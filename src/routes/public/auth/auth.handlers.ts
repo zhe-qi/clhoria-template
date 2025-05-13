@@ -25,7 +25,7 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
     return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const payload = pick(user, ["id", "username", "role"]);
+  const payload = pick(user, ["id", "username", "roles"]);
 
   const token = await sign(payload, env.ADMIN_JWT_SECRET);
 
@@ -48,7 +48,7 @@ export const clientLogin: RouteHandlerType<"clientLogin"> = async (c) => {
     return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const payload = pick(user, ["id", "username", "role"]);
+  const payload = pick(user, ["id", "username"]);
 
   const token = await sign(payload, env.CLIENT_JWT_SECRET);
 
