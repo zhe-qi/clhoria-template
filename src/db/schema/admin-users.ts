@@ -1,13 +1,15 @@
-import { pgTable, text } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns, defaultColumnsOmit } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/base-columns";
+
+import { roles } from "./roles";
 
 export const adminUsers = pgTable("admin_users", {
   id: defaultColumns.id,
   username: text().notNull().unique(),
   password: text().notNull(),
-  role: text().notNull().default("user"),
+  roleId: varchar({ length: 64 }).references(() => roles.id, { onDelete: "cascade" }),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 });
@@ -21,8 +23,9 @@ export const insertAdminUsersSchema = createInsertSchema(
     password: schema => schema.min(6).max(20).regex(/^[\w!@#$%^&*()+\-=[\]{};':"\\|,.<>/?]+$/),
   },
 ).omit({
-  ...defaultColumnsOmit,
-  role: true,
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const patchAdminUsersSchema = insertAdminUsersSchema.partial();

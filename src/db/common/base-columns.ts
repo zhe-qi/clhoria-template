@@ -13,9 +13,3 @@ export const defaultColumns = {
     .$defaultFn(() => formatDate(new Date()))
     .$onUpdate(() => formatDate(new Date())),
 };
-
-export const defaultColumnsOmit = {
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-} as const;

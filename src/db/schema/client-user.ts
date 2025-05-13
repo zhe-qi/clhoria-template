@@ -1,7 +1,7 @@
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns, defaultColumnsOmit } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/base-columns";
 
 export const clientUsers = pgTable("client_users", {
   id: defaultColumns.id,
@@ -21,7 +21,9 @@ export const insertClientUsersSchema = createInsertSchema(
     password: schema => schema.min(6).max(20).regex(/^[\w!@#$%^&*()+\-=[\]{};':"\\|,.<>/?]+$/),
   },
 ).omit({
-  ...defaultColumnsOmit,
+  id: true,
+  createdAt: true,
+  updatedAt: true,
   role: true,
 });
 

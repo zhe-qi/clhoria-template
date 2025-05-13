@@ -1,7 +1,7 @@
 import { boolean, pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns, defaultColumnsOmit } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/base-columns";
 
 export const tasks = pgTable("tasks", {
   id: defaultColumns.id,
@@ -18,8 +18,10 @@ export const insertTasksSchema = createInsertSchema(
   {
     name: schema => schema.min(1).max(500),
   },
-).required({
-  done: true,
-}).omit(defaultColumnsOmit);
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export const patchTasksSchema = insertTasksSchema.partial();

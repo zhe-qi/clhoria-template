@@ -3,12 +3,12 @@ import type { SQL } from "drizzle-orm";
 import type { z } from "zod";
 
 import { Helper } from "casbin";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 import type { insertCasbinTableSchema } from "@/db/schema";
 
 import db from "@/db";
-import { casbinTable } from "@/db/schema";
+import { casbinTable, roles } from "@/db/schema";
 
 type TCasinTable = z.infer<typeof insertCasbinTableSchema>;
 
@@ -53,7 +53,16 @@ export function createDrizzleAdapter(): UpdatableAdapter {
   return {
     async loadPolicy(model: Model): Promise<void> {
       try {
-        const lines = await db.query.casbinTable.findMany();
+        const activeRoleIds = await db.select({ id: roles.id })
+          .from(roles)
+          .where(eq(roles.status, 1));
+
+        const lines = await db.select()
+          .from(casbinTable)
+          .where(
+            inArray(casbinTable.v0, activeRoleIds.map(r => r.id)),
+          );
+
         for (const line of lines) {
           loadPolicyLine(line, model);
         }
@@ -123,12 +132,7 @@ export function createDrizzleAdapter(): UpdatableAdapter {
       await db.delete(casbinTable).where(and(...whereArray));
     },
 
-    async updatePolicy(
-      _sec: string,
-      ptype: string,
-      oldRule: string[],
-      newRule: string[],
-    ): Promise<void> {
+    async updatePolicy(_sec: string, ptype: string, oldRule: string[], newRule: string[]): Promise<void> {
       const oldLine = savePolicyLine(ptype, oldRule);
       const newLine = savePolicyLine(ptype, newRule);
       const whereArray = createWhereConditions(oldLine);
