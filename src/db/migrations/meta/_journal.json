@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747133655626,
-      "tag": "0000_lively_jackpot",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1747142603773,
-      "tag": "0001_old_darkstar",
+      "when": 1747149184997,
+      "tag": "0000_aberrant_stingray",
       "breakpoints": true
     }
   ]
