@@ -4,7 +4,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { tasks } from "@/db/schema";
-import { ZOD_ERROR_CODES, ZOD_ERROR_MESSAGES } from "@/lib/constants";
+import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
 import type { TaskRouteHandlerType } from "./tasks.index";
@@ -35,12 +35,7 @@ export const getOne: TaskRouteHandlerType<"getOne"> = async (c) => {
   });
 
   if (!task) {
-    return c.json(
-      {
-        message: HttpStatusPhrases.NOT_FOUND,
-      },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(task, HttpStatusCodes.OK);
@@ -51,22 +46,7 @@ export const patch: TaskRouteHandlerType<"patch"> = async (c) => {
   const updates = c.req.valid("json");
 
   if (Object.keys(updates).length === 0) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          issues: [
-            {
-              code: ZOD_ERROR_CODES.INVALID_UPDATES,
-              path: [],
-              message: ZOD_ERROR_MESSAGES.NO_UPDATES,
-            },
-          ],
-          name: "ZodError",
-        },
-      },
-      HttpStatusCodes.UNPROCESSABLE_ENTITY,
-    );
+    return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
   const [task] = await db.update(tasks)
@@ -75,12 +55,7 @@ export const patch: TaskRouteHandlerType<"patch"> = async (c) => {
     .returning();
 
   if (!task) {
-    return c.json(
-      {
-        message: HttpStatusPhrases.NOT_FOUND,
-      },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(task, HttpStatusCodes.OK);

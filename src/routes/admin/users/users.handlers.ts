@@ -4,7 +4,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { users } from "@/db/schema";
-import { ZOD_ERROR_CODES, ZOD_ERROR_MESSAGES } from "@/lib/constants";
+import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
 import type { UserRouteHandlerType } from "./users.index";
@@ -35,12 +35,7 @@ export const getOne: UserRouteHandlerType<"getOne"> = async (c) => {
   });
 
   if (!user) {
-    return c.json(
-      {
-        message: HttpStatusPhrases.NOT_FOUND,
-      },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(user, HttpStatusCodes.OK);
@@ -51,22 +46,7 @@ export const patch: UserRouteHandlerType<"patch"> = async (c) => {
   const updates = c.req.valid("json");
 
   if (Object.keys(updates).length === 0) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          issues: [
-            {
-              code: ZOD_ERROR_CODES.INVALID_UPDATES,
-              path: [],
-              message: ZOD_ERROR_MESSAGES.NO_UPDATES,
-            },
-          ],
-          name: "ZodError",
-        },
-      },
-      HttpStatusCodes.UNPROCESSABLE_ENTITY,
-    );
+    return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
   const [user] = await db.update(users)
@@ -75,12 +55,7 @@ export const patch: UserRouteHandlerType<"patch"> = async (c) => {
     .returning();
 
   if (!user) {
-    return c.json(
-      {
-        message: HttpStatusPhrases.NOT_FOUND,
-      },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(user, HttpStatusCodes.OK);
@@ -93,12 +68,7 @@ export const remove: UserRouteHandlerType<"remove"> = async (c) => {
     .returning();
 
   if (!deleted) {
-    return c.json(
-      {
-        message: HttpStatusPhrases.NOT_FOUND,
-      },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);

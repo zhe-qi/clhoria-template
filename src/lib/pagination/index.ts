@@ -1,18 +1,17 @@
 import type { SQL } from "drizzle-orm";
-import type { CreatePgSelectFromBuilderMode, PgTable, SelectedFields } from "drizzle-orm/pg-core";
-import type { GetSelectTableName, GetSelectTableSelection } from "drizzle-orm/query-builders/select.types";
+import type { PgTable, SelectedFields } from "drizzle-orm/pg-core";
 
 import { and, asc, count, desc, eq, getTableColumns, gt, gte, inArray, like, lt, lte, not, or } from "drizzle-orm";
 
 import db from "@/db";
 
-import type { OperatorMap, PaginatedResult, PaginationParams, QueryBuilderMode, QuerySource, QuerySourceWithoutReturningClause, TableFieldsType, WhereValue } from "./types";
+import type { OperatorMap, PaginatedResult, PaginationParams, QuerySelectBuilderModeType, QuerySource, QuerySourceWithoutReturningClause, TableFieldsType } from "./types";
 
 const operatorsMap: OperatorMap = {
   equals: (field, value) => eq(field, value),
   not: (field, value) => not(eq(field, value)),
-  in: (field, value) => inArray(field, value as any[]),
-  notIn: (field, value) => not(inArray(field, value as any[])),
+  in: (field, value) => inArray(field, value as unknown[]),
+  notIn: (field, value) => not(inArray(field, value as unknown[])),
   lt: (field, value) => lt(field, value),
   lte: (field, value) => lte(field, value),
   gt: (field, value) => gt(field, value),
@@ -62,22 +61,15 @@ export default async function paginatedQuery<TResult>({ table, params }: {
   ]);
 
   return {
-    data,
+    data: data as TResult[],
     meta: { total, skip, take },
-  } as PaginatedResult<TResult>;
+  };
 }
 
 /**
  * 处理where条件
  */
-function applyWhereCondition<
-  TSelection extends SelectedFields | undefined,
-  QueryType extends CreatePgSelectFromBuilderMode<
-    QueryBuilderMode,
-    GetSelectTableName<QuerySource>,
-    TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection,
-    TSelection extends undefined ? "single" : "partial"
-  >,
+function applyWhereCondition<QueryType extends QuerySelectBuilderModeType<SelectedFields | undefined>,
 >(query: QueryType, whereInput: unknown, tableFields: TableFieldsType): QueryType {
   if (!whereInput || typeof whereInput !== "object" || Object.keys(whereInput as object).length === 0) {
     return query;
@@ -170,14 +162,7 @@ function buildCondition(whereInput: unknown, tableFields: TableFieldsType): SQL<
 /**
  * 应用排序
  */
-function applyOrderBy<
-  TSelection extends SelectedFields | undefined,
-  QueryType extends CreatePgSelectFromBuilderMode<
-    QueryBuilderMode,
-    GetSelectTableName<QuerySource>,
-    TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection,
-    TSelection extends undefined ? "single" : "partial"
-  >,
+function applyOrderBy<QueryType extends QuerySelectBuilderModeType<SelectedFields | undefined>,
 >(query: QueryType, orderByInput: unknown, tableFields: TableFieldsType): QueryType {
   if (!orderByInput || typeof orderByInput !== "object") {
     return query;
@@ -216,7 +201,7 @@ function applyOrderBy<
 /**
  * 检查值是否为有效的Where条件值
  */
-function isValidWhereValue(value: unknown): value is WhereValue {
+function isValidWhereValue(value: unknown): value is unknown {
   if (value === null)
     return true;
 

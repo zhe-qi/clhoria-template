@@ -5,3 +5,7 @@ export * from "./date/formatter";
 // #region tools
 export * from "./tools/object";
 // #endregion
+
+// #region zod
+export * from "./zod/error";
+// #endregion

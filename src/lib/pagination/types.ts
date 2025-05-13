@@ -1,20 +1,18 @@
 import type { DrizzleTypeError, SQL, Subquery } from "drizzle-orm";
-import type { PgColumn, PgTable, TableLikeHasEmptySelection } from "drizzle-orm/pg-core";
+import type { CreatePgSelectFromBuilderMode, PgColumn, PgTable, SelectedFields, TableLikeHasEmptySelection } from "drizzle-orm/pg-core";
 import type { PgViewBase } from "drizzle-orm/pg-core/view-base";
+import type { GetSelectTableName, GetSelectTableSelection } from "drizzle-orm/query-builders/select.types";
 import type { z } from "zod";
 
 import type { PaginationParamsSchema } from "./schema";
 
-// 条件值类型
-export type WhereValue = string | number | boolean | null | string[] | number[] | boolean[];
-
 // Where操作符对象类型
 export interface WhereOperatorObject {
-  [key: string]: WhereValue;
+  [key: string]: unknown;
 }
 
 // Where条件对象类型
-export type WhereCondition = Record<string, WhereValue | WhereOperatorObject | WhereConditionGroup>;
+export type WhereCondition = Record<string, unknown | WhereOperatorObject | WhereConditionGroup>;
 
 // Where条件组类型
 export interface WhereConditionGroup {
@@ -35,7 +33,7 @@ export interface PaginatedResult<T> {
 
 // 操作符映射
 export interface OperatorMap {
-  [key: string]: (field: PgColumn, value: WhereValue) => SQL<unknown>;
+  [key: string]: (field: PgColumn, value: unknown) => SQL<unknown>;
 }
 
 export type PaginationParams = z.infer<typeof PaginationParamsSchema>;
@@ -49,3 +47,12 @@ export type QuerySourceWithoutReturningClause<TFrom extends QuerySource> = Table
   : TFrom;
 
 export type TableFieldsType = ParamsType<PgColumn>;
+
+// QueryBuilderMode, GetSelectTableName<QuerySource>, TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection, TSelection extends undefined ? "single" : "partial"
+
+export type QuerySelectBuilderModeType<TSelection extends SelectedFields | undefined> = CreatePgSelectFromBuilderMode<
+  QueryBuilderMode,
+  GetSelectTableName<QuerySource>,
+  TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection,
+  TSelection extends undefined ? "single" : "partial"
+>;
