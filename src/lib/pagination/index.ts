@@ -1,5 +1,7 @@
-import type { SQL, TableConfig } from "drizzle-orm";
-import type { PgColumn, PgSelectBase, PgTableWithColumns } from "drizzle-orm/pg-core";
+import type { DrizzleTypeError, SQL, Subquery } from "drizzle-orm";
+import type { CreatePgSelectFromBuilderMode, PgColumn, PgSelectBase, PgTable, SelectedFields, TableLikeHasEmptySelection } from "drizzle-orm/pg-core";
+import type { PgViewBase } from "drizzle-orm/pg-core/view-base";
+import type { GetSelectTableName, GetSelectTableSelection } from "drizzle-orm/query-builders/select.types";
 
 import { and, asc, count, desc, eq, getTableColumns, gt, gte, inArray, like, lt, lte, not, or } from "drizzle-orm";
 
@@ -24,8 +26,10 @@ const operatorsMap: OperatorMap = {
 /**
  * 执行分页查询
  */
-export default async function paginatedQuery<TResult>({ table, params }: {
-  table: PgTableWithColumns<TableConfig<any>>;
+export default async function paginatedQuery<TResult, TFrom extends PgTable | Subquery | PgViewBase | SQL>({ table, params }: {
+  table: TableLikeHasEmptySelection<TFrom> extends true
+    ? DrizzleTypeError<"Cannot reference a data-modifying statement subquery if it doesn't contain a `returning` clause">
+    : TFrom;
   params: PaginationParams;
 }): Promise<PaginatedResult<TResult>> {
   const { skip = 0, take = 10, where, orderBy } = params;
@@ -34,7 +38,7 @@ export default async function paginatedQuery<TResult>({ table, params }: {
   let query = db.select().from(table);
 
   // 获取表字段
-  const tableFields = getTableColumns(table);
+  const tableFields = getTableColumns(table as PgTable);
 
   // 如果有where条件，应用
   if (where) {
@@ -70,32 +74,37 @@ export default async function paginatedQuery<TResult>({ table, params }: {
   };
 }
 
+type TBuilderMode = "db" | "qb";
+
 /**
  * 处理where条件
  */
-function applyWhereCondition<QueryType extends PgSelectBase<any, any, any>>(
-  query: QueryType,
-  whereInput: unknown,
-  tableFields: Record<string, PgColumn>,
-): QueryType {
+function applyWhereCondition<
+  TFrom extends PgTable | Subquery | PgViewBase | SQL,
+  TSelection extends SelectedFields | undefined,
+  QueryType extends CreatePgSelectFromBuilderMode<
+    TBuilderMode,
+    GetSelectTableName<TFrom>,
+    TSelection extends undefined ? GetSelectTableSelection<TFrom> : TSelection,
+    TSelection extends undefined ? "single" : "partial"
+  >,
+>(query: QueryType, whereInput: unknown, tableFields: Record<string, PgColumn>): QueryType {
   if (!whereInput || typeof whereInput !== "object" || Object.keys(whereInput as object).length === 0) {
     return query;
   }
 
-  const input = whereInput as Record<string, unknown>;
-
   // 处理顶层AND条件
-  if ("AND" in input && Array.isArray(input.AND)) {
-    for (const condition of input.AND) {
+  if ("AND" in whereInput && Array.isArray(whereInput.AND)) {
+    for (const condition of whereInput.AND) {
       query = applyWhereCondition(query, condition, tableFields);
     }
     return query;
   }
 
   // 处理顶层OR条件
-  if ("OR" in input && Array.isArray(input.OR)) {
+  if ("OR" in whereInput && Array.isArray(whereInput.OR)) {
     const orConditions: SQL<unknown>[] = [];
-    for (const condition of input.OR) {
+    for (const condition of whereInput.OR) {
       const orSql = buildCondition(condition, tableFields);
       if (orSql)
         orConditions.push(orSql);
@@ -107,8 +116,8 @@ function applyWhereCondition<QueryType extends PgSelectBase<any, any, any>>(
   }
 
   // 处理NOT条件
-  if ("NOT" in input && typeof input.NOT === "object" && input.NOT !== null) {
-    const notSql = buildCondition(input.NOT, tableFields);
+  if ("NOT" in whereInput && typeof whereInput.NOT === "object" && whereInput.NOT !== null) {
+    const notSql = buildCondition(whereInput.NOT, tableFields);
     if (notSql) {
       query.where(not(notSql));
     }
@@ -116,7 +125,7 @@ function applyWhereCondition<QueryType extends PgSelectBase<any, any, any>>(
   }
 
   // 处理其他条件
-  const condition = buildCondition(input, tableFields);
+  const condition = buildCondition(whereInput, tableFields);
   if (condition) {
     query.where(condition);
   }
@@ -135,10 +144,9 @@ function buildCondition(
     return null;
   }
 
-  const input = whereInput as Record<string, unknown>;
   const conditions: SQL<unknown>[] = [];
 
-  for (const [key, value] of Object.entries(input)) {
+  for (const [key, value] of Object.entries(whereInput)) {
     // 跳过特殊操作符
     if (["AND", "OR", "NOT"].includes(key))
       continue;
@@ -175,11 +183,16 @@ function buildCondition(
 /**
  * 应用排序
  */
-function applyOrderBy<QueryType extends PgSelectBase<any, any, any>>(
-  query: QueryType,
-  orderByInput: unknown,
-  tableFields: Record<string, PgColumn>,
-): QueryType {
+function applyOrderBy<
+  TFrom extends PgTable | Subquery | PgViewBase | SQL,
+  TSelection extends SelectedFields | undefined,
+  QueryType extends CreatePgSelectFromBuilderMode<
+    TBuilderMode,
+    GetSelectTableName<TFrom>,
+    TSelection extends undefined ? GetSelectTableSelection<TFrom> : TSelection,
+    TSelection extends undefined ? "single" : "partial"
+  >,
+>(query: QueryType, orderByInput: unknown, tableFields: Record<string, PgColumn>): QueryType {
   if (!orderByInput || typeof orderByInput !== "object") {
     return query;
   }
