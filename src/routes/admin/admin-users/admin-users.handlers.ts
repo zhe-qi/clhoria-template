@@ -2,35 +2,35 @@ import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { users } from "@/db/schema";
+import { adminUsers } from "@/db/schema";
 import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
-import type { UserRouteHandlerType } from "./users.index";
+import type { AdminUserRouteHandlerType } from "./admin-users.index";
 
-export const list: UserRouteHandlerType<"list"> = async (c) => {
+export const list: AdminUserRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof users.$inferSelect>({
-    table: users,
+  const result = await paginatedQuery<typeof adminUsers.$inferSelect>({
+    table: adminUsers,
     params: query,
   });
 
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const create: UserRouteHandlerType<"create"> = async (c) => {
+export const create: AdminUserRouteHandlerType<"create"> = async (c) => {
   const user = c.req.valid("json");
 
-  const [inserted] = await db.insert(users).values(user).returning();
+  const [inserted] = await db.insert(adminUsers).values(user).returning();
 
   return c.json(inserted, HttpStatusCodes.OK);
 };
 
-export const getOne: UserRouteHandlerType<"getOne"> = async (c) => {
+export const getOne: AdminUserRouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const user = await db.query.users.findFirst({
+  const user = await db.query.adminUsers.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
     },
@@ -43,7 +43,7 @@ export const getOne: UserRouteHandlerType<"getOne"> = async (c) => {
   return c.json(user, HttpStatusCodes.OK);
 };
 
-export const patch: UserRouteHandlerType<"patch"> = async (c) => {
+export const patch: AdminUserRouteHandlerType<"patch"> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
@@ -51,9 +51,9 @@ export const patch: UserRouteHandlerType<"patch"> = async (c) => {
     return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [user] = await db.update(users)
+  const [user] = await db.update(adminUsers)
     .set(updates)
-    .where(eq(users.id, id))
+    .where(eq(adminUsers.id, id))
     .returning();
 
   if (!user) {
@@ -63,11 +63,11 @@ export const patch: UserRouteHandlerType<"patch"> = async (c) => {
   return c.json(user, HttpStatusCodes.OK);
 };
 
-export const remove: UserRouteHandlerType<"remove"> = async (c) => {
+export const remove: AdminUserRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [deleted] = await db.delete(users)
-    .where(eq(users.id, id))
+  const [deleted] = await db.delete(adminUsers)
+    .where(eq(adminUsers.id, id))
     .returning();
 
   if (!deleted) {

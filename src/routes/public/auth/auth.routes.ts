@@ -2,7 +2,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
-import { insertUsersSchema } from "@/db/schema";
+import { insertAdminUsersSchema, insertClientUsersSchema } from "@/db/schema";
 
 const tags = ["Public-Auth"];
 
@@ -11,7 +11,7 @@ export const adminLogin = createRoute({
   path: "/admin/auth/login",
   method: "post",
   request: {
-    body: jsonContentRequired(insertUsersSchema, "登录请求"),
+    body: jsonContentRequired(insertAdminUsersSchema, "登录请求"),
   },
   tags,
   responses: {
@@ -35,7 +35,7 @@ export const clientLogin = createRoute({
   path: "/client/auth/login",
   method: "post",
   request: {
-    body: jsonContentRequired(insertUsersSchema, "登录请求"),
+    body: jsonContentRequired(insertClientUsersSchema, "登录请求"),
   },
   tags,
   responses: {
@@ -59,7 +59,7 @@ export const clientRegister = createRoute({
   path: "/client/auth/register",
   method: "post",
   request: {
-    body: jsonContentRequired(insertUsersSchema, "注册请求"),
+    body: jsonContentRequired(insertClientUsersSchema, "注册请求"),
   },
   tags,
   responses: {

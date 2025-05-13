@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns, defaultColumnsOmit } from "@/db/common/base-columns";
 
-export const users = pgTable("users", {
+export const adminUsers = pgTable("admin_users", {
   id: defaultColumns.id,
   username: text().notNull().unique(),
   password: text().notNull(),
@@ -12,10 +12,10 @@ export const users = pgTable("users", {
   updatedAt: defaultColumns.updatedAt,
 });
 
-export const selectUsersSchema = createSelectSchema(users);
+export const selectAdminUsersSchema = createSelectSchema(adminUsers);
 
-export const insertUsersSchema = createInsertSchema(
-  users,
+export const insertAdminUsersSchema = createInsertSchema(
+  adminUsers,
   {
     username: schema => schema.min(4).max(15).regex(/^\w+$/),
     password: schema => schema.min(6).max(20).regex(/^[\w!@#$%^&*()+\-=[\]{};':"\\|,.<>/?]+$/),
@@ -25,4 +25,4 @@ export const insertUsersSchema = createInsertSchema(
   role: true,
 });
 
-export const patchUsersSchema = insertUsersSchema.partial();
+export const patchAdminUsersSchema = insertAdminUsersSchema.partial();

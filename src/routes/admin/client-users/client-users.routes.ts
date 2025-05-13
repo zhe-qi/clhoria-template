@@ -1,17 +1,16 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 
-import { insertUsersSchema, patchUsersSchema, selectUsersSchema } from "@/db/schema";
+import { insertAdminUsersSchema, patchAdminUsersSchema, selectAdminUsersSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["Admin-Users"];
+const tags = ["Client-Users"];
 
 export const list = createRoute({
-  path: "/users",
+  path: "/client-users",
   method: "get",
   request: {
     query: PaginationParamsSchema,
@@ -19,7 +18,7 @@ export const list = createRoute({
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema(selectUsersSchema),
+      GetPaginatedResultSchema(selectAdminUsersSchema),
       "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -30,29 +29,29 @@ export const list = createRoute({
 });
 
 export const create = createRoute({
-  path: "/users",
+  path: "/client-users",
   method: "post",
   request: {
     body: jsonContentRequired(
-      insertUsersSchema,
+      insertAdminUsersSchema,
       "创建请求体",
     ),
   },
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectUsersSchema,
+      selectAdminUsersSchema,
       "创建成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(insertUsersSchema),
+      createErrorSchema(insertAdminUsersSchema),
       "创建请求体验证错误",
     ),
   },
 });
 
 export const getOne = createRoute({
-  path: "/users/{id}",
+  path: "/client-users/{id}",
   method: "get",
   request: {
     params: IdParamsSchema.extend({
@@ -62,7 +61,7 @@ export const getOne = createRoute({
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectUsersSchema,
+      selectAdminUsersSchema,
       "请求成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -77,21 +76,21 @@ export const getOne = createRoute({
 });
 
 export const patch = createRoute({
-  path: "/users/{id}",
+  path: "/client-users/{id}",
   method: "patch",
   request: {
     params: IdParamsSchema.extend({
       id: z.string().uuid(),
     }),
     body: jsonContentRequired(
-      patchUsersSchema,
+      patchAdminUsersSchema,
       "更新请求体",
     ),
   },
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectUsersSchema,
+      selectAdminUsersSchema,
       "更新成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -99,7 +98,7 @@ export const patch = createRoute({
       "用户不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(patchUsersSchema)
+      createErrorSchema(patchAdminUsersSchema)
         .or(createErrorSchema(IdParamsSchema)),
       "请求参数验证错误",
     ),
@@ -107,7 +106,7 @@ export const patch = createRoute({
 });
 
 export const remove = createRoute({
-  path: "/users/{id}",
+  path: "/client-users/{id}",
   method: "delete",
   request: {
     params: IdParamsSchema.extend({

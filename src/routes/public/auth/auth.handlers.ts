@@ -4,7 +4,7 @@ import { sign } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { users } from "@/db/schema";
+import { adminUsers, clientUsers } from "@/db/schema";
 import env from "@/env";
 import { pick } from "@/utils";
 
@@ -13,7 +13,7 @@ import type { AuthRouteHandlerType } from "./auth.index";
 export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
 
-  const [user] = await db.select().from(users).where(eq(users.username, body.username));
+  const [user] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
 
   if (!user) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
@@ -27,7 +27,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
 
   const payload = pick(user, ["id", "username", "role"]);
 
-  const token = await sign(payload, env.JWT_SECRET);
+  const token = await sign(payload, env.ADMIN_JWT_SECRET);
 
   return c.json({ token }, HttpStatusCodes.OK);
 };
@@ -36,7 +36,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
 export const clientLogin: AuthRouteHandlerType<"clientLogin"> = async (c) => {
   const body = c.req.valid("json");
 
-  const [user] = await db.select().from(users).where(eq(users.username, body.username));
+  const [user] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
 
   if (!user) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
@@ -50,7 +50,7 @@ export const clientLogin: AuthRouteHandlerType<"clientLogin"> = async (c) => {
 
   const payload = pick(user, ["id", "username", "role"]);
 
-  const token = await sign(payload, env.JWT_SECRET);
+  const token = await sign(payload, env.CLIENT_JWT_SECRET);
 
   return c.json({ token }, HttpStatusCodes.OK);
 };
@@ -59,18 +59,16 @@ export const clientLogin: AuthRouteHandlerType<"clientLogin"> = async (c) => {
 export const clientRegister: AuthRouteHandlerType<"clientRegister"> = async (c) => {
   const body = c.req.valid("json");
 
-  const [user] = await db.select().from(users).where(eq(users.username, body.username));
+  const [user] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
 
   if (user) {
     return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
   }
 
-  const [inserted] = await db.insert(users).values({
+  const [inserted] = await db.insert(clientUsers).values({
     username: body.username,
     password: await hash(body.password),
-  }).returning({ id: users.id });
+  }).returning({ id: clientUsers.id });
 
-  return c.json({
-    id: inserted.id,
-  }, HttpStatusCodes.OK);
+  return c.json({ id: inserted.id }, HttpStatusCodes.OK);
 };

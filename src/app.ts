@@ -24,7 +24,7 @@ publicRoutes.forEach((route) => {
 // #region 客户端路由
 const clientRoutes = Object.values(allClientExports);
 
-app.use("/client/*", jwt({ secret: env.JWT_SECRET }));
+app.use("/client/*", jwt({ secret: env.CLIENT_JWT_SECRET }));
 
 clientRoutes.forEach((route) => {
   app.route("/client", route);
@@ -34,7 +34,7 @@ clientRoutes.forEach((route) => {
 // #region 后管路由
 const adminRoutes = Object.values(allAdminExports);
 
-app.use("/admin/*", jwt({ secret: env.JWT_SECRET }));
+app.use("/admin/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
 app.use("/admin/*", casbin({
   newEnforcer: newEnforcer("config/casbin/model.conf", "config/casbin/policy.csv"),
 }));

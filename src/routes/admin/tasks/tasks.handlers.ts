@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { tasks } from "@/db/schema";
