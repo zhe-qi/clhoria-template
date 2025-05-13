@@ -1,12 +1,14 @@
 import { boolean, pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { withBaseSchema, withBaseSchemaOmit } from "@/db/common/base-schema";
+import { baseColumns, baseColumnsOmit } from "@/db/common/base-columns";
 
 export const tasks = pgTable("tasks", {
-  ...withBaseSchema(),
+  id: baseColumns.id,
   name: text().notNull(),
   done: boolean().notNull().default(false),
+  createdAt: baseColumns.createdAt,
+  updatedAt: baseColumns.updatedAt,
 });
 
 export const selectTasksSchema = createSelectSchema(tasks);
@@ -18,6 +20,6 @@ export const insertTasksSchema = createInsertSchema(
   },
 ).required({
   done: true,
-}).omit(withBaseSchemaOmit());
+}).omit(baseColumnsOmit);
 
 export const patchTasksSchema = insertTasksSchema.partial();
