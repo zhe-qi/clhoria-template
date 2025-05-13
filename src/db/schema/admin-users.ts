@@ -1,15 +1,12 @@
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
-
-import { roles } from "./roles";
 
 export const adminUsers = pgTable("admin_users", {
   id: defaultColumns.id,
   username: text().notNull().unique(),
   password: text().notNull(),
-  roleId: varchar({ length: 64 }).references(() => roles.id, { onDelete: "cascade" }),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 });

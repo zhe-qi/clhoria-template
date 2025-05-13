@@ -7,7 +7,6 @@ export const clientUsers = pgTable("client_users", {
   id: defaultColumns.id,
   username: text().notNull().unique(),
   password: text().notNull(),
-  role: text().notNull().default("user"),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 });
@@ -24,7 +23,6 @@ export const insertClientUsersSchema = createInsertSchema(
   id: true,
   createdAt: true,
   updatedAt: true,
-  role: true,
 });
 
 export const patchClientUsersSchema = insertClientUsersSchema.partial();

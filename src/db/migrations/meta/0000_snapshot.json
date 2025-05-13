@@ -1,5 +1,5 @@
 {
-  "id": "cffafa53-4132-4732-bb17-a91721fa7344",
+  "id": "069422bb-0a53-4efa-80c6-51360f1f1ec1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -26,12 +26,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "role_id": {
-          "name": "role_id",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -46,21 +40,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "admin_users_role_id_roles_id_fk": {
-          "name": "admin_users_role_id_roles_id_fk",
-          "tableFrom": "admin_users",
-          "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "admin_users_username_unique": {
@@ -187,13 +167,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'user'"
         },
         "created_at": {
           "name": "created_at",
