@@ -3,7 +3,7 @@ import { v7 as uuidV7 } from "uuid";
 
 import { formatDate } from "@/utils";
 
-export const baseColumns = {
+export const defaultColumns = {
   id: uuid().primaryKey().notNull().$defaultFn(() => uuidV7()),
   createdAt: timestamp({ mode: "string" })
     .notNull()
@@ -14,7 +14,7 @@ export const baseColumns = {
     .$onUpdate(() => formatDate(new Date())),
 };
 
-export const baseColumnsOmit = {
+export const defaultColumnsOmit = {
   id: true,
   createdAt: true,
   updatedAt: true,

@@ -1,15 +1,15 @@
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { baseColumns, baseColumnsOmit } from "@/db/common/base-columns";
+import { defaultColumns, defaultColumnsOmit } from "@/db/common/base-columns";
 
 export const users = pgTable("users", {
-  id: baseColumns.id,
+  id: defaultColumns.id,
   username: text().notNull().unique(),
   password: text().notNull(),
   role: text().notNull().default("user"),
-  createdAt: baseColumns.createdAt,
-  updatedAt: baseColumns.updatedAt,
+  createdAt: defaultColumns.createdAt,
+  updatedAt: defaultColumns.updatedAt,
 });
 
 export const selectUsersSchema = createSelectSchema(users);
@@ -21,7 +21,7 @@ export const insertUsersSchema = createInsertSchema(
     password: schema => schema.min(6).max(20).regex(/^[\w!@#$%^&*()+\-=[\]{};':"\\|,.<>/?]+$/),
   },
 ).omit({
-  ...baseColumnsOmit,
+  ...defaultColumnsOmit,
   role: true,
 });
 

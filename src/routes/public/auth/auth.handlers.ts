@@ -59,7 +59,6 @@ export const clientLogin: AuthRouteHandlerType<"clientLogin"> = async (c) => {
 export const clientRegister: AuthRouteHandlerType<"clientRegister"> = async (c) => {
   const body = c.req.valid("json");
 
-  // 1. 查询用户是否存在
   const [user] = await db.select().from(users).where(eq(users.username, body.username));
 
   if (user) {
