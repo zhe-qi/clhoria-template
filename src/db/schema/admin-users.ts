@@ -1,4 +1,4 @@
-import { pgTable, text } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
@@ -7,6 +7,7 @@ export const adminUsers = pgTable("admin_users", {
   id: defaultColumns.id,
   username: text().notNull().unique(),
   password: text().notNull(),
+  roles: varchar({ length: 64 }).array(),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 });

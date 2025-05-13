@@ -1,6 +1,6 @@
 {
-  "id": "92970abe-7a38-4623-8a5f-850c64e9611e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "afe7e9cd-16be-4f49-984a-d086defd0293",
+  "prevId": "92970abe-7a38-4623-8a5f-850c64e9611e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -131,21 +131,7 @@
           "with": {}
         }
       },
-      "foreignKeys": {
-        "casbin_rule_v0_roles_id_fk": {
-          "name": "casbin_rule_v0_roles_id_fk",
-          "tableFrom": "casbin_rule",
-          "tableTo": "roles",
-          "columnsFrom": [
-            "v0"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

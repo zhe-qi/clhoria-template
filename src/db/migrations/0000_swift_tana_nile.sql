@@ -3,6 +3,7 @@ CREATE TABLE "admin_users" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"username" text NOT NULL,
 	"password" text NOT NULL,
+	"roles" varchar(64)[],
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL,
 	CONSTRAINT "admin_users_username_unique" UNIQUE("username")
@@ -57,14 +58,6 @@ CREATE TABLE "tasks" (
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "user_roles" (
-	"user_id" uuid,
-	"role_id" varchar(64),
-	CONSTRAINT "user_roles_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
-);
---> statement-breakpoint
 ALTER TABLE "casbin_rule" ADD CONSTRAINT "casbin_rule_v0_roles_id_fk" FOREIGN KEY ("v0") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_user_id_admin_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."admin_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "ptype_index" ON "casbin_rule" USING btree ("ptype");--> statement-breakpoint
 CREATE INDEX "status_index" ON "roles" USING btree ("status");

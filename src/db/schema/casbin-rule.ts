@@ -2,14 +2,13 @@ import { index, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
-import { roles } from "@/db/schema";
 
 export const casbinTable = pgTable("casbin_rule", {
   id: defaultColumns.id,
   // 策略类型：p（策略）/g（角色继承）
   ptype: varchar("ptype", { length: 254 }),
   // 关联角色
-  v0: varchar({ length: 254 }).references(() => roles.id, { onDelete: "cascade" }),
+  v0: varchar({ length: 254 }),
   // 资源路径（对应 `menu.path`）
   v1: varchar({ length: 254 }),
   // 操作类型（对应 `menu.method` 或自定义动作）
