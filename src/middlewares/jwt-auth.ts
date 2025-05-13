@@ -5,13 +5,18 @@ import { Enforcer } from "casbin";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
-async function jwtAuthorizer(c: Context, enforcer: Enforcer, claimMapping: ParamsType<string> = { Role: "role" }): Promise<boolean> {
+async function jwtAuthorizer(c: Context, enforcer: Enforcer): Promise<boolean> {
   const payload: JWTPayload = c.get("jwtPayload");
 
-  const args = Object.values(claimMapping).map(key => payload[key]);
+  const roles = (payload.roles as string[]) ?? [];
 
   const { path, method } = c.req;
-  return await enforcer.enforce(...args, path, method);
+  const rolesPromise = roles.map(async (role) => {
+    const isAllowed = await enforcer.enforce(role, path, method);
+    return isAllowed;
+  });
+  const isAllowed = await Promise.all(rolesPromise);
+  return isAllowed.some(Boolean);
 }
 
 export function casbin(opt: { newEnforcer: Promise<Enforcer> }): MiddlewareHandler {
