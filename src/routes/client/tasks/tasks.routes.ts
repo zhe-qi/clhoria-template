@@ -14,7 +14,6 @@ export const list = createRoute({
   request: {
     query: PaginationParamsSchema,
   },
-  summary: "/tasks 分页任务列表",
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(

@@ -13,25 +13,18 @@ export const adminLogin = createRoute({
   request: {
     body: jsonContentRequired(insertUsersSchema, "登录请求"),
   },
-  summary: "/admin/auth/login 后管登录",
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        token: z.string(),
-      }),
-      "登录响应",
+      z.object({ token: z.string() }),
+      "登录成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({
-        message: z.string(),
-      }),
+      z.object({ message: z.string() }),
       "密码错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      z.object({
-        message: z.string(),
-      }),
+      z.object({ message: z.string() }),
       "用户不存在",
     ),
   },
@@ -44,25 +37,18 @@ export const clientLogin = createRoute({
   request: {
     body: jsonContentRequired(insertUsersSchema, "登录请求"),
   },
-  summary: "/client/auth/login 登录",
   tags,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        token: z.string(),
-      }),
-      "登录响应",
+      z.object({ token: z.string() }),
+      "登录成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({
-        message: z.string(),
-      }),
+      z.object({ message: z.string() }),
       "密码错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      z.object({
-        message: z.string(),
-      }),
+      z.object({ message: z.string() }),
       "用户不存在",
     ),
   },
@@ -76,18 +62,13 @@ export const clientRegister = createRoute({
     body: jsonContentRequired(insertUsersSchema, "注册请求"),
   },
   tags,
-  summary: "/client/auth/register 注册",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        id: z.string().uuid(),
-      }),
-      "注册响应",
+      z.object({ id: z.string().uuid() }),
+      "注册成功",
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
-      z.object({
-        message: z.string(),
-      }),
+      z.object({ message: z.string() }),
       "用户已存在",
     ),
   },

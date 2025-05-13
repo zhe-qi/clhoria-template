@@ -16,7 +16,6 @@ export const list = createRoute({
     query: PaginationParamsSchema,
   },
   tags,
-  summary: "/tasks 分页任务列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       GetPaginatedResultSchema(selectTasksSchema),
@@ -39,7 +38,6 @@ export const create = createRoute({
     ),
   },
   tags,
-  summary: "/tasks 创建任务",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectTasksSchema,
@@ -61,7 +59,6 @@ export const getOne = createRoute({
     }),
   },
   tags,
-  summary: "/tasks/{id} 请求任务",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectTasksSchema,
@@ -91,7 +88,6 @@ export const patch = createRoute({
     ),
   },
   tags,
-  summary: "/tasks/{id} 更新任务",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectTasksSchema,
@@ -118,7 +114,6 @@ export const remove = createRoute({
     }),
   },
   tags,
-  summary: "/tasks/{id} 删除任务",
   responses: {
     [HttpStatusCodes.NO_CONTENT]: {
       description: "删除成功",

@@ -1,5 +1,6 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 
@@ -16,11 +17,10 @@ export const list = createRoute({
     query: PaginationParamsSchema,
   },
   tags,
-  summary: "/users 用户列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       GetPaginatedResultSchema(selectUsersSchema),
-      "分页用户列表",
+      "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(PaginationParamsSchema),
@@ -35,19 +35,18 @@ export const create = createRoute({
   request: {
     body: jsonContentRequired(
       insertUsersSchema,
-      "创建用户请求",
+      "创建请求体",
     ),
   },
   tags,
-  summary: "/users 创建用户",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectUsersSchema,
-      "创建用户响应",
+      "创建成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(insertUsersSchema),
-      "创建用户请求体验证错误",
+      "创建请求体验证错误",
     ),
   },
 });
@@ -61,11 +60,10 @@ export const getOne = createRoute({
     }),
   },
   tags,
-  summary: "/users/{id} 请求用户",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectUsersSchema,
-      "请求用户响应",
+      "请求成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
@@ -87,15 +85,14 @@ export const patch = createRoute({
     }),
     body: jsonContentRequired(
       patchUsersSchema,
-      "更新用户请求",
+      "更新请求体",
     ),
   },
   tags,
-  summary: "/users/{id} 更新用户",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectUsersSchema,
-      "更新用户响应",
+      "更新成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
@@ -118,7 +115,6 @@ export const remove = createRoute({
     }),
   },
   tags,
-  summary: "/users/{id} 删除用户",
   responses: {
     [HttpStatusCodes.NO_CONTENT]: {
       description: "删除成功",

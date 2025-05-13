@@ -71,7 +71,7 @@ export default async function paginatedQuery<TResult>({ table, params }: {
  */
 function applyWhereCondition<QueryType extends QuerySelectBuilderModeType<SelectedFields | undefined>,
 >(query: QueryType, whereInput: unknown, tableFields: TableFieldsType): QueryType {
-  if (!whereInput || typeof whereInput !== "object" || Object.keys(whereInput as object).length === 0) {
+  if (!whereInput || typeof whereInput !== "object" || Reflect.ownKeys(whereInput).length < 1) {
     return query;
   }
 
@@ -119,7 +119,7 @@ function applyWhereCondition<QueryType extends QuerySelectBuilderModeType<Select
  * 构建条件SQL
  */
 function buildCondition(whereInput: unknown, tableFields: TableFieldsType): SQL<unknown> | null {
-  if (!whereInput || typeof whereInput !== "object" || Object.keys(whereInput as object).length === 0) {
+  if (!whereInput || typeof whereInput !== "object" || Reflect.ownKeys(whereInput).length < 1) {
     return null;
   }
 

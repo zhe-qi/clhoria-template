@@ -22,12 +22,15 @@ export const list: TaskRouteHandlerType<"list"> = async (c) => {
 
 export const create: TaskRouteHandlerType<"create"> = async (c) => {
   const task = c.req.valid("json");
+
   const [inserted] = await db.insert(tasks).values(task).returning();
+
   return c.json(inserted, HttpStatusCodes.OK);
 };
 
 export const getOne: TaskRouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
+
   const task = await db.query.tasks.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
@@ -35,7 +38,7 @@ export const getOne: TaskRouteHandlerType<"getOne"> = async (c) => {
   });
 
   if (!task) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(task, HttpStatusCodes.OK);
@@ -55,7 +58,7 @@ export const patch: TaskRouteHandlerType<"patch"> = async (c) => {
     .returning();
 
   if (!task) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(task, HttpStatusCodes.OK);
@@ -63,17 +66,13 @@ export const patch: TaskRouteHandlerType<"patch"> = async (c) => {
 
 export const remove: TaskRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
+
   const [deleted] = await db.delete(tasks)
     .where(eq(tasks.id, id))
     .returning();
 
   if (!deleted) {
-    return c.json(
-      {
-        message: HttpStatusPhrases.NOT_FOUND,
-      },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);

@@ -6,7 +6,6 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import db from "@/db";
 import { users } from "@/db/schema";
 import env from "@/env";
-import { ZOD_ERROR_MESSAGES } from "@/lib/constants";
 import { pick } from "@/utils";
 
 import type { AuthRouteHandlerType } from "./auth.index";
@@ -17,13 +16,13 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const [user] = await db.select().from(users).where(eq(users.username, body.username));
 
   if (!user) {
-    return c.json({ message: ZOD_ERROR_MESSAGES.USER_NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   const isPasswordValid = await verify(user.password, body.password);
 
   if (!isPasswordValid) {
-    return c.json({ message: ZOD_ERROR_MESSAGES.PASSWORD_ERROR }, HttpStatusCodes.UNAUTHORIZED);
+    return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
   const payload = pick(user, ["id", "username", "role"]);
@@ -40,13 +39,13 @@ export const clientLogin: AuthRouteHandlerType<"clientLogin"> = async (c) => {
   const [user] = await db.select().from(users).where(eq(users.username, body.username));
 
   if (!user) {
-    return c.json({ message: ZOD_ERROR_MESSAGES.USER_NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   const isPasswordValid = await verify(user.password, body.password);
 
   if (!isPasswordValid) {
-    return c.json({ message: ZOD_ERROR_MESSAGES.PASSWORD_ERROR }, HttpStatusCodes.UNAUTHORIZED);
+    return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
   const payload = pick(user, ["id", "username", "role"]);
@@ -64,7 +63,7 @@ export const clientRegister: AuthRouteHandlerType<"clientRegister"> = async (c) 
   const [user] = await db.select().from(users).where(eq(users.username, body.username));
 
   if (user) {
-    return c.json({ message: ZOD_ERROR_MESSAGES.USER_EXISTS }, HttpStatusCodes.CONFLICT);
+    return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
   }
 
   const [inserted] = await db.insert(users).values({

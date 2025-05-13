@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { users } from "@/db/schema";
@@ -22,12 +21,15 @@ export const list: UserRouteHandlerType<"list"> = async (c) => {
 
 export const create: UserRouteHandlerType<"create"> = async (c) => {
   const user = c.req.valid("json");
+
   const [inserted] = await db.insert(users).values(user).returning();
+
   return c.json(inserted, HttpStatusCodes.OK);
 };
 
 export const getOne: UserRouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
+
   const user = await db.query.users.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
@@ -35,7 +37,7 @@ export const getOne: UserRouteHandlerType<"getOne"> = async (c) => {
   });
 
   if (!user) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(user, HttpStatusCodes.OK);
@@ -45,7 +47,7 @@ export const patch: UserRouteHandlerType<"patch"> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
-  if (Object.keys(updates).length === 0) {
+  if (Reflect.ownKeys(updates).length < 1) {
     return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
@@ -55,7 +57,7 @@ export const patch: UserRouteHandlerType<"patch"> = async (c) => {
     .returning();
 
   if (!user) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(user, HttpStatusCodes.OK);
@@ -63,12 +65,13 @@ export const patch: UserRouteHandlerType<"patch"> = async (c) => {
 
 export const remove: UserRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
+
   const [deleted] = await db.delete(users)
     .where(eq(users.id, id))
     .returning();
 
   if (!deleted) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);

@@ -22,7 +22,6 @@ export function createRouter() {
 
 export default function createApp() {
   const app = createRouter();
-
   /** 安全头部中间件 */
   app.use(secureHeaders());
 
@@ -46,7 +45,6 @@ export default function createApp() {
 
   app.notFound(notFound);
   app.onError(onError);
-
   return app;
 }
 
