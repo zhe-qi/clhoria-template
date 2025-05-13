@@ -1,0 +1,53 @@
+{
+  "name": "hono-template",
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.10.0",
+  "license": "MIT",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "tsx watch src/index.ts",
+    "start": "cross-env NODE_ENV=production tsx dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint --fix",
+    "test": "cross-env NODE_ENV=test vitest",
+    "build": "cross-env NODE_ENV=production tsup",
+    "generate": "drizzle-kit generate --config drizzle.config.ts",
+    "push": "drizzle-kit push",
+    "studio": "drizzle-kit studio --config drizzle.config.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.1",
+    "@hono/zod-openapi": "^0.19.6",
+    "@node-rs/argon2": "^2.0.2",
+    "@scalar/hono-api-reference": "^0.8.8",
+    "casbin": "^5.38.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "dotenv": "^16.5.0",
+    "dotenv-expand": "^12.0.2",
+    "drizzle-orm": "^0.43.1",
+    "drizzle-zod": "^0.7.1",
+    "hono": "^4.7.9",
+    "hono-pino": "^0.8.0",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "postgres": "^3.4.5",
+    "stoker": "1.4.2",
+    "uuid": "^11.1.0",
+    "zod": "3.24.4"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.13.0",
+    "@types/node": "^22.15.17",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.31.1",
+    "eslint": "^9.26.0",
+    "eslint-plugin-format": "^1.0.1",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
+  }
+}

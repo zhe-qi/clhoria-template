@@ -1,0 +1,5 @@
+p, admin, /*, *
+p, user, /tasks, GET
+
+g, alice, admin
+g, bob, user
