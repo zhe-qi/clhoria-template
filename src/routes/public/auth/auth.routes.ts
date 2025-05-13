@@ -4,7 +4,7 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 import { insertAdminUsersSchema, insertClientUsersSchema } from "@/db/schema";
 
-const tags = ["Public-Auth"];
+const tags = ["公共接口-身份认证"];
 
 /** 后管登录 */
 export const adminLogin = createRoute({
@@ -14,6 +14,7 @@ export const adminLogin = createRoute({
     body: jsonContentRequired(insertAdminUsersSchema, "登录请求"),
   },
   tags,
+  summary: "后管登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({ token: z.string() }),
@@ -38,6 +39,7 @@ export const clientLogin = createRoute({
     body: jsonContentRequired(insertClientUsersSchema, "登录请求"),
   },
   tags,
+  summary: "客户端登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({ token: z.string() }),
@@ -62,6 +64,7 @@ export const clientRegister = createRoute({
     body: jsonContentRequired(insertClientUsersSchema, "注册请求"),
   },
   tags,
+  summary: "客户端注册",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({ id: z.string().uuid() }),

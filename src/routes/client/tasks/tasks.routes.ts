@@ -6,7 +6,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 import { selectTasksSchema } from "@/db/schema";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["Client-Tasks"];
+const tags = ["客户端-任务管理"];
 
 export const list = createRoute({
   path: "/tasks",
@@ -15,14 +15,15 @@ export const list = createRoute({
     query: PaginationParamsSchema,
   },
   tags,
+  summary: "获取任务列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       GetPaginatedResultSchema(selectTasksSchema),
-      "分页任务列表",
+      "获取成功响应",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(PaginationParamsSchema),
-      "查询参数验证错误",
+      "请求参数验证错误",
     ),
   },
 });

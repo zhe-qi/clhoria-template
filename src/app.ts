@@ -1,6 +1,7 @@
 import { newEnforcer } from "casbin";
 import { jwt } from "hono/jwt";
 
+import { createDrizzleAdapter } from "@/lib/casbin";
 import configureOpenAPI from "@/lib/configure-open-api";
 import createApp from "@/lib/create-app";
 import * as allAdminExports from "@/routes/admin/api.index";
@@ -36,7 +37,7 @@ const adminRoutes = Object.values(allAdminExports);
 
 app.use("/admin/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
 app.use("/admin/*", casbin({
-  newEnforcer: newEnforcer("config/casbin/model.conf", "config/casbin/policy.csv"),
+  newEnforcer: newEnforcer("src/lib/casbin/model.conf", createDrizzleAdapter()),
 }));
 
 adminRoutes.forEach((route) => {

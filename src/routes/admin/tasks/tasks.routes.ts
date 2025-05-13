@@ -7,7 +7,7 @@ import { insertTasksSchema, patchTasksSchema, selectTasksSchema } from "@/db/sch
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["Admin-Tasks"];
+const tags = ["后台管理-任务管理"];
 
 export const list = createRoute({
   path: "/tasks",
@@ -16,6 +16,7 @@ export const list = createRoute({
     query: PaginationParamsSchema,
   },
   tags,
+  summary: "获取任务列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       GetPaginatedResultSchema(selectTasksSchema),
@@ -34,18 +35,19 @@ export const create = createRoute({
   request: {
     body: jsonContentRequired(
       insertTasksSchema,
-      "创建任务请求",
+      "创建任务参数",
     ),
   },
   tags,
+  summary: "创建任务",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectTasksSchema,
-      "创建任务响应",
+      "创建任务成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(insertTasksSchema),
-      "创建任务请求体验证错误",
+      "请求参数验证错误",
     ),
   },
 });
@@ -54,15 +56,16 @@ export const getOne = createRoute({
   path: "/tasks/{id}",
   method: "get",
   request: {
-    params: IdParamsSchema.extend({
+    params: z.object({
       id: z.string().uuid(),
     }),
   },
   tags,
+  summary: "获取任务详情",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectTasksSchema,
-      "请求任务响应",
+      "请求任务成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
@@ -79,19 +82,20 @@ export const patch = createRoute({
   path: "/tasks/{id}",
   method: "patch",
   request: {
-    params: IdParamsSchema.extend({
+    params: z.object({
       id: z.string().uuid(),
     }),
     body: jsonContentRequired(
       patchTasksSchema,
-      "更新任务请求",
+      "更新任务参数",
     ),
   },
   tags,
+  summary: "更新任务",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectTasksSchema,
-      "更新任务响应",
+      "更新任务成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
@@ -109,11 +113,12 @@ export const remove = createRoute({
   path: "/tasks/{id}",
   method: "delete",
   request: {
-    params: IdParamsSchema.extend({
+    params: z.object({
       id: z.string().uuid(),
     }),
   },
   tags,
+  summary: "删除任务",
   responses: {
     [HttpStatusCodes.NO_CONTENT]: {
       description: "删除成功",

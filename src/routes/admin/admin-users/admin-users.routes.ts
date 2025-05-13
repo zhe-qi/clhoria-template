@@ -7,7 +7,7 @@ import { insertAdminUsersSchema, patchAdminUsersSchema, selectAdminUsersSchema }
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["Admin-Users"];
+const tags = ["后台管理-后台用户管理"];
 
 export const list = createRoute({
   path: "/admin-users",
@@ -16,6 +16,7 @@ export const list = createRoute({
     query: PaginationParamsSchema,
   },
   tags,
+  summary: "获取用户列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       GetPaginatedResultSchema(selectAdminUsersSchema),
@@ -34,10 +35,11 @@ export const create = createRoute({
   request: {
     body: jsonContentRequired(
       insertAdminUsersSchema,
-      "创建请求体",
+      "创建参数",
     ),
   },
   tags,
+  summary: "创建用户",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectAdminUsersSchema,
@@ -54,11 +56,12 @@ export const getOne = createRoute({
   path: "/admin-users/{id}",
   method: "get",
   request: {
-    params: IdParamsSchema.extend({
+    params: z.object({
       id: z.string().uuid(),
     }),
   },
   tags,
+  summary: "获取用户详情",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectAdminUsersSchema,
@@ -79,15 +82,16 @@ export const patch = createRoute({
   path: "/admin-users/{id}",
   method: "patch",
   request: {
-    params: IdParamsSchema.extend({
+    params: z.object({
       id: z.string().uuid(),
     }),
     body: jsonContentRequired(
       patchAdminUsersSchema,
-      "更新请求体",
+      "更新参数",
     ),
   },
   tags,
+  summary: "更新用户",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectAdminUsersSchema,
@@ -109,11 +113,12 @@ export const remove = createRoute({
   path: "/admin-users/{id}",
   method: "delete",
   request: {
-    params: IdParamsSchema.extend({
+    params: z.object({
       id: z.string().uuid(),
     }),
   },
   tags,
+  summary: "删除用户",
   responses: {
     [HttpStatusCodes.NO_CONTENT]: {
       description: "删除成功",
