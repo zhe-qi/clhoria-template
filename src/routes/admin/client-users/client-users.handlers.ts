@@ -6,9 +6,9 @@ import { adminUsers } from "@/db/schema";
 import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
-import type { ClientUserRouteHandlerType } from "./client-users.index";
+import type { ClientUserRouteHandlerType as RouteHandlerType } from "./client-users.index";
 
-export const list: ClientUserRouteHandlerType<"list"> = async (c) => {
+export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
   const result = await paginatedQuery<typeof adminUsers.$inferSelect>({
@@ -19,7 +19,7 @@ export const list: ClientUserRouteHandlerType<"list"> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const create: ClientUserRouteHandlerType<"create"> = async (c) => {
+export const create: RouteHandlerType<"create"> = async (c) => {
   const user = c.req.valid("json");
 
   const [inserted] = await db.insert(adminUsers).values(user).returning();
@@ -27,7 +27,7 @@ export const create: ClientUserRouteHandlerType<"create"> = async (c) => {
   return c.json(inserted, HttpStatusCodes.OK);
 };
 
-export const getOne: ClientUserRouteHandlerType<"getOne"> = async (c) => {
+export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const user = await db.query.adminUsers.findFirst({
@@ -43,7 +43,7 @@ export const getOne: ClientUserRouteHandlerType<"getOne"> = async (c) => {
   return c.json(user, HttpStatusCodes.OK);
 };
 
-export const patch: ClientUserRouteHandlerType<"patch"> = async (c) => {
+export const patch: RouteHandlerType<"patch"> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
@@ -63,7 +63,7 @@ export const patch: ClientUserRouteHandlerType<"patch"> = async (c) => {
   return c.json(user, HttpStatusCodes.OK);
 };
 
-export const remove: ClientUserRouteHandlerType<"remove"> = async (c) => {
+export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [deleted] = await db.delete(adminUsers)

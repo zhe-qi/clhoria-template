@@ -2,17 +2,17 @@ import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { adminUsers } from "@/db/schema";
+import { roles } from "@/db/schema";
 import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
-import type { AdminUserRouteHandlerType as RouteHandlerType } from "./admin-users.index";
+import type { RoleRouteHandlerType as RouteHandlerType } from "./roles.index";
 
 export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof adminUsers.$inferSelect>({
-    table: adminUsers,
+  const result = await paginatedQuery<typeof roles.$inferSelect>({
+    table: roles,
     params: query,
   });
 
@@ -20,9 +20,9 @@ export const list: RouteHandlerType<"list"> = async (c) => {
 };
 
 export const create: RouteHandlerType<"create"> = async (c) => {
-  const user = c.req.valid("json");
+  const role = c.req.valid("json");
 
-  const [inserted] = await db.insert(adminUsers).values(user).returning();
+  const [inserted] = await db.insert(roles).values(role).returning();
 
   return c.json(inserted, HttpStatusCodes.OK);
 };
@@ -30,48 +30,48 @@ export const create: RouteHandlerType<"create"> = async (c) => {
 export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const user = await db.query.adminUsers.findFirst({
+  const role = await db.query.roles.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
     },
   });
 
-  if (!user) {
-    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
+  if (!role) {
+    return c.json({ message: "角色不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(user, HttpStatusCodes.OK);
+  return c.json(role, HttpStatusCodes.OK);
 };
 
 export const patch: RouteHandlerType<"patch"> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
-  if (Reflect.ownKeys(updates).length < 1) {
+  if (Object.keys(updates).length === 0) {
     return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [user] = await db.update(adminUsers)
+  const [task] = await db.update(roles)
     .set(updates)
-    .where(eq(adminUsers.id, id))
+    .where(eq(roles.id, id))
     .returning();
 
-  if (!user) {
-    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
+  if (!task) {
+    return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(user, HttpStatusCodes.OK);
+  return c.json(task, HttpStatusCodes.OK);
 };
 
 export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [deleted] = await db.delete(adminUsers)
-    .where(eq(adminUsers.id, id))
+  const [deleted] = await db.delete(roles)
+    .where(eq(roles.id, id))
     .returning();
 
   if (!deleted) {
-    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: "角色不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);

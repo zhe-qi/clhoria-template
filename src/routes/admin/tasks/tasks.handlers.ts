@@ -6,9 +6,9 @@ import { tasks } from "@/db/schema";
 import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
-import type { TaskRouteHandlerType } from "./tasks.index";
+import type { TaskRouteHandlerType as RouteHandlerType } from "./tasks.index";
 
-export const list: TaskRouteHandlerType<"list"> = async (c) => {
+export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
   const result = await paginatedQuery<typeof tasks.$inferSelect>({
@@ -19,7 +19,7 @@ export const list: TaskRouteHandlerType<"list"> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const create: TaskRouteHandlerType<"create"> = async (c) => {
+export const create: RouteHandlerType<"create"> = async (c) => {
   const task = c.req.valid("json");
 
   const [inserted] = await db.insert(tasks).values(task).returning();
@@ -27,7 +27,7 @@ export const create: TaskRouteHandlerType<"create"> = async (c) => {
   return c.json(inserted, HttpStatusCodes.OK);
 };
 
-export const getOne: TaskRouteHandlerType<"getOne"> = async (c) => {
+export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const task = await db.query.tasks.findFirst({
@@ -43,7 +43,7 @@ export const getOne: TaskRouteHandlerType<"getOne"> = async (c) => {
   return c.json(task, HttpStatusCodes.OK);
 };
 
-export const patch: TaskRouteHandlerType<"patch"> = async (c) => {
+export const patch: RouteHandlerType<"patch"> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
@@ -63,7 +63,7 @@ export const patch: TaskRouteHandlerType<"patch"> = async (c) => {
   return c.json(task, HttpStatusCodes.OK);
 };
 
-export const remove: TaskRouteHandlerType<"remove"> = async (c) => {
+export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [deleted] = await db.delete(tasks)

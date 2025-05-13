@@ -8,9 +8,9 @@ import { adminUsers, clientUsers } from "@/db/schema";
 import env from "@/env";
 import { pick } from "@/utils";
 
-import type { AuthRouteHandlerType } from "./auth.index";
+import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";
 
-export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
+export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
 
   const [user] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
@@ -33,7 +33,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
 };
 
 /** 客户端登录 */
-export const clientLogin: AuthRouteHandlerType<"clientLogin"> = async (c) => {
+export const clientLogin: RouteHandlerType<"clientLogin"> = async (c) => {
   const body = c.req.valid("json");
 
   const [user] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
@@ -56,7 +56,7 @@ export const clientLogin: AuthRouteHandlerType<"clientLogin"> = async (c) => {
 };
 
 /** 客户端注册 */
-export const clientRegister: AuthRouteHandlerType<"clientRegister"> = async (c) => {
+export const clientRegister: RouteHandlerType<"clientRegister"> = async (c) => {
   const body = c.req.valid("json");
 
   const [user] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));

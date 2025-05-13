@@ -19,13 +19,13 @@ export const roles = pgTable("roles", {
   index("status_index").on(table.status),
 ]);
 
-export const selectRolesTableSchema = createSelectSchema(roles);
+export const selectRolesSchema = createSelectSchema(roles);
 
-export const insertRolesTableSchema = createInsertSchema(
+export const insertRolesSchema = createInsertSchema(
   roles,
 ).omit({
   createdAt: true,
   updatedAt: true,
 });
 
-export const patchRolesTableSchema = insertRolesTableSchema.partial();
+export const patchRolesSchema = insertRolesSchema.partial();
