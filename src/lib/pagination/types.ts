@@ -1,5 +1,6 @@
-import type { SQL } from "drizzle-orm";
-import type { PgColumn } from "drizzle-orm/pg-core";
+import type { DrizzleTypeError, SQL, Subquery } from "drizzle-orm";
+import type { PgColumn, PgTable, TableLikeHasEmptySelection } from "drizzle-orm/pg-core";
+import type { PgViewBase } from "drizzle-orm/pg-core/view-base";
 import type { z } from "zod";
 
 import type { PaginationParamsSchema } from "./schema";
@@ -38,3 +39,13 @@ export interface OperatorMap {
 }
 
 export type PaginationParams = z.infer<typeof PaginationParamsSchema>;
+
+export type QuerySource = PgTable | Subquery | PgViewBase | SQL;
+
+export type QueryBuilderMode = "db" | "qb";
+
+export type QuerySourceWithoutReturningClause<TFrom extends QuerySource> = TableLikeHasEmptySelection<TFrom> extends true
+  ? DrizzleTypeError<"Cannot reference a data-modifying statement subquery if it doesn't contain a `returning` clause">
+  : TFrom;
+
+export type TableFieldsType = ParamsType<PgColumn>;

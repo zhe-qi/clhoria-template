@@ -12,7 +12,7 @@ import type { UserRouteHandlerType } from "./users.index";
 export const list: UserRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof users.$inferSelect, typeof users>({
+  const result = await paginatedQuery<typeof users.$inferSelect>({
     table: users,
     params: query,
   });

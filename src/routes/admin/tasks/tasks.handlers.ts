@@ -12,7 +12,7 @@ import type { TaskRouteHandlerType } from "./tasks.index";
 export const list: TaskRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof tasks.$inferSelect, typeof tasks>({
+  const result = await paginatedQuery<typeof tasks.$inferSelect>({
     table: tasks,
     params: query,
   });

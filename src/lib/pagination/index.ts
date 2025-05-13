@@ -1,13 +1,12 @@
-import type { DrizzleTypeError, SQL, Subquery } from "drizzle-orm";
-import type { CreatePgSelectFromBuilderMode, PgColumn, PgSelectBase, PgTable, SelectedFields, TableLikeHasEmptySelection } from "drizzle-orm/pg-core";
-import type { PgViewBase } from "drizzle-orm/pg-core/view-base";
+import type { SQL } from "drizzle-orm";
+import type { CreatePgSelectFromBuilderMode, PgTable, SelectedFields } from "drizzle-orm/pg-core";
 import type { GetSelectTableName, GetSelectTableSelection } from "drizzle-orm/query-builders/select.types";
 
 import { and, asc, count, desc, eq, getTableColumns, gt, gte, inArray, like, lt, lte, not, or } from "drizzle-orm";
 
 import db from "@/db";
 
-import type { OperatorMap, PaginatedResult, PaginationParams, WhereValue } from "./types";
+import type { OperatorMap, PaginatedResult, PaginationParams, QueryBuilderMode, QuerySource, QuerySourceWithoutReturningClause, TableFieldsType, WhereValue } from "./types";
 
 const operatorsMap: OperatorMap = {
   equals: (field, value) => eq(field, value),
@@ -26,10 +25,8 @@ const operatorsMap: OperatorMap = {
 /**
  * 执行分页查询
  */
-export default async function paginatedQuery<TResult, TFrom extends PgTable | Subquery | PgViewBase | SQL>({ table, params }: {
-  table: TableLikeHasEmptySelection<TFrom> extends true
-    ? DrizzleTypeError<"Cannot reference a data-modifying statement subquery if it doesn't contain a `returning` clause">
-    : TFrom;
+export default async function paginatedQuery<TResult>({ table, params }: {
+  table: QuerySourceWithoutReturningClause<QuerySource>;
   params: PaginationParams;
 }): Promise<PaginatedResult<TResult>> {
   const { skip = 0, take = 10, where, orderBy } = params;
@@ -59,36 +56,29 @@ export default async function paginatedQuery<TResult, TFrom extends PgTable | Su
   }
 
   // 并行执行查询
-  const [data, [{ value }]] = await Promise.all([
+  const [data, [{ value: total }]] = await Promise.all([
     query.limit(take).offset(skip),
     countQuery,
   ]);
 
   return {
-    data: data as TResult[],
-    meta: {
-      total: Number(value),
-      skip,
-      take,
-    },
-  };
+    data,
+    meta: { total, skip, take },
+  } as PaginatedResult<TResult>;
 }
-
-type TBuilderMode = "db" | "qb";
 
 /**
  * 处理where条件
  */
 function applyWhereCondition<
-  TFrom extends PgTable | Subquery | PgViewBase | SQL,
   TSelection extends SelectedFields | undefined,
   QueryType extends CreatePgSelectFromBuilderMode<
-    TBuilderMode,
-    GetSelectTableName<TFrom>,
-    TSelection extends undefined ? GetSelectTableSelection<TFrom> : TSelection,
+    QueryBuilderMode,
+    GetSelectTableName<QuerySource>,
+    TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection,
     TSelection extends undefined ? "single" : "partial"
   >,
->(query: QueryType, whereInput: unknown, tableFields: Record<string, PgColumn>): QueryType {
+>(query: QueryType, whereInput: unknown, tableFields: TableFieldsType): QueryType {
   if (!whereInput || typeof whereInput !== "object" || Object.keys(whereInput as object).length === 0) {
     return query;
   }
@@ -136,10 +126,7 @@ function applyWhereCondition<
 /**
  * 构建条件SQL
  */
-function buildCondition(
-  whereInput: unknown,
-  tableFields: Record<string, PgColumn>,
-): SQL<unknown> | null {
+function buildCondition(whereInput: unknown, tableFields: TableFieldsType): SQL<unknown> | null {
   if (!whereInput || typeof whereInput !== "object" || Object.keys(whereInput as object).length === 0) {
     return null;
   }
@@ -184,15 +171,14 @@ function buildCondition(
  * 应用排序
  */
 function applyOrderBy<
-  TFrom extends PgTable | Subquery | PgViewBase | SQL,
   TSelection extends SelectedFields | undefined,
   QueryType extends CreatePgSelectFromBuilderMode<
-    TBuilderMode,
-    GetSelectTableName<TFrom>,
-    TSelection extends undefined ? GetSelectTableSelection<TFrom> : TSelection,
+    QueryBuilderMode,
+    GetSelectTableName<QuerySource>,
+    TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection,
     TSelection extends undefined ? "single" : "partial"
   >,
->(query: QueryType, orderByInput: unknown, tableFields: Record<string, PgColumn>): QueryType {
+>(query: QueryType, orderByInput: unknown, tableFields: TableFieldsType): QueryType {
   if (!orderByInput || typeof orderByInput !== "object") {
     return query;
   }
