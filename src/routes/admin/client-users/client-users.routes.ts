@@ -3,7 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 
-import { insertAdminUsersSchema, patchAdminUsersSchema, selectAdminUsersSchema } from "@/db/schema";
+import { insertClientUsersSchema, patchClientUsersSchema, selectClientUsersSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
@@ -19,7 +19,7 @@ export const list = createRoute({
   summary: "获取用户列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema(selectAdminUsersSchema),
+      GetPaginatedResultSchema(selectClientUsersSchema),
       "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -34,7 +34,7 @@ export const create = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      insertAdminUsersSchema,
+      insertClientUsersSchema,
       "创建参数",
     ),
   },
@@ -42,11 +42,11 @@ export const create = createRoute({
   summary: "添加用户",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectAdminUsersSchema,
+      selectClientUsersSchema,
       "创建成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(insertAdminUsersSchema),
+      createErrorSchema(insertClientUsersSchema),
       "创建请求体验证错误",
     ),
   },
@@ -64,7 +64,7 @@ export const getOne = createRoute({
   summary: "获取用户详情",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectAdminUsersSchema,
+      selectClientUsersSchema,
       "请求成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -86,7 +86,7 @@ export const patch = createRoute({
       id: z.string().uuid(),
     }),
     body: jsonContentRequired(
-      patchAdminUsersSchema,
+      patchClientUsersSchema,
       "更新参数",
     ),
   },
@@ -94,7 +94,7 @@ export const patch = createRoute({
   summary: "更新用户",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectAdminUsersSchema,
+      selectClientUsersSchema,
       "更新成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -102,7 +102,7 @@ export const patch = createRoute({
       "用户不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(patchAdminUsersSchema)
+      createErrorSchema(patchClientUsersSchema)
         .or(createErrorSchema(IdParamsSchema)),
       "请求参数验证错误",
     ),

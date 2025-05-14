@@ -7,7 +7,7 @@ import { defaultColumns } from "@/db/common/base-columns";
 export const menuTypeEnum = pgEnum("type", ["dir", "menu", "button"]);
 
 // 创建菜单表
-export const menuTable = pgTable("menu", {
+export const adminMenu = pgTable("admin_menu", {
   id: defaultColumns.id,
   // 前端路由地址
   path: varchar({ length: 100 }).notNull(),
@@ -27,14 +27,14 @@ export const menuTable = pgTable("menu", {
   updatedAt: defaultColumns.updatedAt,
 });
 
-export const selectMenuTableSchema = createSelectSchema(menuTable);
+export const selectAdminMenuSchema = createSelectSchema(adminMenu);
 
-export const insertMenuTableSchema = createInsertSchema(
-  menuTable,
+export const insertAdminMenuSchema = createInsertSchema(
+  adminMenu,
 ).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const patchMenuTableSchema = insertMenuTableSchema.partial();
+export const patchAdminMenuSchema = insertAdminMenuSchema.partial();

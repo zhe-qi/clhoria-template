@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { adminUsers } from "@/db/schema";
+import { clientUsers } from "@/db/schema";
 import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
@@ -11,8 +11,8 @@ import type { ClientUserRouteHandlerType as RouteHandlerType } from "./client-us
 export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof adminUsers.$inferSelect>({
-    table: adminUsers,
+  const result = await paginatedQuery<typeof clientUsers.$inferSelect>({
+    table: clientUsers,
     params: query,
   });
 
@@ -22,7 +22,7 @@ export const list: RouteHandlerType<"list"> = async (c) => {
 export const create: RouteHandlerType<"create"> = async (c) => {
   const user = c.req.valid("json");
 
-  const [inserted] = await db.insert(adminUsers).values(user).returning();
+  const [inserted] = await db.insert(clientUsers).values(user).returning();
 
   return c.json(inserted, HttpStatusCodes.OK);
 };
@@ -30,7 +30,7 @@ export const create: RouteHandlerType<"create"> = async (c) => {
 export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const user = await db.query.adminUsers.findFirst({
+  const user = await db.query.clientUsers.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
     },
@@ -51,9 +51,9 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
     return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [user] = await db.update(adminUsers)
+  const [user] = await db.update(clientUsers)
     .set(updates)
-    .where(eq(adminUsers.id, id))
+    .where(eq(clientUsers.id, id))
     .returning();
 
   if (!user) {
@@ -66,8 +66,8 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
 export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [deleted] = await db.delete(adminUsers)
-    .where(eq(adminUsers.id, id))
+  const [deleted] = await db.delete(clientUsers)
+    .where(eq(clientUsers.id, id))
     .returning();
 
   if (!deleted) {

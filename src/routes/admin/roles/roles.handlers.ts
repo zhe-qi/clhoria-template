@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { roles } from "@/db/schema";
+import { adminRoles } from "@/db/schema";
 import { updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
@@ -11,8 +11,8 @@ import type { RoleRouteHandlerType as RouteHandlerType } from "./roles.index";
 export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof roles.$inferSelect>({
-    table: roles,
+  const result = await paginatedQuery<typeof adminRoles.$inferSelect>({
+    table: adminRoles,
     params: query,
   });
 
@@ -22,7 +22,7 @@ export const list: RouteHandlerType<"list"> = async (c) => {
 export const create: RouteHandlerType<"create"> = async (c) => {
   const role = c.req.valid("json");
 
-  const [inserted] = await db.insert(roles).values(role).returning();
+  const [inserted] = await db.insert(adminRoles).values(role).returning();
 
   return c.json(inserted, HttpStatusCodes.OK);
 };
@@ -30,7 +30,7 @@ export const create: RouteHandlerType<"create"> = async (c) => {
 export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const role = await db.query.roles.findFirst({
+  const role = await db.query.adminRoles.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
     },
@@ -51,9 +51,9 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
     return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [task] = await db.update(roles)
+  const [task] = await db.update(adminRoles)
     .set(updates)
-    .where(eq(roles.id, id))
+    .where(eq(adminRoles.id, id))
     .returning();
 
   if (!task) {
@@ -66,8 +66,8 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
 export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [deleted] = await db.delete(roles)
-    .where(eq(roles.id, id))
+  const [deleted] = await db.delete(adminRoles)
+    .where(eq(adminRoles.id, id))
     .returning();
 
   if (!deleted) {

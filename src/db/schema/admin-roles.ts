@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
 
-export const roles = pgTable("roles", {
+export const adminRoles = pgTable("admin_roles", {
   id: varchar({ length: 64 }).notNull().primaryKey(),
   // 角色名称
   name: text().notNull(),
@@ -19,13 +19,13 @@ export const roles = pgTable("roles", {
   index("status_index").on(table.status),
 ]);
 
-export const selectRolesSchema = createSelectSchema(roles);
+export const selectAdminRolesSchema = createSelectSchema(adminRoles);
 
-export const insertRolesSchema = createInsertSchema(
-  roles,
+export const insertAdminRolesSchema = createInsertSchema(
+  adminRoles,
 ).omit({
   createdAt: true,
   updatedAt: true,
 });
 
-export const patchRolesSchema = insertRolesSchema.partial();
+export const patchAdminRolesSchema = insertAdminRolesSchema.partial();

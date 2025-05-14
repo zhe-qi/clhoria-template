@@ -3,7 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 
-import { insertRolesSchema, patchRolesSchema, selectRolesSchema } from "@/db/schema";
+import { insertAdminRolesSchema, patchAdminRolesSchema, selectAdminRolesSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
@@ -19,7 +19,7 @@ export const list = createRoute({
   summary: "获取角色列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema(selectRolesSchema),
+      GetPaginatedResultSchema(selectAdminRolesSchema),
       "分页角色列表",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -34,7 +34,7 @@ export const create = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      insertRolesSchema,
+      insertAdminRolesSchema,
       "创建角色参数",
     ),
   },
@@ -42,11 +42,11 @@ export const create = createRoute({
   summary: "创建角色",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectRolesSchema,
+      selectAdminRolesSchema,
       "创建角色成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(insertRolesSchema),
+      createErrorSchema(insertAdminRolesSchema),
       "请求参数验证错误",
     ),
   },
@@ -64,7 +64,7 @@ export const getOne = createRoute({
   summary: "获取角色详情",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectRolesSchema,
+      selectAdminRolesSchema,
       "请求角色成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -86,7 +86,7 @@ export const patch = createRoute({
       id: z.string().uuid(),
     }),
     body: jsonContentRequired(
-      patchRolesSchema,
+      patchAdminRolesSchema,
       "更新角色参数",
     ),
   },
@@ -94,7 +94,7 @@ export const patch = createRoute({
   summary: "更新角色",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      selectRolesSchema,
+      selectAdminRolesSchema,
       "更新角色成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -102,7 +102,7 @@ export const patch = createRoute({
       "角色不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(patchRolesSchema)
+      createErrorSchema(patchAdminRolesSchema)
         .or(createErrorSchema(IdParamsSchema)),
       "请求参数验证错误",
     ),
