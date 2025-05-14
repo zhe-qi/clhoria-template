@@ -5,8 +5,11 @@ import { defaultColumns } from "@/db/common/base-columns";
 
 export const adminUsers = pgTable("admin_users", {
   id: defaultColumns.id,
+  /** 用户名 */
   username: text().notNull().unique(),
+  /** 密码 */
   password: text().notNull(),
+  /** 角色 */
   roles: varchar({ length: 64 }).array().default([]),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,

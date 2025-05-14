@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgEnum, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
@@ -6,24 +6,32 @@ import { defaultColumns } from "@/db/common/base-columns";
 // 菜单类型枚举 目录/菜单/按钮
 export const menuTypeEnum = pgEnum("type", ["dir", "menu", "button"]);
 
-// 创建菜单表
 export const adminMenu = pgTable("admin_menu", {
   id: defaultColumns.id,
-  // 前端路由地址
-  path: varchar({ length: 100 }).notNull(),
-  // 菜单名称
-  name: varchar({ length: 50 }).notNull(),
-  // 菜单类型：目录/菜单/按钮
+  /** 菜单组件 */
+  component: varchar({ length: 255 }).notNull(),
+  /** 菜单元数据 */
+  meta: jsonb().$type<{
+    /** 菜单名称 */
+    title: string;
+    /** 菜单图标 */
+    icon: string;
+    /** 是否隐藏 */
+    hidden: boolean;
+    /** 是否缓存 */
+    keepAlive: boolean;
+    /** 权重排序 */
+    order: number;
+    /** 重定向地址 */
+    redirect: string;
+  }>(),
+  /** 仅按钮生效，对应 casbin 规则表的 id（uuid） */
+  casbinId: uuid(),
+  /** 目录或菜单或按钮类型：dir/menu/button */
   type: menuTypeEnum().notNull(),
-  // 父级菜单ID
+  /** 父级菜单ID */
   parentId: uuid(),
-  // HTTP方法
-  method: varchar({ length: 10 }).default(""),
-  // 图标
-  icon: varchar({ length: 50 }),
-  // 创建时间
   createdAt: defaultColumns.createdAt,
-  // 更新时间
   updatedAt: defaultColumns.updatedAt,
 });
 
