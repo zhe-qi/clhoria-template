@@ -5,6 +5,7 @@ import createApp from "@/lib/create-app";
 import * as allAdminExports from "@/routes/admin/api.index";
 import * as allClientExports from "@/routes/client/api.index";
 import * as allPublicExports from "@/routes/public/api.index";
+import type { DynamicSpreadArrayType } from "@/types/lib";
 
 import env from "./env";
 import { casbin } from "./middlewares/jwt-auth";
@@ -40,14 +41,6 @@ adminRoutes.forEach((route) => {
   app.route("/admin", route);
 });
 // #endregion
-
-type ExtractElementType<T> = T extends Array<infer U> ? U : never;
-type ExtractElements<T> =
-  T extends [infer First, ...infer Rest]
-    ? ExtractElementType<First> | ExtractElements<Rest>
-    : never;
-
-type DynamicSpreadArrayType<T extends any[]> = Array<ExtractElements<T>>;
 
 export type AppType = DynamicSpreadArrayType<[typeof adminRoutes, typeof clientRoutes, typeof publicRoutes]>[number];
 
