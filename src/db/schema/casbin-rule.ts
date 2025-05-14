@@ -7,9 +7,9 @@ export const casbinTable = pgTable("casbin_rule", {
   id: defaultColumns.id,
   // 策略类型：p（策略）/g（角色继承）
   ptype: varchar("ptype", { length: 254 }),
-  // 关联角色
+  // 关联角色 或者 继承角色
   v0: varchar({ length: 254 }),
-  // 资源路径（对应 `menu.path`）
+  // 资源路径（对应 `menu.path`）或者 被继承角色
   v1: varchar({ length: 254 }),
   // 操作类型（对应 `menu.method` 或自定义动作）
   v2: varchar({ length: 254 }),
