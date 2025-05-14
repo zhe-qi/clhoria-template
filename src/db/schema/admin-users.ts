@@ -7,7 +7,7 @@ export const adminUsers = pgTable("admin_users", {
   id: defaultColumns.id,
   username: text().notNull().unique(),
   password: text().notNull(),
-  roles: varchar({ length: 64 }).array(),
+  roles: varchar({ length: 64 }).array().default([]),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 });
