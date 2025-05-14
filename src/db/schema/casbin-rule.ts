@@ -1,9 +1,9 @@
-import { pgTable, varchar } from "drizzle-orm/pg-core";
+import { index, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
 
-export const casbinTable = pgTable("casbin_rule", {
+export const casbinRules = pgTable("casbin_rule", {
   id: defaultColumns.id,
   // 策略类型：p（策略）/g（角色继承）
   ptype: varchar("ptype", { length: 254 }),
@@ -16,14 +16,17 @@ export const casbinTable = pgTable("casbin_rule", {
   v3: varchar({ length: 254 }),
   v4: varchar({ length: 254 }),
   v5: varchar({ length: 254 }),
-});
+}, table => [
+  index("idx_ptype_v0").on(table.ptype, table.v0),
+  index("idx_ptype_v0_v1_v2").on(table.ptype, table.v0, table.v1, table.v2)
+]);
 
-export const selectCasbinTableSchema = createSelectSchema(casbinTable);
+export const selectCasbinRulesSchema = createSelectSchema(casbinRules);
 
-export const insertCasbinTableSchema = createInsertSchema(
-  casbinTable,
+export const insertCasbinRulesSchema = createInsertSchema(
+  casbinRules,
 ).omit({
   id: true,
 });
 
-export const patchCasbinTableSchema = insertCasbinTableSchema.partial();
+export const patchCasbinRulesSchema = insertCasbinRulesSchema.partial();

@@ -32,6 +32,24 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
   return c.json({ token }, HttpStatusCodes.OK);
 };
 
+/** 管理员注册 */
+export const adminRegister: RouteHandlerType<"adminRegister"> = async (c) => {
+  const body = c.req.valid("json");
+
+  const [user] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
+
+  if (user) {
+    return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
+  }
+
+  const [inserted] = await db.insert(adminUsers).values({
+    username: body.username,
+    password: await hash(body.password),
+  }).returning({ id: adminUsers.id });
+
+  return c.json({ id: inserted.id }, HttpStatusCodes.OK);
+};
+
 /** 客户端登录 */
 export const clientLogin: RouteHandlerType<"clientLogin"> = async (c) => {
   const body = c.req.valid("json");

@@ -4,22 +4,22 @@ import type { z } from "zod";
 import { Helper } from "casbin";
 import { and, eq, or } from "drizzle-orm";
 
-import type { insertCasbinTableSchema } from "@/db/schema";
+import type { insertCasbinRulesSchema } from "@/db/schema";
 
 import db from "@/db";
-import { casbinTable } from "@/db/schema";
+import { casbinRules } from "@/db/schema";
 
-type TCasinTable = z.infer<typeof insertCasbinTableSchema>;
+type TCasinTable = z.infer<typeof insertCasbinRulesSchema>;
 
 export class DrizzleCasbinAdapter implements Adapter {
   private db: typeof db;
-  private schema: typeof casbinTable;
+  private schema: typeof casbinRules;
 
   private filtered = false;
 
   constructor() {
     this.db = db;
-    this.schema = casbinTable;
+    this.schema = casbinRules;
   }
 
   async loadPolicy(model: Model): Promise<void> {

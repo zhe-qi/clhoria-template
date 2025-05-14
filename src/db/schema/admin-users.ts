@@ -24,6 +24,7 @@ export const insertAdminUsersSchema = createInsertSchema(
   id: true,
   createdAt: true,
   updatedAt: true,
+  roles: true,
 });
 
 export const patchAdminUsersSchema = insertAdminUsersSchema.partial();

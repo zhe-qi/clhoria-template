@@ -36,7 +36,7 @@ export default function configureOpenAPI(app: AppOpenAPI) {
       authentication: {
         securitySchemes: {
           Bearer: {
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZjOTRhLTk3MzMtNzc5ZS1hM2M0LWQ2ZmEzNmY1NWFiYyIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoidXNlciJ9.KwbjFxwn1nKDTqVg1hZzB5lE-bZ-y9DFBW_k7Lrb8oQ",
+            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZjZDMwLWVkMmItNzQzMS1hYjg0LWJkYTJkMDljZTRjNCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6WyJhZG1pbiJdfQ.WeqAZNJ9QbklI4pNCk2EA4qyhx-AlfWNiHqU3u6GCHI",
           },
         },
       },

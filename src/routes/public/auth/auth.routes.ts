@@ -31,6 +31,27 @@ export const adminLogin = createRoute({
   },
 });
 
+/** 后管注册 */
+export const adminRegister = createRoute({
+  path: "/admin/auth/register",
+  method: "post",
+  request: {
+    body: jsonContentRequired(insertAdminUsersSchema, "注册请求"),
+  },
+  tags,
+  summary: "后管注册 限时开放",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ id: z.string().uuid() }),
+      "注册成功",
+    ),
+    [HttpStatusCodes.CONFLICT]: jsonContent(
+      z.object({ message: z.string() }),
+      "用户已存在",
+    ),
+  },
+});
+
 /** 客户端登录 */
 export const clientLogin = createRoute({
   path: "/client/auth/login",
