@@ -1,0 +1,1 @@
+DROP INDEX "ptype_index";

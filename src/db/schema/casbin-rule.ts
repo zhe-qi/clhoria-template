@@ -1,4 +1,4 @@
-import { index, pgTable, varchar } from "drizzle-orm/pg-core";
+import { pgTable, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
@@ -16,9 +16,7 @@ export const casbinTable = pgTable("casbin_rule", {
   v3: varchar({ length: 254 }),
   v4: varchar({ length: 254 }),
   v5: varchar({ length: 254 }),
-}, table => [
-  index("ptype_index").on(table.ptype),
-]);
+});
 
 export const selectCasbinTableSchema = createSelectSchema(casbinTable);
 
