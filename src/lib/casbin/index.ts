@@ -1,7 +1,6 @@
 import { newEnforcer } from "casbin";
 
-import { createDrizzleAdapter } from "./adapter";
+import { DrizzleCasbinAdapter } from "./adapter";
 
-const casbinEnforcer = newEnforcer("src/lib/casbin/model.conf", createDrizzleAdapter());
-
-export default casbinEnforcer;
+const adapter = await DrizzleCasbinAdapter.newAdapter();
+export const enforcerLaunchedPromise = newEnforcer("src/lib/casbin/model.conf", adapter);

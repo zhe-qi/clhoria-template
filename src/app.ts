@@ -1,6 +1,5 @@
 import { jwt } from "hono/jwt";
 
-import casbinEnforcer from "@/lib/casbin";
 import configureOpenAPI from "@/lib/configure-open-api";
 import createApp from "@/lib/create-app";
 import * as allAdminExports from "@/routes/admin/api.index";
@@ -35,7 +34,7 @@ clientRoutes.forEach((route) => {
 const adminRoutes = Object.values(allAdminExports);
 
 app.use("/admin/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
-app.use("/admin/*", casbin({ newEnforcer: casbinEnforcer }));
+app.use("/admin/*", casbin());
 
 adminRoutes.forEach((route) => {
   app.route("/admin", route);

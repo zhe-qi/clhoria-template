@@ -1,145 +1,173 @@
-import type { Model, UpdatableAdapter } from "casbin";
-import type { SQL } from "drizzle-orm";
+import type { Adapter, Model } from "casbin";
 import type { z } from "zod";
 
 import { Helper } from "casbin";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 
 import type { insertCasbinTableSchema } from "@/db/schema";
 
 import db from "@/db";
-import { casbinTable, roles } from "@/db/schema";
+import { casbinTable } from "@/db/schema";
 
 type TCasinTable = z.infer<typeof insertCasbinTableSchema>;
 
-// 工具函数：创建where条件数组
-function createWhereConditions(line: TCasinTable): SQL[] {
-  const whereArray: SQL[] = [];
+export class DrizzleCasbinAdapter implements Adapter {
+  private db: typeof db;
+  private schema: typeof casbinTable;
 
-  const fields = ["v0", "v1", "v2", "v3", "v4", "v5"] as const;
-  for (const field of fields) {
-    if (line[field]) {
-      whereArray.push(eq(casbinTable[field], line[field]));
+  private filtered = false;
+
+  constructor() {
+    this.db = db;
+    this.schema = casbinTable;
+  }
+
+  async loadPolicy(model: Model): Promise<void> {
+    const rules = await this.db.select().from(this.schema);
+    rules.forEach(rule => this.loadPolicyLine(rule, model));
+  }
+
+  async loadFilteredPolicy(model: Model, filter: { [key: string]: string[][] }): Promise<void> {
+    const whereConditions = Object.entries(filter).map(([ptype, patterns]) =>
+      patterns.map(pattern =>
+        and(
+          eq(this.schema.ptype, ptype),
+          ...pattern.map((value, index) =>
+            value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
+          ).filter(Boolean),
+        ),
+      ),
+    ).flat();
+
+    const rules = await this.db.select()
+      .from(this.schema)
+      .where(or(...whereConditions));
+
+    rules.forEach(rule => this.loadPolicyLine(rule, model));
+    this.filtered = true;
+  }
+
+  async savePolicy(model: Model): Promise<boolean> {
+    await this.db.transaction(async (tx) => {
+      await tx.delete(this.schema);
+
+      const policies: TCasinTable[] = [];
+      const processPolicy = (ptype: string) => {
+        const astMap = model.model.get(ptype);
+        astMap?.forEach((ast, ptype) =>
+          ast.policy.forEach(rule =>
+            policies.push(this.createPolicyObject(ptype, rule)),
+          ),
+        );
+      };
+
+      processPolicy("p");
+      processPolicy("g");
+
+      await tx.insert(this.schema).values(policies);
+    });
+
+    return true;
+  }
+
+  async addPolicy(_sec: string, ptype: string, rule: string[]): Promise<void> {
+    const policy = this.createPolicyObject(ptype, rule);
+    await this.db.insert(this.schema).values(policy);
+  }
+
+  async addPolicies(_sec: string, ptype: string, rules: string[][]): Promise<void> {
+    const processes: TCasinTable[] = [];
+
+    for (const rule of rules) {
+      const line = this.createPolicyObject(ptype, rule);
+      processes.push(line);
     }
+
+    await this.db.insert(this.schema).values(processes);
   }
 
-  return whereArray;
-}
-
-// 工具函数：转换rule数组到数据库记录格式
-function savePolicyLine(ptype: string, rule: string[]): TCasinTable {
-  const line: TCasinTable = { ptype, v0: null, v1: null, v2: null, v3: null, v4: null, v5: null };
-
-  // 将规则数组填充到line对象
-  const fields = ["v0", "v1", "v2", "v3", "v4", "v5"] as const;
-  for (let i = 0; i < Math.min(rule.length, 6); i++) {
-    line[fields[i]] = rule[i];
+  async removePolicy(_sec: string, ptype: string, rule: string[]): Promise<void> {
+    await this.db.delete(this.schema)
+      .where(
+        and(
+          eq(this.schema.ptype, ptype),
+          ...rule.map((value, index) =>
+            value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
+          ).filter(Boolean),
+        ),
+      );
   }
 
-  return line;
-}
+  async removePolicies(_sec: string, ptype: string, rules: string[][]): Promise<void> {
+    const processes = [];
 
-// 工具函数：从数据库记录加载策略到模型
-function loadPolicyLine(line: TCasinTable, model: Model): void {
-  const values = [line.v0, line.v1, line.v2, line.v3, line.v4, line.v5]
-    .filter(v => v)
-    .join(", ");
-  const result = `${line.ptype}, ${values}`;
-  Helper.loadPolicyLine(result, model);
-}
+    for (const rule of rules) {
+      const p = this.db.delete(this.schema).where(
+        and(
+          eq(this.schema.ptype, ptype),
+          ...rule.map((value, index) =>
+            value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
+          ).filter(Boolean),
+        ),
+      );
+      processes.push(p);
+    }
 
-// 创建Drizzle适配器
-export function createDrizzleAdapter(): UpdatableAdapter {
-  return {
-    async loadPolicy(model: Model): Promise<void> {
-      try {
-        const activeRoleIds = await db.select({ id: roles.id })
-          .from(roles)
-          .where(eq(roles.status, 1));
+    await Promise.all(processes);
+  }
 
-        const lines = await db.select()
-          .from(casbinTable)
-          .where(
-            inArray(casbinTable.v0, activeRoleIds.map(r => r.id)),
-          );
+  async removeFilteredPolicy(
+    _sec: string,
+    ptype: string,
+    fieldIndex: number,
+    ...fieldValues: string[]
+  ): Promise<void> {
+    const conditions = [];
 
-        for (const line of lines) {
-          loadPolicyLine(line, model);
-        }
-      }
-      catch {
-        throw new Error("table must named 'casbinTable'");
-      }
-    },
+    for (let i = 0; i < fieldValues.length; i++) {
+      const field = `v${i + fieldIndex}` as keyof TCasinTable;
+      conditions.push(eq(this.schema[field], fieldValues[i]));
+    }
 
-    async savePolicy(model: Model): Promise<boolean> {
-      await db.execute(sql`
-        --#region SQL
-        delete from ${casbinTable};
-        --#endregion
-      `);
+    await this.db.delete(this.schema)
+      .where(
+        and(
+          eq(this.schema.ptype, ptype),
+          ...conditions,
+        ),
+      );
+  }
 
-      // 处理p类型的策略
-      let astMap = model.model.get("p")!;
-      for (const [ptype, ast] of astMap) {
-        for (const rule of ast.policy) {
-          const line = savePolicyLine(ptype, rule);
-          await db.insert(casbinTable).values(line);
-        }
-      }
+  static async newAdapter() {
+    return new DrizzleCasbinAdapter();
+  }
 
-      // 处理g类型的策略
-      astMap = model.model.get("g")!;
-      for (const [ptype, ast] of astMap) {
-        for (const rule of ast.policy) {
-          const line = savePolicyLine(ptype, rule);
-          await db.insert(casbinTable).values(line);
-        }
-      }
+  isFiltered(): boolean {
+    return this.filtered;
+  }
 
-      return true;
-    },
+  private loadPolicyLine(rule: TCasinTable, model: Model): void {
+    const policyLine = [
+      rule.ptype,
+      rule.v0,
+      rule.v1,
+      rule.v2,
+      rule.v3,
+      rule.v4,
+      rule.v5,
+    ].filter(v => v !== null).join(", ");
+    Helper.loadPolicyLine(policyLine, model);
+  }
 
-    async addPolicy(_sec: string, ptype: string, rule: string[]): Promise<void> {
-      const line = savePolicyLine(ptype, rule);
-      await db.insert(casbinTable).values(line);
-    },
-
-    async removePolicy(_sec: string, ptype: string, rule: string[]): Promise<void> {
-      const line = savePolicyLine(ptype, rule);
-      const whereArray = createWhereConditions(line);
-      await db.delete(casbinTable).where(and(...whereArray));
-    },
-
-    async removeFilteredPolicy(
-      _sec: string,
-      ptype: string,
-      fieldIndex: number,
-      ...fieldValues: string[]
-    ): Promise<void> {
-      const line: TCasinTable = { ptype, v0: null, v1: null, v2: null, v3: null, v4: null, v5: null };
-
-      // 根据字段索引和值填充line对象
-      const fields = ["v0", "v1", "v2", "v3", "v4", "v5"] as const;
-      for (let i = 0; i < fieldValues.length; i++) {
-        const targetIndex = fieldIndex + i;
-        if (targetIndex >= 0 && targetIndex < 6) {
-          line[fields[targetIndex]] = fieldValues[i];
-        }
-      }
-
-      const whereArray = createWhereConditions(line);
-      await db.delete(casbinTable).where(and(...whereArray));
-    },
-
-    async updatePolicy(_sec: string, ptype: string, oldRule: string[], newRule: string[]): Promise<void> {
-      const oldLine = savePolicyLine(ptype, oldRule);
-      const newLine = savePolicyLine(ptype, newRule);
-      const whereArray = createWhereConditions(oldLine);
-
-      await db.update(casbinTable)
-        .set(newLine)
-        .where(and(...whereArray));
-    },
-  };
+  private createPolicyObject(ptype: string, rule: string[]): TCasinTable {
+    return {
+      ptype,
+      v0: rule[0] || null,
+      v1: rule[1] || null,
+      v2: rule[2] || null,
+      v3: rule[3] || null,
+      v4: rule[4] || null,
+      v5: rule[5] || null,
+    };
+  }
 }
