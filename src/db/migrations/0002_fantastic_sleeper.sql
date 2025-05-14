@@ -1,1 +1,0 @@
-ALTER TABLE "admin_users" ALTER COLUMN "roles" SET DEFAULT '{}';

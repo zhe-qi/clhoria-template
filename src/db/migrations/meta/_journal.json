@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747152784448,
-      "tag": "0000_swift_tana_nile",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1747152889737,
-      "tag": "0001_certain_screwball",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1747185974597,
-      "tag": "0002_fantastic_sleeper",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1747188100288,
-      "tag": "0003_cynical_chronomancer",
+      "when": 1747198427636,
+      "tag": "0000_daily_caretaker",
       "breakpoints": true
     }
   ]

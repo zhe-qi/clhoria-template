@@ -1,9 +1,30 @@
 CREATE TYPE "public"."type" AS ENUM('dir', 'menu', 'button');--> statement-breakpoint
+CREATE TABLE "admin_menu" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"path" varchar(100) NOT NULL,
+	"name" varchar(50) NOT NULL,
+	"type" "type" NOT NULL,
+	"parent_id" uuid,
+	"method" varchar(10) DEFAULT '',
+	"icon" varchar(50),
+	"created_at" timestamp NOT NULL,
+	"updated_at" timestamp NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "admin_roles" (
+	"id" varchar(64) PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"description" text,
+	"status" integer DEFAULT 1,
+	"created_at" timestamp NOT NULL,
+	"updated_at" timestamp NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "admin_users" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"username" text NOT NULL,
 	"password" text NOT NULL,
-	"roles" varchar(64)[],
+	"roles" varchar(64)[] DEFAULT '{}',
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL,
 	CONSTRAINT "admin_users_username_unique" UNIQUE("username")
@@ -29,27 +50,6 @@ CREATE TABLE "client_users" (
 	CONSTRAINT "client_users_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
-CREATE TABLE "menu" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"path" varchar(100) NOT NULL,
-	"name" varchar(50) NOT NULL,
-	"type" "type" NOT NULL,
-	"parent_id" uuid,
-	"method" varchar(10) DEFAULT '',
-	"icon" varchar(50),
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "roles" (
-	"id" varchar(64) PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"description" text,
-	"status" integer DEFAULT 1,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "tasks" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
@@ -58,6 +58,4 @@ CREATE TABLE "tasks" (
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "casbin_rule" ADD CONSTRAINT "casbin_rule_v0_roles_id_fk" FOREIGN KEY ("v0") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "ptype_index" ON "casbin_rule" USING btree ("ptype");--> statement-breakpoint
-CREATE INDEX "status_index" ON "roles" USING btree ("status");
+CREATE INDEX "status_index" ON "admin_roles" USING btree ("status");
