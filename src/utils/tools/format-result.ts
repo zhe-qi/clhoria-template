@@ -8,14 +8,16 @@ function toCamelCase(str: string): string {
 }
 
 /**
- * 格式化单条连接查询结果，将表名转换为小驼峰格式并展平主表数据
+ * 格式化单条连接查询结果，处理表别名或将表名转换为小驼峰格式并展平主表数据
  * @param record 单条记录
  * @param mainTableName 主表名
+ * @param tableAliases 表别名映射 (表名 -> 别名)
  * @returns 格式化后的记录
  */
 export function formatJoinRecord<T = Record<string, any>>(
   record: Record<string, any>,
   mainTableName: string,
+  tableAliases?: Record<string, string>,
 ): T {
   if (!record || typeof record !== "object") {
     return {} as T;
@@ -31,8 +33,9 @@ export function formatJoinRecord<T = Record<string, any>>(
       continue;
     }
 
-    // 转换表名为小驼峰格式作为属性名
-    const propName = toCamelCase(tableName);
+    // 如果有别名映射，使用别名，否则转换表名为小驼峰格式
+    const alias = tableAliases?.[tableName];
+    const propName = alias || toCamelCase(tableName);
     result[propName] = tableData;
   }
 
@@ -40,18 +43,20 @@ export function formatJoinRecord<T = Record<string, any>>(
 }
 
 /**
- * 格式化分页查询结果，将表名转换为小驼峰格式并展平主表数据
+ * 格式化分页查询结果，处理表别名或将表名转换为小驼峰格式并展平主表数据
  * @param data 查询结果数组
  * @param mainTableName 主表名
+ * @param tableAliases 表别名映射 (表名 -> 别名)
  * @returns 格式化后的结果数组
  */
 export function formatJoinResults<T = Record<string, any>>(
   data: Record<string, any>[],
   mainTableName: string,
+  tableAliases?: Record<string, string>,
 ): T[] {
   if (!Array.isArray(data)) {
     return [];
   }
 
-  return data.map(record => formatJoinRecord<T>(record, mainTableName));
+  return data.map(record => formatJoinRecord<T>(record, mainTableName, tableAliases));
 }

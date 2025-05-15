@@ -48,6 +48,9 @@ export default async function paginatedQuery<TResult>({ table, params, joinTable
     // 获取表字段
     const tableFields = getTableColumns(table as PgTable);
 
+    // 收集表别名
+    const tableAliases: Record<string, string> = {};
+
     // 应用 join 查询
     if (joinTables && join) {
       // 为每个连接表应用 join
@@ -58,6 +61,15 @@ export default async function paginatedQuery<TResult>({ table, params, joinTable
         if (joinTable) {
           const joinTableFields = getTableColumns(joinTable);
           query = applyJoin(query, joinTable, joinCondition, tableFields, joinTableFields);
+
+          // 如果有设置别名，记录到映射中
+          if (joinCondition.as) {
+            const joinTableConfig = getTableConfig(joinTable);
+            const actualTableName = joinTableConfig.name;
+            if (actualTableName) {
+              tableAliases[actualTableName] = joinCondition.as;
+            }
+          }
         }
         else {
           const error = new Error(`连接表 ${tableName} 不在允许的表列表中`);
@@ -112,7 +124,7 @@ export default async function paginatedQuery<TResult>({ table, params, joinTable
       const tableConfig = getTableConfig(table as PgTable);
       const mainTableName = tableConfig.name;
       if (mainTableName) {
-        resultData = formatJoinResults<TResult>(data, mainTableName);
+        resultData = formatJoinResults<TResult>(data, mainTableName, tableAliases);
       }
     }
 

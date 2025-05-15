@@ -1,5 +1,5 @@
 {
-  "id": "063018db-0452-4509-bdea-29aba56d8998",
+  "id": "7f8bb1a6-cb9c-40a7-ba6f-fa852666d6f3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -152,13 +152,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "roles": {
-          "name": "roles",
-          "type": "varchar(64)[]",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'"
         },
         "created_at": {
           "name": "created_at",
@@ -395,6 +388,66 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_to_roles": {
+      "name": "user_to_roles",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_to_roles_user_id_admin_users_id_fk": {
+          "name": "user_to_roles_user_id_admin_users_id_fk",
+          "tableFrom": "user_to_roles",
+          "tableTo": "admin_users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_to_roles_role_id_admin_roles_id_fk": {
+          "name": "user_to_roles_role_id_admin_roles_id_fk",
+          "tableFrom": "user_to_roles",
+          "tableTo": "admin_roles",
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "user_to_roles_user_id_role_id_pk": {
+          "name": "user_to_roles_user_id_role_id_pk",
+          "columns": [
+            "user_id",
+            "role_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},

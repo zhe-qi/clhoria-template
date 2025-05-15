@@ -7,6 +7,8 @@ export const JoinConditionSchema = z.object({
   type: z.enum(["left", "inner", "right", "full"]).optional().default("left"),
   // 连接条件，键为主表字段，值为连接表字段
   on: z.record(z.string(), z.string()),
+  // 表别名
+  as: z.string().optional(),
 });
 
 // 支持多表连接的 Schema

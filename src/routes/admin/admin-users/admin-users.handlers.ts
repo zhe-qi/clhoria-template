@@ -23,7 +23,7 @@ export const list: RouteHandlerType<"list"> = async (c) => {
     table: adminUsers,
     params: {
       ...query,
-      join: { usersToRoles: { type: "left", on: { id: "userId" } } },
+      join: { usersToRoles: { type: "left", on: { id: "userId" }, as: "roles" } },
     },
     joinTables: {
       usersToRoles,

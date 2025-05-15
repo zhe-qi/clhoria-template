@@ -69,6 +69,11 @@ export interface JoinCondition {
    * Join 条件，键为主表字段，值为连接表字段
    */
   on: Record<string, string>;
+
+  /**
+   * Join 别名
+   */
+  as?: string;
 }
 
 /**
