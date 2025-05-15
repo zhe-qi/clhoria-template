@@ -7,7 +7,7 @@ import { insertClientUsersSchema, patchClientUsersSchema, selectClientUsersSchem
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["后台管理-用户管理"];
+const tags = ["/client-users (客户端用户管理)"];
 
 export const list = createRoute({
   path: "/client-users",

@@ -7,7 +7,7 @@ import { insertTasksSchema, patchTasksSchema, selectTasksSchema } from "@/db/sch
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["后台管理-任务管理"];
+const tags = ["/tasks (任务管理)"];
 
 export const list = createRoute({
   path: "/tasks",

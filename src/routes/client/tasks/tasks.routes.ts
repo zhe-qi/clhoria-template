@@ -6,7 +6,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 import { selectTasksSchema } from "@/db/schema";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["客户端-任务管理"];
+const tags = ["/tasks (任务管理)"];
 
 export const list = createRoute({
   path: "/tasks",

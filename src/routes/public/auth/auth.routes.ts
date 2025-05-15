@@ -4,7 +4,7 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 import { insertAdminUsersSchema, insertClientUsersSchema } from "@/db/schema";
 
-const tags = ["公共接口-身份认证"];
+const tags = ["/auth (身份认证)"];
 
 /** 后管登录 */
 export const adminLogin = createRoute({

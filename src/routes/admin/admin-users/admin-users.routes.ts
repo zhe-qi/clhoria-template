@@ -7,7 +7,7 @@ import { insertAdminUsersSchema, patchAdminUsersSchema, selectAdminUsersSchema }
 import { notFoundSchema } from "@/lib/constants";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["后台管理-后台用户管理"];
+const tags = ["/admin-users (后台管理端用户管理)"];
 
 export const list = createRoute({
   path: "/admin-users",
