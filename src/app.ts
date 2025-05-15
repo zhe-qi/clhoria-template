@@ -1,11 +1,12 @@
 import { jwt } from "hono/jwt";
 
+import type { DynamicSpreadArrayType } from "@/types/lib";
+
 import configureOpenAPI from "@/lib/configure-open-api";
 import createApp from "@/lib/create-app";
 import * as allAdminExports from "@/routes/admin/api.index";
 import * as allClientExports from "@/routes/client/api.index";
 import * as allPublicExports from "@/routes/public/api.index";
-import type { DynamicSpreadArrayType } from "@/types/lib";
 
 import env from "./env";
 import { casbin } from "./middlewares/jwt-auth";

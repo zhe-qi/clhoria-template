@@ -2,9 +2,19 @@ import { Scalar } from "@scalar/hono-api-reference";
 
 import type { AppOpenAPI } from "@/types/lib";
 
+import env from "@/env";
+
 import packageJSON from "../../package.json" with { type: "json" };
 
 export default function configureOpenAPI(app: AppOpenAPI) {
+  // 环境判断
+  const isDevelopmentOrTest = env.NODE_ENV !== "production";
+
+  // 如果不是开发或测试环境，直接返回
+  if (!isDevelopmentOrTest) {
+    return;
+  }
+
   app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
     type: "http",
     scheme: "bearer",
@@ -24,7 +34,7 @@ export default function configureOpenAPI(app: AppOpenAPI) {
   });
 
   app.get(
-    "/reference",
+    "/",
     Scalar({
       theme: "kepler",
       url: "/doc",

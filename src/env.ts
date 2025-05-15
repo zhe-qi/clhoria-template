@@ -16,17 +16,16 @@ const EnvSchema = z.object({
   PORT: z.coerce.number().default(9999),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]),
   DATABASE_URL: z.string().url(),
-  DATABASE_AUTH_TOKEN: z.string().optional(),
   CLIENT_JWT_SECRET: z.string(),
   ADMIN_JWT_SECRET: z.string(),
 }).superRefine((input, ctx) => {
-  if (input.NODE_ENV === "production" && !input.DATABASE_AUTH_TOKEN) {
+  if (input.NODE_ENV === "production" && !input.DATABASE_URL) {
     ctx.addIssue({
       code: z.ZodIssueCode.invalid_type,
       expected: "string",
       received: "undefined",
-      path: ["DATABASE_AUTH_TOKEN"],
-      message: "Must be set when NODE_ENV is 'production'",
+      path: ["DATABASE_URL"],
+      message: "数据库连接字符串不能为空",
     });
   }
 });

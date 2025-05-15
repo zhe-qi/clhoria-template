@@ -1,10 +1,7 @@
-import { boolean, integer, jsonb, pgEnum, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
-
-// 菜单类型枚举 目录/菜单/按钮
-export const menuTypeEnum = pgEnum("type", ["dir", "menu", "button"]);
 
 export const adminMenu = pgTable("admin_menu", {
   id: defaultColumns.id,
@@ -25,10 +22,10 @@ export const adminMenu = pgTable("admin_menu", {
     /** 重定向地址 */
     redirect: string;
   }>(),
-  /** 仅按钮生效，对应 casbin 规则表的 id（uuid） */
-  casbinId: uuid(),
-  /** 目录或菜单或按钮类型：dir/menu/button */
-  type: menuTypeEnum().notNull(),
+  /** 资源地址 */
+  resource: varchar({ length: 255 }),
+  /** 操作类型 */
+  action: varchar({ length: 64 }),
   /** 父级菜单ID */
   parentId: uuid(),
   createdAt: defaultColumns.createdAt,

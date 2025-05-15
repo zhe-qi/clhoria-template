@@ -7,24 +7,35 @@ import { and, eq, or } from "drizzle-orm";
 import type { insertCasbinRulesSchema } from "@/db/schema";
 
 import db from "@/db";
-import { casbinRules } from "@/db/schema";
+import { adminRoles, casbinRules } from "@/db/schema";
 
 type TCasinTable = z.infer<typeof insertCasbinRulesSchema>;
 
 export class DrizzleCasbinAdapter implements Adapter {
   private db: typeof db;
   private schema: typeof casbinRules;
+  private roleSchema: typeof adminRoles;
 
   private filtered = false;
 
   constructor() {
     this.db = db;
     this.schema = casbinRules;
+    this.roleSchema = adminRoles;
   }
 
   async loadPolicy(model: Model): Promise<void> {
-    const rules = await this.db.select().from(this.schema);
-    rules.forEach(rule => this.loadPolicyLine(rule, model));
+    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, 1));
+    const lines = await this.db.select().from(this.schema);
+
+    const roleSet = new Set<string>(roles.map(role => role.id));
+
+    lines.forEach((line) => {
+      if (!roleSet.has(line.v0 as string)) {
+        return;
+      }
+      this.loadPolicyLine(line, model);
+    });
   }
 
   async loadFilteredPolicy(model: Model, filter: { [key: string]: string[][] }): Promise<void> {
@@ -39,11 +50,19 @@ export class DrizzleCasbinAdapter implements Adapter {
       ),
     ).flat();
 
-    const rules = await this.db.select()
-      .from(this.schema)
-      .where(or(...whereConditions));
+    const lines = await this.db.select().from(this.schema).where(or(...whereConditions));
 
-    rules.forEach(rule => this.loadPolicyLine(rule, model));
+    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, 1));
+
+    const roleSet = new Set<string>(roles.map(role => role.id));
+
+    lines.forEach((line) => {
+      if (!roleSet.has(line.v0 as string)) {
+        return;
+      }
+      this.loadPolicyLine(line, model);
+    });
+
     this.filtered = true;
   }
 
@@ -51,12 +70,12 @@ export class DrizzleCasbinAdapter implements Adapter {
     await this.db.transaction(async (tx) => {
       await tx.delete(this.schema);
 
-      const policies: TCasinTable[] = [];
+      const processes: TCasinTable[] = [];
       const processPolicy = (ptype: string) => {
         const astMap = model.model.get(ptype);
         astMap?.forEach((ast, ptype) =>
           ast.policy.forEach(rule =>
-            policies.push(this.createPolicyObject(ptype, rule)),
+            processes.push(this.createPolicyObject(ptype, rule)),
           ),
         );
       };
@@ -64,7 +83,7 @@ export class DrizzleCasbinAdapter implements Adapter {
       processPolicy("p");
       processPolicy("g");
 
-      await tx.insert(this.schema).values(policies);
+      await tx.insert(this.schema).values(processes);
     });
 
     return true;

@@ -1,15 +1,24 @@
-import { newEnforcer } from "casbin";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { newEnforcer, newModelFromString } from "casbin";
 
 import { DrizzleCasbinAdapter } from "./adapter";
 
+const model = newModelFromString(`
+[request_definition]
+r = sub, obj, act
+
+[policy_definition]
+p = sub, obj, act
+
+[role_definition]
+g = _, _
+
+[policy_effect]
+e = some(where (p.eft == allow))
+
+[matchers]
+m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && (r.act == p.act || p.act == "*")
+`);
+
 const adapter = await DrizzleCasbinAdapter.newAdapter();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-export const enforcerLaunchedPromise = newEnforcer(
-  path.resolve(__dirname, "model.conf"),
-  adapter,
-);
+export const enforcerLaunchedPromise = newEnforcer(model, adapter);
