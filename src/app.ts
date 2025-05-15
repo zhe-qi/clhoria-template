@@ -48,7 +48,7 @@ appGroups.forEach((group) => {
 
 // 配置文档主页（非生产环境）
 if (env.NODE_ENV !== "production") {
-  configureMainDoc(app);
+  configureMainDoc?.(app);
 }
 
 export type AppType = DynamicSpreadArrayType<[typeof adminRoutes, typeof clientRoutes, typeof publicRoutes]>[number];
