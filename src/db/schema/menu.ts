@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
 
-export const adminMenu = pgTable("admin_menu", {
+export const menu = pgTable("menu", {
   id: defaultColumns.id,
   /** 菜单组件 */
   component: varchar({ length: 255 }).notNull(),
@@ -32,14 +32,14 @@ export const adminMenu = pgTable("admin_menu", {
   updatedAt: defaultColumns.updatedAt,
 });
 
-export const selectAdminMenuSchema = createSelectSchema(adminMenu);
+export const selectMenuSchema = createSelectSchema(menu);
 
-export const insertAdminMenuSchema = createInsertSchema(
-  adminMenu,
+export const insertMenuSchema = createInsertSchema(
+  menu,
 ).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const patchAdminMenuSchema = insertAdminMenuSchema.partial();
+export const patchMenuSchema = insertMenuSchema.partial();

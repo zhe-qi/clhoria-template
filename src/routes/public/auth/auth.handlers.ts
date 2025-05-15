@@ -4,7 +4,7 @@ import { sign } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { adminUsers, clientUsers, usersToRoles } from "@/db/schema";
+import { adminUsers, clientUsers } from "@/db/schema";
 import env from "@/env";
 import { pick } from "@/utils";
 

@@ -6,7 +6,7 @@ import { defaultColumns } from "@/db/common/base-columns";
 
 import { usersToRoles } from "./users-to-roles";
 
-export const adminRoles = pgTable("admin_roles", {
+export const roles = pgTable("roles", {
   id: varchar({ length: 64 }).notNull().primaryKey(),
   /** 角色名称 */
   name: text().notNull(),
@@ -22,17 +22,17 @@ export const adminRoles = pgTable("admin_roles", {
   index("status_index").on(table.status),
 ]);
 
-export const adminRolesRelations = relations(adminRoles, ({ many }) => ({
+export const rolesRelations = relations(roles, ({ many }) => ({
   usersToRoles: many(usersToRoles),
 }));
 
-export const selectAdminRolesSchema = createSelectSchema(adminRoles);
+export const selectRolesSchema = createSelectSchema(roles);
 
-export const insertAdminRolesSchema = createInsertSchema(
-  adminRoles,
+export const insertRolesSchema = createInsertSchema(
+  roles,
 ).omit({
   createdAt: true,
   updatedAt: true,
 });
 
-export const patchAdminRolesSchema = insertAdminRolesSchema.partial();
+export const patchRolesSchema = insertRolesSchema.partial();

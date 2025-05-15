@@ -7,19 +7,19 @@ import { and, eq, or } from "drizzle-orm";
 import type { insertCasbinRulesSchema } from "@/db/schema";
 
 import db from "@/db";
-import { adminRoles, casbinRules } from "@/db/schema";
+import { roles, casbinRules } from "@/db/schema";
 
 type TCasinTable = z.infer<typeof insertCasbinRulesSchema>;
 
 export class DrizzleCasbinAdapter implements Adapter {
   private readonly db: typeof db;
   private readonly schema: typeof casbinRules;
-  private readonly roleSchema: typeof adminRoles;
+  private readonly roleSchema: typeof roles;
 
   private filtered = false;
 
   constructor() {
-    [this.db, this.schema, this.roleSchema] = [db, casbinRules, adminRoles];
+    [this.db, this.schema, this.roleSchema] = [db, casbinRules, roles];
   }
 
   async loadPolicy(model: Model): Promise<void> {
