@@ -2,7 +2,7 @@ import { hash } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 
 import db from "@/db";
-import { adminMenu, adminRoles, adminUsers, casbinRules, userRoles } from "@/db/schema";
+import { adminMenu, adminRoles, adminUsers, casbinRules } from "@/db/schema";
 
 async function main() {
   // 1. 创建一个管理员用户

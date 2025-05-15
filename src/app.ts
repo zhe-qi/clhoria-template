@@ -17,6 +17,7 @@ const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
 // 创建主应用
 const app = createApp();
 
+// 配置文档主页（非生产环境）
 configureMainDoc?.(app);
 
 // #region 公共路由
@@ -43,8 +44,8 @@ adminRoutes.forEach((route) => {
 });
 // #endregion
 
-const appGroups = [adminApp, clientApp, publicApp];
-
+// 路由分组 顺序很重要，直接影响了中间件的执行顺序
+const appGroups = [publicApp, clientApp, adminApp];
 appGroups.forEach((group) => {
   app.route("/", group);
 });

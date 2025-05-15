@@ -11,7 +11,7 @@ const APP_CONFIG = [
   {
     name: "admin",
     title: "管理端API文档",
-    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZjZDMwLWVkMmItNzQzMS1hYjg0LWJkYTJkMDljZTRjNCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6WyJhZG1pbiJdfQ.WeqAZNJ9QbklI4pNCk2EA4qyhx-AlfWNiHqU3u6GCHI",
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZkMzZjLWI4NDgtNzE2YS04ZTkwLWNmZGM0Y2QxYTBjYiIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6W119.xGyoH1xNvB40NgelmlhtKN9lwZZTFYfXuTbWl_lsrTA",
   },
   {
     name: "client",
@@ -21,7 +21,6 @@ const APP_CONFIG = [
   {
     name: "public",
     title: "公共API文档",
-    needsAuth: false,
   },
 ];
 
@@ -46,7 +45,7 @@ export default function configureOpenAPI() {
         const router = apps[`${config.name}App` as AppName];
 
         // 配置安全方案
-        if (config.needsAuth) {
+        if (config.token) {
           const securityName = `${config.name}Bearer`;
           router.openAPIRegistry.registerComponent("securitySchemes", securityName, {
             type: "http",
@@ -80,7 +79,7 @@ export default function configureOpenAPI() {
         })),
         authentication: {
           securitySchemes: APP_CONFIG.reduce((acc, config) => {
-            if (Reflect.has(config, "token") && config.token) {
+            if (config.token) {
               acc[`${config.name}Bearer`] = { token: config.token };
             }
             return acc;

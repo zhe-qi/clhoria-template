@@ -12,56 +12,34 @@ import { adminRoles, casbinRules } from "@/db/schema";
 type TCasinTable = z.infer<typeof insertCasbinRulesSchema>;
 
 export class DrizzleCasbinAdapter implements Adapter {
-  private db: typeof db;
-  private schema: typeof casbinRules;
-  private roleSchema: typeof adminRoles;
+  private readonly db: typeof db;
+  private readonly schema: typeof casbinRules;
+  private readonly roleSchema: typeof adminRoles;
 
   private filtered = false;
 
   constructor() {
-    this.db = db;
-    this.schema = casbinRules;
-    this.roleSchema = adminRoles;
+    [this.db, this.schema, this.roleSchema] = [db, casbinRules, adminRoles];
   }
 
   async loadPolicy(model: Model): Promise<void> {
     const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, 1));
     const lines = await this.db.select().from(this.schema);
-
     const roleSet = new Set<string>(roles.map(role => role.id));
-
-    lines.forEach((line) => {
-      if (!roleSet.has(line.v0 as string)) {
-        return;
-      }
-      this.loadPolicyLine(line, model);
-    });
+    lines.forEach(line => roleSet.has(line.v0 as string) && this.loadPolicyLine(line, model));
   }
 
   async loadFilteredPolicy(model: Model, filter: { [key: string]: string[][] }): Promise<void> {
     const whereConditions = Object.entries(filter).map(([ptype, patterns]) =>
-      patterns.map(pattern =>
-        and(
-          eq(this.schema.ptype, ptype),
-          ...pattern.map((value, index) =>
-            value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
-          ).filter(Boolean),
-        ),
-      ),
-    ).flat();
+      patterns.map(pattern => and(eq(this.schema.ptype, ptype), ...pattern.map((value, index) =>
+        value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
+      ).filter(Boolean)))).flat();
 
     const lines = await this.db.select().from(this.schema).where(or(...whereConditions));
-
     const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, 1));
 
     const roleSet = new Set<string>(roles.map(role => role.id));
-
-    lines.forEach((line) => {
-      if (!roleSet.has(line.v0 as string)) {
-        return;
-      }
-      this.loadPolicyLine(line, model);
-    });
+    lines.forEach(line => roleSet.has(line.v0 as string) && this.loadPolicyLine(line, model));
 
     this.filtered = true;
   }
@@ -71,14 +49,9 @@ export class DrizzleCasbinAdapter implements Adapter {
       await tx.delete(this.schema);
 
       const processes: TCasinTable[] = [];
-      const processPolicy = (ptype: string) => {
-        const astMap = model.model.get(ptype);
-        astMap?.forEach((ast, ptype) =>
-          ast.policy.forEach(rule =>
-            processes.push(this.createPolicyObject(ptype, rule)),
-          ),
-        );
-      };
+      const processPolicy = (ptype: string) =>
+        model.model.get(ptype)?.forEach((ast, ptype) =>
+          ast.policy.forEach(rule => processes.push(this.createPolicyObject(ptype, rule))));
 
       processPolicy("p");
       processPolicy("g");
@@ -106,15 +79,11 @@ export class DrizzleCasbinAdapter implements Adapter {
   }
 
   async removePolicy(_sec: string, ptype: string, rule: string[]): Promise<void> {
-    await this.db.delete(this.schema)
-      .where(
-        and(
-          eq(this.schema.ptype, ptype),
-          ...rule.map((value, index) =>
-            value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
-          ).filter(Boolean),
-        ),
-      );
+    await this.db.delete(this.schema).where(
+      and(eq(this.schema.ptype, ptype), ...rule.map((value, index) =>
+        value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
+      ).filter(Boolean)),
+    );
   }
 
   async removePolicies(_sec: string, ptype: string, rules: string[][]): Promise<void> {
@@ -122,12 +91,9 @@ export class DrizzleCasbinAdapter implements Adapter {
 
     for (const rule of rules) {
       const p = this.db.delete(this.schema).where(
-        and(
-          eq(this.schema.ptype, ptype),
-          ...rule.map((value, index) =>
-            value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
-          ).filter(Boolean),
-        ),
+        and(eq(this.schema.ptype, ptype), ...rule.map((value, index) =>
+          value ? eq(this.schema[`v${index}` as keyof TCasinTable], value) : undefined,
+        ).filter(Boolean)),
       );
       processes.push(p);
     }
@@ -144,17 +110,10 @@ export class DrizzleCasbinAdapter implements Adapter {
     const conditions = [];
 
     for (let i = 0; i < fieldValues.length; i++) {
-      const field = `v${i + fieldIndex}` as keyof TCasinTable;
-      conditions.push(eq(this.schema[field], fieldValues[i]));
+      conditions.push(eq(this.schema[`v${i + fieldIndex}` as keyof TCasinTable], fieldValues[i]));
     }
 
-    await this.db.delete(this.schema)
-      .where(
-        and(
-          eq(this.schema.ptype, ptype),
-          ...conditions,
-        ),
-      );
+    await this.db.delete(this.schema).where(and(eq(this.schema.ptype, ptype), ...conditions));
   }
 
   static async newAdapter() {
@@ -166,27 +125,12 @@ export class DrizzleCasbinAdapter implements Adapter {
   }
 
   private loadPolicyLine(rule: TCasinTable, model: Model): void {
-    const policyLine = [
-      rule.ptype,
-      rule.v0,
-      rule.v1,
-      rule.v2,
-      rule.v3,
-      rule.v4,
-      rule.v5,
-    ].filter(v => v !== null).join(", ");
-    Helper.loadPolicyLine(policyLine, model);
+    Helper.loadPolicyLine([rule.ptype, rule.v0, rule.v1, rule.v2, rule.v3, rule.v4, rule.v5]
+      .filter(v => v !== null)
+      .join(", "), model);
   }
 
   private createPolicyObject(ptype: string, rule: string[]): TCasinTable {
-    return {
-      ptype,
-      v0: rule[0] || null,
-      v1: rule[1] || null,
-      v2: rule[2] || null,
-      v3: rule[3] || null,
-      v4: rule[4] || null,
-      v5: rule[5] || null,
-    };
+    return { ptype, v0: rule[0], v1: rule[1], v2: rule[2], v3: rule[3], v4: rule[4], v5: rule[5] };
   }
 }

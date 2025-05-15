@@ -20,4 +20,3 @@ type ExtractElements<T> =
     : never;
 
 export type DynamicSpreadArrayType<T extends any[]> = Array<ExtractElements<T>>;
-
