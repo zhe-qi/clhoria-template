@@ -1,7 +1,10 @@
+import { relations } from "drizzle-orm";
 import { index, integer, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
+
+import { usersToRoles } from "./users-to-roles";
 
 export const adminRoles = pgTable("admin_roles", {
   id: varchar({ length: 64 }).notNull().primaryKey(),
@@ -18,6 +21,10 @@ export const adminRoles = pgTable("admin_roles", {
 }, table => [
   index("status_index").on(table.status),
 ]);
+
+export const adminRolesRelations = relations(adminRoles, ({ many }) => ({
+  usersToRoles: many(usersToRoles),
+}));
 
 export const selectAdminRolesSchema = createSelectSchema(adminRoles);
 

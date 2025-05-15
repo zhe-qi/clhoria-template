@@ -95,20 +95,6 @@ export default async function paginatedQuery<TResult>({ table, params, joinTable
     // 构建计数查询
     let countQuery = db.select({ value: count() }).from(table);
 
-    // 应用 join 到计数查询
-    if (joinTables && join) {
-      // 为每个连接表应用 join
-      for (const [tableName, joinCondition] of Object.entries(join)) {
-        const joinTable = joinTables[tableName];
-
-        // 只处理存在于 joinTables 中的表
-        if (joinTable) {
-          const joinTableFields = getTableColumns(joinTable);
-          countQuery = applyJoin(countQuery, joinTable, joinCondition, tableFields, joinTableFields);
-        }
-      }
-    }
-
     // 应用相同的where条件
     if (where && WhereConditionSchema.safeParse(where).success) {
       countQuery = applyWhereCondition(countQuery, where, tableFields);

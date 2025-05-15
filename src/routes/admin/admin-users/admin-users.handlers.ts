@@ -3,17 +3,17 @@ import type { z } from "zod";
 import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
-import type { selectAdminUsersSchema, selectUserRolesSchema } from "@/db/schema";
+import type { selectAdminUsersSchema } from "@/db/schema";
 
 import db from "@/db";
-import { adminUsers, userRoles } from "@/db/schema";
+import { adminUsers, usersToRoles } from "@/db/schema";
 import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
 import type { AdminUserRouteHandlerType as RouteHandlerType } from "./admin-users.index";
 
 type PaginatedResult = z.infer<typeof selectAdminUsersSchema> & {
-  userRoles: z.infer<typeof selectUserRolesSchema>;
+  usersToRoles: typeof usersToRoles.$inferSelect;
 };
 
 export const list: RouteHandlerType<"list"> = async (c) => {
@@ -23,10 +23,10 @@ export const list: RouteHandlerType<"list"> = async (c) => {
     table: adminUsers,
     params: {
       ...query,
-      join: { userRoles: { type: "left", on: { id: "userId" } } },
+      join: { usersToRoles: { type: "left", on: { id: "userId" } } },
     },
     joinTables: {
-      userRoles,
+      usersToRoles,
     },
   });
 

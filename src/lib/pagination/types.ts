@@ -6,36 +6,6 @@ import type { z } from "zod";
 
 import type { PaginationParamsSchema } from "./schema";
 
-// Where操作符对象类型
-export interface WhereOperatorObject {
-  [key: string]: unknown;
-}
-
-// Where条件对象类型
-export type WhereCondition = Record<string, unknown | WhereOperatorObject | WhereConditionGroup>;
-
-// Where条件组类型
-export interface WhereConditionGroup {
-  AND?: WhereCondition[];
-  OR?: WhereCondition[];
-  NOT?: WhereCondition;
-}
-
-// 定义分页结果接口
-export interface PaginatedResult<T> {
-  data: T[];
-  meta: {
-    total: number;
-    skip: number;
-    take: number;
-  };
-}
-
-// 操作符映射
-export interface OperatorMap {
-  [key: string]: (field: PgColumn, value: unknown) => SQL<unknown>;
-}
-
 export type PaginationParams = z.infer<typeof PaginationParamsSchema>;
 
 export type QuerySource = PgTable | Subquery | PgViewBase | SQL;
@@ -48,14 +18,37 @@ export type QuerySourceWithoutReturningClause<TFrom extends QuerySource> = Table
 
 export type TableFieldsType = ParamsType<PgColumn>;
 
-// QueryBuilderMode, GetSelectTableName<QuerySource>, TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection, TSelection extends undefined ? "single" : "partial"
-
 export type QuerySelectBuilderModeType<TSelection extends SelectedFields | undefined> = CreatePgSelectFromBuilderMode<
   QueryBuilderMode,
   GetSelectTableName<QuerySource>,
   TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection,
   TSelection extends undefined ? "single" : "partial"
 >;
+
+export interface WhereOperatorObject {
+  [key: string]: unknown;
+}
+
+export type WhereCondition = Record<string, unknown | WhereOperatorObject | WhereConditionGroup>;
+
+export interface WhereConditionGroup {
+  AND?: WhereCondition[];
+  OR?: WhereCondition[];
+  NOT?: WhereCondition;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: {
+    total: number;
+    skip: number;
+    take: number;
+  };
+}
+
+export interface OperatorMap {
+  [key: string]: (field: PgColumn, value: unknown) => SQL<unknown>;
+}
 
 /**
  * Join 查询类型
@@ -83,9 +76,4 @@ export interface JoinCondition {
  */
 export type JoinConfig = Record<string, JoinCondition>;
 
-/**
- * 返回类型，当有错误时，返回错误，否则返回结果，互斥关系
- */
-export type ToResult<T, E = Error> =
-  | readonly [E, null]
-  | readonly [null, T];
+export type ToResult<T, E = Error> = [E, null] | [null, T];
