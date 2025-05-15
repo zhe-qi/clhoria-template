@@ -1,4 +1,4 @@
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
@@ -9,8 +9,6 @@ export const adminUsers = pgTable("admin_users", {
   username: text().notNull().unique(),
   /** 密码 */
   password: text().notNull(),
-  /** 角色 */
-  roles: varchar({ length: 64 }).array().default([]),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 });
@@ -27,7 +25,6 @@ export const insertAdminUsersSchema = createInsertSchema(
   id: true,
   createdAt: true,
   updatedAt: true,
-  roles: true,
 });
 
 export const patchAdminUsersSchema = insertAdminUsersSchema.partial();

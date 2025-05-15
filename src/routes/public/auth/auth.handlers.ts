@@ -4,7 +4,7 @@ import { sign } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { adminUsers, clientUsers } from "@/db/schema";
+import { adminUsers, clientUsers, userRoles } from "@/db/schema";
 import env from "@/env";
 import { pick } from "@/utils";
 
@@ -13,11 +13,18 @@ import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";
 export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
 
-  const [user] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
+  const userWithRoles = await db
+    .select()
+    .from(adminUsers)
+    .leftJoin(userRoles, eq(adminUsers.id, userRoles.userId))
+    .where(eq(adminUsers.username, body.username));
 
-  if (!user) {
+  if (userWithRoles.length === 0) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
+
+  const user = userWithRoles[0].admin_users;
+  const roles = userWithRoles.map(row => row.user_roles?.roleId).filter(Boolean);
 
   const isPasswordValid = await verify(user.password, body.password);
 
@@ -25,7 +32,7 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
     return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const payload = pick(user, ["id", "username", "roles"]);
+  const payload = Object.assign(pick(user, ["id", "username"]), { roles });
 
   const token = await sign(payload, env.ADMIN_JWT_SECRET);
 

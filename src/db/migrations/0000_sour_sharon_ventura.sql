@@ -1,12 +1,10 @@
-CREATE TYPE "public"."type" AS ENUM('dir', 'menu', 'button');--> statement-breakpoint
 CREATE TABLE "admin_menu" (
 	"id" uuid PRIMARY KEY NOT NULL,
-	"path" varchar(100) NOT NULL,
-	"name" varchar(50) NOT NULL,
-	"type" "type" NOT NULL,
+	"component" varchar(255) NOT NULL,
+	"meta" jsonb,
+	"resource" varchar(255),
+	"action" varchar(64),
 	"parent_id" uuid,
-	"method" varchar(10) DEFAULT '',
-	"icon" varchar(50),
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );
@@ -32,13 +30,13 @@ CREATE TABLE "admin_users" (
 --> statement-breakpoint
 CREATE TABLE "casbin_rule" (
 	"id" uuid PRIMARY KEY NOT NULL,
-	"ptype" varchar(254),
-	"v0" varchar(254),
+	"ptype" varchar(8),
+	"v0" varchar(64),
 	"v1" varchar(254),
-	"v2" varchar(254),
-	"v3" varchar(254),
-	"v4" varchar(254),
-	"v5" varchar(254)
+	"v2" varchar(64),
+	"v3" varchar(64),
+	"v4" varchar(64),
+	"v5" varchar(64)
 );
 --> statement-breakpoint
 CREATE TABLE "client_users" (
@@ -58,4 +56,6 @@ CREATE TABLE "tasks" (
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX "status_index" ON "admin_roles" USING btree ("status");
+CREATE INDEX "status_index" ON "admin_roles" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "idx_ptype_v0" ON "casbin_rule" USING btree ("ptype","v0");--> statement-breakpoint
+CREATE INDEX "idx_ptype_v0_v1_v2" ON "casbin_rule" USING btree ("ptype","v0","v1","v2");

@@ -1,6 +1,6 @@
 {
-  "id": "063018db-0452-4509-bdea-29aba56d8998",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "8711268d-0dd9-41e3-a7b6-1aad23f632d3",
+  "prevId": "063018db-0452-4509-bdea-29aba56d8998",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -152,13 +152,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "roles": {
-          "name": "roles",
-          "type": "varchar(64)[]",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'"
         },
         "created_at": {
           "name": "created_at",
@@ -395,6 +388,39 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_roles": {
+      "name": "user_roles",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "user_roles_user_id_role_id_pk": {
+          "name": "user_roles_user_id_role_id_pk",
+          "columns": [
+            "user_id",
+            "role_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},

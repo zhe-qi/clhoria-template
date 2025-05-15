@@ -19,7 +19,7 @@ const APP_CONFIG = [
     name: "client",
     title: "客户端API文档",
     needsAuth: true,
-    token: "111",
+    token: "",
   },
   {
     name: "public",
