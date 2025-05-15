@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { adminUsers } from "@/db/schema";
-import { updatesZodError } from "@/lib/constants";
+import { adminUsers, userRoles } from "@/db/schema";
+import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
 import type { AdminUserRouteHandlerType as RouteHandlerType } from "./admin-users.index";
@@ -11,10 +11,27 @@ import type { AdminUserRouteHandlerType as RouteHandlerType } from "./admin-user
 export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof adminUsers.$inferSelect>({
+  const [error, result] = await paginatedQuery<typeof adminUsers.$inferSelect>({
     table: adminUsers,
-    params: query,
+    params: {
+      ...query,
+      join: {
+        userRoles: {
+          type: "left",
+          on: {
+            id: "userId",
+          },
+        },
+      },
+    },
+    joinTables: {
+      userRoles,
+    },
   });
+
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+  }
 
   return c.json(result, HttpStatusCodes.OK);
 };

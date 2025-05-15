@@ -15,3 +15,14 @@ export const updatesZodError = formatZodError({
   ],
   name: "ZodError",
 });
+
+export function getQueryValidationError(error: { message: string }) {
+  return formatZodError({
+    issues: [{
+      code: "invalid_query",
+      path: [],
+      message: error.message,
+    }],
+    name: "ZodError",
+  });
+}

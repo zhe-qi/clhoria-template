@@ -56,3 +56,36 @@ export type QuerySelectBuilderModeType<TSelection extends SelectedFields | undef
   TSelection extends undefined ? GetSelectTableSelection<QuerySource> : TSelection,
   TSelection extends undefined ? "single" : "partial"
 >;
+
+/**
+ * Join 查询类型
+ */
+export type JoinType = "left" | "inner" | "right" | "full";
+
+/**
+ * 单个表的连接配置
+ */
+export interface JoinCondition {
+  /**
+   * Join 类型
+   * @default 'left'
+   */
+  type?: JoinType;
+
+  /**
+   * Join 条件，键为主表字段，值为连接表字段
+   */
+  on: Record<string, string>;
+}
+
+/**
+ * 多表连接配置，键为表别名，值为连接配置
+ */
+export type JoinConfig = Record<string, JoinCondition>;
+
+/**
+ * 返回类型，当有错误时，返回错误，否则返回结果，互斥关系
+ */
+export type ToResult<T, E = Error> =
+  | readonly [E, null]
+  | readonly [null, T];

@@ -11,7 +11,7 @@ const APP_CONFIG = [
   {
     name: "admin",
     title: "管理端API文档",
-    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZkMzZjLWI4NDgtNzE2YS04ZTkwLWNmZGM0Y2QxYTBjYiIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6W119.xGyoH1xNvB40NgelmlhtKN9lwZZTFYfXuTbWl_lsrTA",
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZkMzZjLWI4NDgtNzE2YS04ZTkwLWNmZGM0Y2QxYTBjYiIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6WyJhZG1pbiJdfQ.BAGwSjqCUlFCrRVykfVu3roMF6SUpAxXLjpc9kE5ORs",
   },
   {
     name: "client",

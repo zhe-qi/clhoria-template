@@ -34,8 +34,8 @@ describe("任务路由", () => {
   it("get /tasks 支持分页参数", async () => {
     const response = await client.tasks.$get({
       query: {
-        skip: "0",
-        take: "5",
+        skip: 0,
+        take: 5,
       },
     });
     expect(response.status).toBe(200);
@@ -47,20 +47,25 @@ describe("任务路由", () => {
   });
 
   it("get /tasks 支持排序参数", async () => {
-    const orderBy = JSON.stringify({ id: "desc" });
     const response = await client.tasks.$get({
       query: {
-        orderBy,
+        orderBy: JSON.stringify({
+          id: "desc",
+        }),
       },
     });
+
     expect(response.status).toBe(200);
   });
 
   it("get /tasks 支持过滤条件", async () => {
-    const where = JSON.stringify({ name: { contains: "任务" } });
     const response = await client.tasks.$get({
       query: {
-        where,
+        where: JSON.stringify({
+          name: {
+            contains: "任务",
+          },
+        }),
       },
     });
     expect(response.status).toBe(200);
@@ -69,6 +74,7 @@ describe("任务路由", () => {
   it("get /tasks 参数验证 - 无效的skip参数", async () => {
     const response = await client.tasks.$get({
       query: {
+        // @ts-expect-error 测试类型错误
         skip: "invalid",
       },
     });
@@ -82,6 +88,7 @@ describe("任务路由", () => {
   it("get /tasks 参数验证 - 无效的take参数", async () => {
     const response = await client.tasks.$get({
       query: {
+        // @ts-expect-error 测试类型错误
         take: "invalid",
       },
     });
@@ -98,6 +105,10 @@ describe("任务路由", () => {
         where: "{invalid json}",
       },
     });
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(422);
+    if (response.status === 422) {
+      const json = await response.json() as { error: { issues: Array<{ path: string[] }> } };
+      expect(json.error.issues[0].path[0]).toBe("where");
+    }
   });
 });
