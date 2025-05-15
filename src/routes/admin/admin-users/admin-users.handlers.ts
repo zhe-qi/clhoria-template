@@ -1,5 +1,9 @@
+import type { z } from "zod";
+
 import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+
+import type { selectAdminUsersSchema, selectUserRolesSchema } from "@/db/schema";
 
 import db from "@/db";
 import { adminUsers, userRoles } from "@/db/schema";
@@ -8,21 +12,18 @@ import paginatedQuery from "@/lib/pagination";
 
 import type { AdminUserRouteHandlerType as RouteHandlerType } from "./admin-users.index";
 
+type PaginatedResult = z.infer<typeof selectAdminUsersSchema> & {
+  userRoles: z.infer<typeof selectUserRolesSchema>;
+};
+
 export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const [error, result] = await paginatedQuery<typeof adminUsers.$inferSelect>({
+  const [error, result] = await paginatedQuery<PaginatedResult>({
     table: adminUsers,
     params: {
       ...query,
-      join: {
-        userRoles: {
-          type: "left",
-          on: {
-            id: "userId",
-          },
-        },
-      },
+      join: { userRoles: { type: "left", on: { id: "userId" } } },
     },
     joinTables: {
       userRoles,

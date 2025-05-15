@@ -2,8 +2,10 @@ import type { SQL } from "drizzle-orm";
 import type { PgTable, SelectedFields } from "drizzle-orm/pg-core";
 
 import { and, asc, count, desc, eq, getTableColumns, gt, gte, inArray, like, lt, lte, not, or } from "drizzle-orm";
+import { getTableConfig } from "drizzle-orm/pg-core";
 
 import db from "@/db";
+import { formatJoinResults } from "@/utils/tools/format-result";
 
 import type { JoinCondition, OperatorMap, PaginatedResult, PaginationParams, QuerySelectBuilderModeType, QuerySource, QuerySourceWithoutReturningClause, TableFieldsType, ToResult } from "./types";
 
@@ -24,12 +26,15 @@ const operatorsMap: OperatorMap = {
 };
 
 /**
- * 执行分页查询，返回 await-to-js 风格的元组
+ * 执行分页查询，传入声明式参数，返回分页结果
  * @returns 返回元组 [error, result]，互斥关系：有 error 时 result 为 null，无 error 时 result 非空
  */
 export default async function paginatedQuery<TResult>({ table, params, joinTables }: {
+  /** 主表 */
   table: QuerySourceWithoutReturningClause<QuerySource>;
+  /** 分页参数 */
   params: PaginationParams;
+  /** 联表查询白名单 */
   joinTables?: Record<string, PgTable>;
 }): Promise<ToResult<PaginatedResult<TResult>>> {
   try {
@@ -115,8 +120,18 @@ export default async function paginatedQuery<TResult>({ table, params, joinTable
       countQuery,
     ]);
 
+    // 格式化结果（如果需要）
+    let resultData = data as TResult[];
+    if (joinTables && join) {
+      const tableConfig = getTableConfig(table as PgTable);
+      const mainTableName = tableConfig.name;
+      if (mainTableName) {
+        resultData = formatJoinResults<TResult>(data, mainTableName);
+      }
+    }
+
     const result = {
-      data: data as TResult[],
+      data: resultData,
       meta: { total, skip, take },
     };
 

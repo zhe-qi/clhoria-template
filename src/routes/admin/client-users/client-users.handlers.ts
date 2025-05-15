@@ -3,7 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { clientUsers } from "@/db/schema";
-import { updatesZodError } from "@/lib/constants";
+import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 
 import type { ClientUserRouteHandlerType as RouteHandlerType } from "./client-users.index";
@@ -11,10 +11,14 @@ import type { ClientUserRouteHandlerType as RouteHandlerType } from "./client-us
 export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const result = await paginatedQuery<typeof clientUsers.$inferSelect>({
+  const [error, result] = await paginatedQuery<typeof clientUsers.$inferSelect>({
     table: clientUsers,
     params: query,
   });
+
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+  }
 
   return c.json(result, HttpStatusCodes.OK);
 };
