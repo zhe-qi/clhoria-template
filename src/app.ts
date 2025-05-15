@@ -17,10 +17,7 @@ const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
 // 创建主应用
 const app = createApp();
 
-// 配置文档主页（非生产环境）
-if (env.NODE_ENV !== "production") {
-  configureMainDoc?.(app);
-}
+configureMainDoc?.(app);
 
 // #region 公共路由
 const publicRoutes = Object.values(allPublicExports);

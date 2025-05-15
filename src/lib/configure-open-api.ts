@@ -7,19 +7,16 @@ import env from "@/env";
 import packageJSON from "../../package.json" with { type: "json" };
 import { createRouter } from "./create-app";
 
-// 简化配置
 const APP_CONFIG = [
   {
     name: "admin",
     title: "管理端API文档",
-    needsAuth: true,
     token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZjZDMwLWVkMmItNzQzMS1hYjg0LWJkYTJkMDljZTRjNCIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6WyJhZG1pbiJdfQ.WeqAZNJ9QbklI4pNCk2EA4qyhx-AlfWNiHqU3u6GCHI",
   },
   {
     name: "client",
     title: "客户端API文档",
-    needsAuth: true,
-    token: "",
+    token: "111",
   },
   {
     name: "public",
@@ -83,7 +80,7 @@ export default function configureOpenAPI() {
         })),
         authentication: {
           securitySchemes: APP_CONFIG.reduce((acc, config) => {
-            if (config.needsAuth && config.token) {
+            if (Reflect.has(config, "token") && config.token) {
               acc[`${config.name}Bearer`] = { token: config.token };
             }
             return acc;
