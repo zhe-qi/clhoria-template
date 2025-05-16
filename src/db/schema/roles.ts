@@ -24,13 +24,13 @@ export const rolesRelations = relations(roles, ({ many }) => ({
 export const selectRolesSchema = createSelectSchema(
   roles,
   {
-    id: schema => schema.openapi({
+    id: schema => schema.openapi?.({
       description: "角色ID 例如: admin",
     }) ?? schema,
-    name: schema => schema.openapi({
+    name: schema => schema.openapi?.({
       description: "角色名称",
     }) ?? schema,
-    description: schema => schema.openapi({
+    description: schema => schema.openapi?.({
       description: "角色描述",
     }) ?? schema,
   },

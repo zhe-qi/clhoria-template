@@ -2,31 +2,26 @@ import { z } from "@hono/zod-openapi";
 
 import { formatSafeJson } from "@/utils";
 
-// 单个连接配置 Schema
 export const JoinConditionSchema = z.object({
   type: z.enum(["left", "inner", "right", "full"]).optional().default("left"),
-  // 连接条件，键为主表字段，值为连接表字段
   on: z.record(z.string(), z.string()),
-  // 表别名
   as: z.string().optional(),
 });
 
-// 支持多表连接的 Schema
 export const JoinConfigSchema = z.record(z.string(), JoinConditionSchema);
 
-// Where 操作符 Schema
 export const WhereOperatorSchema = z.object({
-  equals: z.any().optional(),
-  not: z.any().optional(),
-  in: z.array(z.any()).optional(),
-  notIn: z.array(z.any()).optional(),
-  lt: z.any().optional(),
-  lte: z.any().optional(),
-  gt: z.any().optional(),
-  gte: z.any().optional(),
-  contains: z.string().optional(),
-  startsWith: z.string().optional(),
-  endsWith: z.string().optional(),
+  equals: z.any().optional().describe("等于"),
+  not: z.any().optional().describe("不等于"),
+  in: z.array(z.any()).optional().describe("在范围内"),
+  notIn: z.array(z.any()).optional().describe("不在范围内"),
+  lt: z.any().optional().describe("小于"),
+  lte: z.any().optional().describe("小于等于"),
+  gt: z.any().optional().describe("大于"),
+  gte: z.any().optional().describe("大于等于"),
+  contains: z.string().optional().describe("包含"),
+  startsWith: z.string().optional().describe("以...开始"),
+  endsWith: z.string().optional().describe("以...结束"),
 }).partial();
 
 // 定义递归类型的基础结构
@@ -36,10 +31,10 @@ function makeWhereConditionSchema() {
 
   // 定义条件组结构
   const conditionGroup = z.object({
-    AND: z.array(baseSchema).optional(),
-    OR: z.array(baseSchema).optional(),
-    NOT: baseSchema.optional(),
-  }).partial();
+    AND: z.array(baseSchema).optional().describe("与"),
+    OR: z.array(baseSchema).optional().describe("或"),
+    NOT: baseSchema.optional().describe("非"),
+  }).partial().describe("Where条件组");
 
   // 完整的 where 条件 schema
   return z.record(
@@ -48,7 +43,7 @@ function makeWhereConditionSchema() {
       z.any(),
       WhereOperatorSchema,
       conditionGroup,
-    ]),
+    ]).describe("Where条件 参考：https://prisma.org.cn/docs/orm/reference/prisma-client-reference#equals"),
   );
 }
 
@@ -63,10 +58,10 @@ export const OrderBySchema = z.union([
 
 // 基础的查询参数Schema
 export const PaginationParamsSchema = z.object({
-  skip: z.coerce.number().int().nonnegative().optional().default(0),
-  take: z.coerce.number().int().positive().optional().default(10),
+  skip: z.coerce.number().int().nonnegative().optional().default(0).describe("页码"),
+  take: z.coerce.number().int().positive().optional().default(10).describe("每页条数"),
   where: z.preprocess(formatSafeJson, WhereConditionSchema.optional()),
-  orderBy: z.preprocess(formatSafeJson, OrderBySchema.optional()),
+  orderBy: z.preprocess(formatSafeJson, OrderBySchema.optional()).describe("排序 例如: { field: 'createdAt', order: 'desc' }"),
   join: z.preprocess(formatSafeJson, JoinConfigSchema.optional()),
 });
 

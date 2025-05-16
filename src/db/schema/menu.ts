@@ -8,12 +8,12 @@ export const menu = pgTable("menu", {
   id: defaultColumns.id,
   component: varchar({ length: 255 }),
   meta: jsonb().$type<{
-    title?: string;
-    icon?: string;
-    hidden?: boolean;
-    keepAlive?: boolean;
-    order?: number;
-    redirect?: string;
+    title?: string | undefined;
+    icon?: string | undefined;
+    hidden?: boolean | undefined;
+    keepAlive?: boolean | undefined;
+    order?: number | undefined;
+    redirect?: string | undefined;
   }>(),
   resource: varchar({ length: 255 }),
   action: varchar({ length: 64 }),
@@ -26,31 +26,22 @@ export const menu = pgTable("menu", {
 export const selectMenuSchema = createSelectSchema(
   menu,
   {
-    component: schema => schema.openapi({
-      description: "组件地址",
-    }) ?? schema,
+    component: schema => schema.describe("组件地址"),
     meta: () => {
       const schema = z.object({
         title: z.string().optional().describe("菜单名称"),
         icon: z.string().optional().describe("菜单图标"),
-        hidden: z.boolean().optional().describe("是否隐藏").default(false),
-        keepAlive: z.boolean().optional().describe("是否缓存").default(true),
-        order: z.number().optional().describe("权重排序").default(0),
+        hidden: z.boolean().describe("是否隐藏").default(false).optional(),
+        keepAlive: z.boolean().describe("是否缓存").default(true).optional(),
+        order: z.number().describe("权重排序").default(0).optional(),
         redirect: z.string().optional().describe("重定向地址"),
       }).optional();
-      return schema.openapi?.({
-        description: "菜单元数据",
-      }) ?? schema;
+      return schema.describe("菜单元数据");
     },
-    resource: schema => schema.openapi?.({
-      description: "资源地址",
-    }) ?? schema,
-    action: schema => schema.openapi?.({
-      description: "操作类型",
-    }) ?? schema,
-    type: schema => schema.openapi?.({
-      description: "菜单类型 0: 目录 1: 菜单 2: 按钮",
-    }) ?? schema,
+    resource: schema => schema.describe("资源地址"),
+    action: schema => schema.describe("操作类型"),
+    type: schema => schema.describe("菜单类型 0: 目录 1: 菜单 2: 按钮"),
+    parentId: schema => schema.describe("父级ID"),
   },
 );
 
