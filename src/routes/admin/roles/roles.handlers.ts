@@ -255,10 +255,9 @@ export const addPermissions: AppRouteHandler<AddPermissionsRoute> = async (c) =>
 
   const enforcer = await enforcerLaunchedPromise;
 
-  // 添加权限
-  for (const permission of permissions) {
-    await enforcer.addPolicy(id, permission.obj, permission.act);
-  }
+  // 使用批量添加权限
+  const policies = permissions.map(permission => [id, permission.obj, permission.act]);
+  await enforcer.addPolicies(policies);
 
   return c.json({ success: true }, HttpStatusCodes.OK);
 };
@@ -315,10 +314,9 @@ export const removePermissions: AppRouteHandler<RemovePermissionsRoute> = async 
 
   const enforcer = await enforcerLaunchedPromise;
 
-  // 删除权限
-  for (const permission of permissions) {
-    await enforcer.removePolicy(id, permission.obj, permission.act);
-  }
+  // 使用批量删除权限
+  const policies = permissions.map(permission => [id, permission.obj, permission.act]);
+  await enforcer.removePolicies(policies);
 
   return c.json({ success: true }, HttpStatusCodes.OK);
 };
