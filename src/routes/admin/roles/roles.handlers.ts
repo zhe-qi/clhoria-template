@@ -118,122 +118,122 @@ export const getPermissions: AppRouteHandler<GetPermissionsRoute> = async (c) =>
   const enforcer = await enforcerLaunchedPromise;
   const result: Record<string, any> = {};
 
-  // 获取直接权限
-  if (include.includes("direct")) {
-    const directPolicy = await enforcer.getFilteredPolicy(0, id);
-    result.direct = directPolicy.map(policy => ({
-      obj: policy[1],
-      act: policy[2],
-    }));
-  }
+  const [direct, inherited, inheritable, combined] = [
+    include.includes("direct"),
+    include.includes("inherited"),
+    include.includes("inheritable"),
+    include.includes("combined"),
+  ];
 
-  // 获取继承权限
-  if (include.includes("inherited")) {
-    // 先获取所有角色继承关系
-    const inheritedRoles: string[] = [];
+  // 创建并行任务数组
+  const tasks: Promise<void>[] = [];
+
+  // 获取继承的角色列表，避免重复获取
+  let inheritedRoles: string[] = [];
+  if (inherited || combined || inheritable) {
     try {
       const model = enforcer.getModel();
-      if (model && model.model && model.model.get("g")) {
+      if (model?.model?.get("g")) {
         const gModel = model.model.get("g");
         const policy = gModel?.get("g")?.policy ?? [];
-        inheritedRoles.push(...policy
+        inheritedRoles = policy
           .filter(p => p[0] === id)
-          .map(p => p[1]));
+          .map(p => p[1]);
       }
     }
     catch (error) {
       console.error("获取继承角色失败", error);
     }
+  }
 
-    // 获取所有继承角色的权限
-    const inheritedPolicies: string[][] = [];
-    for (const inheritedRole of inheritedRoles) {
-      const policies = await enforcer.getFilteredPolicy(0, inheritedRole);
-      inheritedPolicies.push(...policies);
+  // 格式化策略的辅助函数
+  const formatPolicy = (policy: string[]) => ({
+    obj: policy[1],
+    act: policy[2],
+  });
+
+  // 直接获取直接权限
+  let directPolicyPromise: Promise<string[][]> | null = null;
+  if (direct || combined) {
+    directPolicyPromise = enforcer.getFilteredPolicy(0, id);
+
+    if (direct) {
+      tasks.push(
+        directPolicyPromise.then((policies) => {
+          result.direct = policies.map(formatPolicy);
+        }),
+      );
     }
+  }
 
-    result.inherited = inheritedPolicies.map(policy => ({
-      obj: policy[1],
-      act: policy[2],
-    }));
+  // 继承权限获取和处理
+  let inheritedPoliciesPromise: Promise<Array<{ obj: string; act: string }>> | null = null;
+  if (inherited || combined) {
+    // 并行获取所有继承角色的权限
+    inheritedPoliciesPromise = Promise.all(
+      inheritedRoles.map(role => enforcer.getFilteredPolicy(0, role)),
+    ).then(policiesArray =>
+      policiesArray.flat().map(formatPolicy),
+    );
+
+    if (inherited) {
+      tasks.push(
+        inheritedPoliciesPromise.then((policies) => {
+          result.inherited = policies;
+        }),
+      );
+    }
   }
 
   // 获取可继承的角色列表
-  if (include.includes("inheritable")) {
-    // 查询所有启用的角色
-    const allRoles = await db.select({ id: roles.id, name: roles.name })
-      .from(roles)
-      .where(eq(roles.status, 1));
-
-    // 获取已经继承的角色
-    const inheritedRoles: string[] = [];
-    try {
-      const model = enforcer.getModel();
-      if (model && model.model && model.model.get("g")) {
-        const gModel = model.model.get("g");
-        const policy = gModel?.get("g")?.policy ?? [];
-        inheritedRoles.push(...policy
-          .filter(p => p[0] === id)
-          .map(p => p[1]));
-      }
-    }
-    catch (error) {
-      console.error("获取继承角色失败", error);
-    }
-
-    // 过滤出可继承的角色（排除自己和已继承的）
-    result.inheritable = allRoles
-      .filter(r => r.id !== id && !inheritedRoles.includes(r.id))
-      .map(r => ({
-        role: r.id,
-        name: r.name,
-      }));
+  if (inheritable) {
+    tasks.push(
+      db.select({ id: roles.id, name: roles.name })
+        .from(roles)
+        .where(eq(roles.status, 1))
+        .then((allRoles) => {
+          // 过滤出可继承的角色（排除自己和已继承的）
+          result.inheritable = allRoles
+            .filter(r => r.id !== id && !inheritedRoles.includes(r.id))
+            .map(r => ({
+              role: r.id,
+              name: r.name,
+            }));
+        }),
+    );
   }
 
   // 获取所有权限（直接+继承）
-  if (include.includes("combined")) {
-    const directPolicies = include.includes("direct")
-      ? result.direct || []
-      : await enforcer.getFilteredPolicy(0, id).then(policies =>
-        policies.map(policy => ({ obj: policy[1], act: policy[2] })),
-      );
+  if (combined) {
+    tasks.push(
+      Promise.all([
+        directPolicyPromise?.then(policies => policies.map(formatPolicy)) || Promise.resolve([]),
+        inheritedPoliciesPromise || Promise.resolve([]),
+      ]).then(([directPolicies, inheritedPolicies]) => {
+        // 使用Set来实现更高效的去重
+        const uniquePolicies = new Map<string, { obj: string; act: string }>();
 
-    // 获取继承的角色ID
-    const inheritedRolesIds: string[] = [];
-    try {
-      const model = enforcer.getModel();
-      if (model && model.model && model.model.get("g")) {
-        const gModel = model.model.get("g");
-        const policy = gModel?.get("g")?.policy ?? [];
-        inheritedRolesIds.push(...policy
-          .filter(p => p[0] === id)
-          .map(p => p[1]));
-      }
-    }
-    catch (error) {
-      console.error("获取继承角色失败", error);
-    }
+        // 添加直接权限
+        directPolicies.forEach((policy) => {
+          const key = `${policy.obj}:${policy.act}`;
+          uniquePolicies.set(key, policy);
+        });
 
-    const inheritedPoliciesPromises = inheritedRolesIds.map(async inheritedRole =>
-      await enforcer.getFilteredPolicy(0, inheritedRole).then(policies =>
-        policies.map(policy => ({ obj: policy[1], act: policy[2] })),
-      ),
+        // 添加继承权限
+        inheritedPolicies.forEach((policy) => {
+          const key = `${policy.obj}:${policy.act}`;
+          if (!uniquePolicies.has(key)) {
+            uniquePolicies.set(key, policy);
+          }
+        });
+
+        result.combined = Array.from(uniquePolicies.values());
+      }),
     );
-
-    const inheritedPolicies = include.includes("inherited")
-      ? result.inherited || []
-      : (await Promise.all(inheritedPoliciesPromises)).flat();
-
-    // 合并直接权限和继承权限，去重
-    const combined = [...directPolicies];
-    for (const policy of inheritedPolicies) {
-      if (!combined.some(p => p.obj === policy.obj && p.act === policy.act)) {
-        combined.push(policy);
-      }
-    }
-
-    result.combined = combined;
   }
+
+  // 等待所有并行任务完成
+  await Promise.all(tasks);
 
   return c.json(result, HttpStatusCodes.OK);
 };
