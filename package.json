@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "lint:fix": "npm run lint --fix",
     "test": "cross-env NODE_ENV=test vitest",
-    "build": "cross-env NODE_ENV=production tsup",
+    "build": "cross-env NODE_ENV=production tsdown",
     "generate": "drizzle-kit generate --config drizzle.config.ts",
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio --config drizzle.config.ts"
