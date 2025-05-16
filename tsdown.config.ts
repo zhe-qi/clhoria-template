@@ -15,5 +15,4 @@ export default defineConfig({
   skipNodeModulesBundle: true,
   shims: true,
   external: ["papaparse"],
-  tsconfig: "./tsconfig.json",
 });

@@ -1,14 +1,16 @@
 import { eq } from "drizzle-orm";
 
+import type { AppRouteHandler } from "@/types/lib";
+
 import db from "@/db";
 import { clientUsers } from "@/db/schema";
 import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
-import type { ClientUserRouteHandlerType as RouteHandlerType } from "./client-users.index";
+import type { CreateRoute, GetOneRoute, ListRoute, PatchRoute, RemoveRoute } from "./client-users.routes";
 
-export const list: RouteHandlerType<"list"> = async (c) => {
+export const list: AppRouteHandler<ListRoute> = async (c) => {
   const query = c.req.valid("query");
 
   const [error, result] = await paginatedQuery<typeof clientUsers.$inferSelect>({
@@ -23,7 +25,7 @@ export const list: RouteHandlerType<"list"> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const create: RouteHandlerType<"create"> = async (c) => {
+export const create: AppRouteHandler<CreateRoute> = async (c) => {
   const user = c.req.valid("json");
 
   const [inserted] = await db.insert(clientUsers).values(user).returning();
@@ -31,7 +33,7 @@ export const create: RouteHandlerType<"create"> = async (c) => {
   return c.json(inserted, HttpStatusCodes.OK);
 };
 
-export const getOne: RouteHandlerType<"getOne"> = async (c) => {
+export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
   const user = await db.query.clientUsers.findFirst({
@@ -47,7 +49,7 @@ export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   return c.json(user, HttpStatusCodes.OK);
 };
 
-export const patch: RouteHandlerType<"patch"> = async (c) => {
+export const patch: AppRouteHandler<PatchRoute> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
@@ -67,7 +69,7 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
   return c.json(user, HttpStatusCodes.OK);
 };
 
-export const remove: RouteHandlerType<"remove"> = async (c) => {
+export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [deleted] = await db.delete(clientUsers)

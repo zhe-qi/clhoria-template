@@ -29,7 +29,7 @@ type AppName = "adminApp" | "clientApp" | "publicApp";
 export default function configureOpenAPI() {
   const isNotProd = env.NODE_ENV !== "production";
 
-  const apps: Record<AppName, AppOpenAPI> = APP_CONFIG.reduce((acc, config) => {
+  const apps = APP_CONFIG.reduce((acc, config) => {
     const path = config.name === "public" ? "/" : `/${config.name}`;
     acc[`${config.name}App` as AppName] = createRouter().basePath(path);
     return acc;

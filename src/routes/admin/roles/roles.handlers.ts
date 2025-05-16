@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { eq } from "drizzle-orm";
 
 import type { selectRolesSchema } from "@/db/schema";
+import type { AppRouteHandler } from "@/types/lib";
 
 import db from "@/db";
 import { roles } from "@/db/schema";
@@ -10,11 +11,11 @@ import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
-import type { RoleRouteHandlerType as RouteHandlerType } from "./roles.index";
+import type { CreateRoute, GetOneRoute, ListRoute, PatchRoute, RemoveRoute } from "./roles.routes";
 
 type PaginatedResult = z.infer<typeof selectRolesSchema>;
 
-export const list: RouteHandlerType<"list"> = async (c) => {
+export const list: AppRouteHandler<ListRoute> = async (c) => {
   const query = c.req.valid("query");
 
   const [error, result] = await paginatedQuery<PaginatedResult>({
@@ -29,7 +30,7 @@ export const list: RouteHandlerType<"list"> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const create: RouteHandlerType<"create"> = async (c) => {
+export const create: AppRouteHandler<CreateRoute> = async (c) => {
   const role = c.req.valid("json");
 
   const [inserted] = await db.insert(roles).values(role).returning();
@@ -37,7 +38,7 @@ export const create: RouteHandlerType<"create"> = async (c) => {
   return c.json(inserted, HttpStatusCodes.OK);
 };
 
-export const getOne: RouteHandlerType<"getOne"> = async (c) => {
+export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
   const role = await db.query.roles.findFirst({
@@ -53,7 +54,7 @@ export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   return c.json(role, HttpStatusCodes.OK);
 };
 
-export const patch: RouteHandlerType<"patch"> = async (c) => {
+export const patch: AppRouteHandler<PatchRoute> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
@@ -73,7 +74,7 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
   return c.json(role, HttpStatusCodes.OK);
 };
 
-export const remove: RouteHandlerType<"remove"> = async (c) => {
+export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [deleted] = await db.delete(roles)

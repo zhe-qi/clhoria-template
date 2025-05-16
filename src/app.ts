@@ -1,6 +1,6 @@
 import { jwt } from "hono/jwt";
 
-import type { DynamicSpreadArrayType } from "@/types/lib";
+import type { AppOpenAPI, DynamicSpreadArrayType } from "@/types/lib";
 
 import configureOpenAPI from "@/lib/configure-open-api";
 import * as allAdminExports from "@/routes/admin/admin.index";
@@ -21,14 +21,14 @@ const app = createApp();
 configureMainDoc?.(app);
 
 // #region 公共路由
-const publicRoutes = Object.values(allPublicExports);
+const publicRoutes = Object.values<AppOpenAPI>(allPublicExports);
 publicRoutes.forEach((route) => {
   publicApp.route("/", route);
 });
 // #endregion
 
 // #region 客户端路由
-const clientRoutes = Object.values(allClientExports);
+const clientRoutes = Object.values<AppOpenAPI>(allClientExports);
 clientApp.use("/*", jwt({ secret: env.CLIENT_JWT_SECRET }));
 clientRoutes.forEach((route) => {
   clientApp.route("/", route);
@@ -36,7 +36,7 @@ clientRoutes.forEach((route) => {
 // #endregion
 
 // #region 后管路由
-const adminRoutes = Object.values(allAdminExports);
+const adminRoutes = Object.values<AppOpenAPI>(allAdminExports);
 adminApp.use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
 adminApp.use("/*", casbin());
 adminRoutes.forEach((route) => {
