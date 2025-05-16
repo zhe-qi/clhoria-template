@@ -31,27 +31,27 @@ export const list: AppRouteHandler<ListRoute> = async (c) => {
 };
 
 export const create: AppRouteHandler<CreateRoute> = async (c) => {
-  const role = c.req.valid("json");
+  const body = c.req.valid("json");
 
-  const [inserted] = await db.insert(roles).values(role).returning();
+  const [result] = await db.insert(roles).values(body).returning();
 
-  return c.json(inserted, HttpStatusCodes.OK);
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const role = await db.query.roles.findFirst({
+  const result = await db.query.roles.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
     },
   });
 
-  if (!role) {
+  if (!result) {
     return c.json({ message: "角色不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(role, HttpStatusCodes.OK);
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const patch: AppRouteHandler<PatchRoute> = async (c) => {
@@ -62,26 +62,26 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
     return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [role] = await db.update(roles)
+  const [result] = await db.update(roles)
     .set(updates)
     .where(eq(roles.id, id))
     .returning();
 
-  if (!role) {
+  if (!result) {
     return c.json({ message: "角色不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(role, HttpStatusCodes.OK);
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [deleted] = await db.delete(roles)
+  const [result] = await db.delete(roles)
     .where(eq(roles.id, id))
     .returning();
 
-  if (!deleted) {
+  if (!result) {
     return c.json({ message: "角色不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 

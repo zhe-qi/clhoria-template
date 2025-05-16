@@ -39,27 +39,27 @@ export const list: AppRouteHandler<ListRoute> = async (c) => {
 };
 
 export const create: AppRouteHandler<CreateRoute> = async (c) => {
-  const user = c.req.valid("json");
+  const body = c.req.valid("json");
 
-  const [inserted] = await db.insert(adminUsers).values(user).returning();
+  const [result] = await db.insert(adminUsers).values(body).returning();
 
-  return c.json(inserted, HttpStatusCodes.OK);
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const user = await db.query.adminUsers.findFirst({
+  const result = await db.query.adminUsers.findFirst({
     where(fields, operators) {
       return operators.eq(fields.id, id);
     },
   });
 
-  if (!user) {
+  if (!result) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(user, HttpStatusCodes.OK);
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const patch: AppRouteHandler<PatchRoute> = async (c) => {
@@ -70,26 +70,26 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
     return c.json(updatesZodError, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [user] = await db.update(adminUsers)
+  const [result] = await db.update(adminUsers)
     .set(updates)
     .where(eq(adminUsers.id, id))
     .returning();
 
-  if (!user) {
+  if (!result) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(user, HttpStatusCodes.OK);
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [deleted] = await db.delete(adminUsers)
+  const [result] = await db.delete(adminUsers)
     .where(eq(adminUsers.id, id))
     .returning();
 
-  if (!deleted) {
+  if (!result) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 

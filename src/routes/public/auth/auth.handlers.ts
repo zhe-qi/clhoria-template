@@ -15,25 +15,25 @@ import type { AdminLoginRoute, AdminRegisterRoute, ClientLoginRoute, ClientRegis
 export const adminLogin: AppRouteHandler<AdminLoginRoute> = async (c) => {
   const body = c.req.valid("json");
 
-  const user = await db.query.adminUsers.findFirst({
+  const result = await db.query.adminUsers.findFirst({
     with: {
       usersToRoles: true,
     },
     where: eq(adminUsers.username, body.username),
   });
 
-  if (!user) {
+  if (!result) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const isPasswordValid = await verify(user.password, body.password);
+  const isPasswordValid = await verify(result.password, body.password);
 
   if (!isPasswordValid) {
     return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const roles = user.usersToRoles.map(role => role.roleId);
-  const payload = Object.assign(pick(user, ["id", "username"]), { roles });
+  const roles = result.usersToRoles.map(role => role.roleId);
+  const payload = Object.assign(pick(result, ["id", "username"]), { roles });
 
   const token = await sign(payload, env.ADMIN_JWT_SECRET);
 
@@ -44,37 +44,37 @@ export const adminLogin: AppRouteHandler<AdminLoginRoute> = async (c) => {
 export const adminRegister: AppRouteHandler<AdminRegisterRoute> = async (c) => {
   const body = c.req.valid("json");
 
-  const [user] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
+  const [result] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
 
-  if (user) {
+  if (result) {
     return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
   }
 
-  const [inserted] = await db.insert(adminUsers).values({
+  const [{ id }] = await db.insert(adminUsers).values({
     username: body.username,
     password: await hash(body.password),
   }).returning({ id: adminUsers.id });
 
-  return c.json({ id: inserted.id }, HttpStatusCodes.OK);
+  return c.json({ id }, HttpStatusCodes.OK);
 };
 
 /** 客户端登录 */
 export const clientLogin: AppRouteHandler<ClientLoginRoute> = async (c) => {
   const body = c.req.valid("json");
 
-  const [user] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
+  const [result] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
 
-  if (!user) {
+  if (!result) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const isPasswordValid = await verify(user.password, body.password);
+  const isPasswordValid = await verify(result.password, body.password);
 
   if (!isPasswordValid) {
     return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const payload = pick(user, ["id", "username"]);
+  const payload = pick(result, ["id", "username"]);
 
   const token = await sign(payload, env.CLIENT_JWT_SECRET);
 
@@ -85,16 +85,16 @@ export const clientLogin: AppRouteHandler<ClientLoginRoute> = async (c) => {
 export const clientRegister: AppRouteHandler<ClientRegisterRoute> = async (c) => {
   const body = c.req.valid("json");
 
-  const [user] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
+  const [result] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
 
-  if (user) {
+  if (result) {
     return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
   }
 
-  const [inserted] = await db.insert(clientUsers).values({
+  const [{ id }] = await db.insert(clientUsers).values({
     username: body.username,
     password: await hash(body.password),
   }).returning({ id: clientUsers.id });
 
-  return c.json({ id: inserted.id }, HttpStatusCodes.OK);
+  return c.json({ id }, HttpStatusCodes.OK);
 };
