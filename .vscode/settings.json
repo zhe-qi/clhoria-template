@@ -51,6 +51,7 @@
     "Hono",
     "openapi",
     "papaparse",
-    "ptype"
+    "ptype",
+    "tsdown"
   ]
 }

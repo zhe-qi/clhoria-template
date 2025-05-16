@@ -44,10 +44,7 @@ adminRoutes.forEach((route) => {
 });
 // #endregion
 
-/**
- * ! 路由分组 顺序很重要
- * 直接影响了中间件的执行顺序，公共路由必须放最前面
- */
+/** 路由分组 顺序很重要，直接影响了中间件的执行顺序，公共路由必须放最前面 */
 const appGroups = [publicApp, clientApp, adminApp];
 appGroups.forEach((group) => {
   app.route("/", group);

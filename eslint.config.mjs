@@ -9,7 +9,9 @@ export default antfu({
     semi: true,
     quotes: "double",
   },
-  ignores: ["**/migrations/*"],
+  ignores: [
+    "**/migrations/*",
+  ],
 }, {
   rules: {
     "no-console": ["warn"],

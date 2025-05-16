@@ -120,6 +120,7 @@ HTTP status phrase constants.
 ```ts
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
+// eslint-disable-next-line no-console
 console.log(HttpStatusPhrases.NOT_FOUND); // Not Found
 ```
 
