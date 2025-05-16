@@ -13,7 +13,7 @@ import paginatedQuery from "@/lib/pagination";
 import type { AdminUserRouteHandlerType as RouteHandlerType } from "./admin-users.index";
 
 type PaginatedResult = z.infer<typeof selectAdminUsersSchema> & {
-  usersToRoles: typeof usersToRoles.$inferSelect;
+  roles: typeof usersToRoles.$inferSelect;
 };
 
 export const list: RouteHandlerType<"list"> = async (c) => {

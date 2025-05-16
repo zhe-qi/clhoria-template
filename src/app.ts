@@ -3,9 +3,9 @@ import { jwt } from "hono/jwt";
 import type { DynamicSpreadArrayType } from "@/types/lib";
 
 import configureOpenAPI from "@/lib/configure-open-api";
-import * as allAdminExports from "@/routes/admin/api.index";
-import * as allClientExports from "@/routes/client/api.index";
-import * as allPublicExports from "@/routes/public/api.index";
+import * as allAdminExports from "@/routes/admin/admin.index";
+import * as allClientExports from "@/routes/client/client.index";
+import * as allPublicExports from "@/routes/public/public.index";
 
 import env from "./env";
 import createApp from "./lib/create-app";
@@ -44,7 +44,10 @@ adminRoutes.forEach((route) => {
 });
 // #endregion
 
-// 路由分组 顺序很重要，直接影响了中间件的执行顺序
+/**
+ * ! 路由分组 顺序很重要
+ * 直接影响了中间件的执行顺序，公共路由必须放最前面
+ */
 const appGroups = [publicApp, clientApp, adminApp];
 appGroups.forEach((group) => {
   app.route("/", group);
