@@ -1,8 +1,7 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
-
 import { tasks } from "@/db/schema";
 import { getQueryValidationError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
 import type { TaskRouteHandlerType as RouteHandlerType } from "./tasks.index";
 

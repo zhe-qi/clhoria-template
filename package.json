@@ -18,6 +18,7 @@
     "studio": "drizzle-kit studio --config drizzle.config.ts"
   },
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^7.3.0",
     "@hono/node-server": "^1.14.1",
     "@hono/zod-openapi": "^0.19.6",
     "@node-rs/argon2": "^2.0.2",
@@ -34,7 +35,6 @@
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
     "postgres": "^3.4.5",
-    "stoker": "1.4.2",
     "uuid": "^11.1.0",
     "zod": "3.24.4"
   },

@@ -7,7 +7,7 @@ import { and, eq, or } from "drizzle-orm";
 import type { insertCasbinRulesSchema } from "@/db/schema";
 
 import db from "@/db";
-import { roles, casbinRules } from "@/db/schema";
+import { casbinRules, roles } from "@/db/schema";
 
 type TCasinTable = z.infer<typeof insertCasbinRulesSchema>;
 

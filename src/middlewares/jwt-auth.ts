@@ -2,10 +2,10 @@ import type { Context, MiddlewareHandler } from "hono";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { Enforcer } from "casbin";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import { enforcerLaunchedPromise } from "@/lib/casbin";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 
 async function jwtAuthorizer(c: Context, enforcer: Enforcer): Promise<boolean> {
   const payload: JWTPayload = c.get("jwtPayload");

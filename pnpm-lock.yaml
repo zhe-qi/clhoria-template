@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@asteasolutions/zod-to-openapi':
+        specifier: ^7.3.0
+        version: 7.3.0(zod@3.24.4)
       '@hono/node-server':
         specifier: ^1.14.1
         version: 1.14.1(hono@4.7.9)
@@ -56,9 +59,6 @@ importers:
       postgres:
         specifier: ^3.4.5
         version: 3.4.5
-      stoker:
-        specifier: 1.4.2
-        version: 1.4.2(@asteasolutions/zod-to-openapi@7.3.0(zod@3.24.4))(@hono/zod-openapi@0.19.6(hono@4.7.9)(zod@3.24.4))(hono@4.7.9)(openapi3-ts@4.4.0)
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -3310,17 +3310,6 @@ packages:
 
   std-env@3.9.0:
     resolution: {integrity: sha512-UGvjygr6F6tpH7o2qyqR6QYpwraIjKSdtzyBdyytFOHmPZY917kwdwLG0RbOjWOnKmnm3PeHjaoLLMie7kPLQw==}
-
-  stoker@1.4.2:
-    resolution: {integrity: sha512-zna86ZzC3fnMOIkuO+1vRMfcRw7SpC/7yafRb0u8DwDVig2pPh6POVnGB7t2A5t/rMvyr7hE7tjXTPvW8bhJKg==}
-    peerDependencies:
-      '@asteasolutions/zod-to-openapi': ^7.0.0
-      '@hono/zod-openapi': '>=0.16.0'
-      hono: ^4.0.0
-      openapi3-ts: ^4.4.0
-    peerDependenciesMeta:
-      '@hono/zod-openapi':
-        optional: true
 
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
@@ -6825,14 +6814,6 @@ snapshots:
   statuses@2.0.1: {}
 
   std-env@3.9.0: {}
-
-  stoker@1.4.2(@asteasolutions/zod-to-openapi@7.3.0(zod@3.24.4))(@hono/zod-openapi@0.19.6(hono@4.7.9)(zod@3.24.4))(hono@4.7.9)(openapi3-ts@4.4.0):
-    dependencies:
-      '@asteasolutions/zod-to-openapi': 7.3.0(zod@3.24.4)
-      hono: 4.7.9
-      openapi3-ts: 4.4.0
-    optionalDependencies:
-      '@hono/zod-openapi': 0.19.6(hono@4.7.9)(zod@3.24.4)
 
   string-width@4.2.3:
     dependencies:

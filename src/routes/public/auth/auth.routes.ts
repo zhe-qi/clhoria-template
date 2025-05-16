@@ -1,8 +1,8 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 import { insertAdminUsersSchema, insertClientUsersSchema } from "@/db/schema";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 
 const tags = ["/auth (身份认证)"];
 

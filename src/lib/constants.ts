@@ -1,6 +1,5 @@
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
-import { createMessageObjectSchema } from "stoker/openapi/schemas";
-
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import { createMessageObjectSchema } from "@/lib/stoker/openapi/schemas";
 import { formatZodError } from "@/utils";
 
 export const notFoundSchema = createMessageObjectSchema(HttpStatusPhrases.NOT_FOUND);
@@ -18,11 +17,13 @@ export const updatesZodError = formatZodError({
 
 export function getQueryValidationError(error: { message: string }) {
   return formatZodError({
-    issues: [{
-      code: "invalid_query",
-      path: [],
-      message: error.message,
-    }],
+    issues: [
+      {
+        code: "invalid_query",
+        path: [],
+        message: error.message,
+      },
+    ],
     name: "ZodError",
   });
 }
