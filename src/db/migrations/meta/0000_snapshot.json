@@ -1,5 +1,5 @@
 {
-  "id": "339d8aad-16cc-4b67-accf-f37e9d8df7b3",
+  "id": "a1482a89-5afa-4fc8-baae-f97d32ff0664",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -236,7 +236,7 @@
           "name": "component",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "meta": {
           "name": "meta",
@@ -256,9 +256,15 @@
           "primaryKey": false,
           "notNull": false
         },
+        "type": {
+          "name": "type",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "parent_id": {
           "name": "parent_id",
-          "type": "uuid",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": false
         },

@@ -8,4 +8,9 @@ export const roles = createRouter()
   .openapi(routes.create, handlers.create)
   .openapi(routes.getOne, handlers.getOne)
   .openapi(routes.patch, handlers.patch)
-  .openapi(routes.remove, handlers.remove);
+  .openapi(routes.remove, handlers.remove)
+  .openapi(routes.getPermissions, handlers.getPermissions)
+  .openapi(routes.addPermissions, handlers.addPermissions)
+  .openapi(routes.addInherits, handlers.addInherits)
+  .openapi(routes.removePermissions, handlers.removePermissions)
+  .openapi(routes.removeInherits, handlers.removeInherits);

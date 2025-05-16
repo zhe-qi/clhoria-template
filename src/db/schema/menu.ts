@@ -1,42 +1,60 @@
-import { jsonb, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "@hono/zod-openapi";
+import { integer, jsonb, pgTable, varchar } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/base-columns";
 
 export const menu = pgTable("menu", {
   id: defaultColumns.id,
-  /** 菜单组件 */
-  component: varchar({ length: 255 }).notNull(),
-  /** 菜单元数据 */
+  component: varchar({ length: 255 }),
   meta: jsonb().$type<{
-    /** 菜单名称 */
-    title: string;
-    /** 菜单图标 */
-    icon: string;
-    /** 是否隐藏 */
-    hidden: boolean;
-    /** 是否缓存 */
-    keepAlive: boolean;
-    /** 权重排序 */
-    order: number;
-    /** 重定向地址 */
-    redirect: string;
+    title?: string;
+    icon?: string;
+    hidden?: boolean;
+    keepAlive?: boolean;
+    order?: number;
+    redirect?: string;
   }>(),
-  /** 资源地址 */
   resource: varchar({ length: 255 }),
-  /** 操作类型 */
   action: varchar({ length: 64 }),
-  /** 父级菜单ID */
-  parentId: uuid(),
+  type: integer().notNull(),
+  parentId: varchar({ length: 64 }),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 });
 
-export const selectMenuSchema = createSelectSchema(menu);
-
-export const insertMenuSchema = createInsertSchema(
+export const selectMenuSchema = createSelectSchema(
   menu,
-).omit({
+  {
+    component: schema => schema.openapi({
+      description: "组件地址",
+    }) ?? schema,
+    meta: () => {
+      const schema = z.object({
+        title: z.string().optional().describe("菜单名称"),
+        icon: z.string().optional().describe("菜单图标"),
+        hidden: z.boolean().optional().describe("是否隐藏").default(false),
+        keepAlive: z.boolean().optional().describe("是否缓存").default(true),
+        order: z.number().optional().describe("权重排序").default(0),
+        redirect: z.string().optional().describe("重定向地址"),
+      }).optional();
+      return schema.openapi?.({
+        description: "菜单元数据",
+      }) ?? schema;
+    },
+    resource: schema => schema.openapi?.({
+      description: "资源地址",
+    }) ?? schema,
+    action: schema => schema.openapi?.({
+      description: "操作类型",
+    }) ?? schema,
+    type: schema => schema.openapi?.({
+      description: "菜单类型 0: 目录 1: 菜单 2: 按钮",
+    }) ?? schema,
+  },
+);
+
+export const insertMenuSchema = selectMenuSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,

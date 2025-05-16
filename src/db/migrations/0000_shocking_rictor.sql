@@ -29,11 +29,12 @@ CREATE TABLE "client_users" (
 --> statement-breakpoint
 CREATE TABLE "menu" (
 	"id" uuid PRIMARY KEY NOT NULL,
-	"component" varchar(255) NOT NULL,
+	"component" varchar(255),
 	"meta" jsonb,
 	"resource" varchar(255),
 	"action" varchar(64),
-	"parent_id" uuid,
+	"type" integer NOT NULL,
+	"parent_id" varchar(64),
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );

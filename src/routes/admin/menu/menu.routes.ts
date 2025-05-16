@@ -39,7 +39,7 @@ export const create = createRoute({
     ),
   },
   tags,
-  summary: "创建角色",
+  summary: "创建菜单",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectMenuSchema,
@@ -93,7 +93,7 @@ export const patch = createRoute({
     ),
   },
   tags,
-  summary: "更新角色",
+  summary: "更新菜单",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectMenuSchema,

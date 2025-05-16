@@ -140,8 +140,203 @@ export const remove = createRoute({
   },
 });
 
+export const getPermissions = createRoute({
+  path: "/roles/{id}/permissions",
+  method: "get",
+  request: {
+    params: z.object({
+      id: z.string(),
+    }),
+    query: z.object({
+      include: z.enum(["direct", "inherited", "inheritable", "combined"]).array().optional(),
+    }),
+  },
+  tags,
+  summary: "获取角色权限信息",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        direct: z.array(z.object({
+          obj: z.string(),
+          act: z.string(),
+        })).optional(),
+        inherited: z.array(z.object({
+          obj: z.string(),
+          act: z.string(),
+        })).optional(),
+        inheritable: z.array(z.object({
+          role: z.string(),
+          name: z.string(),
+        })).optional(),
+        combined: z.array(z.object({
+          obj: z.string(),
+          act: z.string(),
+        })).optional(),
+      }),
+      "请求成功",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "角色不存在",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(z.object({
+        id: z.string(),
+      })),
+      "请求参数验证错误",
+    ),
+  },
+});
+
+export const addPermissions = createRoute({
+  path: "/roles/{id}/permissions",
+  method: "post",
+  request: {
+    params: z.object({
+      id: z.string(),
+    }),
+    body: jsonContentRequired(
+      z.object({
+        permissions: z.array(z.object({
+          obj: z.string(),
+          act: z.string(),
+        })),
+      }),
+      "添加权限参数",
+    ),
+  },
+  tags,
+  summary: "添加角色直接权限",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ success: z.boolean() }),
+      "添加成功",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "角色不存在",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(z.object({
+        id: z.string(),
+      })),
+      "请求参数验证错误",
+    ),
+  },
+});
+
+export const addInherits = createRoute({
+  path: "/roles/{id}/inherits",
+  method: "post",
+  request: {
+    params: z.object({
+      id: z.string(),
+    }),
+    body: jsonContentRequired(
+      z.object({
+        roles: z.array(z.string()),
+      }),
+      "添加继承关系参数",
+    ),
+  },
+  tags,
+  summary: "添加角色继承关系",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ success: z.boolean() }),
+      "添加成功",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "角色不存在",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(z.object({
+        id: z.string(),
+      })),
+      "请求参数验证错误",
+    ),
+  },
+});
+
+export const removePermissions = createRoute({
+  path: "/roles/{id}/permissions",
+  method: "delete",
+  request: {
+    params: z.object({
+      id: z.string(),
+    }),
+    body: jsonContentRequired(
+      z.object({
+        permissions: z.array(z.object({
+          obj: z.string(),
+          act: z.string(),
+        })),
+      }),
+      "删除权限参数",
+    ),
+  },
+  tags,
+  summary: "删除角色直接权限",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ success: z.boolean() }),
+      "删除成功",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "角色不存在",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(z.object({
+        id: z.string(),
+      })),
+      "请求参数验证错误",
+    ),
+  },
+});
+
+export const removeInherits = createRoute({
+  path: "/roles/{id}/inherits",
+  method: "delete",
+  request: {
+    params: z.object({
+      id: z.string(),
+    }),
+    body: jsonContentRequired(
+      z.object({
+        roles: z.array(z.string()),
+      }),
+      "删除继承关系参数",
+    ),
+  },
+  tags,
+  summary: "删除角色继承关系",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ success: z.boolean() }),
+      "删除成功",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "角色不存在",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(z.object({
+        id: z.string(),
+      })),
+      "请求参数验证错误",
+    ),
+  },
+});
+
 export type ListRoute = typeof list;
 export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;
 export type PatchRoute = typeof patch;
 export type RemoveRoute = typeof remove;
+export type GetPermissionsRoute = typeof getPermissions;
+export type AddPermissionsRoute = typeof addPermissions;
+export type AddInheritsRoute = typeof addInherits;
+export type RemovePermissionsRoute = typeof removePermissions;
+export type RemoveInheritsRoute = typeof removeInherits;
