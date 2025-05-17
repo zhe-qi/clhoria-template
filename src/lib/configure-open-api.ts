@@ -52,14 +52,14 @@ export default function configureOpenAPI() {
             scheme: "bearer",
           });
 
-          router.doc("/doc", {
+          router.doc31("/doc", {
             openapi: "3.1.0",
             info: { version: packageJSON.version, title: config.title },
             security: [{ [securityName]: [] }],
           });
         }
         else {
-          router.doc("/doc", {
+          router.doc31("/doc", {
             openapi: "3.1.0",
             info: { version: packageJSON.version, title: config.title },
           });
