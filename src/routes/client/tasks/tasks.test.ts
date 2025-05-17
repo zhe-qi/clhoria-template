@@ -3,14 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import type { PaginatedResult } from "@/lib/pagination";
 
-import env from "@/env";
 import { createTestApp } from "@/lib/create-app";
 
 import { tasks } from "./tasks.index";
-
-if (env.NODE_ENV !== "test") {
-  throw new Error("NODE_ENV must be 'test'");
-}
 
 const client = testClient(createTestApp(tasks));
 
