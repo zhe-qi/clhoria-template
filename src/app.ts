@@ -1,6 +1,6 @@
 import { jwt } from "hono/jwt";
 
-import type { AppOpenAPI, DynamicSpreadArrayType } from "@/types/lib";
+import type { AppOpenAPI } from "@/types/lib";
 
 import configureOpenAPI from "@/lib/configure-open-api";
 import * as allAdminExports from "@/routes/admin/admin.index";
@@ -49,7 +49,5 @@ const appGroups = [publicApp, clientApp, adminApp];
 appGroups.forEach((group) => {
   app.route("/", group);
 });
-
-export type AppType = DynamicSpreadArrayType<[typeof adminRoutes, typeof clientRoutes, typeof publicRoutes]>[number];
 
 export default app;

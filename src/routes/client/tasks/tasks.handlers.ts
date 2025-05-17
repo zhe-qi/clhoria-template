@@ -1,13 +1,11 @@
-import type { AppRouteHandler } from "@/types/lib";
-
 import { tasks } from "@/db/schema";
 import { getQueryValidationError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
-import type { ListRoute } from "./tasks.routes";
+import type { TasksRouteHandlerType as RouteHandlerType } from "./tasks.index";
 
-export const list: AppRouteHandler<ListRoute> = async (c) => {
+export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
   const [error, result] = await paginatedQuery<typeof tasks.$inferSelect>({

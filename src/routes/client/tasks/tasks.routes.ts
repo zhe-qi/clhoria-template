@@ -27,5 +27,3 @@ export const list = createRoute({
     ),
   },
 });
-
-export type ListRoute = typeof list;

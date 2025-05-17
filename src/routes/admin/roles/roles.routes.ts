@@ -329,14 +329,3 @@ export const removeInherits = createRoute({
     ),
   },
 });
-
-export type ListRoute = typeof list;
-export type CreateRoute = typeof create;
-export type GetOneRoute = typeof getOne;
-export type PatchRoute = typeof patch;
-export type RemoveRoute = typeof remove;
-export type GetPermissionsRoute = typeof getPermissions;
-export type AddPermissionsRoute = typeof addPermissions;
-export type AddInheritsRoute = typeof addInherits;
-export type RemovePermissionsRoute = typeof removePermissions;
-export type RemoveInheritsRoute = typeof removeInherits;

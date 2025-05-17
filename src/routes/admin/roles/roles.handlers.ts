@@ -3,7 +3,6 @@ import type { z } from "zod";
 import { eq } from "drizzle-orm";
 
 import type { selectRolesSchema } from "@/db/schema";
-import type { AppRouteHandler } from "@/types/lib";
 
 import db from "@/db";
 import { roles } from "@/db/schema";
@@ -12,22 +11,11 @@ import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
-import type {
-  AddInheritsRoute,
-  AddPermissionsRoute,
-  CreateRoute,
-  GetOneRoute,
-  GetPermissionsRoute,
-  ListRoute,
-  PatchRoute,
-  RemoveInheritsRoute,
-  RemovePermissionsRoute,
-  RemoveRoute,
-} from "./roles.routes";
+import type { RolesRouteHandlerType as RouteHandlerType } from "./roles.index";
 
 type PaginatedResult = z.infer<typeof selectRolesSchema>;
 
-export const list: AppRouteHandler<ListRoute> = async (c) => {
+export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
   const [error, result] = await paginatedQuery<PaginatedResult>({
@@ -42,7 +30,7 @@ export const list: AppRouteHandler<ListRoute> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const create: AppRouteHandler<CreateRoute> = async (c) => {
+export const create: RouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
 
   const [result] = await db.insert(roles).values(body).returning();
@@ -50,7 +38,7 @@ export const create: AppRouteHandler<CreateRoute> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
+export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const result = await db.query.roles.findFirst({
@@ -66,7 +54,7 @@ export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const patch: AppRouteHandler<PatchRoute> = async (c) => {
+export const patch: RouteHandlerType<"patch"> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
@@ -86,7 +74,7 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
+export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [result] = await db.delete(roles)
@@ -100,7 +88,7 @@ export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
   return c.body(null, HttpStatusCodes.NO_CONTENT);
 };
 
-export const getPermissions: AppRouteHandler<GetPermissionsRoute> = async (c) => {
+export const getPermissions: RouteHandlerType<"getPermissions"> = async (c) => {
   const { id } = c.req.valid("param");
   const { include = ["direct", "inherited", "inheritable", "combined"] } = c.req.valid("query");
 
@@ -238,7 +226,7 @@ export const getPermissions: AppRouteHandler<GetPermissionsRoute> = async (c) =>
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const addPermissions: AppRouteHandler<AddPermissionsRoute> = async (c) => {
+export const addPermissions: RouteHandlerType<"addPermissions"> = async (c) => {
   const { id } = c.req.valid("param");
   const { permissions } = c.req.valid("json");
 
@@ -262,7 +250,7 @@ export const addPermissions: AppRouteHandler<AddPermissionsRoute> = async (c) =>
   return c.json({ success: true }, HttpStatusCodes.OK);
 };
 
-export const addInherits: AppRouteHandler<AddInheritsRoute> = async (c) => {
+export const addInherits: RouteHandlerType<"addInherits"> = async (c) => {
   const { id } = c.req.valid("param");
   const { roles: inheritRoles } = c.req.valid("json");
 
@@ -297,7 +285,7 @@ export const addInherits: AppRouteHandler<AddInheritsRoute> = async (c) => {
   return c.json({ success: true }, HttpStatusCodes.OK);
 };
 
-export const removePermissions: AppRouteHandler<RemovePermissionsRoute> = async (c) => {
+export const removePermissions: RouteHandlerType<"removePermissions"> = async (c) => {
   const { id } = c.req.valid("param");
   const { permissions } = c.req.valid("json");
 
@@ -321,7 +309,7 @@ export const removePermissions: AppRouteHandler<RemovePermissionsRoute> = async 
   return c.json({ success: true }, HttpStatusCodes.OK);
 };
 
-export const removeInherits: AppRouteHandler<RemoveInheritsRoute> = async (c) => {
+export const removeInherits: RouteHandlerType<"removeInherits"> = async (c) => {
   const { id } = c.req.valid("param");
   const { roles: inheritRoles } = c.req.valid("json");
 

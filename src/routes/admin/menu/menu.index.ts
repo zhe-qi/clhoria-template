@@ -1,3 +1,5 @@
+import type { AppRouteHandler } from "@/types/lib";
+
 import { createRouter } from "@/lib/create-app";
 
 import * as handlers from "./menu.handlers";
@@ -9,3 +11,9 @@ export const menu = createRouter()
   .openapi(routes.getOne, handlers.getOne)
   .openapi(routes.patch, handlers.patch)
   .openapi(routes.remove, handlers.remove);
+
+type RouteTypes = {
+  [K in keyof typeof routes]: typeof routes[K];
+};
+
+export type MenuRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

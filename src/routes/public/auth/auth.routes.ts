@@ -97,8 +97,3 @@ export const clientRegister = createRoute({
     ),
   },
 });
-
-export type AdminLoginRoute = typeof adminLogin;
-export type AdminRegisterRoute = typeof adminRegister;
-export type ClientLoginRoute = typeof clientLogin;
-export type ClientRegisterRoute = typeof clientRegister;

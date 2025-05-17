@@ -2,17 +2,15 @@ import { hash, verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
 
-import type { AppRouteHandler } from "@/types/lib";
-
 import db from "@/db";
 import { adminUsers, clientUsers } from "@/db/schema";
 import env from "@/env";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { pick } from "@/utils";
 
-import type { AdminLoginRoute, AdminRegisterRoute, ClientLoginRoute, ClientRegisterRoute } from "./auth.routes";
+import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";
 
-export const adminLogin: AppRouteHandler<AdminLoginRoute> = async (c) => {
+export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
 
   const result = await db.query.adminUsers.findFirst({
@@ -41,7 +39,7 @@ export const adminLogin: AppRouteHandler<AdminLoginRoute> = async (c) => {
 };
 
 /** 管理员注册 */
-export const adminRegister: AppRouteHandler<AdminRegisterRoute> = async (c) => {
+export const adminRegister: RouteHandlerType<"adminRegister"> = async (c) => {
   const body = c.req.valid("json");
 
   const [result] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
@@ -59,7 +57,7 @@ export const adminRegister: AppRouteHandler<AdminRegisterRoute> = async (c) => {
 };
 
 /** 客户端登录 */
-export const clientLogin: AppRouteHandler<ClientLoginRoute> = async (c) => {
+export const clientLogin: RouteHandlerType<"clientLogin"> = async (c) => {
   const body = c.req.valid("json");
 
   const [result] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
@@ -82,7 +80,7 @@ export const clientLogin: AppRouteHandler<ClientLoginRoute> = async (c) => {
 };
 
 /** 客户端注册 */
-export const clientRegister: AppRouteHandler<ClientRegisterRoute> = async (c) => {
+export const clientRegister: RouteHandlerType<"clientRegister"> = async (c) => {
   const body = c.req.valid("json");
 
   const [result] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
