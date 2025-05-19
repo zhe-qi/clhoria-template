@@ -40,10 +40,17 @@ export const selectMenuSchema = createSelectSchema(
     },
     resource: schema => schema.describe("资源地址"),
     action: schema => schema.describe("操作类型"),
-    type: schema => schema.describe("菜单类型 0: 目录 1: 菜单 2: 按钮"),
+    /**  0: 目录 1: 菜单 2: 按钮  */
+    type: schema => schema.describe(JSON.stringify({
+      title: "菜单类型",
+      dict: "menuType",
+    })),
     parentId: schema => schema.describe("父级ID"),
   },
-);
+).describe(JSON.stringify({
+  title: "菜单",
+  name: "menu",
+}));
 
 export const insertMenuSchema = selectMenuSchema.omit({
   id: true,
