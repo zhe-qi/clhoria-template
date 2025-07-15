@@ -1,0 +1,66 @@
+import { integer, json, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+export const operationLogs = pgTable("sys_operation_log", {
+  id: varchar("id", { length: 36 }).primaryKey().notNull(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  username: varchar("username", { length: 50 }).notNull(),
+  domain: varchar("domain", { length: 100 }).notNull(),
+  moduleName: varchar("module_name", { length: 100 }).notNull(),
+  description: varchar("description", { length: 500 }).notNull(),
+  requestId: varchar("request_id", { length: 36 }).notNull(),
+  method: varchar("method", { length: 10 }).notNull(),
+  url: varchar("url", { length: 500 }).notNull(),
+  ip: varchar("ip", { length: 45 }).notNull(),
+  userAgent: varchar("user_agent", { length: 500 }),
+  params: json("params"),
+  body: json("body"),
+  response: json("response"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  duration: integer("duration").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const selectOperationLogSchema = createSelectSchema(operationLogs, {
+  id: schema => schema.describe("操作日志ID"),
+  userId: schema => schema.describe("用户ID"),
+  username: schema => schema.describe("用户名"),
+  domain: schema => schema.describe("域名"),
+  moduleName: schema => schema.describe("模块名称"),
+  description: schema => schema.describe("操作描述"),
+  requestId: schema => schema.describe("请求ID"),
+  method: schema => schema.describe("HTTP方法"),
+  url: schema => schema.describe("访问URL"),
+  ip: schema => schema.describe("IP地址"),
+  userAgent: schema => schema.describe("用户代理"),
+  params: schema => schema.describe("请求参数"),
+  body: schema => schema.describe("请求体"),
+  response: schema => schema.describe("响应内容"),
+  startTime: schema => schema.describe("开始时间"),
+  endTime: schema => schema.describe("结束时间"),
+  duration: schema => schema.describe("持续时间(毫秒)"),
+  createdAt: schema => schema.describe("创建时间"),
+});
+
+export const insertOperationLogSchema = createInsertSchema(operationLogs, {
+  userId: schema => schema.describe("用户ID"),
+  username: schema => schema.describe("用户名"),
+  domain: schema => schema.describe("域名"),
+  moduleName: schema => schema.describe("模块名称"),
+  description: schema => schema.describe("操作描述"),
+  requestId: schema => schema.describe("请求ID"),
+  method: schema => schema.describe("HTTP方法"),
+  url: schema => schema.describe("访问URL"),
+  ip: schema => schema.describe("IP地址"),
+  userAgent: schema => schema.describe("用户代理"),
+  params: schema => schema.describe("请求参数"),
+  body: schema => schema.describe("请求体"),
+  response: schema => schema.describe("响应内容"),
+  startTime: schema => schema.describe("开始时间"),
+  endTime: schema => schema.describe("结束时间"),
+  duration: schema => schema.describe("持续时间(毫秒)"),
+}).omit({
+  id: true,
+  createdAt: true,
+});

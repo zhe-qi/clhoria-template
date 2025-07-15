@@ -1,4 +1,6 @@
 // 后台管理，需要认证和鉴权的路由组
+export * from "./login-log/login-log.index";
+export * from "./operation-log/operation-log.index";
 export * from "./sys-access-keys/sys-access-keys.index";
 export * from "./sys-domains/sys-domains.index";
 export * from "./sys-endpoints/sys-endpoints.index";
