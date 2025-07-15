@@ -11,6 +11,8 @@ export default antfu({
   },
   ignores: [
     "**/migrations/*",
+    "CLAUDE.md",
+    "CLAUDE.local.md",
   ],
 }, {
   rules: {

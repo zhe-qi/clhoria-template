@@ -10,15 +10,19 @@ const queryClient = postgres(env.DATABASE_URL, {
   idle_timeout: 10, // 空闲连接保留10秒
   connect_timeout: 30, // 连接超时30秒
   transform: {
-    undefined: null, // 处理JS undefined转SQL NULL
+    // 处理JS undefined转SQL NULL
+    undefined: null,
   },
 });
 
 const db = drizzle({
   client: queryClient,
+  // schema同时用于提供类型
   schema,
+  // 自动在数据库使用 snake_case 命名风格
   casing: "snake_case",
-  logger: env.NODE_ENV !== "production", // 开发环境日志
+  // 开发环境数据库日志
+  // logger: env.NODE_ENV !== "production",
 });
 
 export default db;

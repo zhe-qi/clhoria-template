@@ -366,10 +366,7 @@ function isValidWhereValue(value: unknown): value is unknown {
 
     if (Array.isArray(value)) {
       // 检查数组内的每个元素是否都是有效类型
-      return value.every(item =>
-        typeof item === "string"
-        || typeof item === "number"
-        || typeof item === "boolean");
+      return value.every(item => typeof item === "string" || typeof item === "number" || typeof item === "boolean");
     }
 
     return false;

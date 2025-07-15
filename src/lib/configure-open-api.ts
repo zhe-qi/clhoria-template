@@ -7,7 +7,28 @@ import env from "@/env";
 import packageJSON from "../../package.json" with { type: "json" };
 import { createRouter } from "./create-app";
 
-const APP_CONFIG = [
+// Types
+type AppName = "adminApp" | "clientApp" | "publicApp";
+
+interface AppConfig {
+  name: string;
+  title: string;
+  token?: string;
+}
+
+interface ScalarSource {
+  title: string;
+  slug: string;
+  url: string;
+  default: boolean;
+}
+
+interface ScalarAuthentication {
+  securitySchemes: Record<string, { token: string }>;
+}
+
+// Constants
+const APP_CONFIG: AppConfig[] = [
   {
     name: "admin",
     title: "管理端API文档",
@@ -24,70 +45,100 @@ const APP_CONFIG = [
   },
 ];
 
-type AppName = "adminApp" | "clientApp" | "publicApp";
+const OPENAPI_VERSION = "3.1.0";
+const DOC_ENDPOINT = "/doc";
 
-export default function configureOpenAPI() {
-  const isNotProd = env.NODE_ENV !== "production";
+const SCALAR_CONFIG = {
+  theme: "kepler",
+  layout: "modern",
+  defaultHttpClient: { targetKey: "js", clientKey: "fetch" },
+} as const;
 
-  const apps = APP_CONFIG.reduce((acc, config) => {
+// Helper functions
+function createApps(): Record<AppName, AppOpenAPI> {
+  return APP_CONFIG.reduce((acc, config) => {
     const path = config.name === "public" ? "/" : `/${config.name}`;
     acc[`${config.name}App` as AppName] = createRouter().basePath(path);
     return acc;
   }, {} as Record<AppName, AppOpenAPI>);
+}
 
-  // 开发环境下配置文档
-  let configureMainDoc = null;
+function registerSecurityScheme(router: AppOpenAPI, config: AppConfig): string {
+  const securityName = `${config.name}Bearer`;
+  router.openAPIRegistry.registerComponent("securitySchemes", securityName, {
+    type: "http",
+    scheme: "bearer",
+  });
+  return securityName;
+}
 
-  if (isNotProd) {
-    configureMainDoc = (app: AppOpenAPI) => {
-      // 配置每个子应用的OpenAPI文档
-      APP_CONFIG.forEach((config) => {
-        const router = apps[`${config.name}App` as AppName];
+function configureAppDocumentation(router: AppOpenAPI, config: AppConfig): void {
+  const docConfig = {
+    openapi: OPENAPI_VERSION,
+    info: { version: packageJSON.version, title: config.title },
+  };
 
-        // 配置安全方案
-        if (config.token) {
-          const securityName = `${config.name}Bearer`;
-          router.openAPIRegistry.registerComponent("securitySchemes", securityName, {
-            type: "http",
-            scheme: "bearer",
-          });
-
-          router.doc31("/doc", {
-            openapi: "3.1.0",
-            info: { version: packageJSON.version, title: config.title },
-            security: [{ [securityName]: [] }],
-          });
-        }
-        else {
-          router.doc31("/doc", {
-            openapi: "3.1.0",
-            info: { version: packageJSON.version, title: config.title },
-          });
-        }
-      });
-
-      // 配置主文档
-      app.get("/", Scalar({
-        theme: "kepler",
-        layout: "modern",
-        defaultHttpClient: { targetKey: "js", clientKey: "fetch" },
-        sources: APP_CONFIG.map((config, i) => ({
-          title: config.title,
-          slug: config.name,
-          url: config.name === "public" ? "doc" : `/${config.name}/doc`,
-          default: i === 0,
-        })),
-        authentication: {
-          securitySchemes: APP_CONFIG.reduce((acc, config) => {
-            if (config.token) {
-              acc[`${config.name}Bearer`] = { token: config.token };
-            }
-            return acc;
-          }, {} as Record<string, { token: string }>),
-        },
-      }));
-    };
+  if (config.token) {
+    const securityName = registerSecurityScheme(router, config);
+    router.doc31(DOC_ENDPOINT, {
+      ...docConfig,
+      security: [{ [securityName]: [] }],
+    });
   }
+  else {
+    router.doc31(DOC_ENDPOINT, docConfig);
+  }
+}
+
+function createScalarSources(): ScalarSource[] {
+  return APP_CONFIG.map((config, i) => ({
+    title: config.title,
+    slug: config.name,
+    url: config.name === "public" ? "doc" : `/${config.name}/doc`,
+    default: i === 0,
+  }));
+}
+
+function createScalarAuthentication(): ScalarAuthentication {
+  return {
+    securitySchemes: APP_CONFIG.reduce((acc, config) => {
+      if (config.token) {
+        acc[`${config.name}Bearer`] = { token: config.token };
+      }
+      return acc;
+    }, {} as Record<string, { token: string }>),
+  };
+}
+
+function configureSubApplications(apps: Record<AppName, AppOpenAPI>): void {
+  APP_CONFIG.forEach((config) => {
+    const router = apps[`${config.name}App` as AppName];
+    configureAppDocumentation(router, config);
+  });
+}
+
+function configureMainDocumentation(app: AppOpenAPI): void {
+  app.get("/", Scalar({
+    ...SCALAR_CONFIG,
+    sources: createScalarSources(),
+    authentication: createScalarAuthentication(),
+  }));
+}
+
+function createMainDocConfigurator() {
+  return (app: AppOpenAPI) => {
+    const apps = createApps();
+    configureSubApplications(apps);
+    configureMainDocumentation(app);
+  };
+}
+
+// Main export function
+export default function configureOpenAPI() {
+  const isNotProd = env.NODE_ENV !== "production";
+  const apps = createApps();
+
+  const configureMainDoc = isNotProd ? createMainDocConfigurator() : null;
 
   return { ...apps, configureMainDoc };
 }
