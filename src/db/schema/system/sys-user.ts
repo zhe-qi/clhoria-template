@@ -1,12 +1,11 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgEnum, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 
+import { statusEnum } from "./enums";
 import { sysUserRole } from "./sys-user-role";
-
-export const statusEnum = pgEnum("status", ["ENABLED", "DISABLED", "BANNED"]);
 
 export const sysUser = pgTable("sys_user", {
   id: defaultColumns.id,

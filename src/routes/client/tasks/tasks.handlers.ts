@@ -6,7 +6,7 @@ import { tasks } from "@/db/schema";
 import type { TasksRouteHandlerType as RouteHandlerType } from "./tasks.index";
 
 export const list: RouteHandlerType<"list"> = async (c) => {
-  const query = c.req.valid("query");
+  const _query = c.req.valid("query");
 
   const taskList = await db.select().from(tasks);
 

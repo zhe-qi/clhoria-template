@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 
-import { statusEnum } from "./sys-user";
+import { statusEnum } from "./enums";
 
 export const sysOrganization = pgTable("sys_organization", {
   id: defaultColumns.id,

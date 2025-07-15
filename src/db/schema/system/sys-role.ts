@@ -4,8 +4,8 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 
+import { statusEnum } from "./enums";
 import { sysRoleMenu } from "./sys-role-menu";
-import { statusEnum } from "./sys-user";
 import { sysUserRole } from "./sys-user-role";
 
 export const sysRole = pgTable("sys_role", {

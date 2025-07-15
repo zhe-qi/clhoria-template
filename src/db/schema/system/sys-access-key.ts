@@ -1,7 +1,7 @@
 import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { statusEnum } from "./sys-user";
+import { statusEnum } from "./enums";
 
 export const sysAccessKey = pgTable("sys_access_key", {
   id: uuid().primaryKey().defaultRandom(),

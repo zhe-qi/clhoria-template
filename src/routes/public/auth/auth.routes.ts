@@ -24,10 +24,10 @@ export const adminLogin = createRoute({
   summary: "后台登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ 
+      z.object({
         token: z.string(),
         refreshToken: z.string(),
-        user: responseSysUserSchema
+        user: responseSysUserSchema,
       }),
       "登录成功",
     ),
@@ -49,7 +49,7 @@ export const adminRegister = createRoute({
   request: {
     body: jsonContentRequired(
       insertSysUserSchema.extend({
-        confirmPassword: z.string().describe("确认密码")
+        confirmPassword: z.string().describe("确认密码"),
       }),
       "注册请求",
     ),
@@ -88,7 +88,7 @@ export const refreshToken = createRoute({
   summary: "刷新访问令牌",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ 
+      z.object({
         token: z.string(),
         refreshToken: z.string(),
       }),
