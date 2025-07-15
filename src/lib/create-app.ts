@@ -17,7 +17,6 @@ import type { AppBindings, AppOpenAPI } from "@/types/lib";
 
 import { pinoLogger } from "@/middlewares/pino-logger";
 import { v7 as uuidV7 } from 'uuid';
-import { Command } from "ioredis";
 
 export function createRouter() {
   return new OpenAPIHono<AppBindings>({
@@ -28,8 +27,10 @@ export function createRouter() {
 
 export default function createApp() {
   const ioredisStore = new RedisStore({
-    sendCommand: (...args) =>
-      redisClient.sendCommand(args as unknown as Command) as Promise<RedisReply>,
+    sendCommand: (...args) => {
+      const [command, ...commandArgs] = args;
+      return redisClient.call(command, ...commandArgs) as Promise<RedisReply>;
+    },
   }) as unknown as Store
 
   const app = createRouter();
