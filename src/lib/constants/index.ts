@@ -28,3 +28,17 @@ export function getQueryValidationError(error: { message: string }) {
     name: "ZodError",
   });
 }
+
+export function getDuplicateKeyError(field: string, message: string) {
+  return {
+    error: {
+      issues: [{
+        code: "duplicate_key",
+        path: [field],
+        message,
+      }],
+      name: "ValidationError",
+    },
+    success: false,
+  };
+}

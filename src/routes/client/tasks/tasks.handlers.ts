@@ -1,22 +1,14 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
+import db from "@/db";
 import { tasks } from "@/db/schema";
-import { getQueryValidationError } from "@/lib/constants";
-import paginatedQuery from "@/lib/pagination";
 
 import type { TasksRouteHandlerType as RouteHandlerType } from "./tasks.index";
 
 export const list: RouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
-  const [error, result] = await paginatedQuery<typeof tasks.$inferSelect>({
-    table: tasks,
-    params: query,
-  });
+  const taskList = await db.select().from(tasks);
 
-  if (error) {
-    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
-  }
-
-  return c.json(result, HttpStatusCodes.OK);
+  return c.json(taskList, HttpStatusCodes.OK);
 };

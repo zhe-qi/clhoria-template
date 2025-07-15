@@ -126,7 +126,7 @@ When creating new routes, ALWAYS follow the admin-users route structure for cons
    import * as HttpStatusCodes from "stoker/http-status-codes";
    import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
    import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
-   
+
    import { schema imports } from "@/db/schema";
    import { notFoundSchema } from "@/lib/constants";
    import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
@@ -135,25 +135,30 @@ When creating new routes, ALWAYS follow the admin-users route structure for cons
 2. **Tags Convention**: Use format `["/resource-name (中文描述)"]`
 
 3. **Request Structure**:
-   - List routes: Use only `PaginationParamsSchema` for query
+   - List routes: Use simple query schema with optional search field
    - Create routes: Use `jsonContentRequired(insertSchema, "创建参数")`
    - Update routes: Use `jsonContentRequired(patchSchema, "更新参数")`
-   - ID routes: Use `IdParamsSchema` or `IdUUIDParamsSchema` for params
+   - ID routes: ALWAYS use `IdUUIDParamsSchema` for params (never use `IdParamsSchema`)
 
 4. **Response Structure**:
-   - List routes: Use `GetPaginatedResultSchema(selectSchema)` with "列表响应成功"
+   - List routes: Use `z.array(selectSchema)` to return simple arrays
    - Create/Update routes: Use `selectSchema` with "创建成功"/"更新成功"
    - Error responses: Use `createErrorSchema(schemaType)` with proper schema validation
    - NotFound responses: Use `notFoundSchema` with descriptive message
 
 5. **Error Schema Requirements**:
    - ALWAYS provide the appropriate schema to `createErrorSchema()`
-   - List routes: `createErrorSchema(PaginationParamsSchema)`
    - Create routes: `createErrorSchema(insertSchema)`
-   - Update routes: `createErrorSchema(patchSchema).or(createErrorSchema(IdParamsSchema))`
-   - ID routes: `createErrorSchema(IdParamsSchema)`
+   - Update routes: `createErrorSchema(patchSchema).or(createErrorSchema(IdUUIDParamsSchema))`
+   - ID routes: `createErrorSchema(IdUUIDParamsSchema)`
 
-6. **Field Descriptions**: 
+6. **Error Handling Constants**:
+   - Use standardized error response functions from `@/lib/constants`
+   - For duplicate key errors: Use `getDuplicateKeyError(field, message)`
+   - For validation errors: Use `getQueryValidationError(error)`
+   - Always import error helpers: `import { getDuplicateKeyError } from "@/lib/constants"`
+
+7. **Field Descriptions**:
    - Use `.describe()` directly for simple field descriptions
    - Do NOT use `.openapi()` unless complex OpenAPI configuration is needed
 

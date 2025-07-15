@@ -11,10 +11,11 @@ async function jwtAuthorizer(c: Context, enforcer: Enforcer): Promise<boolean> {
   const payload: JWTPayload = c.get("jwtPayload");
 
   const roles = (payload.roles as string[]) ?? [];
+  const domain = (payload.domain as string) ?? "default";
 
   const { path, method } = c.req;
 
-  const rolesPromise = roles.map(async role => enforcer.enforce(role, path, method));
+  const rolesPromise = roles.map(async role => enforcer.enforce(role, path, method, domain));
 
   return (await Promise.all(rolesPromise)).some(Boolean);
 }

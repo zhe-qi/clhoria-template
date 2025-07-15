@@ -2,22 +2,33 @@ import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
-import { insertAdminUsersSchema, insertClientUsersSchema } from "@/db/schema";
+import { insertSysUserSchema, responseSysUserSchema } from "@/db/schema";
 
 const tags = ["/auth (身份认证)"];
 
-/** 后管登录 */
+/** 后台登录 */
 export const adminLogin = createRoute({
   path: "/admin/auth/login",
   method: "post",
   request: {
-    body: jsonContentRequired(insertAdminUsersSchema, "登录请求"),
+    body: jsonContentRequired(
+      z.object({
+        identifier: z.string().describe("用户名/邮箱/手机号"),
+        password: z.string().describe("密码"),
+        domain: z.string().default("default").describe("域/租户"),
+      }),
+      "登录请求",
+    ),
   },
   tags,
-  summary: "后管登录",
+  summary: "后台登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ token: z.string() }),
+      z.object({ 
+        token: z.string(),
+        refreshToken: z.string(),
+        user: responseSysUserSchema
+      }),
       "登录成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
@@ -31,15 +42,20 @@ export const adminLogin = createRoute({
   },
 });
 
-/** 后管注册 */
+/** 后台注册 */
 export const adminRegister = createRoute({
   path: "/admin/auth/register",
   method: "post",
   request: {
-    body: jsonContentRequired(insertAdminUsersSchema, "注册请求"),
+    body: jsonContentRequired(
+      insertSysUserSchema.extend({
+        confirmPassword: z.string().describe("确认密码")
+      }),
+      "注册请求",
+    ),
   },
   tags,
-  summary: "后管注册 限时开放",
+  summary: "后台注册 限时开放",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({ id: z.string().uuid() }),
@@ -49,51 +65,56 @@ export const adminRegister = createRoute({
       z.object({ message: z.string() }),
       "用户已存在",
     ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      z.object({ message: z.string() }),
+      "密码不一致",
+    ),
   },
 });
 
-/** 客户端登录 */
-export const clientLogin = createRoute({
-  path: "/client/auth/login",
+/** 刷新 Token */
+export const refreshToken = createRoute({
+  path: "/auth/refresh",
   method: "post",
   request: {
-    body: jsonContentRequired(insertClientUsersSchema, "登录请求"),
+    body: jsonContentRequired(
+      z.object({
+        refreshToken: z.string().describe("刷新令牌"),
+      }),
+      "刷新请求",
+    ),
   },
   tags,
-  summary: "客户端登录",
+  summary: "刷新访问令牌",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ token: z.string() }),
-      "登录成功",
+      z.object({ 
+        token: z.string(),
+        refreshToken: z.string(),
+      }),
+      "刷新成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
       z.object({ message: z.string() }),
-      "密码错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      z.object({ message: z.string() }),
-      "用户不存在",
+      "刷新令牌无效",
     ),
   },
 });
 
-/** 客户端注册 */
-export const clientRegister = createRoute({
-  path: "/client/auth/register",
-  method: "post",
-  request: {
-    body: jsonContentRequired(insertClientUsersSchema, "注册请求"),
-  },
+/** 获取用户信息 */
+export const getUserInfo = createRoute({
+  path: "/auth/userinfo",
+  method: "get",
   tags,
-  summary: "客户端注册",
+  summary: "获取当前用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ id: z.string().uuid() }),
-      "注册成功",
+      responseSysUserSchema,
+      "获取成功",
     ),
-    [HttpStatusCodes.CONFLICT]: jsonContent(
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
       z.object({ message: z.string() }),
-      "用户已存在",
+      "未授权",
     ),
   },
 });

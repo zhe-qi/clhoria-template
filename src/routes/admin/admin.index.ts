@@ -1,6 +1,4 @@
 // 后台管理，需要认证和鉴权的路由组
-export * from "./admin-users/admin-users.index";
-export * from "./client-users/client-users.index";
-export * from "./menu/menu.index";
-export * from "./roles/roles.index";
-export * from "./tasks/tasks.index";
+export * from "./sys-menus/sys-menus.index";
+export * from "./sys-roles/sys-roles.index";
+export * from "./sys-users/sys-users.index";

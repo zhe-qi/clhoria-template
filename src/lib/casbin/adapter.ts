@@ -4,26 +4,26 @@ import type { z } from "zod";
 import { Helper } from "casbin";
 import { and, eq, or } from "drizzle-orm";
 
-import type { insertCasbinRulesSchema } from "@/db/schema";
+import type { insertCasbinRuleSchema } from "@/db/schema";
 
 import db from "@/db";
-import { casbinRules, roles } from "@/db/schema";
+import { casbinRule, sysRole } from "@/db/schema";
 
-type TCasinTable = z.infer<typeof insertCasbinRulesSchema>;
+type TCasinTable = z.infer<typeof insertCasbinRuleSchema>;
 
 export class DrizzleCasbinAdapter implements Adapter {
   private readonly db: typeof db;
-  private readonly schema: typeof casbinRules;
-  private readonly roleSchema: typeof roles;
+  private readonly schema: typeof casbinRule;
+  private readonly roleSchema: typeof sysRole;
 
   private filtered = false;
 
   constructor() {
-    [this.db, this.schema, this.roleSchema] = [db, casbinRules, roles];
+    [this.db, this.schema, this.roleSchema] = [db, casbinRule, sysRole];
   }
 
   async loadPolicy(model: Model): Promise<void> {
-    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, 1));
+    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, "ENABLED"));
     const lines = await this.db.select().from(this.schema);
     const roleSet = new Set<string>(roles.map(role => role.id));
     lines.forEach(line => roleSet.has(line.v0 as string) && this.loadPolicyLine(line, model));
@@ -36,7 +36,7 @@ export class DrizzleCasbinAdapter implements Adapter {
       ).filter(Boolean)))).flat();
 
     const lines = await this.db.select().from(this.schema).where(or(...whereConditions));
-    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, 1));
+    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, "ENABLED"));
 
     const roleSet = new Set<string>(roles.map(role => role.id));
     lines.forEach(line => roleSet.has(line.v0 as string) && this.loadPolicyLine(line, model));

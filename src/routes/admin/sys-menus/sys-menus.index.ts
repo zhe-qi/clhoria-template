@@ -2,11 +2,13 @@ import type { AppRouteHandler } from "@/types/lib";
 
 import { createRouter } from "@/lib/create-app";
 
-import * as handlers from "./tasks.handlers";
-import * as routes from "./tasks.routes";
+import * as handlers from "./sys-menus.handlers";
+import * as routes from "./sys-menus.routes";
 
-export const tasks = createRouter()
+export const sysMenus = createRouter()
   .openapi(routes.list, handlers.list)
+  .openapi(routes.tree, handlers.tree)
+  .openapi(routes.getMenusByRole, handlers.getMenusByRole)
   .openapi(routes.create, handlers.create)
   .openapi(routes.getOne, handlers.getOne)
   .openapi(routes.patch, handlers.patch)
@@ -16,4 +18,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type TasksRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type SysMenusRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

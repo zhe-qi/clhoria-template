@@ -1,0 +1,80 @@
+import { relations } from "drizzle-orm";
+import { boolean, integer, pgEnum, pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+import { defaultColumns } from "@/db/common/default-columns";
+
+import { sysRoleMenu } from "./sys-role-menu";
+import { statusEnum } from "./sys-user";
+
+export const menuTypeEnum = pgEnum("menu_type", ["directory", "menu"]);
+
+export const sysMenu = pgTable("sys_menu", {
+  id: serial().primaryKey(),
+  menuType: menuTypeEnum("menu_type").notNull(),
+  menuName: varchar("menu_name", { length: 64 }).notNull(),
+  iconType: integer("icon_type").default(1),
+  icon: varchar({ length: 64 }),
+  routeName: varchar("route_name", { length: 64 }).notNull().unique(),
+  routePath: varchar("route_path", { length: 128 }).notNull(),
+  component: varchar({ length: 64 }).notNull(),
+  pathParam: varchar("path_param", { length: 64 }),
+  status: statusEnum().notNull().default("ENABLED"),
+  activeMenu: varchar("active_menu", { length: 64 }),
+  hideInMenu: boolean("hide_in_menu").default(false),
+  pid: integer().notNull().default(0),
+  order: integer().notNull(),
+  i18nKey: varchar("i18n_key", { length: 64 }),
+  keepAlive: boolean("keep_alive").default(false),
+  constant: boolean().notNull().default(false),
+  href: varchar({ length: 64 }),
+  multiTab: boolean("multi_tab").default(false),
+  createdAt: defaultColumns.createdAt,
+  createdBy: varchar("created_by", { length: 64 }).notNull(),
+  updatedAt: defaultColumns.updatedAt,
+  updatedBy: varchar("updated_by", { length: 64 }),
+});
+
+export const sysMenuRelations = relations(sysMenu, ({ many }) => ({
+  roleMenus: many(sysRoleMenu),
+}));
+
+export const selectSysMenuSchema = createSelectSchema(sysMenu, {
+  id: schema => schema.describe("菜单ID"),
+  menuType: schema => schema.describe("菜单类型: directory=目录 menu=菜单"),
+  menuName: schema => schema.describe("菜单名称"),
+  iconType: schema => schema.describe("图标类型"),
+  icon: schema => schema.describe("图标"),
+  routeName: schema => schema.describe("路由名称"),
+  routePath: schema => schema.describe("路由路径"),
+  component: schema => schema.describe("组件路径"),
+  pathParam: schema => schema.describe("路径参数"),
+  status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用"),
+  activeMenu: schema => schema.describe("激活的菜单"),
+  hideInMenu: schema => schema.describe("是否在菜单中隐藏"),
+  pid: schema => schema.describe("父级菜单ID"),
+  order: schema => schema.describe("排序"),
+  i18nKey: schema => schema.describe("国际化键"),
+  keepAlive: schema => schema.describe("是否缓存"),
+  constant: schema => schema.describe("是否常量菜单"),
+  href: schema => schema.describe("外链地址"),
+  multiTab: schema => schema.describe("是否多标签"),
+  createdAt: schema => schema.describe("创建时间"),
+  createdBy: schema => schema.describe("创建人"),
+  updatedAt: schema => schema.describe("更新时间"),
+  updatedBy: schema => schema.describe("更新人"),
+});
+
+export const insertSysMenuSchema = createInsertSchema(sysMenu, {
+  menuName: schema => schema.min(1),
+  routeName: schema => schema.min(1),
+  routePath: schema => schema.min(1),
+  component: schema => schema.min(1),
+  createdBy: schema => schema.min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const patchSysMenuSchema = insertSysMenuSchema.partial();

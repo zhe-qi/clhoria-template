@@ -1,10 +1,10 @@
 import { hash, verify } from "@node-rs/argon2";
-import { eq } from "drizzle-orm";
-import { sign } from "hono/jwt";
+import { and, eq, or } from "drizzle-orm";
+import { sign, verify as verifyJwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { adminUsers, clientUsers } from "@/db/schema";
+import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
 import env from "@/env";
 import { pick } from "@/utils";
 
@@ -12,87 +12,213 @@ import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";
 
 export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
+  const { identifier, password, domain } = body;
 
-  const result = await db.query.adminUsers.findFirst({
+  // 支持用户名/邮箱/手机号登录
+  const user = await db.query.sysUser.findFirst({
     with: {
-      usersToRoles: true,
+      userRoles: {
+        with: {
+          role: true,
+        },
+      },
     },
-    where: eq(adminUsers.username, body.username),
+    where: and(
+      or(
+        eq(sysUser.username, identifier),
+        eq(sysUser.email, identifier),
+        eq(sysUser.phoneNumber, identifier),
+      ),
+      eq(sysUser.domain, domain),
+    ),
   });
 
-  if (!result) {
+  if (!user) {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const isPasswordValid = await verify(result.password, body.password);
+  if (user.status !== "ENABLED") {
+    return c.json({ message: "用户已禁用" }, HttpStatusCodes.UNAUTHORIZED);
+  }
+
+  const isPasswordValid = await verify(user.password, password);
 
   if (!isPasswordValid) {
     return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const roles = result.usersToRoles.map(role => role.roleId);
-  const payload = Object.assign(pick(result, ["id", "username"]), { roles });
+  // 生成 tokens
+  const roles = user.userRoles.map(ur => ur.roleId);
+  const tokenPayload = {
+    uid: user.id,
+    username: user.username,
+    domain: user.domain,
+    roles,
+  };
 
-  const token = await sign(payload, env.ADMIN_JWT_SECRET);
+  const accessToken = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
+  const refreshToken = await sign({ ...tokenPayload, type: "refresh" }, env.ADMIN_JWT_SECRET, "HS256");
 
-  return c.json({ token }, HttpStatusCodes.OK);
+  // 保存 token 记录
+  const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const userAgent = c.req.header("user-agent") || "unknown";
+
+  await db.insert(sysTokens).values({
+    accessToken,
+    refreshToken,
+    status: "ACTIVE",
+    userId: user.id,
+    username: user.username,
+    domain: user.domain,
+    ip: clientIP,
+    address: "unknown",
+    userAgent,
+    requestId: crypto.randomUUID(),
+    type: "WEB",
+    createdBy: "system",
+  });
+
+  // 记录登录日志
+  await db.insert(sysLoginLog).values({
+    userId: user.id,
+    username: user.username,
+    domain: user.domain,
+    ip: clientIP,
+    address: "unknown",
+    userAgent,
+    requestId: crypto.randomUUID(),
+    type: "PASSWORD",
+    createdBy: "system",
+  });
+
+  const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "email", "phoneNumber", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
+
+  return c.json({
+    token: accessToken,
+    refreshToken,
+    user: responseUser,
+  }, HttpStatusCodes.OK);
 };
 
-/** 管理员注册 */
+/** 后台注册 */
 export const adminRegister: RouteHandlerType<"adminRegister"> = async (c) => {
   const body = c.req.valid("json");
+  const { password, confirmPassword, ...userData } = body;
 
-  const [result] = await db.select().from(adminUsers).where(eq(adminUsers.username, body.username));
+  if (password !== confirmPassword) {
+    return c.json({ message: "密码不一致" }, HttpStatusCodes.BAD_REQUEST);
+  }
 
-  if (result) {
+  // 检查用户名是否已存在
+  const existingUser = await db.query.sysUser.findFirst({
+    where: and(
+      or(
+        eq(sysUser.username, userData.username),
+        ...(userData.email ? [eq(sysUser.email, userData.email)] : []),
+        ...(userData.phoneNumber ? [eq(sysUser.phoneNumber, userData.phoneNumber)] : []),
+      ),
+      eq(sysUser.domain, userData.domain),
+    ),
+  });
+
+  if (existingUser) {
     return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
   }
 
-  const [{ id }] = await db.insert(adminUsers).values({
-    username: body.username,
-    password: await hash(body.password),
-  }).returning({ id: adminUsers.id });
+  const [{ id }] = await db.insert(sysUser).values({
+    ...userData,
+    password: await hash(password),
+    createdBy: "system",
+  }).returning({ id: sysUser.id });
 
   return c.json({ id }, HttpStatusCodes.OK);
 };
 
-/** 客户端登录 */
-export const clientLogin: RouteHandlerType<"clientLogin"> = async (c) => {
+/** 刷新 Token */
+export const refreshToken: RouteHandlerType<"refreshToken"> = async (c) => {
   const body = c.req.valid("json");
+  const { refreshToken: oldRefreshToken } = body;
 
-  const [result] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
+  try {
+    // 验证 refresh token
+    const payload = await verifyJwt(oldRefreshToken, env.ADMIN_JWT_SECRET) as any;
 
-  if (!result) {
-    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
+    if (payload.type !== "refresh") {
+      return c.json({ message: "无效的刷新令牌" }, HttpStatusCodes.UNAUTHORIZED);
+    }
+
+    // 检查 token 记录
+    const tokenRecord = await db.query.sysTokens.findFirst({
+      where: and(
+        eq(sysTokens.refreshToken, oldRefreshToken),
+        eq(sysTokens.status, "ACTIVE"),
+      ),
+    });
+
+    if (!tokenRecord) {
+      return c.json({ message: "刷新令牌已失效" }, HttpStatusCodes.UNAUTHORIZED);
+    }
+
+    // 生成新的 tokens
+    const newTokenPayload = {
+      uid: payload.uid,
+      username: payload.username,
+      domain: payload.domain,
+      roles: payload.roles,
+    };
+
+    const newAccessToken = await sign({ ...newTokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
+    const newRefreshToken = await sign({ ...newTokenPayload, type: "refresh" }, env.ADMIN_JWT_SECRET, "HS256");
+
+    // 更新 token 记录
+    await db.update(sysTokens)
+      .set({
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      })
+      .where(eq(sysTokens.id, tokenRecord.id));
+
+    return c.json({
+      token: newAccessToken,
+      refreshToken: newRefreshToken,
+    }, HttpStatusCodes.OK);
   }
-
-  const isPasswordValid = await verify(result.password, body.password);
-
-  if (!isPasswordValid) {
-    return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
+  catch {
+    return c.json({ message: "刷新令牌无效" }, HttpStatusCodes.UNAUTHORIZED);
   }
-
-  const payload = pick(result, ["id", "username"]);
-
-  const token = await sign(payload, env.CLIENT_JWT_SECRET);
-
-  return c.json({ token }, HttpStatusCodes.OK);
 };
 
-/** 客户端注册 */
-export const clientRegister: RouteHandlerType<"clientRegister"> = async (c) => {
-  const body = c.req.valid("json");
+/** 获取用户信息 */
+export const getUserInfo: RouteHandlerType<"getUserInfo"> = async (c) => {
+  // 这里需要从 JWT token 中获取用户信息
+  // 在实际实现中，这里应该由 JWT 中间件提供用户信息
+  const authHeader = c.req.header("authorization");
 
-  const [result] = await db.select().from(clientUsers).where(eq(clientUsers.username, body.username));
-
-  if (result) {
-    return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
+  if (!authHeader?.startsWith("Bearer ")) {
+    return c.json({ message: "未授权" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const [{ id }] = await db.insert(clientUsers).values({
-    username: body.username,
-    password: await hash(body.password),
-  }).returning({ id: clientUsers.id });
+  const token = authHeader.slice(7);
 
-  return c.json({ id }, HttpStatusCodes.OK);
+  try {
+    const payload = await verifyJwt(token, env.ADMIN_JWT_SECRET) as any;
+
+    const user = await db.query.sysUser.findFirst({
+      where: and(
+        eq(sysUser.id, payload.uid),
+        eq(sysUser.domain, payload.domain),
+      ),
+    });
+
+    if (!user) {
+      return c.json({ message: "用户不存在" }, HttpStatusCodes.UNAUTHORIZED);
+    }
+
+    const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "email", "phoneNumber", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
+
+    return c.json(responseUser, HttpStatusCodes.OK);
+  }
+  catch {
+    return c.json({ message: "未授权" }, HttpStatusCodes.UNAUTHORIZED);
+  }
 };
