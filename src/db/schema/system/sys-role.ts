@@ -16,9 +16,9 @@ export const sysRole = pgTable("sys_role", {
   pid: varchar({ length: 64 }).notNull().default("0"),
   status: statusEnum().notNull().default("ENABLED"),
   createdAt: defaultColumns.createdAt,
-  createdBy: varchar("created_by", { length: 64 }).notNull(),
+  createdBy: varchar({ length: 64 }).notNull(),
   updatedAt: defaultColumns.updatedAt,
-  updatedBy: varchar("updated_by", { length: 64 }),
+  updatedBy: varchar({ length: 64 }),
 });
 
 export const sysRoleRelations = relations(sysRole, ({ many }) => ({

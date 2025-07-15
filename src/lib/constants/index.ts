@@ -42,3 +42,9 @@ export function getDuplicateKeyError(field: string, message: string) {
     success: false,
   };
 }
+
+export function getNotFoundError(resource: string) {
+  return {
+    message: `${resource}不存在`,
+  };
+}

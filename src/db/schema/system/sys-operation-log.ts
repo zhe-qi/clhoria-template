@@ -3,23 +3,23 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const sysOperationLog = pgTable("sys_operation_log", {
   id: uuid().primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull(),
+  userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
-  moduleName: varchar("module_name", { length: 128 }).notNull(),
+  moduleName: varchar({ length: 128 }).notNull(),
   description: varchar({ length: 512 }).notNull(),
-  requestId: varchar("request_id", { length: 64 }).notNull(),
+  requestId: varchar({ length: 64 }).notNull(),
   method: varchar({ length: 16 }).notNull(),
   url: varchar({ length: 512 }).notNull(),
   ip: varchar({ length: 64 }).notNull(),
-  userAgent: varchar("user_agent", { length: 512 }),
+  userAgent: varchar({ length: 512 }),
   params: jsonb(),
   body: jsonb(),
   response: jsonb(),
-  startTime: timestamp("start_time", { mode: "date" }).notNull(),
-  endTime: timestamp("end_time", { mode: "date" }).notNull(),
+  startTime: timestamp({ mode: "date" }).notNull(),
+  endTime: timestamp({ mode: "date" }).notNull(),
   duration: integer().notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
 });
 
 export const selectSysOperationLogSchema = createSelectSchema(sysOperationLog, {

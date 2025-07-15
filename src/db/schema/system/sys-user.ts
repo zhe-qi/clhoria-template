@@ -12,16 +12,16 @@ export const sysUser = pgTable("sys_user", {
   username: varchar({ length: 64 }).notNull().unique(),
   password: text().notNull(),
   domain: varchar({ length: 64 }).notNull(),
-  builtIn: boolean("built_in").default(false),
+  builtIn: boolean().default(false),
   avatar: text(),
   email: varchar({ length: 128 }).unique(),
-  phoneNumber: varchar("phone_number", { length: 32 }).unique(),
-  nickName: varchar("nick_name", { length: 64 }).notNull(),
+  phoneNumber: varchar({ length: 32 }).unique(),
+  nickName: varchar({ length: 64 }).notNull(),
   status: statusEnum().notNull().default("ENABLED"),
   createdAt: defaultColumns.createdAt,
-  createdBy: varchar("created_by", { length: 64 }).notNull(),
+  createdBy: varchar({ length: 64 }).notNull(),
   updatedAt: defaultColumns.updatedAt,
-  updatedBy: varchar("updated_by", { length: 64 }),
+  updatedBy: varchar({ length: 64 }),
 });
 
 export const sysUserRelations = relations(sysUser, ({ many }) => ({

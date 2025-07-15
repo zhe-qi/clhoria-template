@@ -5,8 +5,8 @@ import { sysRole } from "./sys-role";
 import { sysUser } from "./sys-user";
 
 export const sysUserRole = pgTable("sys_user_role", {
-  userId: uuid("user_id").notNull(),
-  roleId: uuid("role_id").notNull(),
+  userId: uuid().notNull(),
+  roleId: uuid().notNull(),
 }, table => [
   primaryKey({ columns: [table.userId, table.roleId] }),
 ]);

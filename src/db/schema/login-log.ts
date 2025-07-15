@@ -2,19 +2,19 @@ import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const loginLogs = pgTable("sys_login_log", {
-  id: varchar("id", { length: 36 }).primaryKey().notNull(),
-  userId: varchar("user_id", { length: 36 }).notNull(),
-  username: varchar("username", { length: 50 }).notNull(),
-  domain: varchar("domain", { length: 100 }).notNull(),
-  loginTime: timestamp("login_time").defaultNow().notNull(),
-  ip: varchar("ip", { length: 45 }).notNull(),
-  port: integer("port"),
-  address: varchar("address", { length: 255 }).notNull(),
-  userAgent: varchar("user_agent", { length: 500 }).notNull(),
-  requestId: varchar("request_id", { length: 36 }).notNull(),
-  type: varchar("type", { length: 20 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  createdBy: varchar("created_by", { length: 36 }).notNull(),
+  id: varchar({ length: 36 }).primaryKey().notNull(),
+  userId: varchar({ length: 36 }).notNull(),
+  username: varchar({ length: 50 }).notNull(),
+  domain: varchar({ length: 100 }).notNull(),
+  loginTime: timestamp().defaultNow().notNull(),
+  ip: varchar({ length: 45 }).notNull(),
+  port: integer(),
+  address: varchar({ length: 255 }).notNull(),
+  userAgent: varchar({ length: 500 }).notNull(),
+  requestId: varchar({ length: 36 }).notNull(),
+  type: varchar({ length: 20 }).notNull(),
+  createdAt: timestamp().defaultNow().notNull(),
+  createdBy: varchar({ length: 36 }).notNull(),
 });
 
 export const selectLoginLogSchema = createSelectSchema(loginLogs, {

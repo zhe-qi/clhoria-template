@@ -12,9 +12,9 @@ export const sysDomain = pgTable("sys_domain", {
   description: text(),
   status: statusEnum().notNull().default("ENABLED"),
   createdAt: defaultColumns.createdAt,
-  createdBy: varchar("created_by", { length: 64 }).notNull(),
+  createdBy: varchar({ length: 64 }).notNull(),
   updatedAt: defaultColumns.updatedAt,
-  updatedBy: varchar("updated_by", { length: 64 }),
+  updatedBy: varchar({ length: 64 }),
 });
 
 export const selectSysDomainSchema = createSelectSchema(sysDomain, {

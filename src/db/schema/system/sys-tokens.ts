@@ -3,21 +3,21 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const sysTokens = pgTable("sys_tokens", {
   id: uuid().primaryKey().defaultRandom(),
-  accessToken: varchar("access_token", { length: 512 }).notNull().unique(),
-  refreshToken: varchar("refresh_token", { length: 512 }).notNull().unique(),
+  accessToken: varchar({ length: 512 }).notNull().unique(),
+  refreshToken: varchar({ length: 512 }).notNull().unique(),
   status: varchar({ length: 32 }).notNull(),
-  userId: uuid("user_id").notNull(),
+  userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
-  loginTime: timestamp("login_time", { mode: "date" }).notNull().defaultNow(),
+  loginTime: timestamp({ mode: "date" }).notNull().defaultNow(),
   ip: varchar({ length: 64 }).notNull(),
   port: integer(),
   address: varchar({ length: 255 }).notNull(),
-  userAgent: varchar("user_agent", { length: 512 }).notNull(),
-  requestId: varchar("request_id", { length: 64 }).notNull(),
+  userAgent: varchar({ length: 512 }).notNull(),
+  requestId: varchar({ length: 64 }).notNull(),
   type: varchar({ length: 32 }).notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  createdBy: varchar("created_by", { length: 64 }).notNull(),
+  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
+  createdBy: varchar({ length: 64 }).notNull(),
 });
 
 export const selectSysTokensSchema = createSelectSchema(sysTokens, {

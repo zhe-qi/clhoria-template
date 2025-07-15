@@ -6,7 +6,7 @@ import { defaultColumns } from "@/db/common/default-columns";
 export const casbinRule = pgTable("casbin_rule", {
   id: defaultColumns.id,
   /** 策略类型：p（策略）/g（角色继承） */
-  ptype: varchar("ptype", { length: 8 }),
+  ptype: varchar({ length: 8 }),
   /** 主体：角色或用户 */
   v0: varchar({ length: 64 }),
   /** 对象：资源路径 */

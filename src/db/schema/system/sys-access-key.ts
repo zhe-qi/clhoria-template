@@ -6,12 +6,12 @@ import { statusEnum } from "./enums";
 export const sysAccessKey = pgTable("sys_access_key", {
   id: uuid().primaryKey().defaultRandom(),
   domain: varchar({ length: 64 }).notNull(),
-  accessKeyId: varchar("access_key_id", { length: 128 }).notNull().unique(),
-  accessKeySecret: varchar("access_key_secret", { length: 256 }).notNull().unique(),
+  accessKeyId: varchar({ length: 128 }).notNull().unique(),
+  accessKeySecret: varchar({ length: 256 }).notNull().unique(),
   status: statusEnum().notNull().default("ENABLED"),
   description: text(),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  createdBy: varchar("created_by", { length: 64 }).notNull(),
+  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
+  createdBy: varchar({ length: 64 }).notNull(),
 });
 
 export const selectSysAccessKeySchema = createSelectSchema(sysAccessKey, {
