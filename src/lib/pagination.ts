@@ -79,20 +79,23 @@ export async function withPagination<T extends PgSelect>(
   return { data, meta };
 }
 
+type CountQueryResult = Promise<{ count: number }[]>;
+
 export async function withPaginationAndCount<T extends PgSelect>(
   query: T,
-  countQuery: any,
+  countQuery: CountQueryResult,
   options: PaginationOptions,
 ): Promise<{ data: Awaited<T>; meta: PaginationMeta }> {
   const { page, limit } = options;
   const offset = (page - 1) * limit;
 
-  // 获取总数
-  const [{ count: total }] = await countQuery;
+  // 并行执行总数查询和分页数据查询
+  const [countResult, data] = await Promise.all([
+    countQuery,
+    query.limit(limit).offset(offset),
+  ]);
 
-  // 获取分页数据
-  const data = await query.limit(limit).offset(offset);
-
+  const [{ count: total }] = countResult;
   const meta = createPaginationMeta(page, limit, total);
 
   return { data, meta };
