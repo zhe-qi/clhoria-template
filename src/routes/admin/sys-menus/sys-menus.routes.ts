@@ -150,6 +150,62 @@ export const patch = createRoute({
   },
 });
 
+/** 获取常量路由 */
+export const getConstantRoutes = createRoute({
+  path: "/sys-menus/constant",
+  method: "get",
+  tags,
+  summary: "获取常量路由",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.array(selectSysMenuSchema.pick({
+        id: true,
+        menuName: true,
+        routeName: true,
+        routePath: true,
+        component: true,
+        icon: true,
+        iconType: true,
+        i18nKey: true,
+        hideInMenu: true,
+        keepAlive: true,
+        href: true,
+        multiTab: true,
+        order: true,
+        pid: true,
+        pathParam: true,
+        activeMenu: true,
+      })),
+      "获取成功",
+    ),
+  },
+});
+
+/** 获取用户路由 */
+export const getUserRoutes = createRoute({
+  path: "/sys-menus/user-routes",
+  method: "get",
+  tags,
+  summary: "获取当前用户路由",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        routes: z.array(selectSysMenuSchema.extend({
+          children: z.array(selectSysMenuSchema).optional(),
+        })),
+        home: z.string().describe("首页路由"),
+      }),
+      "获取成功",
+    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+      z.object({
+        message: z.string(),
+      }),
+      "未授权",
+    ),
+  },
+});
+
 /** 删除菜单 */
 export const remove = createRoute({
   path: "/sys-menus/{id}",

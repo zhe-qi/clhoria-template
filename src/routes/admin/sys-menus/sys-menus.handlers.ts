@@ -3,6 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { sysMenu, sysRoleMenu } from "@/db/schema";
+import { getUserMenuIds } from "@/lib/authorization";
 
 import type { SysMenusRouteHandlerType as RouteHandlerType } from "./sys-menus.index";
 
@@ -153,6 +154,73 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
     .returning();
 
   return c.json(updatedMenu, HttpStatusCodes.OK);
+};
+
+/** 获取常量路由 */
+export const getConstantRoutes: RouteHandlerType<"getConstantRoutes"> = async (c) => {
+  const constantMenus = await db.query.sysMenu.findMany({
+    where: and(
+      eq(sysMenu.constant, true),
+      eq(sysMenu.status, "ENABLED"),
+    ),
+    orderBy: [sysMenu.order, sysMenu.id],
+  });
+
+  const routes = constantMenus.map(menu => ({
+    id: menu.id,
+    menuName: menu.menuName,
+    routeName: menu.routeName,
+    routePath: menu.routePath,
+    component: menu.component,
+    icon: menu.icon,
+    iconType: menu.iconType,
+    i18nKey: menu.i18nKey,
+    hideInMenu: menu.hideInMenu,
+    keepAlive: menu.keepAlive,
+    href: menu.href,
+    multiTab: menu.multiTab,
+    order: menu.order,
+    pid: menu.pid,
+    pathParam: menu.pathParam,
+    activeMenu: menu.activeMenu,
+  }));
+
+  return c.json(routes, HttpStatusCodes.OK);
+};
+
+/** 获取用户路由 */
+export const getUserRoutes: RouteHandlerType<"getUserRoutes"> = async (c) => {
+  const user = c.get("jwtPayload");
+  
+  if (!user || !user.uid) {
+    return c.json({ message: "未授权" }, HttpStatusCodes.UNAUTHORIZED);
+  }
+
+  const domain = (user.domain as string) || "default";
+  
+  // 获取用户的菜单ID
+  const menuIds = await getUserMenuIds(user.uid as string, domain);
+
+  if (menuIds.length === 0) {
+    return c.json({ routes: [], home: "/dashboard" }, HttpStatusCodes.OK);
+  }
+
+  // 获取菜单详情
+  const menus = await db.query.sysMenu.findMany({
+    where: and(
+      or(...menuIds.map(id => eq(sysMenu.id, id))),
+      eq(sysMenu.status, "ENABLED"),
+      eq(sysMenu.constant, false), // 排除常量菜单
+    ),
+    orderBy: [sysMenu.order, sysMenu.id],
+  });
+
+  const menuTree = buildTree(menus);
+
+  return c.json({
+    routes: menuTree,
+    home: "/dashboard", // 可以配置化
+  }, HttpStatusCodes.OK);
 };
 
 /** 删除菜单 */
