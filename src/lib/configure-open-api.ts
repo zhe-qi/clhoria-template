@@ -30,7 +30,7 @@ const APP_CONFIG: AppConfig[] = [
   {
     name: "admin",
     title: "管理端API文档",
-    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTZkMzZjLWI4NDgtNzE2YS04ZTkwLWNmZGM0Y2QxYTBjYiIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6WyJhZG1pbiJdfQ.BAGwSjqCUlFCrRVykfVu3roMF6SUpAxXLjpc9kE5ORs",
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIwMTk4MGViNi0wNzk5LTczZWUtODQ5Yi01OWZhMzgwYTAyODYiLCJ1c2VybmFtZSI6ImFkbWluIiwiZG9tYWluIjoiYnVpbHQtaW4iLCJyb2xlcyI6WyIwMTk4MGViNi0wODBkLTc0YmUtYTA5YS1kZWMxZWFiZTJiY2YiXSwidHlwZSI6ImFjY2VzcyJ9.nU11dMWcMqFucP0ZSmmea1yeUdgprWBpPfDYKDfcuhE",
   },
   {
     name: "client",

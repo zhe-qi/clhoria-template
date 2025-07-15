@@ -14,7 +14,7 @@ async function jwtAuthorizer(c: Context, enforcer: Enforcer): Promise<boolean> {
   const domain = (payload.domain as string) ?? "default";
 
   const { path, method } = c.req;
-
+  console.log(await enforcer.enforce(roles[0], path, method, domain), roles[0], path, method, domain, await enforcer.getPolicy());
   const rolesPromise = roles.map(async role => enforcer.enforce(role, path, method, domain));
 
   return (await Promise.all(rolesPromise)).some(Boolean);

@@ -1,0 +1,60 @@
+/* eslint-disable unicorn/filename-case */
+/* eslint-disable no-console */
+
+import db from "@/db";
+import { sysMenu, sysRole, sysRoleMenu } from "@/db/schema";
+
+export async function initSysRoleMenu() {
+  // 获取角色和菜单的 ID
+  const roles = await db.select({ id: sysRole.id, code: sysRole.code }).from(sysRole);
+  const menus = await db.select({ id: sysMenu.id, routeName: sysMenu.routeName }).from(sysMenu);
+
+  const superRole = roles.find(r => r.code === "ROLE_SUPER");
+  const adminRole = roles.find(r => r.code === "ROLE_ADMIN");
+  const userRole = roles.find(r => r.code === "ROLE_USER");
+
+  if (!superRole || !adminRole || !userRole) {
+    throw new Error("未找到必要的角色数据");
+  }
+
+  const data = [];
+
+  // 超级管理员拥有所有菜单权限
+  for (const menu of menus) {
+    data.push({
+      roleId: superRole.id,
+      menuId: menu.id,
+      domain: "built-in",
+    });
+  }
+
+  // 普通管理员拥有基础菜单权限
+  const adminMenus = menus.filter(m =>
+    m.routeName === "home"
+    || m.routeName === "manage"
+    || m.routeName === "manage_user"
+    || m.routeName === "manage_role",
+  );
+
+  for (const menu of adminMenus) {
+    data.push({
+      roleId: adminRole.id,
+      menuId: menu.id,
+      domain: "built-in",
+    });
+  }
+
+  // 普通用户只有首页权限
+  const userMenus = menus.filter(m => m.routeName === "home");
+
+  for (const menu of userMenus) {
+    data.push({
+      roleId: userRole.id,
+      menuId: menu.id,
+      domain: "built-in",
+    });
+  }
+
+  await db.insert(sysRoleMenu).values(data).onConflictDoNothing();
+  console.log("角色菜单权限初始化完成");
+}
