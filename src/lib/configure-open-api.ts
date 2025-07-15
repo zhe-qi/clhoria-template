@@ -123,9 +123,8 @@ function configureMainDocumentation(app: AppOpenAPI): void {
   }));
 }
 
-function createMainDocConfigurator() {
+function createMainDocConfigurator(apps: Record<AppNameType, AppOpenAPI>) {
   return (app: AppOpenAPI) => {
-    const apps = createApps();
     configureSubApplications(apps);
     configureMainDocumentation(app);
   };
@@ -136,7 +135,6 @@ export default function configureOpenAPI() {
   const isNotProd = env.NODE_ENV !== "production";
   const apps = createApps();
 
-  const configureMainDoc = isNotProd ? createMainDocConfigurator() : null;
-
+  const configureMainDoc = isNotProd ? createMainDocConfigurator(apps) : null;
   return { ...apps, configureMainDoc };
 }

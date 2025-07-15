@@ -8,7 +8,7 @@ const tags = ["/auth (身份认证)"];
 
 /** 后台登录 */
 export const adminLogin = createRoute({
-  path: "/admin/auth/login",
+  path: "/auth/login",
   method: "post",
   request: {
     body: jsonContentRequired(
@@ -44,7 +44,7 @@ export const adminLogin = createRoute({
 
 /** 后台注册 */
 export const adminRegister = createRoute({
-  path: "/admin/auth/register",
+  path: "/auth/register",
   method: "post",
   request: {
     body: jsonContentRequired(
