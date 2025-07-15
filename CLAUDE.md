@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Hono-based backend template designed for B2B CRUD-intensive applications and survey scenarios. It uses TypeScript, Drizzle ORM with PostgreSQL, and implements a multi-tier architecture with strict route separation (public, client, admin).
+This is a backend template based on hono. It uses TypeScript, Drizzle ORM and PostgreSQL, and implements a strictly routing-separated multi-layer architecture (public, client, admin).
 
 ## Development Commands
 
@@ -41,6 +41,27 @@ Route execution order is critical as it affects middleware execution. Public rou
 - **Schema**: Located in `src/db/schema/` with barrel exports
 - **Configuration**: `drizzle.config.ts` with snake_case convention
 - **Migrations**: Stored in `./migrations/`
+
+#### Schema Definition Rules
+
+When creating Drizzle schemas, follow these rules:
+
+1. **Table Descriptions**: Always add descriptions to schema fields using `.describe()`
+2. **Schema Exports**: Create three schemas for each table:
+   - `selectXxxSchema` - for reading data (with field descriptions)
+   - `insertXxxSchema` - for creating data (omit id, createdAt, updatedAt)
+   - `patchXxxSchema` - for updating data (partial of insertXxxSchema)
+3. **Field Descriptions**: Use Chinese descriptions that explain the field purpose and format
+4. **Status Fields**: Use `integer().default(1)` for enable/disable flags (1=enabled, 0=disabled)
+
+Example:
+```typescript
+export const selectUsersSchema = createSelectSchema(users, {
+  id: schema => schema.describe("用户ID"),
+  name: schema => schema.describe("用户名称"),
+  status: schema => schema.describe("状态: 1=启用 0=禁用"),
+});
+```
 
 ### Authentication & Authorization
 
@@ -92,6 +113,81 @@ src/db/schema/
 - Production build uses `tsdown` for optimized bundling
 - Testing with Vitest in silent mode during tests
 - ESLint with @antfu/eslint-config
+
+## Route Architecture Standards
+
+When creating new routes, ALWAYS follow the admin-users route structure for consistency:
+
+### Route Definition Structure
+
+1. **Import Order (REQUIRED)**:
+   ```typescript
+   import { createRoute } from "@hono/zod-openapi";
+   import * as HttpStatusCodes from "stoker/http-status-codes";
+   import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+   import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
+   
+   import { schema imports } from "@/db/schema";
+   import { notFoundSchema } from "@/lib/constants";
+   import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+   ```
+
+2. **Tags Convention**: Use format `["/resource-name (中文描述)"]`
+
+3. **Request Structure**:
+   - List routes: Use only `PaginationParamsSchema` for query
+   - Create routes: Use `jsonContentRequired(insertSchema, "创建参数")`
+   - Update routes: Use `jsonContentRequired(patchSchema, "更新参数")`
+   - ID routes: Use `IdParamsSchema` or `IdUUIDParamsSchema` for params
+
+4. **Response Structure**:
+   - List routes: Use `GetPaginatedResultSchema(selectSchema)` with "列表响应成功"
+   - Create/Update routes: Use `selectSchema` with "创建成功"/"更新成功"
+   - Error responses: Use `createErrorSchema(schemaType)` with proper schema validation
+   - NotFound responses: Use `notFoundSchema` with descriptive message
+
+5. **Error Schema Requirements**:
+   - ALWAYS provide the appropriate schema to `createErrorSchema()`
+   - List routes: `createErrorSchema(PaginationParamsSchema)`
+   - Create routes: `createErrorSchema(insertSchema)`
+   - Update routes: `createErrorSchema(patchSchema).or(createErrorSchema(IdParamsSchema))`
+   - ID routes: `createErrorSchema(IdParamsSchema)`
+
+6. **Field Descriptions**: 
+   - Use `.describe()` directly for simple field descriptions
+   - Do NOT use `.openapi()` unless complex OpenAPI configuration is needed
+
+This structure ensures type safety and consistency across all routes.
+
+### Router Index File Structure
+
+All route index files MUST follow this exact pattern:
+
+```typescript
+import type { AppRouteHandler } from "@/types/lib";
+
+import { createRouter } from "@/lib/create-app";
+
+import * as handlers from "./feature.handlers";
+import * as routes from "./feature.routes";
+
+export const featureName = createRouter()
+  .openapi(routes.routeName1, handlers.routeName1)
+  .openapi(routes.routeName2, handlers.routeName2)
+  // ... more routes
+
+type RouteTypes = {
+  [K in keyof typeof routes]: typeof routes[K];
+};
+
+export type FeatureRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+```
+
+Key requirements:
+- Use **named export** for the router (e.g., `export const apiEndpoints`, `export const menus`)
+- Include the `RouteTypes` and `FeatureRouteHandlerType` type definitions
+- Import `AppRouteHandler` from `@/types/lib`
+- Follow the exact naming pattern for type exports
 
 ## Environment
 

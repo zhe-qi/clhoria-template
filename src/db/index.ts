@@ -5,15 +5,18 @@ import env from "@/env";
 
 import * as schema from "./schema";
 
-const queryClient = postgres(env.DATABASE_URL, {
-  max: 10, // 默认最大连接数=10
-  idle_timeout: 10, // 空闲连接保留10秒
-  connect_timeout: 30, // 连接超时30秒
-  transform: {
+const queryClient = postgres(
+  env.DATABASE_URL ?? "postgres://localhost:5432/postgres",
+  {
+    max: 10, // 默认最大连接数=10
+    idle_timeout: 10, // 空闲连接保留10秒
+    connect_timeout: 30, // 连接超时30秒
+    transform: {
     // 处理JS undefined转SQL NULL
-    undefined: null,
+      undefined: null,
+    },
   },
-});
+);
 
 const db = drizzle({
   client: queryClient,

@@ -20,6 +20,10 @@ const EnvSchema = z.object({
     val => process.env.NODE_ENV !== "production" || val !== "",
     { message: "生产环境下数据库连接字符串不能为空" },
   ),
+  REDIS_URL: z.string().refine(
+    val => process.env.NODE_ENV !== "production" || val !== "",
+    { message: "生产环境下redis连接字符串不能为空" },
+  ),
   CLIENT_JWT_SECRET: z.string(),
   ADMIN_JWT_SECRET: z.string(),
 });
