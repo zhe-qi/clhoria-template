@@ -8,7 +8,6 @@ import * as routes from "./demo-api-key.routes";
 
 export const demoApiKey = createRouter()
   .openapi(routes.publicRoute, handlers.publicRoute)
-  .use("/demo-api-key/protected", apiKeyAuth())
   .openapi(routes.protectedRoute, handlers.protectedRoute);
 
 type RouteTypes = {

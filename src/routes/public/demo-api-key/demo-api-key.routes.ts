@@ -3,6 +3,8 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent } from "stoker/openapi/helpers";
 import { z } from "zod";
 
+import { apiKeyAuth } from "@/middlewares/api-key-auth";
+
 const tags = ["/demo-api-key (API Key 演示)"];
 
 export const protectedRoute = createRoute({
@@ -11,6 +13,7 @@ export const protectedRoute = createRoute({
   tags,
   summary: "需要 API Key 的受保护端点",
   security: [{ apiKey: [] }],
+  middleware: [apiKeyAuth()],
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
