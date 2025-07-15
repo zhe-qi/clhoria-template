@@ -194,6 +194,18 @@ Key requirements:
 - Import `AppRouteHandler` from `@/types/lib`
 - Follow the exact naming pattern for type exports
 
+## Domain/Tenant Management
+
+The system includes domain/tenant management functionality at `/sys-domains` endpoint with the following features:
+
+- **List Domains**: GET `/sys-domains` - Paginated list with search capability
+- **Create Domain**: POST `/sys-domains` - Create new domain/tenant  
+- **Update Domain**: PATCH `/sys-domains/{id}` - Update existing domain
+- **Delete Domain**: DELETE `/sys-domains/{id}` - Remove domain
+- **Get Domain**: GET `/sys-domains/{id}` - Retrieve single domain details
+
+Domain schema includes: `code` (unique identifier), `name`, `description`, `status` (ENABLED/DISABLED/BANNED), audit fields (`createdBy`, `updatedBy`, timestamps).
+
 ## Environment
 
 - `NODE_ENV` - Set to "production" for builds and start script
