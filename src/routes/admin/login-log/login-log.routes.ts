@@ -5,10 +5,11 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
 import { selectLoginLogSchema } from "@/db/schema";
+import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const tags = ["/login-log (登录日志)"];
 
-const loginLogQuerySchema = z.object({
+const loginLogQuerySchema = PaginationParamsSchema.extend({
   search: z.string().optional().describe("搜索关键词"),
 });
 
@@ -22,7 +23,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectLoginLogSchema),
+      createPaginatedResultSchema(selectLoginLogSchema),
       "登录日志列表获取成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(

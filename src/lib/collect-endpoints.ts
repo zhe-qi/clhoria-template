@@ -1,9 +1,10 @@
-import { createHash } from "crypto";
+import { eq } from "drizzle-orm";
+import { createHash } from "node:crypto";
+
 import type { AppOpenAPI } from "@/types/lib";
 
 import db from "@/db";
 import { sysEndpoint } from "@/db/schema/system/sys-endpoint";
-import { eq } from "drizzle-orm";
 
 export interface EndpointInfo {
   id: string;
@@ -20,26 +21,26 @@ export interface EndpointInfo {
  */
 function extractResourceAndAction(path: string, method: string): { resource: string; action: string } {
   // 移除查询参数和路径参数
-  const cleanPath = path.replace(/\?.*$/, '').replace(/\/:[^\/]+/g, '');
+  const cleanPath = path.replace(/\?.*$/, "").replace(/\/:[^/]+/g, "");
 
   // 从路径中提取资源名称（最后一个非参数部分）
-  const pathParts = cleanPath.split('/').filter(Boolean);
-  const resource = pathParts[pathParts.length - 1] || 'root';
+  const pathParts = cleanPath.split("/").filter(Boolean);
+  const resource = pathParts[pathParts.length - 1] || "root";
 
   // 根据 HTTP 方法映射动作
   const actionMap: Record<string, string> = {
-    GET: 'read',
-    POST: 'create',
-    PUT: 'update',
-    PATCH: 'update',
-    DELETE: 'delete',
-    HEAD: 'read',
-    OPTIONS: 'read',
+    GET: "read",
+    POST: "create",
+    PUT: "update",
+    PATCH: "update",
+    DELETE: "delete",
+    HEAD: "read",
+    OPTIONS: "read",
   };
 
   return {
     resource,
-    action: actionMap[method] || 'access',
+    action: actionMap[method] || "access",
   };
 }
 
@@ -55,25 +56,26 @@ export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
     const routes = registry.definitions;
 
     for (const definition of routes) {
-      if (definition.type === 'route') {
+      if (definition.type === "route") {
         const { path, method } = definition.route;
 
         // 跳过中间件和内部路由
-        if (!method) continue;
+        if (!method)
+          continue;
 
         const fullPath = prefix + path;
         const { resource, action } = extractResourceAndAction(fullPath, method);
 
         // 生成唯一ID
-        const id = createHash('md5')
+        const id = createHash("md5")
           .update(JSON.stringify({ path: fullPath, method, action, resource }))
-          .digest('hex');
+          .digest("hex");
 
         // 从路由信息推断控制器
-        const controller = definition.route.tags?.[0] || 'unknown';
+        const controller = definition.route.tags?.[0] || "unknown";
 
         // 获取 OpenAPI 描述
-        const summary = definition.route.summary || '';
+        const summary = definition.route.summary || "";
 
         endpoints.push({
           id,
@@ -86,26 +88,25 @@ export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
         });
       }
     }
-  } catch (error) {
-    console.error('Error collecting endpoints:', error);
-    // 如果 OpenAPI 方式失败，尝试备用方案
-    console.log('Falling back to basic route collection...');
-
+  }
+  catch (error) {
+    console.error("Error collecting endpoints:", error);
     try {
       const routes = app.routes;
       for (const route of routes) {
         const { path, method, handler } = route;
 
-        if (!method) continue;
+        if (!method)
+          continue;
 
         const fullPath = prefix + path;
         const { resource, action } = extractResourceAndAction(fullPath, method);
 
-        const id = createHash('md5')
+        const id = createHash("md5")
           .update(JSON.stringify({ path: fullPath, method, action, resource }))
-          .digest('hex');
+          .digest("hex");
 
-        const controller = handler?.name || 'unknown';
+        const controller = handler?.name || "unknown";
 
         endpoints.push({
           id,
@@ -114,11 +115,12 @@ export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
           action,
           resource,
           controller,
-          summary: '',
+          summary: "",
         });
       }
-    } catch (fallbackError) {
-      console.error('Fallback route collection also failed:', fallbackError);
+    }
+    catch (fallbackError) {
+      console.error("Fallback route collection also failed:", fallbackError);
     }
   }
 
@@ -129,13 +131,14 @@ export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
  * 同步端点到数据库
  */
 export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
-  if (endpoints.length === 0) return { inserted: 0, updated: 0 };
+  if (endpoints.length === 0)
+    return { inserted: 0, updated: 0 };
 
   return db.transaction(async (tx) => {
     // 获取现有端点
     const existing = await tx.select().from(sysEndpoint);
     const existingMap = new Map(
-      existing.map(e => [`${e.method}:${e.path}`, e])
+      existing.map(e => [`${e.method}:${e.path}`, e]),
     );
 
     let inserted = 0;
@@ -156,11 +159,12 @@ export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
           summary: endpoint.summary,
         });
         inserted++;
-      } else if (
-        existingEndpoint.action !== endpoint.action ||
-        existingEndpoint.resource !== endpoint.resource ||
-        existingEndpoint.controller !== endpoint.controller ||
-        existingEndpoint.summary !== endpoint.summary
+      }
+      else if (
+        existingEndpoint.action !== endpoint.action
+        || existingEndpoint.resource !== endpoint.resource
+        || existingEndpoint.controller !== endpoint.controller
+        || existingEndpoint.summary !== endpoint.summary
       ) {
         // 更新现有端点
         await tx
@@ -193,6 +197,7 @@ export async function collectAndSyncEndpoints(apps: { name: string; app: AppOpen
 
   if (allEndpoints.length > 0) {
     const result = await syncEndpointsToDatabase(allEndpoints);
+    // eslint-disable-next-line no-console
     console.log(`端点同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
     return result;
   }

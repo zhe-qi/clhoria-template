@@ -1,9 +1,10 @@
-import { and, eq, like, or } from "drizzle-orm";
+import { and, count, eq, like, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { sysMenu, sysRoleMenu } from "@/db/schema";
 import { getUserMenuIds } from "@/lib/authorization";
+import { withPaginationAndCount } from "@/lib/pagination";
 
 import type { SysMenusRouteHandlerType as RouteHandlerType } from "./sys-menus.index";
 
@@ -38,26 +39,39 @@ function buildTree<T extends { id: number; pid: number }>(
 
 /** 查询菜单列表 */
 export const list: RouteHandlerType<"list"> = async (c) => {
-  const { search } = c.req.valid("query");
+  const params = c.req.valid("query");
 
-  const whereConditions = [];
+  let searchCondition;
 
-  if (search) {
-    whereConditions.push(
-      or(
-        like(sysMenu.menuName, `%${search}%`),
-        like(sysMenu.routeName, `%${search}%`),
-        like(sysMenu.routePath, `%${search}%`),
-      ),
+  if (params.search) {
+    searchCondition = or(
+      like(sysMenu.menuName, `%${params.search}%`),
+      like(sysMenu.routeName, `%${params.search}%`),
+      like(sysMenu.routePath, `%${params.search}%`),
     );
   }
 
-  const menus = await db.query.sysMenu.findMany({
-    where: whereConditions.length > 0 ? and(...whereConditions) : undefined,
-    orderBy: [sysMenu.order, sysMenu.id],
-  });
+  // 构建查询
+  const query = db
+    .select()
+    .from(sysMenu)
+    .where(searchCondition)
+    .orderBy(sysMenu.order, sysMenu.id)
+    .$dynamic();
 
-  return c.json(menus, HttpStatusCodes.OK);
+  // 构建计数查询
+  const countQuery = db
+    .select({ count: count() })
+    .from(sysMenu)
+    .where(searchCondition);
+
+  const result = await withPaginationAndCount(
+    query,
+    countQuery,
+    { page: params.page, limit: params.limit },
+  );
+
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 /** 查询菜单树形结构 */
@@ -191,13 +205,13 @@ export const getConstantRoutes: RouteHandlerType<"getConstantRoutes"> = async (c
 /** 获取用户路由 */
 export const getUserRoutes: RouteHandlerType<"getUserRoutes"> = async (c) => {
   const user = c.get("jwtPayload");
-  
+
   if (!user || !user.uid) {
     return c.json({ message: "未授权" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
   const domain = (user.domain as string) || "default";
-  
+
   // 获取用户的菜单ID
   const menuIds = await getUserMenuIds(user.uid as string, domain);
 

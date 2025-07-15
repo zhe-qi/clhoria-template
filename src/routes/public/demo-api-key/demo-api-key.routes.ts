@@ -21,13 +21,13 @@ export const protectedRoute = createRoute({
         apiKey: z.string(),
         timestamp: z.string(),
       }),
-      "访问成功"
+      "访问成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
       z.object({
         message: z.string(),
       }),
-      "未授权访问"
+      "未授权访问",
     ),
   },
 });
@@ -43,7 +43,7 @@ export const publicRoute = createRoute({
         message: z.string(),
         timestamp: z.string(),
       }),
-      "访问成功"
+      "访问成功",
     ),
   },
 });

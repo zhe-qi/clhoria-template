@@ -5,6 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysEndpointSchema, patchSysEndpointSchema, selectSysEndpointSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 // 查询API端点列表
@@ -14,7 +15,7 @@ export const list = createRoute({
   method: "get",
   path: "/sys-endpoints",
   request: {
-    query: z.object({
+    query: PaginationParamsSchema.extend({
       search: z.string().optional().describe("搜索关键词"),
       method: z.string().optional().describe("HTTP方法过滤"),
       action: z.string().optional().describe("动作过滤"),
@@ -23,7 +24,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSysEndpointSchema),
+      createPaginatedResultSchema(selectSysEndpointSchema),
       "API端点列表响应成功",
     ),
   },

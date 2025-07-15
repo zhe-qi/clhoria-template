@@ -1,20 +1,16 @@
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, count, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { casbinRule, sysEndpoint } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/constants";
+import { withPaginationAndCount } from "@/lib/pagination";
 
 import type { SysEndpointsRouteHandlerType } from "./sys-endpoints.index";
 
 // 查询API端点列表
 export const list: SysEndpointsRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
-
-  const query = db
-    .select()
-    .from(sysEndpoint)
-    .$dynamic();
 
   const conditions = [];
 
@@ -38,13 +34,30 @@ export const list: SysEndpointsRouteHandlerType<"list"> = async (c) => {
     conditions.push(ilike(sysEndpoint.resource, `%${params.resource}%`));
   }
 
-  if (conditions.length > 0) {
-    query.where(and(...conditions));
-  }
+  // 组合条件
+  const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const endpoints = await query.orderBy(sysEndpoint.createdAt);
+  // 构建查询
+  const query = db
+    .select()
+    .from(sysEndpoint)
+    .where(whereCondition)
+    .orderBy(sysEndpoint.createdAt)
+    .$dynamic();
 
-  return c.json(endpoints, HttpStatusCodes.OK);
+  // 构建计数查询
+  const countQuery = db
+    .select({ count: count() })
+    .from(sysEndpoint)
+    .where(whereCondition);
+
+  const result = await withPaginationAndCount(
+    query,
+    countQuery,
+    { page: params.page, limit: params.limit },
+  );
+
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 // 树形结构查询API端点（按资源分组）

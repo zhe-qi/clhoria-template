@@ -1,12 +1,13 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { eq, ilike, or } from "drizzle-orm";
+import { count, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysDomain } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/constants";
+import { withPaginationAndCount } from "@/lib/pagination";
 import { formatDate } from "@/utils";
 
 import type { SysDomainsRouteHandlerType } from "./sys-domains.index";
@@ -14,25 +15,37 @@ import type { SysDomainsRouteHandlerType } from "./sys-domains.index";
 export const list: SysDomainsRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
 
-  const query = db
-    .select()
-    .from(sysDomain)
-    .$dynamic();
+  let searchCondition;
 
   // 搜索条件
   if (params.search) {
-    const searchCondition = or(
+    searchCondition = or(
       ilike(sysDomain.code, `%${params.search}%`),
       ilike(sysDomain.name, `%${params.search}%`),
       sysDomain.description ? ilike(sysDomain.description, `%${params.search}%`) : undefined,
     );
-    if (searchCondition) {
-      query.where(searchCondition);
-    }
   }
 
-  const domains = await query;
-  return c.json(domains, HttpStatusCodes.OK);
+  // 构建查询
+  const query = db
+    .select()
+    .from(sysDomain)
+    .where(searchCondition)
+    .$dynamic();
+
+  // 构建计数查询
+  const countQuery = db
+    .select({ count: count() })
+    .from(sysDomain)
+    .where(searchCondition);
+
+  const result = await withPaginationAndCount(
+    query,
+    countQuery,
+    { page: params.page, limit: params.limit },
+  );
+
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const create: SysDomainsRouteHandlerType<"create"> = async (c) => {

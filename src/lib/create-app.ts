@@ -1,22 +1,24 @@
 import type { Schema } from "hono";
+import type { Store } from "hono-rate-limiter";
+import type { RedisReply } from "rate-limit-redis";
 
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { rateLimiter } from "hono-rate-limiter";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { trimTrailingSlash } from "hono/trailing-slash";
+import { RedisStore } from "rate-limit-redis";
 import { notFound, onError } from "stoker/middlewares";
 import { defaultHook } from "stoker/openapi";
-import { rateLimiter, Store } from "hono-rate-limiter";
-import { RedisReply, RedisStore } from 'rate-limit-redis'
-import { redisClient } from '@/lib/redis'
+import { v7 as uuidV7 } from "uuid";
 
 import type { AppBindings, AppOpenAPI } from "@/types/lib";
 
+import { redisClient } from "@/lib/redis";
 import { pinoLogger } from "@/middlewares/pino-logger";
-import { v7 as uuidV7 } from 'uuid';
 
 export function createRouter() {
   return new OpenAPIHono<AppBindings>({
@@ -31,7 +33,7 @@ export default function createApp() {
       const [command, ...commandArgs] = args;
       return redisClient.call(command, ...commandArgs) as Promise<RedisReply>;
     },
-  }) as unknown as Store
+  }) as unknown as Store;
 
   const app = createRouter();
 
@@ -60,8 +62,8 @@ export default function createApp() {
   app.use(rateLimiter({
     windowMs: 15 * 60 * 1000,
     limit: 100,
-    keyGenerator: (c) => c.req.header("X-Forwarded-for") + uuidV7(),
-    store: ioredisStore
+    keyGenerator: c => c.req.header("X-Forwarded-for") + uuidV7(),
+    store: ioredisStore,
   }));
 
   app.notFound(notFound);

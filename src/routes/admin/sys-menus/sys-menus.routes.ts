@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { insertSysMenuSchema, patchSysMenuSchema, selectSysMenuSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const tags = ["/sys-menus (系统菜单管理)"];
 
@@ -14,7 +15,7 @@ export const list = createRoute({
   path: "/sys-menus",
   method: "get",
   request: {
-    query: z.object({
+    query: PaginationParamsSchema.extend({
       search: z.string().optional().describe("搜索关键词"),
     }),
   },
@@ -22,7 +23,7 @@ export const list = createRoute({
   summary: "查询菜单列表",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSysMenuSchema),
+      createPaginatedResultSchema(selectSysMenuSchema),
       "查询成功",
     ),
   },

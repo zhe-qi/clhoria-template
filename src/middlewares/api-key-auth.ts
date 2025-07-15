@@ -1,4 +1,5 @@
 import type { Context, MiddlewareHandler } from "hono";
+
 import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
@@ -25,9 +26,9 @@ async function getApiKeyFromCache(keyValue: string): Promise<boolean> {
       .where(eq(apiKey.key, keyValue))
       .limit(1);
 
-    const isValid = result.length > 0 &&
-                   result[0].enabled &&
-                   (!result[0].expiresAt || result[0].expiresAt > new Date());
+    const isValid = result.length > 0
+      && result[0].enabled
+      && (!result[0].expiresAt || result[0].expiresAt > new Date());
 
     // 缓存结果 5 分钟
     await redisClient.setex(cacheKey, 300, isValid ? "1" : "0");
@@ -41,7 +42,8 @@ async function getApiKeyFromCache(keyValue: string): Promise<boolean> {
     }
 
     return isValid;
-  } catch (error) {
+  }
+  catch (error) {
     console.error("API Key validation error:", error);
     return false;
   }
@@ -69,7 +71,7 @@ export function apiKeyAuth(options: {
       if (required) {
         return c.json(
           { message: "API Key is required" },
-          HttpStatusCodes.UNAUTHORIZED
+          HttpStatusCodes.UNAUTHORIZED,
         );
       }
       await next();
@@ -82,7 +84,7 @@ export function apiKeyAuth(options: {
     if (!isValid) {
       return c.json(
         { message: "Invalid or expired API Key" },
-        HttpStatusCodes.UNAUTHORIZED
+        HttpStatusCodes.UNAUTHORIZED,
       );
     }
 

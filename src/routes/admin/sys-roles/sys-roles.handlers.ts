@@ -1,6 +1,6 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { eq, ilike, or } from "drizzle-orm";
+import { count, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
@@ -8,29 +8,47 @@ import db from "@/db";
 import { sysRole } from "@/db/schema";
 import { assignMenusToRole, assignPermissionsToRole, assignUsersToRole } from "@/lib/authorization";
 import { getDuplicateKeyError } from "@/lib/constants";
+import { withPaginationAndCount } from "@/lib/pagination";
 
 import type { SysRolesRouteHandlerType } from "./sys-roles.index";
 
 export const list: SysRolesRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
 
+  let whereCondition;
+
+  // 搜索条件
+  if (params.search) {
+    whereCondition = or(
+      ilike(sysRole.code, `%${params.search}%`),
+      ilike(sysRole.name, `%${params.search}%`),
+    );
+  }
+
   const query = db
     .select()
     .from(sysRole)
     .$dynamic();
 
-  // 搜索条件
-  if (params.search) {
-    const searchCondition = or(
-      ilike(sysRole.code, `%${params.search}%`),
-      ilike(sysRole.name, `%${params.search}%`),
-    );
-    query.where(searchCondition!);
+  if (whereCondition) {
+    query.where(whereCondition);
   }
 
-  const roles = await query;
+  const countQuery = db
+    .select({ count: count() })
+    .from(sysRole);
 
-  return c.json(roles, HttpStatusCodes.OK);
+  if (whereCondition) {
+    countQuery.where(whereCondition);
+  }
+
+  const result = await withPaginationAndCount(
+    query,
+    countQuery,
+    { page: params.page, limit: params.limit },
+  );
+
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const create: SysRolesRouteHandlerType<"create"> = async (c) => {

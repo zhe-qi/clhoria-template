@@ -5,6 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysAccessKeySchema, selectSysAccessKeySchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 export const list = createRoute({
@@ -13,13 +14,13 @@ export const list = createRoute({
   method: "get",
   path: "/sys-access-keys",
   request: {
-    query: z.object({
+    query: PaginationParamsSchema.extend({
       search: z.string().optional().describe("搜索关键词"),
     }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSysAccessKeySchema),
+      createPaginatedResultSchema(selectSysAccessKeySchema),
       "访问密钥列表响应成功",
     ),
   },

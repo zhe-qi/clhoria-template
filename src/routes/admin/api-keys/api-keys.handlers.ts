@@ -1,43 +1,58 @@
-import { createHash, randomBytes } from "crypto";
-import { and, desc, eq, ilike } from "drizzle-orm";
+import { and, count, desc, eq, ilike } from "drizzle-orm";
+import { createHash, randomBytes } from "node:crypto";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
-import type { ApiKeysRouteHandlerType } from "./api-keys.index";
-
 import db from "@/db";
 import { apiKey } from "@/db/schema/api-key";
+import { withPaginationAndCount } from "@/lib/pagination";
 import { clearApiKeyCache } from "@/middlewares/api-key-auth";
 
+import type { ApiKeysRouteHandlerType } from "./api-keys.index";
+
 export const list: ApiKeysRouteHandlerType<"list"> = async (c) => {
-  const { name, enabled } = c.req.valid("query");
+  const params = c.req.valid("query");
 
   const conditions = [];
-  if (name) {
-    conditions.push(ilike(apiKey.name, `%${name}%`));
+  if (params.name) {
+    conditions.push(ilike(apiKey.name, `%${params.name}%`));
   }
-  if (enabled !== undefined) {
-    conditions.push(eq(apiKey.enabled, enabled));
+  if (params.enabled !== undefined) {
+    conditions.push(eq(apiKey.enabled, params.enabled));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const data = await db
+  // 构建查询
+  const query = db
     .select()
     .from(apiKey)
     .where(whereClause)
-    .orderBy(desc(apiKey.createdAt));
+    .orderBy(desc(apiKey.createdAt))
+    .$dynamic();
 
-  return c.json(data, HttpStatusCodes.OK);
+  // 构建计数查询
+  const countQuery = db
+    .select({ count: count() })
+    .from(apiKey)
+    .where(whereClause);
+
+  const result = await withPaginationAndCount(
+    query,
+    countQuery,
+    { page: params.page, limit: params.limit },
+  );
+
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const create: ApiKeysRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
 
   // 生成 API Key
-  const keyValue = createHash('sha256')
-    .update(randomBytes(32).toString('hex') + Date.now().toString())
-    .digest('hex')
+  const keyValue = createHash("sha256")
+    .update(randomBytes(32).toString("hex") + Date.now().toString())
+    .digest("hex")
     .substring(0, 32);
 
   const payload = c.get("jwtPayload");

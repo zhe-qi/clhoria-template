@@ -5,6 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysRoleSchema, patchSysRoleSchema, selectSysRoleSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 export const list = createRoute({
@@ -13,13 +14,11 @@ export const list = createRoute({
   method: "get",
   path: "/sys-roles",
   request: {
-    query: z.object({
-      search: z.string().optional().describe("搜索关键词"),
-    }),
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSysRoleSchema),
+      createPaginatedResultSchema(selectSysRoleSchema),
       "系统角色列表响应成功",
     ),
   },

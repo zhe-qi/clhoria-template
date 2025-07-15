@@ -20,7 +20,8 @@ async function startServer() {
     console.log(`服务启动成功 http://localhost:${port}`);
 
     serve({ fetch: app.fetch, port });
-  } catch (error) {
+  }
+  catch (error) {
     console.error("启动服务失败:", error);
     process.exit(1);
   }

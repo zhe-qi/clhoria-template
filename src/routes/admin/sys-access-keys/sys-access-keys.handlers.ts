@@ -1,11 +1,12 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysAccessKey } from "@/db/schema";
+import { withPaginationAndCount } from "@/lib/pagination";
 
 import type { SysAccessKeysRouteHandlerType } from "./sys-access-keys.index";
 
@@ -14,29 +15,42 @@ export const list: SysAccessKeysRouteHandlerType<"list"> = async (c) => {
   const payload: JWTPayload = c.get("jwtPayload");
   const domain = (payload.domain as string) || "default";
 
-  const query = db
-    .select()
-    .from(sysAccessKey)
-    .where(eq(sysAccessKey.domain, domain))
-    .$dynamic();
+  // 基本查询条件
+  const baseCondition = eq(sysAccessKey.domain, domain);
+  let searchCondition;
 
   // 搜索条件
   if (params.search) {
-    const searchCondition = or(
+    searchCondition = or(
       ilike(sysAccessKey.accessKeyId, `%${params.search}%`),
       sysAccessKey.description ? ilike(sysAccessKey.description, `%${params.search}%`) : undefined,
     );
-    if (searchCondition) {
-      query.where(searchCondition);
-    }
   }
 
-  // 添加排序
-  query.orderBy(desc(sysAccessKey.createdAt));
+  // 组合条件
+  const whereCondition = searchCondition ? and(baseCondition, searchCondition) : baseCondition;
 
-  const accessKeys = await query;
+  // 构建查询
+  const query = db
+    .select()
+    .from(sysAccessKey)
+    .where(whereCondition)
+    .orderBy(desc(sysAccessKey.createdAt))
+    .$dynamic();
 
-  return c.json(accessKeys, HttpStatusCodes.OK);
+  // 构建计数查询
+  const countQuery = db
+    .select({ count: count() })
+    .from(sysAccessKey)
+    .where(whereCondition);
+
+  const result = await withPaginationAndCount(
+    query,
+    countQuery,
+    { page: params.page, limit: params.limit },
+  );
+
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const create: SysAccessKeysRouteHandlerType<"create"> = async (c) => {

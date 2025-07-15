@@ -1,7 +1,6 @@
 import type { AppRouteHandler } from "@/types/lib";
 
 import { createRouter } from "@/lib/create-app";
-import { apiKeyAuth } from "@/middlewares/api-key-auth";
 
 import * as handlers from "./demo-api-key.handlers";
 import * as routes from "./demo-api-key.routes";

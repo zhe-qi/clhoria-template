@@ -6,10 +6,11 @@ import { z } from "zod";
 
 import { insertApiKeySchema, selectApiKeySchema } from "@/db/schema/api-key";
 import { notFoundSchema } from "@/lib/constants";
+import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const tags = ["/api-keys (API密钥管理)"];
 
-const ListApiKeysQuerySchema = z.object({
+const ListApiKeysQuerySchema = PaginationParamsSchema.extend({
   name: z.string().optional().describe("按名称搜索"),
   enabled: z.boolean().optional().describe("按启用状态筛选"),
 });
@@ -24,12 +25,12 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectApiKeySchema),
-      "获取成功"
+      createPaginatedResultSchema(selectApiKeySchema),
+      "获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(ListApiKeysQuerySchema),
-      "参数验证失败"
+      "参数验证失败",
     ),
   },
 });
@@ -45,11 +46,11 @@ export const create = createRoute({
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
       selectApiKeySchema,
-      "创建成功"
+      "创建成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(insertApiKeySchema),
-      "参数验证失败"
+      "参数验证失败",
     ),
   },
 });
@@ -65,15 +66,15 @@ export const getById = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectApiKeySchema,
-      "获取成功"
+      "获取成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
-      "API密钥不存在"
+      "API密钥不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
-      "参数验证失败"
+      "参数验证失败",
     ),
   },
 });
@@ -92,11 +93,11 @@ export const deleteById = createRoute({
     },
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
-      "API密钥不存在"
+      "API密钥不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
-      "参数验证失败"
+      "参数验证失败",
     ),
   },
 });
@@ -112,15 +113,15 @@ export const toggleStatus = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       selectApiKeySchema,
-      "操作成功"
+      "操作成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
-      "API密钥不存在"
+      "API密钥不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
-      "参数验证失败"
+      "参数验证失败",
     ),
   },
 });

@@ -1,12 +1,13 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, count, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/constants";
+import { withPaginationAndCount } from "@/lib/pagination";
 import { assignRolesToUser, createUser } from "@/lib/user";
 
 import type { SysUsersRouteHandlerType } from "./sys-users.index";
@@ -16,30 +17,38 @@ export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
   const payload: JWTPayload = c.get("jwtPayload");
   const domain = (payload.domain as string) || "default";
 
-  const query = db
-    .select()
-    .from(sysUser)
-    .where(eq(sysUser.domain, domain))
-    .$dynamic();
+  let whereCondition = eq(sysUser.domain, domain);
 
   // 搜索条件
   if (params.search) {
     const searchCondition = or(
       ilike(sysUser.username, `%${params.search}%`),
       ilike(sysUser.nickName, `%${params.search}%`),
-      sysUser.email ? ilike(sysUser.email, `%${params.search}%`) : undefined,
     );
-    if (searchCondition) {
-      query.where(searchCondition);
-    }
+    whereCondition = and(whereCondition, searchCondition)!;
   }
 
-  const users = await query;
+  const query = db
+    .select()
+    .from(sysUser)
+    .where(whereCondition)
+    .$dynamic();
+
+  const countQuery = db
+    .select({ count: count() })
+    .from(sysUser)
+    .where(whereCondition);
+
+  const result = await withPaginationAndCount(
+    query,
+    countQuery,
+    { page: params.page, limit: params.limit },
+  );
 
   // 移除密码字段
-  const data = users.map(({ password, ...user }) => user);
+  const data = result.data.map(({ password, ...user }) => user);
 
-  return c.json(data, HttpStatusCodes.OK);
+  return c.json({ data, meta: result.meta }, HttpStatusCodes.OK);
 };
 
 export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
