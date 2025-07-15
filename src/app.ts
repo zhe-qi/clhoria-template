@@ -52,3 +52,6 @@ appGroups.forEach((group) => {
 });
 
 export default app;
+
+// 导出各个应用实例以便端点收集
+export { adminApp, clientApp, publicApp };

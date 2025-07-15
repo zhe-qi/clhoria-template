@@ -1,6 +1,5 @@
 import { createHash } from "crypto";
-import type { OpenAPIHono } from "@hono/zod-openapi";
-import type { Env } from "hono";
+import type { AppOpenAPI } from "@/types/lib";
 
 import db from "@/db";
 import { sysEndpoint } from "@/db/schema/system/sys-endpoint";
@@ -47,7 +46,7 @@ function extractResourceAndAction(path: string, method: string): { resource: str
 /**
  * 从 Hono 应用中收集端点信息
  */
-export function collectEndpoints(app: OpenAPIHono<Env>, prefix = ""): EndpointInfo[] {
+export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
   const endpoints: EndpointInfo[] = [];
 
   try {
@@ -184,20 +183,17 @@ export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
 /**
  * 完整的端点收集和同步流程
  */
-export async function collectAndSyncEndpoints(apps: { name: string; app: OpenAPIHono<Env>; prefix?: string }[]) {
+export async function collectAndSyncEndpoints(apps: { name: string; app: AppOpenAPI; prefix?: string }[]) {
   const allEndpoints: EndpointInfo[] = [];
 
-  for (const { name, app, prefix } of apps) {
-    console.log(`🔍 收集 ${name} 的端点...`);
+  for (const { app, prefix } of apps) {
     const endpoints = collectEndpoints(app, prefix);
-    console.log(`✅ 从 ${name} 收集到 ${endpoints.length} 个端点`);
     allEndpoints.push(...endpoints);
   }
 
   if (allEndpoints.length > 0) {
-    console.log(`💾 同步 ${allEndpoints.length} 个端点到数据库...`);
     const result = await syncEndpointsToDatabase(allEndpoints);
-    console.log(`✅ 同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
+    console.log(`端点同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
     return result;
   }
 
