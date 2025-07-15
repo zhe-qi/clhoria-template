@@ -1,7 +1,7 @@
 import { boolean, pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/default-columns";
 
 export const tasks = pgTable("tasks", {
   id: defaultColumns.id,

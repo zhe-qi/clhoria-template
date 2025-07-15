@@ -1,6 +1,7 @@
 import type { z } from "zod";
 
 import { eq } from "drizzle-orm";
+import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import type { selectRolesSchema } from "@/db/schema";
 
@@ -9,7 +10,6 @@ import { roles } from "@/db/schema";
 import { enforcerLaunchedPromise } from "@/lib/casbin";
 import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
 import type { RolesRouteHandlerType as RouteHandlerType } from "./roles.index";
 

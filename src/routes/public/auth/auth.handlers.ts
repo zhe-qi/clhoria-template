@@ -1,11 +1,11 @@
 import { hash, verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
+import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { adminUsers, clientUsers } from "@/db/schema";
 import env from "@/env";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { pick } from "@/utils";
 
 import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";

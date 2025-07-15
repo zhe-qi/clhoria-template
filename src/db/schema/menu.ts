@@ -2,7 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { integer, jsonb, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/default-columns";
 
 export const menu = pgTable("menu", {
   id: defaultColumns.id,

@@ -1,6 +1,7 @@
 import type { z } from "zod";
 
 import { eq } from "drizzle-orm";
+import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import type { selectAdminUsersSchema } from "@/db/schema";
 
@@ -8,7 +9,6 @@ import db from "@/db";
 import { adminUsers, usersToRoles } from "@/db/schema";
 import { getQueryValidationError, updatesZodError } from "@/lib/constants";
 import paginatedQuery from "@/lib/pagination";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
 import type { AdminUsersRouteHandlerType as RouteHandlerType } from "./admin-users.index";
 

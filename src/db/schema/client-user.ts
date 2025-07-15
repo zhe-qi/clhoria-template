@@ -1,7 +1,7 @@
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/default-columns";
 
 export const clientUsers = pgTable("client_users", {
   id: defaultColumns.id,

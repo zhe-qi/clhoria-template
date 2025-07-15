@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import { index, integer, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/default-columns";
 
 import { usersToRoles } from "./users-to-roles";
 

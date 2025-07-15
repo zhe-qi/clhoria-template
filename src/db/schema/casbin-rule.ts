@@ -1,7 +1,7 @@
 import { index, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns } from "@/db/common/base-columns";
+import { defaultColumns } from "@/db/common/default-columns";
 
 export const casbinRules = pgTable("casbin_rule", {
   id: defaultColumns.id,
