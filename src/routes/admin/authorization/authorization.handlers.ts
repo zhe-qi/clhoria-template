@@ -1,0 +1,217 @@
+import type { JWTPayload } from "hono/utils/jwt/types";
+
+import { and, eq, inArray } from "drizzle-orm";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import * as HttpStatusPhrases from "stoker/http-status-phrases";
+
+import db from "@/db";
+import { sysMenu, sysRoleMenu } from "@/db/schema";
+import {
+  assignMenusToRole,
+  assignPermissionsToRole as assignPermissionsToRoleLib,
+  assignUsersToRole as assignUsersToRoleLib,
+  getUserMenuIds,
+} from "@/lib/authorization";
+import * as rbac from "@/lib/casbin/rbac";
+
+import type { AuthorizationRouteHandlerType } from "./authorization.index";
+
+// 分配权限给角色
+export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermissionsToRole"> = async (c) => {
+  const { roleId } = c.req.valid("param");
+  const { permissions, domain } = c.req.valid("json");
+  const payload: JWTPayload = c.get("jwtPayload");
+  const currentDomain = domain || (payload.domain as string) || "default";
+
+  // 检查角色是否存在
+  const role = await db.query.sysRole.findFirst({
+    where: (table, { eq }) => eq(table.id, roleId),
+  });
+
+  if (!role) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  // 将权限字符串转换为对象格式
+  const permissionObjects = permissions.map((perm) => {
+    const [resource, action] = perm.split(":");
+    return { resource, action };
+  });
+
+  const result = await assignPermissionsToRoleLib(roleId, permissionObjects, currentDomain);
+
+  return c.json(result, HttpStatusCodes.OK);
+};
+
+// 分配路由给角色
+export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRole"> = async (c) => {
+  const { roleId } = c.req.valid("param");
+  const { menuIds, domain } = c.req.valid("json");
+  const payload: JWTPayload = c.get("jwtPayload");
+  const currentDomain = domain || (payload.domain as string) || "default";
+
+  // 检查角色是否存在
+  const role = await db.query.sysRole.findFirst({
+    where: (table, { eq }) => eq(table.id, roleId),
+  });
+
+  if (!role) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const result = await assignMenusToRole(roleId, menuIds, currentDomain);
+
+  return c.json({
+    success: result.success,
+    added: result.count,
+    removed: 0, // TODO: 计算实际删除的数量
+  }, HttpStatusCodes.OK);
+};
+
+// 分配用户给角色
+export const assignUsersToRole: AuthorizationRouteHandlerType<"assignUsersToRole"> = async (c) => {
+  const { roleId } = c.req.valid("param");
+  const { userIds } = c.req.valid("json");
+  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = (payload.domain as string) || "default";
+
+  // 检查角色是否存在
+  const role = await db.query.sysRole.findFirst({
+    where: (table, { eq }) => eq(table.id, roleId),
+  });
+
+  if (!role) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const result = await assignUsersToRoleLib(roleId, userIds, domain);
+
+  return c.json(result, HttpStatusCodes.OK);
+};
+
+// 获取用户路由
+export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = async (c) => {
+  const { userId } = c.req.valid("param");
+  const { domain: queryDomain } = c.req.valid("query");
+  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = queryDomain || (payload.domain as string) || "default";
+
+  // 检查用户是否存在
+  const user = await db.query.sysUser.findFirst({
+    where: (table, { eq }) => eq(table.id, userId),
+  });
+
+  if (!user) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  // 获取用户的菜单ID
+  const menuIds = await getUserMenuIds(userId, domain);
+
+  if (menuIds.length === 0) {
+    return c.json([], HttpStatusCodes.OK);
+  }
+
+  // 查询菜单详情
+  const menus = await db
+    .select({
+      id: sysMenu.id,
+      menuName: sysMenu.menuName,
+      routeName: sysMenu.routeName,
+      routePath: sysMenu.routePath,
+      component: sysMenu.component,
+      icon: sysMenu.icon,
+      menuType: sysMenu.menuType,
+      pid: sysMenu.pid,
+      order: sysMenu.order,
+      hideInMenu: sysMenu.hideInMenu,
+      keepAlive: sysMenu.keepAlive,
+    })
+    .from(sysMenu)
+    .where(and(
+      inArray(sysMenu.id, menuIds),
+      eq(sysMenu.status, "ENABLED"),
+    ))
+    .orderBy(sysMenu.order);
+
+  // 构建树形结构
+  const menuMap = new Map(menus.map(menu => [menu.id, { ...menu, children: [] as any[] }]));
+  const rootMenus: any[] = [];
+
+  for (const menu of menus) {
+    if (menu.pid === 0) {
+      const rootMenu = menuMap.get(menu.id);
+      if (rootMenu) {
+        rootMenus.push(rootMenu);
+      }
+    }
+    else {
+      const parent = menuMap.get(menu.pid);
+      const child = menuMap.get(menu.id);
+      if (parent && child) {
+        parent.children.push(child);
+      }
+    }
+  }
+
+  return c.json(rootMenus, HttpStatusCodes.OK);
+};
+
+// 获取角色权限
+export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissions"> = async (c) => {
+  const { roleId } = c.req.valid("param");
+  const { domain: queryDomain } = c.req.valid("query");
+  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = queryDomain || (payload.domain as string) || "default";
+
+  // 检查角色是否存在
+  const role = await db.query.sysRole.findFirst({
+    where: (table, { eq }) => eq(table.id, roleId),
+  });
+
+  if (!role) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  // 获取角色权限
+  const permissions = await rbac.getPermissionsForUserInDomain(roleId, domain);
+  const permissionStrings = permissions.map(p => `${p[1]}:${p[2]}`);
+
+  return c.json({
+    domain,
+    permissions: permissionStrings,
+  }, HttpStatusCodes.OK);
+};
+
+// 获取角色菜单
+export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async (c) => {
+  const { roleId } = c.req.valid("param");
+  const { domain: queryDomain } = c.req.valid("query");
+  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = queryDomain || (payload.domain as string) || "default";
+
+  // 检查角色是否存在
+  const role = await db.query.sysRole.findFirst({
+    where: (table, { eq }) => eq(table.id, roleId),
+  });
+
+  if (!role) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  // 获取角色菜单
+  const roleMenus = await db
+    .select({ menuId: sysRoleMenu.menuId })
+    .from(sysRoleMenu)
+    .where(and(
+      eq(sysRoleMenu.roleId, roleId),
+      eq(sysRoleMenu.domain, domain),
+    ));
+
+  const menuIds = roleMenus.map(rm => rm.menuId);
+
+  return c.json({
+    domain,
+    menuIds,
+  }, HttpStatusCodes.OK);
+};
