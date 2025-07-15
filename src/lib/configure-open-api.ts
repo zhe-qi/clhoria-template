@@ -1,14 +1,12 @@
 import { Scalar } from "@scalar/hono-api-reference";
 
+import type { AppNameType } from "@/lib/enums";
 import type { AppOpenAPI } from "@/types/lib";
 
 import env from "@/env";
 
 import packageJSON from "../../package.json" with { type: "json" };
 import { createRouter } from "./create-app";
-
-// Types
-type AppName = "adminApp" | "clientApp" | "publicApp";
 
 interface AppConfig {
   name: string;
@@ -55,12 +53,12 @@ const SCALAR_CONFIG = {
 } as const;
 
 // Helper functions
-function createApps(): Record<AppName, AppOpenAPI> {
+function createApps(): Record<AppNameType, AppOpenAPI> {
   return APP_CONFIG.reduce((acc, config) => {
     const path = config.name === "public" ? "/" : `/${config.name}`;
-    acc[`${config.name}App` as AppName] = createRouter().basePath(path);
+    acc[`${config.name}App` as AppNameType] = createRouter().basePath(path);
     return acc;
-  }, {} as Record<AppName, AppOpenAPI>);
+  }, {} as Record<AppNameType, AppOpenAPI>);
 }
 
 function registerSecurityScheme(router: AppOpenAPI, config: AppConfig): string {
@@ -110,9 +108,9 @@ function createScalarAuthentication(): ScalarAuthentication {
   };
 }
 
-function configureSubApplications(apps: Record<AppName, AppOpenAPI>): void {
+function configureSubApplications(apps: Record<AppNameType, AppOpenAPI>): void {
   APP_CONFIG.forEach((config) => {
-    const router = apps[`${config.name}App` as AppName];
+    const router = apps[`${config.name}App` as AppNameType];
     configureAppDocumentation(router, config);
   });
 }

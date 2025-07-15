@@ -1,37 +1,63 @@
 /* eslint-disable node/no-process-env */
 import { config } from "dotenv";
-import { z } from "zod";
+import { expand } from "dotenv-expand";
+import path from "node:path";
+import { z } from "zod/v4";
 
-config();
+expand(config({
+  path: path.resolve(
+    process.cwd(),
+    process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+  ),
+}));
 
 const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(9999),
-  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]),
-  DATABASE_URL: z.string().url(),
+  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+    .default("info"),
+  DATABASE_URL: z.string().refine(
+    val => process.env.NODE_ENV !== "production" || val !== "",
+    { message: "生产环境下数据库连接字符串不能为空" },
+  ),
   CLIENT_JWT_SECRET: z.string(),
   ADMIN_JWT_SECRET: z.string(),
-}).superRefine((input, ctx) => {
-  if (input.NODE_ENV === "production" && !input.DATABASE_URL) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.invalid_type,
-      expected: "string",
-      received: "undefined",
-      path: ["DATABASE_URL"],
-      message: "数据库连接字符串不能为空",
-    });
-  }
 });
 
-export type env = z.infer<typeof EnvSchema>;
+export type Env = z.infer<typeof EnvSchema>;
 
-// eslint-disable-next-line ts/no-redeclare
-const { data: env, error } = EnvSchema.safeParse(process.env);
+const result = EnvSchema.safeParse(process.env);
 
-if (error) {
+if (!result.success) {
   console.error("❌ Invalid env:");
-  console.error(JSON.stringify(error.flatten().fieldErrors, null, 2));
+
+  const fieldErrors: Record<string, string[]> = {};
+
+  result.error.issues.forEach((issue) => {
+    // 确保路径元素是字符串 (Symbol 不能作为索引类型)
+    const field = issue.path
+      .filter((p): p is string => typeof p === "string")
+      .join("."); // 处理嵌套路径，尽管环境变量是扁平的
+
+    if (field) {
+      // 将错误添加到对应字段
+      if (!fieldErrors[field]) {
+        fieldErrors[field] = [];
+      }
+      fieldErrors[field].push(issue.message);
+    }
+    else {
+      // 处理无字段关联的错误（如根级错误）
+      const rootKey = "_";
+      if (!fieldErrors[rootKey]) {
+        fieldErrors[rootKey] = [];
+      }
+      fieldErrors[rootKey].push(issue.message);
+    }
+  });
+
+  console.error(JSON.stringify(fieldErrors, null, 2));
   process.exit(1);
 }
 
-export default env!;
+export default result.data;
