@@ -17,7 +17,7 @@
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio --config drizzle.config.ts",
     "generate:model": "tsx scripts/generate/index.ts",
-    "seed": "tsx scripts/seed/index.ts",
+    "seed": "tsx migrations/seed/index.ts",
     "migrate:permissions": "tsx src/scripts/migrate-permissions.ts"
   },
   "dependencies": {
