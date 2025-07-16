@@ -5,6 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysRoleSchema, patchSysRoleSchema, selectSysRoleSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/lib/schemas";
 
@@ -137,8 +138,8 @@ export const assignPermissions = createRoute({
     body: jsonContentRequired(
       z.object({
         permissions: z.array(z.object({
-          resource: z.string().describe("资源"),
-          action: z.string().describe("动作"),
+          resource: z.nativeEnum(PermissionResource).describe("资源"),
+          action: z.nativeEnum(PermissionAction).describe("动作"),
         })).describe("权限列表"),
       }),
       "分配权限参数",

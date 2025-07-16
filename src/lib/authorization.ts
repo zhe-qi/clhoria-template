@@ -1,7 +1,10 @@
 import { and, eq, inArray } from "drizzle-orm";
 
+import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
+
 import db from "@/db";
 import { sysEndpoint, sysRoleMenu, sysUserRole } from "@/db/schema";
+import { getUserRolesKey } from "@/lib/enums";
 import { redisClient } from "@/lib/redis";
 
 import * as rbac from "./casbin/rbac";
@@ -11,7 +14,7 @@ import * as rbac from "./casbin/rbac";
  */
 export async function assignPermissionsToRole(
   roleId: string,
-  permissions: Array<{ resource: string; action: string }>,
+  permissions: Array<{ resource: PermissionResourceType; action: PermissionActionType }>,
   domain: string,
 ) {
   // 获取现有权限
@@ -136,10 +139,16 @@ export async function assignUsersToRole(
     // 更新 Redis 缓存
     await Promise.all([
       ...toAdd.map(userId =>
-        redisClient.sadd(`user:${domain}:${userId}:roles`, roleId),
+        redisClient.sadd(
+          getUserRolesKey(userId, domain),
+          roleId,
+        ),
       ),
       ...toRemove.map(userId =>
-        redisClient.srem(`user:${domain}:${userId}:roles`, roleId),
+        redisClient.srem(
+          getUserRolesKey(userId, domain),
+          roleId,
+        ),
       ),
     ]);
 
@@ -158,8 +167,8 @@ export async function syncEndpoints(
   endpoints: Array<{
     path: string;
     method: string;
-    action: string;
-    resource: string;
+    action: PermissionActionType;
+    resource: PermissionResourceType;
     controller: string;
     summary?: string;
   }>,
@@ -238,6 +247,9 @@ export async function getUserMenuIds(userId: string, domain: string): Promise<nu
  * 清理用户的 Redis 缓存
  */
 export async function clearUserCache(userId: string, domain: string) {
-  const key = `user:${domain}:${userId}:roles`;
-  await redisClient.del(key);
+  const userRolesKey = getUserRolesKey(userId, domain);
+  const { getUserMenusKey } = await import("@/lib/enums");
+  const userMenusKey = getUserMenusKey(userId, domain);
+
+  await redisClient.del(userRolesKey, userMenusKey);
 }

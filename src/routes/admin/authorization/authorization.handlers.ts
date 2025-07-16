@@ -1,18 +1,15 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { and, eq, inArray } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
-import { sysMenu, sysRoleMenu } from "@/db/schema";
 import {
-  assignMenusToRole,
   assignPermissionsToRole as assignPermissionsToRoleLib,
   assignUsersToRole as assignUsersToRoleLib,
-  getUserMenuIds,
 } from "@/lib/authorization";
 import * as rbac from "@/lib/casbin/rbac";
+import { MenuService } from "@/lib/menu-service";
 
 import type { AuthorizationRouteHandlerType } from "./authorization.index";
 
@@ -35,7 +32,10 @@ export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermi
   // 将权限字符串转换为对象格式
   const permissionObjects = permissions.map((perm) => {
     const [resource, action] = perm.split(":");
-    return { resource, action };
+    return {
+      resource: resource as import("@/lib/enums").PermissionResourceType,
+      action: action as import("@/lib/enums").PermissionActionType,
+    };
   });
 
   const result = await assignPermissionsToRoleLib(roleId, permissionObjects, currentDomain);
@@ -59,7 +59,7 @@ export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRo
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const result = await assignMenusToRole(roleId, menuIds, currentDomain);
+  const result = await MenuService.instance.assignMenusToRole(roleId, menuIds, currentDomain);
 
   return c.json({
     success: result.success,
@@ -105,56 +105,10 @@ export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = asy
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
-  // 获取用户的菜单ID
-  const menuIds = await getUserMenuIds(userId, domain);
+  // 获取用户路由
+  const userRoutes = await MenuService.instance.getUserRoutes(userId, domain);
 
-  if (menuIds.length === 0) {
-    return c.json([], HttpStatusCodes.OK);
-  }
-
-  // 查询菜单详情
-  const menus = await db
-    .select({
-      id: sysMenu.id,
-      menuName: sysMenu.menuName,
-      routeName: sysMenu.routeName,
-      routePath: sysMenu.routePath,
-      component: sysMenu.component,
-      icon: sysMenu.icon,
-      menuType: sysMenu.menuType,
-      pid: sysMenu.pid,
-      order: sysMenu.order,
-      hideInMenu: sysMenu.hideInMenu,
-      keepAlive: sysMenu.keepAlive,
-    })
-    .from(sysMenu)
-    .where(and(
-      inArray(sysMenu.id, menuIds),
-      eq(sysMenu.status, "ENABLED"),
-    ))
-    .orderBy(sysMenu.order);
-
-  // 构建树形结构
-  const menuMap = new Map(menus.map(menu => [menu.id, { ...menu, children: [] as any[] }]));
-  const rootMenus: any[] = [];
-
-  for (const menu of menus) {
-    if (menu.pid === 0) {
-      const rootMenu = menuMap.get(menu.id);
-      if (rootMenu) {
-        rootMenus.push(rootMenu);
-      }
-    }
-    else {
-      const parent = menuMap.get(menu.pid);
-      const child = menuMap.get(menu.id);
-      if (parent && child) {
-        parent.children.push(child);
-      }
-    }
-  }
-
-  return c.json(rootMenus, HttpStatusCodes.OK);
+  return c.json(userRoutes, HttpStatusCodes.OK);
 };
 
 // 获取角色权限
@@ -200,15 +154,7 @@ export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async
   }
 
   // 获取角色菜单
-  const roleMenus = await db
-    .select({ menuId: sysRoleMenu.menuId })
-    .from(sysRoleMenu)
-    .where(and(
-      eq(sysRoleMenu.roleId, roleId),
-      eq(sysRoleMenu.domain, domain),
-    ));
-
-  const menuIds = roleMenus.map(rm => rm.menuId);
+  const menuIds = await MenuService.instance.getRoleMenuIds(roleId, domain);
 
   return c.json({
     domain,

@@ -9,9 +9,9 @@ export const casbinRule = pgTable("casbin_rule", {
   ptype: varchar({ length: 8 }),
   /** 主体：角色或用户 */
   v0: varchar({ length: 64 }),
-  /** 对象：资源路径 */
+  /** 对象：业务资源 */
   v1: varchar({ length: 254 }),
-  /** 动作：操作类型 */
+  /** 动作：业务动作 */
   v2: varchar({ length: 64 }),
   /** 域：租户/域 */
   v3: varchar({ length: 64 }),
@@ -29,8 +29,8 @@ export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
   id: schema => schema.describe("规则ID"),
   ptype: schema => schema.describe("策略类型: p=策略 g=角色继承"),
   v0: schema => schema.describe("主体: 角色或用户"),
-  v1: schema => schema.describe("对象: 资源路径"),
-  v2: schema => schema.describe("动作: 操作类型"),
+  v1: schema => schema.describe("对象: 业务资源"),
+  v2: schema => schema.describe("动作: 业务动作"),
   v3: schema => schema.describe("域: 租户/域"),
   v4: schema => schema.describe("效果: allow/deny"),
   v5: schema => schema.describe("保留字段"),

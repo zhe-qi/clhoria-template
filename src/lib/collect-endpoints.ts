@@ -17,18 +17,144 @@ export interface EndpointInfo {
 }
 
 /**
- * 从路径提取资源和动作
+ * 从路径和方法提取资源和动作
+ * 使用基于路径模式的智能匹配
  */
 function extractResourceAndAction(path: string, method: string): { resource: string; action: string } {
-  // 移除查询参数和路径参数
-  const cleanPath = path.replace(/\?.*$/, "").replace(/\/:[^/]+/g, "");
+  // 移除查询参数
+  const cleanPath = path.replace(/\?.*$/, "");
 
-  // 从路径中提取资源名称（最后一个非参数部分）
-  const pathParts = cleanPath.split("/").filter(Boolean);
-  const resource = pathParts[pathParts.length - 1] || "root";
+  // 路径模式匹配规则
+  const pathPatterns: Array<{ pattern: RegExp; resource: string; actionMap: Record<string, string> }> = [
+    // 用户管理
+    {
+      pattern: /^\/admin\/sys-users(?:\/[\w-]+)?(?:\/(status|password))?$/,
+      resource: "sys-users",
+      actionMap: {
+        "GET": "read",
+        "POST": "create",
+        "PATCH": "update",
+        "DELETE": "delete",
+        "PATCH-status": "change-status",
+        "PATCH-password": "reset-password",
+      },
+    },
+    // 角色管理
+    {
+      pattern: /^\/admin\/sys-roles(?:\/[\w-]+)?(?:\/(status|permissions|menus))?$/,
+      resource: "sys-roles",
+      actionMap: {
+        "GET": "read",
+        "POST": "create",
+        "PATCH": "update",
+        "DELETE": "delete",
+        "PATCH-status": "change-status",
+        "POST-permissions": "assign-permissions",
+        "POST-menus": "assign-routes",
+      },
+    },
+    // 菜单管理
+    {
+      pattern: /^\/admin\/sys-menus(?:\/[\w-]+)?(?:\/(status))?$/,
+      resource: "sys-menus",
+      actionMap: {
+        "GET": "read",
+        "POST": "create",
+        "PATCH": "update",
+        "DELETE": "delete",
+        "PATCH-status": "change-status",
+      },
+    },
+    // 域管理
+    {
+      pattern: /^\/admin\/sys-domains(?:\/[\w-]+)?(?:\/(status))?$/,
+      resource: "sys-domains",
+      actionMap: {
+        "GET": "read",
+        "POST": "create",
+        "PATCH": "update",
+        "DELETE": "delete",
+        "PATCH-status": "change-status",
+      },
+    },
+    // 端点管理
+    {
+      pattern: /^\/admin\/sys-endpoints(?:\/[\w-]+)?$/,
+      resource: "sys-endpoints",
+      actionMap: {
+        GET: "read",
+        PATCH: "update",
+      },
+    },
+    // 访问密钥管理
+    {
+      pattern: /^\/admin\/sys-access-keys(?:\/[\w-]+)?(?:\/(status))?$/,
+      resource: "sys-access-keys",
+      actionMap: {
+        "GET": "read",
+        "POST": "create",
+        "DELETE": "delete",
+        "PATCH-status": "change-status",
+      },
+    },
+    // 授权管理
+    {
+      pattern: /^\/admin\/authorization\/(?:roles\/[\w-]+\/(permissions|routes|menus)|users\/[\w-]+\/routes)$/,
+      resource: "authorization",
+      actionMap: {
+        "POST-permissions": "assign-permissions",
+        "POST-routes": "assign-routes",
+        "POST-users": "assign-users",
+        "GET-routes": "get-user-routes",
+        "GET-permissions": "get-role-permissions",
+        "GET-menus": "get-role-menus",
+      },
+    },
+    // 登录日志
+    {
+      pattern: /^\/admin\/login-log$/,
+      resource: "login-log",
+      actionMap: {
+        GET: "read",
+      },
+    },
+    // 操作日志
+    {
+      pattern: /^\/admin\/operation-log$/,
+      resource: "operation-log",
+      actionMap: {
+        GET: "read",
+      },
+    },
+    // API密钥管理
+    {
+      pattern: /^\/admin\/api-keys(?:\/[\w-]+)?(?:\/(status))?$/,
+      resource: "api-keys",
+      actionMap: {
+        "GET": "read",
+        "POST": "create",
+        "DELETE": "delete",
+        "PATCH-status": "change-status",
+      },
+    },
+  ];
 
-  // 根据 HTTP 方法映射动作
-  const actionMap: Record<string, string> = {
+  // 尝试匹配路径模式
+  for (const { pattern, resource, actionMap } of pathPatterns) {
+    const match = cleanPath.match(pattern);
+    if (match) {
+      const subPath = match[1]; // 子路径（如 status, permissions 等）
+      const actionKey = subPath ? `${method}-${subPath}` : method;
+      const action = actionMap[actionKey] || actionMap[method];
+
+      if (action) {
+        return { resource, action };
+      }
+    }
+  }
+
+  // 如果没有匹配到，使用默认的方法映射
+  const defaultActionMap: Record<string, string> = {
     GET: "read",
     POST: "create",
     PUT: "update",
@@ -38,9 +164,13 @@ function extractResourceAndAction(path: string, method: string): { resource: str
     OPTIONS: "read",
   };
 
+  // 从路径中提取资源名称（最后一个非参数部分）
+  const pathParts = cleanPath.split("/").filter(Boolean);
+  const resource = pathParts[pathParts.length - 1] || "root";
+
   return {
     resource,
-    action: actionMap[method] || "access",
+    action: defaultActionMap[method] || "access",
   };
 }
 

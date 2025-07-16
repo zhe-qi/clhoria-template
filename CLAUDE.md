@@ -114,6 +114,55 @@ src/db/schema/
 - Testing with Vitest in silent mode during tests
 - ESLint with @antfu/eslint-config
 
+## Enum Definition Standards
+
+When creating enums in the project, follow these conventions:
+
+### 1. Use Const Assertion Pattern
+
+```typescript
+/** 描述枚举的用途 */
+export const EnumName = {
+  /** 描述选项1 */
+  OPTION_1: "value1",
+  
+  /** 描述选项2 */
+  OPTION_2: "value2",
+} as const;
+
+/** 枚举类型 */
+export type EnumNameType = (typeof EnumName)[keyof typeof EnumName];
+```
+
+### 2. Database Enums
+
+For database-related enums, use `pgEnum` from Drizzle:
+
+```typescript
+import { pgEnum } from "drizzle-orm/pg-core";
+
+export const statusEnum = pgEnum("status", ["ENABLED", "DISABLED", "BANNED"]);
+```
+
+### 3. Naming Conventions
+
+- **Enum names**: Use PascalCase with descriptive names (e.g., `PermissionResource`, `PermissionAction`)
+- **Enum values**: Use UPPER_SNAKE_CASE for constants
+- **String values**: Use kebab-case for string values that represent identifiers
+- **Type names**: Add `Type` suffix (e.g., `PermissionResourceType`)
+
+### 4. Documentation
+
+- Always include JSDoc comments for enums and their values
+- Use Chinese descriptions for better understanding
+- Include usage examples when necessary
+
+### 5. File Organization
+
+- Place enums in `src/lib/enums/` directory
+- Use barrel exports from `src/lib/enums/index.ts`
+- Keep related enums in the same file when appropriate
+
 ## Route Architecture Standards
 
 When creating new routes, ALWAYS follow the admin-users route structure for consistency:

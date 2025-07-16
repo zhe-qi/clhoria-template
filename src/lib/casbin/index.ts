@@ -16,7 +16,7 @@ g = _, _, _
 e = some(where (p.eft == allow)) && !some(where (p.eft == deny))
 
 [matchers]
-m = r.sub == p.sub && keyMatch(r.obj, p.obj) && (r.act == p.act || p.act == "*") && r.dom == p.dom
+m = g(r.sub, p.sub, r.dom) && r.obj == p.obj && r.act == p.act && r.dom == p.dom
 `);
 
 const adapter = await DrizzleCasbinAdapter.newAdapter();
