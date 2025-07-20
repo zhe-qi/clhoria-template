@@ -8,6 +8,7 @@ import type { insertCasbinRuleSchema } from "@/db/schema";
 
 import db from "@/db";
 import { casbinRule, sysRole } from "@/db/schema";
+import { Status } from "@/lib/enums";
 
 type TCasinTable = z.infer<typeof insertCasbinRuleSchema>;
 
@@ -23,7 +24,7 @@ export class DrizzleCasbinAdapter implements Adapter {
   }
 
   async loadPolicy(model: Model): Promise<void> {
-    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, "ENABLED"));
+    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, Status.ENABLED));
     const lines = await this.db.select().from(this.schema);
     const roleSet = new Set<string>(roles.map(role => role.id));
     lines.forEach(line => roleSet.has(line.v0 as string) && this.loadPolicyLine(line, model));
@@ -36,7 +37,7 @@ export class DrizzleCasbinAdapter implements Adapter {
       ).filter(Boolean)))).flat();
 
     const lines = await this.db.select().from(this.schema).where(or(...whereConditions));
-    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, "ENABLED"));
+    const roles = await this.db.select().from(this.roleSchema).where(eq(this.roleSchema.status, Status.ENABLED));
 
     const roleSet = new Set<string>(roles.map(role => role.id));
     lines.forEach(line => roleSet.has(line.v0 as string) && this.loadPolicyLine(line, model));

@@ -2,7 +2,7 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import db from "@/db";
 import { sysMenu, sysRoleMenu } from "@/db/schema";
-import { getUserMenusKey } from "@/lib/enums";
+import { getUserMenusKey, Status } from "@/lib/enums";
 import { redisClient } from "@/lib/redis";
 
 import * as rbac from "./casbin/rbac";
@@ -89,7 +89,7 @@ export class MenuService {
       .from(sysMenu)
       .where(and(
         inArray(sysMenu.id, menuIds),
-        eq(sysMenu.status, "ENABLED"),
+        eq(sysMenu.status, Status.ENABLED),
       ))
       .orderBy(sysMenu.order);
 

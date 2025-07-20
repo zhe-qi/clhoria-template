@@ -6,7 +6,7 @@ import { v7 as uuidV7 } from "uuid";
 import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser, sysUserRole } from "@/db/schema";
 import env from "@/env";
-import { TokenStatus, TokenType } from "@/lib/enums";
+import { Status, TokenStatus, TokenType } from "@/lib/enums";
 
 import { clearUserCache } from "./authorization";
 import * as rbac from "./casbin/rbac";
@@ -63,7 +63,7 @@ export async function login(params: LoginParams) {
     throw new Error("用户不存在");
   }
 
-  if (user.status !== "ENABLED") {
+  if (user.status !== Status.ENABLED) {
     throw new Error("用户已被禁用");
   }
 

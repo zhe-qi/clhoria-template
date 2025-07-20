@@ -1,3 +1,5 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
-export const statusEnum = pgEnum("status", ["ENABLED", "DISABLED", "BANNED"]);
+import { Status } from "@/lib/enums";
+
+export const statusEnum = pgEnum("status", [Status.ENABLED, Status.DISABLED, Status.BANNED]);

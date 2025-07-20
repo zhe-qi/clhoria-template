@@ -4,6 +4,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import db from "@/db";
 import { sysMenu, sysRoleMenu } from "@/db/schema";
 import { getUserMenuIds } from "@/lib/authorization";
+import { Status } from "@/lib/enums";
 import { withPaginationAndCount } from "@/lib/pagination";
 
 import type { SysMenusRouteHandlerType as RouteHandlerType } from "./sys-menus.index";
@@ -109,7 +110,7 @@ export const getMenusByRole: RouteHandlerType<"getMenusByRole"> = async (c) => {
 
   const menus = await db.query.sysMenu.findMany({
     where: and(
-      eq(sysMenu.status, "ENABLED"),
+      eq(sysMenu.status, Status.ENABLED),
       or(...menuIds.map(({ menuId }) => eq(sysMenu.id, menuId))),
     ),
     orderBy: [sysMenu.order, sysMenu.id],
@@ -175,7 +176,7 @@ export const getConstantRoutes: RouteHandlerType<"getConstantRoutes"> = async (c
   const constantMenus = await db.query.sysMenu.findMany({
     where: and(
       eq(sysMenu.constant, true),
-      eq(sysMenu.status, "ENABLED"),
+      eq(sysMenu.status, Status.ENABLED),
     ),
     orderBy: [sysMenu.order, sysMenu.id],
   });
@@ -223,7 +224,7 @@ export const getUserRoutes: RouteHandlerType<"getUserRoutes"> = async (c) => {
   const menus = await db.query.sysMenu.findMany({
     where: and(
       or(...menuIds.map(id => eq(sysMenu.id, id))),
-      eq(sysMenu.status, "ENABLED"),
+      eq(sysMenu.status, Status.ENABLED),
       eq(sysMenu.constant, false), // 排除常量菜单
     ),
     orderBy: [sysMenu.order, sysMenu.id],

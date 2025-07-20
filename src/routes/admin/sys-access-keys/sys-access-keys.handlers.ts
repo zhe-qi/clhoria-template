@@ -6,6 +6,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysAccessKey } from "@/db/schema";
+import { Status } from "@/lib/enums";
 import { withPaginationAndCount } from "@/lib/pagination";
 
 import type { SysAccessKeysRouteHandlerType } from "./sys-access-keys.index";
@@ -79,7 +80,7 @@ export const create: SysAccessKeysRouteHandlerType<"create"> = async (c) => {
       accessKeyId,
       accessKeySecret,
       description: body.description,
-      status: body.status || "ENABLED",
+      status: body.status || Status.ENABLED,
       createdBy: operatorId,
     })
     .returning();

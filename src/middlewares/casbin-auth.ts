@@ -64,7 +64,6 @@ export function requirePermission(options: PermissionOptions): MiddlewareHandler
 
     // 从 Redis 获取用户角色
     const roles = await getUserRoles(userId, domain);
-
     if (roles.length === 0) {
       return c.json(
         { message: "User has no roles assigned" },
@@ -117,7 +116,6 @@ export function casbin(): MiddlewareHandler {
 
     // 从 Redis 获取用户角色
     const roles = await getUserRoles(userId, domain);
-
     if (roles.length === 0) {
       return c.json(
         { message: "User has no roles assigned" },

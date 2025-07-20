@@ -16,6 +16,9 @@ export type AppNameType = (typeof AppNameMenu)[keyof typeof AppNameMenu];
 // 缓存相关枚举和工具函数
 export * from "./cache";
 
+// 通用枚举
+export * from "./common";
+
 // 权限相关枚举
 export * from "./permissions";
 

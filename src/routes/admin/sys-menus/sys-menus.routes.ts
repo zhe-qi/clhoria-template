@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { insertSysMenuSchema, patchSysMenuSchema, selectSysMenuSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { Status } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const tags = ["/sys-menus (系统菜单管理)"];
@@ -35,7 +36,7 @@ export const tree = createRoute({
   method: "get",
   request: {
     query: z.object({
-      status: z.enum(["ENABLED", "DISABLED"]).optional().describe("菜单状态"),
+      status: z.enum([Status.ENABLED, Status.DISABLED]).optional().describe("菜单状态"),
     }),
   },
   tags,

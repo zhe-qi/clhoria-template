@@ -6,7 +6,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
 import env from "@/env";
-import { TokenStatus, TokenType } from "@/lib/enums";
+import { AuthType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { pick } from "@/utils";
 
 import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";
@@ -38,7 +38,7 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  if (user.status !== "ENABLED") {
+  if (user.status !== Status.ENABLED) {
     return c.json({ message: "用户已禁用" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
@@ -101,7 +101,7 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
     address: "unknown",
     userAgent,
     requestId: crypto.randomUUID(),
-    type: "PASSWORD",
+    type: AuthType.PASSWORD,
     createdBy: "system",
   });
 
