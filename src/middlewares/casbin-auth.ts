@@ -105,9 +105,9 @@ export function casbin(): MiddlewareHandler {
     const reqId = c.get("reqId");
     const { path, method } = c.req;
     const logger = c.get("logger");
-    
+
     logger.info(`[CASBIN] ${reqId} - 开始Casbin权限验证: ${method} ${path}`);
-    
+
     const enforcer = await enforcerLaunchedPromise;
 
     if (!(enforcer instanceof Enforcer)) {
@@ -127,8 +127,8 @@ export function casbin(): MiddlewareHandler {
     // 从 Redis 获取用户角色
     logger.info(`[CASBIN] ${reqId} - 开始获取用户角色`);
     const roles = await getUserRoles(userId, domain);
-    logger.info(`[CASBIN] ${reqId} - 用户角色: roles=[${roles.join(', ')}], 角色数量=${roles.length}`);
-    
+    logger.info(`[CASBIN] ${reqId} - 用户角色: roles=[${roles.join(", ")}], 角色数量=${roles.length}`);
+
     if (roles.length === 0) {
       logger.warn(`[CASBIN] ${reqId} - 权限验证失败: 用户无任何角色`);
       return c.json(
@@ -162,7 +162,7 @@ export function casbin(): MiddlewareHandler {
       const hasRolePermission = await enforcer.enforce(role, endpoint.resource, endpoint.action, domain);
       logger.info(`[CASBIN] ${reqId} - 角色权限检查结果: role=${role} -> ${hasRolePermission}`);
     }
-    
+
     const hasPermission = await checkPermission(
       enforcer,
       roles,

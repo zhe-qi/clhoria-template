@@ -13,6 +13,7 @@ export default antfu({
     "**/migrations/*",
     "CLAUDE.md",
     "CLAUDE.local.md",
+    "./.claude/**/*",
   ],
 }, {
   rules: {

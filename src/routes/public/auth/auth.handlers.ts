@@ -51,7 +51,7 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
 
   // 生成 tokens
   const roles = user.userRoles.map(ur => ur.roleId);
-  
+
   const now = Math.floor(Date.now() / 1000);
   const jti = crypto.randomUUID(); // JWT ID 确保唯一性
 
@@ -69,7 +69,8 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
   const userRolesKey = getUserRolesKey(user.id, user.domain);
   if (roles.length > 0) {
     await redisClient.sadd(userRolesKey, ...roles);
-  } else {
+  }
+  else {
     // 即使没有角色，也要设置一个标记表示已经处理过该用户
     await redisClient.sadd(userRolesKey, "__no_roles__");
   }

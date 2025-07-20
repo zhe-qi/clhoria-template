@@ -51,9 +51,9 @@ export function jwtAuth(): MiddlewareHandler {
     const reqId = c.get("reqId");
     const { path, method } = c.req;
     const logger = c.get("logger");
-    
+
     logger.info(`[JWT-AUTH] ${reqId} - 开始JWT认证: ${method} ${path}`);
-    
+
     const payload: JWTPayload = c.get("jwtPayload");
 
     if (!payload) {
@@ -94,7 +94,7 @@ export function jwtAuth(): MiddlewareHandler {
     // 从 Redis 获取用户角色
     logger.info(`[JWT-AUTH] ${reqId} - 开始获取用户角色: userId=${userId}, domain=${domain}`);
     const roles = await getUserRoles(userId, domain);
-    logger.info(`[JWT-AUTH] ${reqId} - 用户角色获取结果: roles=[${roles.join(', ')}], 角色数量=${roles.length}`);
+    logger.info(`[JWT-AUTH] ${reqId} - 用户角色获取结果: roles=[${roles.join(", ")}], 角色数量=${roles.length}`);
 
     // 将用户信息存入上下文
     c.set("userId", userId);
