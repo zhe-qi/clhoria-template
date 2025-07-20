@@ -25,7 +25,8 @@ interface PermissionOptions {
 async function getUserRoles(userId: string, domain: string): Promise<string[]> {
   const key = getUserRolesKey(userId, domain);
   const roles = await redisClient.smembers(key);
-  return roles.length > 0 ? roles : [];
+  // 过滤掉特殊标记
+  return roles.filter(role => role !== "__no_roles__");
 }
 
 /**
@@ -59,14 +60,14 @@ export function requirePermission(options: PermissionOptions): MiddlewareHandler
     }
 
     const payload: JWTPayload = c.get("jwtPayload");
-    const userId = payload.sub as string;
+    const userId = payload.uid as string;
     const domain = (payload.domain as string) ?? "default";
 
     // 从 Redis 获取用户角色
     const roles = await getUserRoles(userId, domain);
     if (roles.length === 0) {
       return c.json(
-        { message: "User has no roles assigned" },
+        { message: "Access denied: No roles assigned to user" },
         HttpStatusCodes.FORBIDDEN,
       );
     }
@@ -101,9 +102,16 @@ export function requirePermission(options: PermissionOptions): MiddlewareHandler
  */
 export function casbin(): MiddlewareHandler {
   return async (c: Context, next) => {
+    const reqId = c.get("reqId");
+    const { path, method } = c.req;
+    const logger = c.get("logger");
+    
+    logger.info(`[CASBIN] ${reqId} - 开始Casbin权限验证: ${method} ${path}`);
+    
     const enforcer = await enforcerLaunchedPromise;
 
     if (!(enforcer instanceof Enforcer)) {
+      logger.error(`[CASBIN] ${reqId} - Casbin enforcer初始化失败`);
       return c.json(
         { message: HttpStatusPhrases.INTERNAL_SERVER_ERROR },
         HttpStatusCodes.INTERNAL_SERVER_ERROR,
@@ -111,21 +119,26 @@ export function casbin(): MiddlewareHandler {
     }
 
     const payload: JWTPayload = c.get("jwtPayload");
-    const userId = payload.sub as string;
+    const userId = payload.uid as string;
     const domain = (payload.domain as string) ?? "default";
 
+    logger.info(`[CASBIN] ${reqId} - 用户信息: userId=${userId}, domain=${domain}`);
+
     // 从 Redis 获取用户角色
+    logger.info(`[CASBIN] ${reqId} - 开始获取用户角色`);
     const roles = await getUserRoles(userId, domain);
+    logger.info(`[CASBIN] ${reqId} - 用户角色: roles=[${roles.join(', ')}], 角色数量=${roles.length}`);
+    
     if (roles.length === 0) {
+      logger.warn(`[CASBIN] ${reqId} - 权限验证失败: 用户无任何角色`);
       return c.json(
-        { message: "User has no roles assigned" },
+        { message: "Access denied: No roles assigned to user" },
         HttpStatusCodes.FORBIDDEN,
       );
     }
 
-    const { path, method } = c.req;
-
     // 查询数据库获取端点权限信息
+    logger.info(`[CASBIN] ${reqId} - 查询端点权限信息: ${method} ${path}`);
     const endpoint = await db.query.sysEndpoint.findFirst({
       where: and(
         eq(sysEndpoint.path, path),
@@ -135,12 +148,21 @@ export function casbin(): MiddlewareHandler {
 
     if (!endpoint) {
       // 如果没有找到端点信息，说明该端点不需要权限验证或者尚未同步
-      console.warn(`No endpoint info found for ${method} ${path}`);
+      logger.warn(`[CASBIN] ${reqId} - 未找到端点权限信息: ${method} ${path} - 跳过权限验证`);
       await next();
       return;
     }
 
+    logger.info(`[CASBIN] ${reqId} - 端点权限信息: resource=${endpoint.resource}, action=${endpoint.action}`);
+
     // 验证权限
+    logger.info(`[CASBIN] ${reqId} - 开始权限检查`);
+    for (const role of roles) {
+      logger.info(`[CASBIN] ${reqId} - 检查角色权限: role=${role}, resource=${endpoint.resource}, action=${endpoint.action}, domain=${domain}`);
+      const hasRolePermission = await enforcer.enforce(role, endpoint.resource, endpoint.action, domain);
+      logger.info(`[CASBIN] ${reqId} - 角色权限检查结果: role=${role} -> ${hasRolePermission}`);
+    }
+    
     const hasPermission = await checkPermission(
       enforcer,
       roles,
@@ -149,7 +171,10 @@ export function casbin(): MiddlewareHandler {
       domain,
     );
 
+    logger.info(`[CASBIN] ${reqId} - 最终权限验证结果: ${hasPermission}`);
+
     if (!hasPermission) {
+      logger.warn(`[CASBIN] ${reqId} - 权限验证失败: 用户无访问权限`);
       return c.json(
         { message: HttpStatusPhrases.FORBIDDEN },
         HttpStatusCodes.FORBIDDEN,
@@ -160,6 +185,7 @@ export function casbin(): MiddlewareHandler {
     c.set("userRoles", roles);
     c.set("userDomain", domain);
 
+    logger.info(`[CASBIN] ${reqId} - Casbin权限验证通过，继续执行`);
     await next();
   };
 }

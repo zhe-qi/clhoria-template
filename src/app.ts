@@ -9,7 +9,8 @@ import * as allPublicExports from "@/routes/public/public.index";
 
 import env from "./env";
 import createApp from "./lib/create-app";
-import { casbin } from "./middlewares/jwt-auth";
+import { casbin } from "./middlewares/casbin-auth";
+import { jwtAuth } from "./middlewares/jwt-auth";
 
 // 获取OpenAPIHono实例
 const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
@@ -30,6 +31,7 @@ publicRoutes.forEach((route) => {
 // #region 客户端路由
 const clientRoutes = Object.values<AppOpenAPI>(allClientExports);
 clientApp.use("/*", jwt({ secret: env.CLIENT_JWT_SECRET }));
+clientApp.use("/*", jwtAuth());
 clientRoutes.forEach((route) => {
   clientApp.route("/", route);
 });
@@ -39,6 +41,7 @@ clientRoutes.forEach((route) => {
 // ps: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
 const adminRoutes = Object.values<AppOpenAPI>(allAdminExports);
 adminApp.use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
+adminApp.use("/*", jwtAuth());
 adminApp.use("/*", casbin());
 adminRoutes.forEach((route) => {
   adminApp.route("/", route);

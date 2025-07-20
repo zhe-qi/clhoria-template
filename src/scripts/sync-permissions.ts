@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import db from "@/db";
-import { casbinRule, sysEndpoint, sysRole } from "@/db/schema";
+import { casbinRule, sysEndpoint } from "@/db/schema";
 
 /**
  * 同步权限数据
@@ -27,15 +27,15 @@ async function syncPermissions() {
     const endpoints = await db.select().from(sysEndpoint);
     console.log(`找到 ${endpoints.length} 个端点`);
 
-    // 获取现有的超级管理员权限
+    // 获取现有的超级管理员权限（使用角色ID）
     const existingRules = await db
       .select()
       .from(casbinRule)
-      .where(eq(casbinRule.v0, "ROLE_SUPER"));
+      .where(eq(casbinRule.v0, superRole.id));
 
     // 创建权限映射
     const existingPermissions = new Set(
-      existingRules.map(rule => `${rule.v1}:${rule.v2}`)
+      existingRules.map(rule => `${rule.v1}:${rule.v2}`),
     );
 
     // 收集需要添加的权限
@@ -46,7 +46,7 @@ async function syncPermissions() {
 
     for (const endpoint of endpoints) {
       const permissionKey = `${endpoint.resource}:${endpoint.action}`;
-      
+
       if (!existingPermissions.has(permissionKey)) {
         newPermissions.push({
           resource: endpoint.resource,
@@ -60,7 +60,7 @@ async function syncPermissions() {
     if (newPermissions.length > 0) {
       const rulesToInsert = newPermissions.map(perm => ({
         ptype: "p",
-        v0: "ROLE_SUPER",
+        v0: superRole.id, // 使用角色ID而不是角色代码
         v1: perm.resource,
         v2: perm.action,
         v3: "built-in",
@@ -70,7 +70,8 @@ async function syncPermissions() {
 
       await db.insert(casbinRule).values(rulesToInsert);
       console.log(`添加了 ${newPermissions.length} 条新权限`);
-    } else {
+    }
+    else {
       console.log("所有权限已存在，无需添加");
     }
 
@@ -85,7 +86,8 @@ async function syncPermissions() {
     console.log(`- 超级管理员权限: ${existingRules.length + newPermissions.length}`);
 
     console.log("\n权限同步完成！");
-  } catch (error) {
+  }
+  catch (error) {
     console.error("权限同步失败:", error);
     throw error;
   }
@@ -104,7 +106,7 @@ async function validatePermissions() {
 
     // 获取所有端点
     const endpoints = await db.select().from(sysEndpoint);
-    
+
     // 创建端点映射
     const endpointMap = new Map<string, boolean>();
     for (const endpoint of endpoints) {
@@ -117,10 +119,11 @@ async function validatePermissions() {
 
     for (const rule of rules) {
       const permissionKey = `${rule.v1}:${rule.v2}`;
-      
+
       if (endpointMap.has(permissionKey)) {
         validCount++;
-      } else {
+      }
+      else {
         invalidCount++;
         console.warn(`未找到对应端点: ${permissionKey} (角色: ${rule.v0})`);
       }
@@ -133,10 +136,12 @@ async function validatePermissions() {
 
     if (invalidCount > 0) {
       console.warn("\n警告: 存在未映射到端点的权限规则");
-    } else {
+    }
+    else {
       console.log("\n✓ 所有权限规则都有对应的端点");
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error("权限验证失败:", error);
     throw error;
   }
@@ -149,7 +154,8 @@ async function main() {
     await validatePermissions();
     console.log("\n所有任务完成！");
     process.exit(0);
-  } catch (error) {
+  }
+  catch (error) {
     console.error("执行失败:", error);
     process.exit(1);
   }
