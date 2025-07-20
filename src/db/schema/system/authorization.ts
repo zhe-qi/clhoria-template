@@ -58,7 +58,34 @@ export const menuRouteSchema: z.ZodType<MenuRouteType> = z.lazy(() => z.object({
   component: z.string().optional().describe("组件路径"),
   meta: menuRouteMetaSchema,
   children: z.array(menuRouteSchema).optional().describe("子路由"),
-}));
+})).openapi({
+  type: "object",
+  properties: {
+    name: { type: "string", description: "路由名称" },
+    path: { type: "string", description: "路由路径" },
+    component: { type: "string", description: "组件路径" },
+    meta: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "菜单标题" },
+        icon: { type: "string", description: "图标" },
+        order: { type: "number", description: "排序" },
+        hideInMenu: { type: "boolean", description: "是否在菜单中隐藏" },
+        keepAlive: { type: "boolean", description: "是否缓存" },
+        activeMenu: { type: "string", description: "激活菜单" },
+        constant: { type: "boolean", description: "是否常量路由" },
+      },
+      required: ["title", "order"],
+    },
+    children: {
+      type: "array",
+      items: { $ref: "#/components/schemas/MenuRoute" },
+      description: "子路由",
+    },
+  },
+  required: ["name", "path", "meta"],
+  description: "菜单路由配置",
+});
 
 // 用户路由响应Schema - 包含首页和路由列表
 export const userRoutesResponseSchema = z.object({
