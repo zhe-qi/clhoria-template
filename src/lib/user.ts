@@ -94,7 +94,7 @@ export async function login(params: LoginParams) {
   await db.insert(sysTokens).values({
     accessToken,
     refreshToken,
-    status: "active",
+    status: "ACTIVE",
     userId: user.id,
     username: user.username,
     domain: params.domain,
@@ -149,7 +149,7 @@ export async function logout(userId: string, domain: string, accessToken: string
   // 更新令牌状态
   await db
     .update(sysTokens)
-    .set({ status: "revoked" })
+    .set({ status: "REVOKED" })
     .where(eq(sysTokens.accessToken, accessToken));
 
   // 清理 Redis 缓存

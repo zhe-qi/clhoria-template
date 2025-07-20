@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 // 分配权限给角色的Schema
 export const assignPermissionsToRoleSchema = z.object({
