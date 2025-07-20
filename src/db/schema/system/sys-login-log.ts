@@ -34,7 +34,6 @@ export const selectSysLoginLogSchema = createSelectSchema(sysLoginLog, {
 });
 
 export const insertSysLoginLogSchema = createInsertSchema(sysLoginLog, {
-  userId: schema => schema.uuid(),
   username: schema => schema.min(1),
   domain: schema => schema.min(1),
   ip: schema => schema.min(1),

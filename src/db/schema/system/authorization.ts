@@ -33,23 +33,38 @@ export const assignmentResponseSchema = z.object({
   removed: z.number().describe("移除数量"),
 });
 
-// 用户路由响应Schema
-export const userRouteSchema = z.object({
-  id: z.number().describe("菜单ID"),
-  menuName: z.string().describe("菜单名称"),
-  routeName: z.string().describe("路由名称"),
-  routePath: z.string().describe("路由路径"),
-  component: z.string().describe("组件路径"),
+// 菜单路由Schema
+const menuRouteMetaSchema = z.object({
+  title: z.string().describe("菜单标题"),
   icon: z.string().optional().describe("图标"),
-  menuType: z.enum(["directory", "menu"]).describe("菜单类型"),
-  pid: z.number().describe("父级菜单ID"),
   order: z.number().describe("排序"),
-  hideInMenu: z.boolean().describe("是否在菜单中隐藏"),
-  keepAlive: z.boolean().describe("是否缓存"),
-  children: z.array(z.any()).optional().describe("子菜单"),
-});
+  hideInMenu: z.boolean().optional().describe("是否在菜单中隐藏"),
+  keepAlive: z.boolean().optional().describe("是否缓存"),
+  activeMenu: z.string().optional().describe("激活菜单"),
+  constant: z.boolean().optional().describe("是否常量路由"),
+}).describe("路由元信息");
 
-export const userRoutesResponseSchema = z.array(userRouteSchema);
+interface MenuRouteType {
+  name: string;
+  path: string;
+  component?: string;
+  meta: z.infer<typeof menuRouteMetaSchema>;
+  children?: MenuRouteType[];
+}
+
+export const menuRouteSchema: z.ZodType<MenuRouteType> = z.lazy(() => z.object({
+  name: z.string().describe("路由名称"),
+  path: z.string().describe("路由路径"),
+  component: z.string().optional().describe("组件路径"),
+  meta: menuRouteMetaSchema,
+  children: z.array(menuRouteSchema).optional().describe("子路由"),
+}));
+
+// 用户路由响应Schema - 包含首页和路由列表
+export const userRoutesResponseSchema = z.object({
+  home: z.string().describe("首页路由"),
+  routes: z.array(menuRouteSchema).describe("路由列表"),
+});
 
 // 角色权限查询Schema
 export const rolePermissionsSchema = z.object({

@@ -43,7 +43,6 @@ export const insertSysTokensSchema = createInsertSchema(sysTokens, {
   accessToken: schema => schema.min(1),
   refreshToken: schema => schema.min(1),
   status: schema => schema.min(1),
-  userId: schema => schema.uuid(),
   username: schema => schema.min(1),
   domain: schema => schema.min(1),
   ip: schema => schema.min(1),

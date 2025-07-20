@@ -44,7 +44,6 @@ export const selectSysOperationLogSchema = createSelectSchema(sysOperationLog, {
 });
 
 export const insertSysOperationLogSchema = createInsertSchema(sysOperationLog, {
-  userId: schema => schema.uuid(),
   username: schema => schema.min(1),
   domain: schema => schema.min(1),
   moduleName: schema => schema.min(1),
