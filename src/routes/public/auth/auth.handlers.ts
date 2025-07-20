@@ -6,6 +6,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
 import env from "@/env";
+import { TokenStatus, TokenType } from "@/lib/enums";
 import { pick } from "@/utils";
 
 import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";
@@ -49,24 +50,37 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
 
   // 生成 tokens
   const roles = user.userRoles.map(ur => ur.roleId);
+  const now = Math.floor(Date.now() / 1000);
+  const jti = crypto.randomUUID(); // JWT ID 确保唯一性
   const tokenPayload = {
     uid: user.id,
     username: user.username,
     domain: user.domain,
     roles,
+    iat: now,
+    exp: now + 7 * 24 * 60 * 60, // 7天过期
+    jti,
   };
 
   const accessToken = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
-  const refreshToken = await sign({ ...tokenPayload, type: "refresh" }, env.ADMIN_JWT_SECRET, "HS256");
+  const refreshToken = await sign({ ...tokenPayload, type: "refresh", exp: now + 30 * 24 * 60 * 60, jti: crypto.randomUUID() }, env.ADMIN_JWT_SECRET, "HS256");
 
   // 保存 token 记录
   const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
   const userAgent = c.req.header("user-agent") || "unknown";
 
+  // 先撤销该用户的所有活跃 token
+  await db.update(sysTokens)
+    .set({ status: TokenStatus.REVOKED })
+    .where(and(
+      eq(sysTokens.userId, user.id),
+      eq(sysTokens.status, TokenStatus.ACTIVE),
+    ));
+
   await db.insert(sysTokens).values({
     accessToken,
     refreshToken,
-    status: "ACTIVE",
+    status: TokenStatus.ACTIVE,
     userId: user.id,
     username: user.username,
     domain: user.domain,
@@ -74,7 +88,7 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
     address: "unknown",
     userAgent,
     requestId: crypto.randomUUID(),
-    type: "WEB",
+    type: TokenType.WEB,
     createdBy: "system",
   });
 
@@ -151,7 +165,7 @@ export const refreshToken: RouteHandlerType<"refreshToken"> = async (c) => {
     const tokenRecord = await db.query.sysTokens.findFirst({
       where: and(
         eq(sysTokens.refreshToken, oldRefreshToken),
-        eq(sysTokens.status, "ACTIVE"),
+        eq(sysTokens.status, TokenStatus.ACTIVE),
       ),
     });
 
@@ -160,21 +174,35 @@ export const refreshToken: RouteHandlerType<"refreshToken"> = async (c) => {
     }
 
     // 生成新的 tokens
+    const now = Math.floor(Date.now() / 1000);
+    const jti = crypto.randomUUID(); // JWT ID 确保唯一性
     const newTokenPayload = {
       uid: payload.uid,
       username: payload.username,
       domain: payload.domain,
       roles: payload.roles,
+      iat: now,
+      exp: now + 7 * 24 * 60 * 60, // 7天过期
+      jti,
     };
 
     const newAccessToken = await sign({ ...newTokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
-    const newRefreshToken = await sign({ ...newTokenPayload, type: "refresh" }, env.ADMIN_JWT_SECRET, "HS256");
+    const newRefreshToken = await sign({ ...newTokenPayload, type: "refresh", exp: now + 30 * 24 * 60 * 60, jti: crypto.randomUUID() }, env.ADMIN_JWT_SECRET, "HS256");
 
-    // 更新 token 记录
+    // 先撤销该用户的其他活跃 token
+    await db.update(sysTokens)
+      .set({ status: TokenStatus.REVOKED })
+      .where(and(
+        eq(sysTokens.userId, payload.uid),
+        eq(sysTokens.status, TokenStatus.ACTIVE),
+      ));
+
+    // 更新当前 token 记录
     await db.update(sysTokens)
       .set({
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
+        status: TokenStatus.ACTIVE,
       })
       .where(eq(sysTokens.id, tokenRecord.id));
 

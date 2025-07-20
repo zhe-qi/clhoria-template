@@ -6,6 +6,7 @@ import { v7 as uuidV7 } from "uuid";
 import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser, sysUserRole } from "@/db/schema";
 import env from "@/env";
+import { TokenStatus, TokenType } from "@/lib/enums";
 
 import { clearUserCache } from "./authorization";
 import * as rbac from "./casbin/rbac";
@@ -94,7 +95,7 @@ export async function login(params: LoginParams) {
   await db.insert(sysTokens).values({
     accessToken,
     refreshToken,
-    status: "ACTIVE",
+    status: TokenStatus.ACTIVE,
     userId: user.id,
     username: user.username,
     domain: params.domain,
@@ -102,7 +103,7 @@ export async function login(params: LoginParams) {
     address: params.ip, // TODO: 可以通过 IP 查询地址
     userAgent: params.userAgent,
     requestId: params.requestId,
-    type: "login",
+    type: TokenType.WEB,
     createdBy: user.id,
   });
 
@@ -149,7 +150,7 @@ export async function logout(userId: string, domain: string, accessToken: string
   // 更新令牌状态
   await db
     .update(sysTokens)
-    .set({ status: "REVOKED" })
+    .set({ status: TokenStatus.REVOKED })
     .where(eq(sysTokens.accessToken, accessToken));
 
   // 清理 Redis 缓存
