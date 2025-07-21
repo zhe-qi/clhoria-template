@@ -5,6 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
 import { selectLoginLogSchema } from "@/db/schema";
+import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const tags = ["/login-log (登录日志)"];
@@ -17,7 +18,10 @@ export const list = createRoute({
   tags,
   method: "get",
   path: "/login-log",
-  operationId: "login-log:read",
+  permission: {
+    resource: PermissionResource.LOGIN_LOG,
+    action: PermissionAction.READ,
+  },
   summary: "获取登录日志列表",
   request: {
     query: loginLogQuerySchema,

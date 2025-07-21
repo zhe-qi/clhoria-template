@@ -10,7 +10,10 @@ import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagin
 
 export const list = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:read",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.READ,
+  },
   summary: "获取系统角色列表",
   method: "get",
   path: "/sys-roles",
@@ -27,7 +30,10 @@ export const list = createRoute({
 
 export const create = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:create",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.CREATE,
+  },
   summary: "创建系统角色",
   method: "post",
   path: "/sys-roles",
@@ -55,7 +61,10 @@ export const create = createRoute({
 
 export const get = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:read",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.READ,
+  },
   summary: "获取系统角色详情",
   method: "get",
   path: "/sys-roles/{id}",
@@ -80,7 +89,10 @@ export const get = createRoute({
 
 export const update = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:update",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.UPDATE,
+  },
   summary: "更新系统角色",
   method: "patch",
   path: "/sys-roles/{id}",
@@ -109,7 +121,10 @@ export const update = createRoute({
 
 export const remove = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:delete",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.DELETE,
+  },
   summary: "删除系统角色",
   method: "delete",
   path: "/sys-roles/{id}",
@@ -134,7 +149,10 @@ export const remove = createRoute({
 // 角色权限分配路由
 export const assignPermissions = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:assign-permissions",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.ASSIGN_PERMISSIONS,
+  },
   summary: "分配权限给角色",
   method: "post",
   path: "/sys-roles/{id}/permissions",
@@ -173,7 +191,10 @@ export const assignPermissions = createRoute({
 // 角色菜单分配路由
 export const assignMenus = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:assign-routes",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.ASSIGN_ROUTES,
+  },
   summary: "分配菜单给角色",
   method: "post",
   path: "/sys-roles/{id}/menus",
@@ -208,7 +229,10 @@ export const assignMenus = createRoute({
 // 角色用户分配路由
 export const assignUsers = createRoute({
   tags: ["/sys-roles (系统角色)"],
-  operationId: "sys-roles:assign-users",
+  permission: {
+    resource: PermissionResource.SYS_ROLES,
+    action: PermissionAction.ASSIGN_USERS,
+  },
   summary: "分配用户给角色",
   method: "post",
   path: "/sys-roles/{id}/users",

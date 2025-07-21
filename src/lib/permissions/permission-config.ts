@@ -38,27 +38,6 @@ export interface PermissionConfigOptions {
   skipOnInferenceFailure?: boolean;
 }
 
-/**
- * 扩展的路由定义类型
- */
-export interface RouteWithPermission {
-  /** 路径 */
-  "path": string;
-  /** HTTP 方法 */
-  "method": string;
-  /** 操作ID */
-  "operationId"?: string;
-  /** 权限配置 */
-  "x-permission"?: PermissionConfig;
-  /** 权限选项 */
-  "x-permission-options"?: PermissionConfigOptions;
-  /** 标签 */
-  "tags"?: string[];
-  /** 描述 */
-  "summary"?: string;
-  /** 其他路由属性 */
-  [key: string]: any;
-}
 
 /**
  * 权限规则缓存

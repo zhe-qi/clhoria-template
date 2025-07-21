@@ -55,8 +55,8 @@ export function validatePermissionConfig(config: PermissionConfig): boolean {
 export function extractPermissionFromRoute(route: RouteConfig): PermissionConfig | null {
   try {
     // 1. 检查显式权限配置
-    if (route["x-permission"]) {
-      const explicitPermission = route["x-permission"] as PermissionConfig;
+    if (route.permission) {
+      const explicitPermission = route.permission as PermissionConfig;
       if (validatePermissionConfig(explicitPermission)) {
         return explicitPermission;
       }

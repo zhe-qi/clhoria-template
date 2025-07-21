@@ -5,11 +5,15 @@ import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
 
 import { insertSysDomainSchema, patchSysDomainSchema, selectSysDomainSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 export const list = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "sys-domains:read",
+  permission: {
+    resource: PermissionResource.SYS_DOMAINS,
+    action: PermissionAction.READ,
+  },
   summary: "获取系统域列表",
   method: "get",
   path: "/sys-domains",
@@ -28,7 +32,10 @@ export const list = createRoute({
 
 export const create = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "sys-domains:create",
+  permission: {
+    resource: PermissionResource.SYS_DOMAINS,
+    action: PermissionAction.CREATE,
+  },
   summary: "创建系统域",
   method: "post",
   path: "/sys-domains",
@@ -56,7 +63,10 @@ export const create = createRoute({
 
 export const get = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "sys-domains:read",
+  permission: {
+    resource: PermissionResource.SYS_DOMAINS,
+    action: PermissionAction.READ,
+  },
   summary: "获取系统域详情",
   method: "get",
   path: "/sys-domains/{id}",
@@ -81,7 +91,10 @@ export const get = createRoute({
 
 export const update = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "sys-domains:update",
+  permission: {
+    resource: PermissionResource.SYS_DOMAINS,
+    action: PermissionAction.UPDATE,
+  },
   summary: "更新系统域",
   method: "patch",
   path: "/sys-domains/{id}",
@@ -110,7 +123,10 @@ export const update = createRoute({
 
 export const remove = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "sys-domains:delete",
+  permission: {
+    resource: PermissionResource.SYS_DOMAINS,
+    action: PermissionAction.DELETE,
+  },
   summary: "删除系统域",
   method: "delete",
   path: "/sys-domains/{id}",

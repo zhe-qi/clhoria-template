@@ -6,14 +6,17 @@ import { z } from "zod";
 
 import { insertSysMenuSchema, patchSysMenuSchema, selectSysMenuSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
-import { Status } from "@/lib/enums";
+import { PermissionAction, PermissionResource, Status } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const tags = ["/sys-menus (系统菜单管理)"];
 
 /** 查询菜单列表 */
 export const list = createRoute({
-  operationId: "sys-menus:read",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.READ,
+  },
   path: "/sys-menus",
   method: "get",
   request: {
@@ -33,7 +36,10 @@ export const list = createRoute({
 
 /** 查询菜单树形结构 */
 export const tree = createRoute({
-  operationId: "sys-menus:read",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.READ,
+  },
   path: "/sys-menus/tree",
   method: "get",
   request: {
@@ -55,7 +61,10 @@ export const tree = createRoute({
 
 /** 根据角色获取菜单 */
 export const getMenusByRole = createRoute({
-  operationId: "sys-menus:read",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.READ,
+  },
   path: "/sys-menus/role/{id}",
   method: "get",
   request: {
@@ -77,7 +86,10 @@ export const getMenusByRole = createRoute({
 
 /** 创建菜单 */
 export const create = createRoute({
-  operationId: "sys-menus:create",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.CREATE,
+  },
   path: "/sys-menus",
   method: "post",
   request: {
@@ -99,7 +111,10 @@ export const create = createRoute({
 
 /** 根据ID查询菜单 */
 export const getOne = createRoute({
-  operationId: "sys-menus:read",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.READ,
+  },
   path: "/sys-menus/{id}",
   method: "get",
   request: {
@@ -125,7 +140,10 @@ export const getOne = createRoute({
 
 /** 更新菜单 */
 export const patch = createRoute({
-  operationId: "sys-menus:update",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.UPDATE,
+  },
   path: "/sys-menus/{id}",
   method: "patch",
   request: {
@@ -152,7 +170,10 @@ export const patch = createRoute({
 
 /** 获取常量路由 */
 export const getConstantRoutes = createRoute({
-  operationId: "sys-menus:read",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.READ,
+  },
   path: "/sys-menus/constant",
   method: "get",
   tags,
@@ -184,7 +205,10 @@ export const getConstantRoutes = createRoute({
 
 /** 获取用户路由 */
 export const getUserRoutes = createRoute({
-  operationId: "sys-menus:read",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.READ,
+  },
   path: "/sys-menus/user-routes",
   method: "get",
   tags,
@@ -210,7 +234,10 @@ export const getUserRoutes = createRoute({
 
 /** 删除菜单 */
 export const remove = createRoute({
-  operationId: "sys-menus:delete",
+  permission: {
+    resource: PermissionResource.SYS_MENUS,
+    action: PermissionAction.DELETE,
+  },
   path: "/sys-menus/{id}",
   method: "delete",
   request: {
