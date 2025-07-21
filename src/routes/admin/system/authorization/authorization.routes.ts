@@ -1,7 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
+import { createErrorSchema } from "stoker/openapi/schemas";
 
 import {
   assignmentResponseSchema,
@@ -14,6 +14,7 @@ import {
   userRoutesResponseSchema,
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
+import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 // 分配权限给角色
 export const assignPermissionsToRole = createRoute({

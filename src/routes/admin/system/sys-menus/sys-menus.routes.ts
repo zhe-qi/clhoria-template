@@ -1,13 +1,14 @@
 import { createRoute } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
+import { createErrorSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
 import { insertSysMenuSchema, patchSysMenuSchema, selectSysMenuSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { Status } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 const tags = ["/sys-menus (系统菜单管理)"];
 
