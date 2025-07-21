@@ -18,9 +18,7 @@
     "studio": "drizzle-kit studio --config drizzle.config.ts",
     "generate:model": "tsx scripts/generate/index.ts",
     "seed": "tsx migrations/seed/index.ts",
-    "sync:permissions": "tsx src/scripts/sync-permissions.ts",
-    "clean:permissions": "tsx src/scripts/clean-permissions.ts",
-    "test:permissions": "tsx src/scripts/test-permission-system.ts"
+    "sync:permissions": "tsx src/scripts/sync-permissions.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.0.0",

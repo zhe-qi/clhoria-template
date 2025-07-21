@@ -16,6 +16,17 @@ This is a backend template based on hono. It uses TypeScript, Drizzle ORM and Po
 - `pnpm lint:fix` - Fix ESLint issues automatically
 - `pnpm test` - Run tests using Vitest
 
+## Code Style Standards
+
+### Console Output Guidelines
+
+- **NO EMOJIS**: Never use emojis in console.log, console.warn, or console.error statements
+- **Clean Output**: All console output should be plain text without decorative icons or symbols
+- **Consistent Format**: Use clear, descriptive text for logging and user feedback
+- **Examples**:
+  - ✅ Good: `console.log("权限同步完成: 新增 3, 更新 1")`
+  - ❌ Bad: `console.log("✅ 权限同步完成: 新增 3, 更新 1")`
+
 ## Database Commands
 
 - `pnpm generate` - Generate Drizzle migrations from schema changes
