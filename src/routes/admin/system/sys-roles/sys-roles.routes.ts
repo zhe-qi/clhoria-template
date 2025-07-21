@@ -143,8 +143,8 @@ export const assignPermissions = createRoute({
     body: jsonContentRequired(
       z.object({
         permissions: z.array(z.object({
-          resource: z.nativeEnum(PermissionResource).describe("资源"),
-          action: z.nativeEnum(PermissionAction).describe("动作"),
+          resource: z.enum(Object.values(PermissionResource) as [string, ...string[]]).describe("资源"),
+          action: z.enum(Object.values(PermissionAction) as [string, ...string[]]).describe("动作"),
         })).describe("权限列表"),
       }),
       "分配权限参数",

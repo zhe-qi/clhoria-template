@@ -2,7 +2,7 @@ import { serve } from "@hono/node-server";
 
 import app, { adminApp } from "./app";
 import env from "./env";
-import { collectAndSyncEndpoints } from "./lib/permissions";
+import { collectAndSyncEndpointPermissions } from "./lib/permissions";
 
 const port = env.PORT;
 
@@ -10,7 +10,7 @@ const port = env.PORT;
 async function startServer() {
   try {
     // 收集并同步端点（使用已注册路由的应用实例）
-    await collectAndSyncEndpoints([
+    await collectAndSyncEndpointPermissions([
       { name: "admin", app: adminApp, prefix: "/admin" },
     ]);
 
