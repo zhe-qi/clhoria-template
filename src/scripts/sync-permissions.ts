@@ -6,8 +6,7 @@ import { eq } from "drizzle-orm";
 import { adminApp, clientApp, publicApp } from "@/app";
 import db from "@/db";
 import { casbinRule } from "@/db/schema";
-import { collectAndSyncEndpointPermissions } from "@/lib/collect-endpoints";
-import { PermissionConfigManager } from "@/lib/permission-config";
+import { collectAndSyncEndpointPermissions, PermissionConfigManager } from "@/lib/permissions";
 
 /**
  * 现代化权限同步脚本

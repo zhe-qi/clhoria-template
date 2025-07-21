@@ -7,9 +7,8 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
-import { enforcerLaunchedPromise } from "@/lib/casbin";
 import { getUserRolesKey } from "@/lib/enums";
-import { PermissionConfigManager } from "@/lib/permission-config";
+import { enforcerLaunchedPromise, PermissionConfigManager } from "@/lib/permissions";
 import { redisClient } from "@/lib/redis";
 
 interface PermissionOptions {

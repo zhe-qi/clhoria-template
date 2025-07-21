@@ -54,6 +54,8 @@ export function normalizeAction(action: string): PermissionActionType {
 
     "assignUsers": PermissionAction.ASSIGN_USERS,
     "assign-users": PermissionAction.ASSIGN_USERS,
+    "assignRoles": PermissionAction.ASSIGN_USERS, // 分配角色给用户
+    "assign-roles": PermissionAction.ASSIGN_USERS,
 
     "getUserRoutes": PermissionAction.GET_USER_ROUTES,
     "get-user-routes": PermissionAction.GET_USER_ROUTES,

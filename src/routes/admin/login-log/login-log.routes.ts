@@ -17,6 +17,7 @@ export const list = createRoute({
   tags,
   method: "get",
   path: "/login-log",
+  operationId: "loginLog:list",
   summary: "获取登录日志列表",
   request: {
     query: loginLogQuerySchema,

@@ -19,6 +19,7 @@ export const list = createRoute({
   method: "get",
   path: "/api-keys",
   tags,
+  operationId: "apiKeys:list",
   summary: "获取API密钥列表",
   request: {
     query: ListApiKeysQuerySchema,
@@ -39,6 +40,7 @@ export const create = createRoute({
   method: "post",
   path: "/api-keys",
   tags,
+  operationId: "apiKeys:create",
   summary: "创建API密钥",
   request: {
     body: jsonContentRequired(insertApiKeySchema, "创建参数"),
@@ -59,6 +61,7 @@ export const getById = createRoute({
   method: "get",
   path: "/api-keys/{id}",
   tags,
+  operationId: "apiKeys:read",
   summary: "获取API密钥详情",
   request: {
     params: IdUUIDParamsSchema,
@@ -83,6 +86,7 @@ export const deleteById = createRoute({
   method: "delete",
   path: "/api-keys/{id}",
   tags,
+  operationId: "apiKeys:delete",
   summary: "删除API密钥",
   request: {
     params: IdUUIDParamsSchema,
@@ -106,6 +110,7 @@ export const toggleStatus = createRoute({
   method: "patch",
   path: "/api-keys/{id}/toggle",
   tags,
+  operationId: "apiKeys:update",
   summary: "切换API密钥状态",
   request: {
     params: IdUUIDParamsSchema,

@@ -3,9 +3,9 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { sysMenu, sysRoleMenu } from "@/db/schema";
-import { getUserMenuIds } from "@/lib/authorization";
 import { Status } from "@/lib/enums";
 import { withPaginationAndCount } from "@/lib/pagination";
+import { getUserMenuIds } from "@/lib/permissions";
 
 import type { SysMenusRouteHandlerType as RouteHandlerType } from "./sys-menus.index";
 

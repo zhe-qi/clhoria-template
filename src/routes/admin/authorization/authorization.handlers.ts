@@ -4,12 +4,12 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
+import { MenuService } from "@/lib/menu-service";
 import {
   assignPermissionsToRole as assignPermissionsToRoleLib,
   assignUsersToRole as assignUsersToRoleLib,
-} from "@/lib/authorization";
-import * as rbac from "@/lib/casbin/rbac";
-import { MenuService } from "@/lib/menu-service";
+} from "@/lib/permissions";
+import * as rbac from "@/lib/permissions/casbin/rbac";
 
 import type { AuthorizationRouteHandlerType } from "./authorization.index";
 

@@ -2,7 +2,7 @@ import type { OpenAPIHono, RouteConfig, RouteHandler } from "@hono/zod-openapi";
 import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
 
-import type { PermissionConfig } from "@/lib/permission-inference";
+import type { PermissionConfig } from "@/lib/permissions";
 
 export interface AppBindings {
   Variables: {

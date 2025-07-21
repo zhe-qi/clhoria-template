@@ -2,8 +2,7 @@
 /* eslint-disable no-console */
 
 import { adminApp, clientApp, publicApp } from "@/app";
-import { collectAndSyncEndpointPermissions } from "@/lib/collect-endpoints";
-import { PermissionConfigManager } from "@/lib/permission-config";
+import { collectAndSyncEndpointPermissions, PermissionConfigManager } from "@/lib/permissions";
 
 async function testPermissionSystem() {
   console.log("🚀 开始测试新的权限系统...\n");

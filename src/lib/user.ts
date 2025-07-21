@@ -8,8 +8,8 @@ import { sysLoginLog, sysTokens, sysUser, sysUserRole } from "@/db/schema";
 import env from "@/env";
 import { Status, TokenStatus, TokenType } from "@/lib/enums";
 
-import { clearUserCache } from "./authorization";
-import * as rbac from "./casbin/rbac";
+import { clearUserCache } from "./permissions";
+import * as rbac from "./permissions/casbin/rbac";
 import { redisClient } from "./redis";
 
 interface CreateUserParams {
@@ -262,7 +262,7 @@ export async function initSuperAdmin() {
   // 创建超级管理员用户
   const user = await createUser({
     username: "admin",
-    password: "admin123",
+    password: "123456",
     domain,
     nickName: "超级管理员",
     createdBy: "system",

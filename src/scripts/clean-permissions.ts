@@ -5,7 +5,7 @@ import { eq, inArray } from "drizzle-orm";
 
 import db from "@/db";
 import { casbinRule } from "@/db/schema";
-import { PermissionConfigManager } from "@/lib/permission-config";
+import { PermissionConfigManager } from "@/lib/permissions";
 
 /**
  * 权限清理脚本

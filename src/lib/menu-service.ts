@@ -5,7 +5,7 @@ import { sysMenu, sysRoleMenu } from "@/db/schema";
 import { getUserMenusKey, Status } from "@/lib/enums";
 import { redisClient } from "@/lib/redis";
 
-import * as rbac from "./casbin/rbac";
+import * as rbac from "./permissions/casbin/rbac";
 
 /**
  * 菜单路由接口

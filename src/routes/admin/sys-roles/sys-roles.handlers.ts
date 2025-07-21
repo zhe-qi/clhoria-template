@@ -6,9 +6,9 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysRole } from "@/db/schema";
-import { assignMenusToRole, assignPermissionsToRole, assignUsersToRole } from "@/lib/authorization";
 import { getDuplicateKeyError } from "@/lib/constants";
 import { withPaginationAndCount } from "@/lib/pagination";
+import { assignMenusToRole, assignPermissionsToRole, assignUsersToRole } from "@/lib/permissions";
 
 import type { SysRolesRouteHandlerType } from "./sys-roles.index";
 
