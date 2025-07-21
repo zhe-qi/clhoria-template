@@ -1,5 +1,6 @@
 import { z } from "@hono/zod-openapi";
 
+// 用于处理默认所不兼容的情况
 export const IdUUIDParamsSchema = z.object({
   id: z.uuid().describe("UUID格式的ID"),
 });

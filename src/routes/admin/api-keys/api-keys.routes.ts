@@ -1,13 +1,12 @@
 import { createRoute } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema } from "stoker/openapi/schemas";
+import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
 import { insertApiKeySchema, selectApiKeySchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
-import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 const tags = ["/api-keys (API密钥管理)"];
 
