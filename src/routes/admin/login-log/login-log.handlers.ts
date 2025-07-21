@@ -12,7 +12,7 @@ import type { LoginLogRouteHandlerType } from "./login-log.index";
 export const list: LoginLogRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   // 基本查询条件
   const baseCondition = eq(loginLogs.domain, domain);

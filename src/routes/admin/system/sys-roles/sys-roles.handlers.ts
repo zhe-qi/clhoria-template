@@ -140,7 +140,7 @@ export const assignPermissions: SysRolesRouteHandlerType<"assignPermissions"> = 
   const { id } = c.req.valid("param");
   const { permissions } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   // 检查角色是否存在
   const [role] = await db
@@ -163,7 +163,7 @@ export const assignMenus: SysRolesRouteHandlerType<"assignMenus"> = async (c) =>
   const { id } = c.req.valid("param");
   const { menuIds } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   // 检查角色是否存在
   const [role] = await db
@@ -186,7 +186,7 @@ export const assignUsers: SysRolesRouteHandlerType<"assignUsers"> = async (c) =>
   const { id } = c.req.valid("param");
   const { userIds } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   // 检查角色是否存在
   const [role] = await db

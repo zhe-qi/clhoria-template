@@ -14,7 +14,7 @@ import type { SysAccessKeysRouteHandlerType } from "./sys-access-keys.index";
 export const list: SysAccessKeysRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   // 基本查询条件
   const baseCondition = eq(sysAccessKey.domain, domain);
@@ -57,7 +57,7 @@ export const list: SysAccessKeysRouteHandlerType<"list"> = async (c) => {
 export const create: SysAccessKeysRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
   const operatorId = payload.sub as string;
 
   // 生成访问密钥
@@ -91,7 +91,7 @@ export const create: SysAccessKeysRouteHandlerType<"create"> = async (c) => {
 export const remove: SysAccessKeysRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   const [deleted] = await db
     .delete(sysAccessKey)

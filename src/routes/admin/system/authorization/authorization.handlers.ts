@@ -18,7 +18,7 @@ export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermi
   const { roleId } = c.req.valid("param");
   const { permissions, domain } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const currentDomain = domain || (payload.domain as string) || "default";
+  const currentDomain = domain || payload.domain as string;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -30,7 +30,7 @@ export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermi
   }
 
   // 将权限字符串转换为对象格式
-  const permissionObjects = permissions.map((perm) => {
+  const permissionObjects = permissions.map((perm: string) => {
     const [resource, action] = perm.split(":");
     return {
       resource: resource as import("@/lib/enums").PermissionResourceType,
@@ -48,7 +48,7 @@ export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRo
   const { roleId } = c.req.valid("param");
   const { menuIds, domain } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const currentDomain = domain || (payload.domain as string) || "default";
+  const currentDomain = domain || payload.domain as string;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -73,7 +73,7 @@ export const assignUsersToRole: AuthorizationRouteHandlerType<"assignUsersToRole
   const { roleId } = c.req.valid("param");
   const { userIds } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -94,7 +94,7 @@ export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = asy
   const { userId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = queryDomain || (payload.domain as string) || "default";
+  const domain = queryDomain || payload.domain as string;
 
   // 检查用户是否存在
   const user = await db.query.sysUser.findFirst({
@@ -116,7 +116,7 @@ export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissio
   const { roleId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = queryDomain || (payload.domain as string) || "default";
+  const domain = queryDomain || payload.domain as string;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -132,7 +132,7 @@ export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissio
   const permissionStrings = permissions.map(p => `${p[1]}:${p[2]}`);
 
   return c.json({
-    domain,
+    domain: domain as string,
     permissions: permissionStrings,
   }, HttpStatusCodes.OK);
 };
@@ -142,7 +142,7 @@ export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async
   const { roleId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = queryDomain || (payload.domain as string) || "default";
+  const domain = queryDomain || payload.domain as string;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -157,7 +157,7 @@ export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async
   const menuIds = await MenuService.instance.getRoleMenuIds(roleId, domain);
 
   return c.json({
-    domain,
+    domain: domain as string,
     menuIds,
   }, HttpStatusCodes.OK);
 };

@@ -12,7 +12,7 @@ import type { OperationLogRouteHandlerType } from "./operation-log.index";
 export const list: OperationLogRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   // 基本查询条件
   const baseCondition = eq(operationLogs.domain, domain);

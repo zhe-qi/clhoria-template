@@ -15,7 +15,7 @@ import type { SysUsersRouteHandlerType } from "./sys-users.index";
 export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   let whereCondition = eq(sysUser.domain, domain);
 
@@ -54,7 +54,7 @@ export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
 export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
   const operatorId = payload.sub as string;
 
   try {
@@ -85,7 +85,7 @@ export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
 export const get: SysUsersRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   const [user] = await db
     .select()
@@ -110,7 +110,7 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
   const operatorId = payload.sub as string;
 
   // 不允许直接更新密码
@@ -143,7 +143,7 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
 export const remove: SysUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
 
   const [deleted] = await db
     .delete(sysUser)
@@ -167,7 +167,7 @@ export const assignRoles: SysUsersRouteHandlerType<"assignRoles"> = async (c) =>
   const { id } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const domain = (payload.domain as string) || "default";
+  const domain = payload.domain as string;
   const operatorId = payload.sub as string;
 
   // 检查用户是否存在
