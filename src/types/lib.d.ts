@@ -2,10 +2,16 @@ import type { OpenAPIHono, RouteConfig, RouteHandler } from "@hono/zod-openapi";
 import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
 
+import type { PermissionConfig } from "@/lib/permission-inference";
+
 export interface AppBindings {
   Variables: {
     logger: PinoLogger;
     apiKey?: string;
+    userRoles?: string[];
+    userDomain?: string;
+    currentPermission?: PermissionConfig;
+    requiredPermission?: PermissionConfig;
   };
 };
 

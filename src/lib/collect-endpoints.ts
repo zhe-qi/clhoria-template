@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { eq } from "drizzle-orm";
 import { createHash } from "node:crypto";
 
@@ -5,6 +6,11 @@ import type { AppOpenAPI } from "@/types/lib";
 
 import db from "@/db";
 import { sysEndpoint } from "@/db/schema/system/sys-endpoint";
+
+import type { EndpointPermission } from "./permission-config";
+
+import { PermissionConfigManager } from "./permission-config";
+import { extractPermissionFromRoute } from "./permission-inference";
 
 export interface EndpointInfo {
   id: string;
@@ -14,171 +20,16 @@ export interface EndpointInfo {
   resource: string;
   controller: string;
   summary?: string;
+  operationId?: string;
 }
 
 /**
- * 从路径和方法提取资源和动作
- * 使用基于路径模式的智能匹配
+ * 从 Hono 应用中收集端点权限信息
+ * 新的实现基于权限推断机制
  */
-function extractResourceAndAction(path: string, method: string): { resource: string; action: string } {
-  // 移除查询参数
-  const cleanPath = path.replace(/\?.*$/, "");
-
-  // 路径模式匹配规则
-  const pathPatterns: Array<{ pattern: RegExp; resource: string; actionMap: Record<string, string> }> = [
-    // 用户管理
-    {
-      pattern: /^\/admin\/sys-users(?:\/[\w-]+)?(?:\/(status|password))?$/,
-      resource: "sys-users",
-      actionMap: {
-        "GET": "read",
-        "POST": "create",
-        "PATCH": "update",
-        "DELETE": "delete",
-        "PATCH-status": "change-status",
-        "PATCH-password": "reset-password",
-      },
-    },
-    // 角色管理
-    {
-      pattern: /^\/admin\/sys-roles(?:\/[\w-]+)?(?:\/(status|permissions|menus))?$/,
-      resource: "sys-roles",
-      actionMap: {
-        "GET": "read",
-        "POST": "create",
-        "PATCH": "update",
-        "DELETE": "delete",
-        "PATCH-status": "change-status",
-        "POST-permissions": "assign-permissions",
-        "POST-menus": "assign-routes",
-      },
-    },
-    // 菜单管理
-    {
-      pattern: /^\/admin\/sys-menus(?:\/[\w-]+)?(?:\/(status))?$/,
-      resource: "sys-menus",
-      actionMap: {
-        "GET": "read",
-        "POST": "create",
-        "PATCH": "update",
-        "DELETE": "delete",
-        "PATCH-status": "change-status",
-      },
-    },
-    // 域管理
-    {
-      pattern: /^\/admin\/sys-domains(?:\/[\w-]+)?(?:\/(status))?$/,
-      resource: "sys-domains",
-      actionMap: {
-        "GET": "read",
-        "POST": "create",
-        "PATCH": "update",
-        "DELETE": "delete",
-        "PATCH-status": "change-status",
-      },
-    },
-    // 端点管理
-    {
-      pattern: /^\/admin\/sys-endpoints(?:\/[\w-]+)?$/,
-      resource: "sys-endpoints",
-      actionMap: {
-        GET: "read",
-        PATCH: "update",
-      },
-    },
-    // 访问密钥管理
-    {
-      pattern: /^\/admin\/sys-access-keys(?:\/[\w-]+)?(?:\/(status))?$/,
-      resource: "sys-access-keys",
-      actionMap: {
-        "GET": "read",
-        "POST": "create",
-        "DELETE": "delete",
-        "PATCH-status": "change-status",
-      },
-    },
-    // 授权管理
-    {
-      pattern: /^\/admin\/authorization\/(?:roles\/[\w-]+\/(permissions|routes|menus)|users\/[\w-]+\/routes)$/,
-      resource: "authorization",
-      actionMap: {
-        "POST-permissions": "assign-permissions",
-        "POST-routes": "assign-routes",
-        "POST-users": "assign-users",
-        "GET-routes": "get-user-routes",
-        "GET-permissions": "get-role-permissions",
-        "GET-menus": "get-role-menus",
-      },
-    },
-    // 登录日志
-    {
-      pattern: /^\/admin\/login-log$/,
-      resource: "login-log",
-      actionMap: {
-        GET: "read",
-      },
-    },
-    // 操作日志
-    {
-      pattern: /^\/admin\/operation-log$/,
-      resource: "operation-log",
-      actionMap: {
-        GET: "read",
-      },
-    },
-    // API密钥管理
-    {
-      pattern: /^\/admin\/api-keys(?:\/[\w-]+)?(?:\/(status))?$/,
-      resource: "api-keys",
-      actionMap: {
-        "GET": "read",
-        "POST": "create",
-        "DELETE": "delete",
-        "PATCH-status": "change-status",
-      },
-    },
-  ];
-
-  // 尝试匹配路径模式
-  for (const { pattern, resource, actionMap } of pathPatterns) {
-    const match = cleanPath.match(pattern);
-    if (match) {
-      const subPath = match[1]; // 子路径（如 status, permissions 等）
-      const actionKey = subPath ? `${method}-${subPath}` : method;
-      const action = actionMap[actionKey] || actionMap[method];
-
-      if (action) {
-        return { resource, action };
-      }
-    }
-  }
-
-  // 如果没有匹配到，使用默认的方法映射
-  const defaultActionMap: Record<string, string> = {
-    GET: "read",
-    POST: "create",
-    PUT: "update",
-    PATCH: "update",
-    DELETE: "delete",
-    HEAD: "read",
-    OPTIONS: "read",
-  };
-
-  // 从路径中提取资源名称（最后一个非参数部分）
-  const pathParts = cleanPath.split("/").filter(Boolean);
-  const resource = pathParts[pathParts.length - 1] || "root";
-
-  return {
-    resource,
-    action: defaultActionMap[method] || "access",
-  };
-}
-
-/**
- * 从 Hono 应用中收集端点信息
- */
-export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
-  const endpoints: EndpointInfo[] = [];
+export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): EndpointPermission[] {
+  const endpoints: EndpointPermission[] = [];
+  const permissionManager = PermissionConfigManager.getInstance();
 
   try {
     // 从 OpenAPI 注册表获取路由信息
@@ -187,42 +38,62 @@ export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
 
     for (const definition of routes) {
       if (definition.type === "route") {
-        const { path, method } = definition.route;
+        const route = definition.route;
+        const { path, method, operationId, summary, tags } = route;
 
         // 跳过中间件和内部路由
         if (!method)
           continue;
 
         const fullPath = prefix + path;
-        const { resource, action } = extractResourceAndAction(fullPath, method);
+
+        // 尝试从路由定义中提取权限配置
+        const permissionConfig = extractPermissionFromRoute(route);
+
+        // 如果无法提取权限配置，跳过该端点（可能是公开接口）
+        if (!permissionConfig) {
+          console.log(`跳过无权限配置的端点: ${method} ${fullPath} (operationId: ${operationId})`);
+          continue;
+        }
 
         // 生成唯一ID
-        const id = createHash("md5")
-          .update(JSON.stringify({ path: fullPath, method, action, resource }))
+        const endpointId = createHash("md5")
+          .update(JSON.stringify({
+            path: fullPath,
+            method,
+            resource: permissionConfig.resource,
+            action: permissionConfig.action,
+          }))
           .digest("hex");
 
         // 从路由信息推断控制器
-        const controller = definition.route.tags?.[0] || "unknown";
+        const controller = tags?.[0]?.replace(/^\/|[\s()]/g, "") || "unknown";
 
-        // 获取 OpenAPI 描述
-        const summary = definition.route.summary || "";
-
-        endpoints.push({
-          id,
+        const endpointPermission: EndpointPermission = {
+          id: endpointId,
           path: fullPath,
-          method,
-          action,
-          resource,
+          method: method.toUpperCase(),
+          resource: permissionConfig.resource,
+          action: permissionConfig.action,
           controller,
-          summary,
-        });
+          summary: summary || "",
+          operationId: operationId || "",
+        };
+
+        endpoints.push(endpointPermission);
+
+        // 注册到权限管理器
+        permissionManager.registerEndpointPermission(endpointPermission);
       }
     }
   }
   catch (error) {
-    console.error("Error collecting endpoints:", error);
+    console.error("Error collecting endpoint permissions:", error);
+
+    // 降级处理：尝试从应用路由中收集
     try {
-      const routes = app.routes;
+      const routes = app.routes || [];
+
       for (const route of routes) {
         const { path, method, handler } = route;
 
@@ -230,27 +101,42 @@ export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
           continue;
 
         const fullPath = prefix + path;
-        const { resource, action } = extractResourceAndAction(fullPath, method);
 
-        const id = createHash("md5")
-          .update(JSON.stringify({ path: fullPath, method, action, resource }))
+        // 尝试从处理器中提取权限信息
+        const permissionConfig = (handler as any)?.__permission;
+
+        if (!permissionConfig) {
+          continue;
+        }
+
+        const endpointId = createHash("md5")
+          .update(JSON.stringify({
+            path: fullPath,
+            method,
+            resource: permissionConfig.resource,
+            action: permissionConfig.action,
+          }))
           .digest("hex");
 
         const controller = handler?.name || "unknown";
 
-        endpoints.push({
-          id,
+        const endpointPermission: EndpointPermission = {
+          id: endpointId,
           path: fullPath,
-          method,
-          action,
-          resource,
+          method: method.toUpperCase(),
+          resource: permissionConfig.resource,
+          action: permissionConfig.action,
           controller,
           summary: "",
-        });
+          operationId: "",
+        };
+
+        endpoints.push(endpointPermission);
+        permissionManager.registerEndpointPermission(endpointPermission);
       }
     }
     catch (fallbackError) {
-      console.error("Fallback route collection also failed:", fallbackError);
+      console.error("Fallback endpoint collection also failed:", fallbackError);
     }
   }
 
@@ -258,9 +144,29 @@ export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
 }
 
 /**
- * 同步端点到数据库
+ * 向后兼容的端点收集函数
+ * 将新的权限端点转换为旧的端点信息格式
  */
-export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
+export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
+  const endpointPermissions = collectEndpointPermissions(app, prefix);
+
+  return endpointPermissions.map(ep => ({
+    id: ep.id,
+    path: ep.path,
+    method: ep.method,
+    action: ep.action,
+    resource: ep.resource,
+    controller: ep.controller,
+    summary: ep.summary,
+    operationId: ep.operationId,
+  }));
+}
+
+/**
+ * 同步端点权限到数据库
+ * 新的实现支持 EndpointPermission 类型
+ */
+export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermission[]) {
   if (endpoints.length === 0)
     return { inserted: 0, updated: 0 };
 
@@ -287,6 +193,7 @@ export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
           resource: endpoint.resource,
           controller: endpoint.controller,
           summary: endpoint.summary,
+          createdBy: "system",
         });
         inserted++;
       }
@@ -304,6 +211,7 @@ export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
             resource: endpoint.resource,
             controller: endpoint.controller,
             summary: endpoint.summary,
+            updatedBy: "system",
           })
           .where(eq(sysEndpoint.id, existingEndpoint.id));
         updated++;
@@ -315,7 +223,55 @@ export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
 }
 
 /**
- * 完整的端点收集和同步流程
+ * 向后兼容的同步函数
+ */
+export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
+  // 转换为 EndpointPermission 格式
+  const endpointPermissions: EndpointPermission[] = endpoints.map(ep => ({
+    id: ep.id,
+    path: ep.path,
+    method: ep.method,
+    resource: ep.resource as any,
+    action: ep.action as any,
+    controller: ep.controller,
+    summary: ep.summary,
+    operationId: ep.operationId,
+  }));
+
+  return syncEndpointPermissionsToDatabase(endpointPermissions);
+}
+
+/**
+ * 完整的端点权限收集和同步流程
+ * 新的实现使用权限推断机制
+ */
+export async function collectAndSyncEndpointPermissions(apps: { name: string; app: AppOpenAPI; prefix?: string }[]) {
+  const allEndpoints: EndpointPermission[] = [];
+  const permissionManager = PermissionConfigManager.getInstance();
+
+  // 清空之前的权限缓存
+  permissionManager.clearAll();
+
+  for (const { name, app, prefix } of apps) {
+    console.log(`开始收集应用 ${name} 的端点权限...`);
+    const endpoints = collectEndpointPermissions(app, prefix);
+    allEndpoints.push(...endpoints);
+    console.log(`应用 ${name} 收集到 ${endpoints.length} 个端点`);
+  }
+
+  if (allEndpoints.length > 0) {
+    const result = await syncEndpointPermissionsToDatabase(allEndpoints);
+    console.log(`端点权限同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
+    console.log(`权限管理器缓存统计:`, permissionManager.getStats());
+    return result;
+  }
+
+  console.log("未发现任何端点权限配置");
+  return { inserted: 0, updated: 0 };
+}
+
+/**
+ * 向后兼容的端点收集和同步流程
  */
 export async function collectAndSyncEndpoints(apps: { name: string; app: AppOpenAPI; prefix?: string }[]) {
   const allEndpoints: EndpointInfo[] = [];
@@ -327,7 +283,6 @@ export async function collectAndSyncEndpoints(apps: { name: string; app: AppOpen
 
   if (allEndpoints.length > 0) {
     const result = await syncEndpointsToDatabase(allEndpoints);
-    // eslint-disable-next-line no-console
     console.log(`端点同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
     return result;
   }

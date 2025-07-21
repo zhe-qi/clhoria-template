@@ -65,7 +65,7 @@ export async function assignPermissionsToRole(
  */
 export async function assignMenusToRole(
   roleId: string,
-  menuIds: number[],
+  menuIds: string[],
   domain: string,
 ) {
   return db.transaction(async (tx) => {
@@ -188,7 +188,7 @@ export async function syncEndpoints(
       const existing = existingMap.get(key);
 
       if (!existing) {
-        toInsert.push(endpoint);
+        toInsert.push({ ...endpoint, createdBy: "system" });
       }
       else if (
         existing.action !== endpoint.action
@@ -223,7 +223,7 @@ export async function syncEndpoints(
 /**
  * 获取用户的所有菜单ID
  */
-export async function getUserMenuIds(userId: string, domain: string): Promise<number[]> {
+export async function getUserMenuIds(userId: string, domain: string): Promise<string[]> {
   // 获取用户的所有角色（包括隐式角色）
   const roles = await rbac.getImplicitRolesForUser(userId, domain);
 
@@ -240,7 +240,7 @@ export async function getUserMenuIds(userId: string, domain: string): Promise<nu
       eq(sysRoleMenu.domain, domain),
     ));
 
-  return [...new Set(roleMenus.map(rm => rm.menuId))];
+  return roleMenus.map(rm => rm.menuId);
 }
 
 /**

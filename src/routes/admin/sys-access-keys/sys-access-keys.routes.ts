@@ -10,7 +10,7 @@ import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 export const list = createRoute({
   tags: ["/sys-access-keys (访问密钥)"],
-  operationId: "listSysAccessKeys",
+  operationId: "sysAccessKeys:read",
   summary: "获取访问密钥列表",
   method: "get",
   path: "/sys-access-keys",
@@ -29,7 +29,7 @@ export const list = createRoute({
 
 export const create = createRoute({
   tags: ["/sys-access-keys (访问密钥)"],
-  operationId: "createSysAccessKey",
+  operationId: "sysAccessKeys:create",
   summary: "创建访问密钥",
   method: "post",
   path: "/sys-access-keys",
@@ -53,7 +53,7 @@ export const create = createRoute({
 
 export const remove = createRoute({
   tags: ["/sys-access-keys (访问密钥)"],
-  operationId: "removeSysAccessKey",
+  operationId: "sysAccessKeys:delete",
   summary: "删除访问密钥",
   method: "delete",
   path: "/sys-access-keys/{id}",

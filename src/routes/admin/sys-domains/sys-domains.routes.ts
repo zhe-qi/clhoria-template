@@ -10,7 +10,7 @@ import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 export const list = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "listSysDomains",
+  operationId: "sysDomains:read",
   summary: "获取系统域列表",
   method: "get",
   path: "/sys-domains",
@@ -29,7 +29,7 @@ export const list = createRoute({
 
 export const create = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "createSysDomain",
+  operationId: "sysDomains:create",
   summary: "创建系统域",
   method: "post",
   path: "/sys-domains",
@@ -57,7 +57,7 @@ export const create = createRoute({
 
 export const get = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "getSysDomain",
+  operationId: "sysDomains:read",
   summary: "获取系统域详情",
   method: "get",
   path: "/sys-domains/{id}",
@@ -82,7 +82,7 @@ export const get = createRoute({
 
 export const update = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "updateSysDomain",
+  operationId: "sysDomains:update",
   summary: "更新系统域",
   method: "patch",
   path: "/sys-domains/{id}",
@@ -111,7 +111,7 @@ export const update = createRoute({
 
 export const remove = createRoute({
   tags: ["/sys-domains (系统域)"],
-  operationId: "removeSysDomain",
+  operationId: "sysDomains:delete",
   summary: "删除系统域",
   method: "delete",
   path: "/sys-domains/{id}",

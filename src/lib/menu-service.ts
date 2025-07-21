@@ -113,7 +113,7 @@ export class MenuService {
   /**
    * 获取用户的菜单ID列表
    */
-  private async getUserMenuIds(userId: string, domain: string): Promise<number[]> {
+  private async getUserMenuIds(userId: string, domain: string): Promise<string[]> {
     // 获取用户的所有角色（包括隐式角色）
     const roles = await rbac.getImplicitRolesForUser(userId, domain);
 
@@ -228,7 +228,7 @@ export class MenuService {
   /**
    * 为角色分配菜单
    */
-  async assignMenusToRole(roleId: string, menuIds: number[], domain: string): Promise<{ success: boolean; count: number }> {
+  async assignMenusToRole(roleId: string, menuIds: string[], domain: string): Promise<{ success: boolean; count: number }> {
     const result = await db.transaction(async (tx) => {
       // 删除现有的菜单分配
       await tx
@@ -261,7 +261,7 @@ export class MenuService {
   /**
    * 获取角色的菜单ID列表
    */
-  async getRoleMenuIds(roleId: string, domain: string): Promise<number[]> {
+  async getRoleMenuIds(roleId: string, domain: string): Promise<string[]> {
     const roleMenus = await db
       .select({ menuId: sysRoleMenu.menuId })
       .from(sysRoleMenu)

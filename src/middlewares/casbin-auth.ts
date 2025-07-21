@@ -2,16 +2,14 @@ import type { Context, MiddlewareHandler } from "hono";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { Enforcer } from "casbin";
-import { and, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
-import db from "@/db";
-import { sysEndpoint } from "@/db/schema";
 import { enforcerLaunchedPromise } from "@/lib/casbin";
 import { getUserRolesKey } from "@/lib/enums";
+import { PermissionConfigManager } from "@/lib/permission-config";
 import { redisClient } from "@/lib/redis";
 
 interface PermissionOptions {
@@ -98,7 +96,7 @@ export function requirePermission(options: PermissionOptions): MiddlewareHandler
 
 /**
  * 通用 Casbin 权限验证中间件
- * 使用API端点权限映射将路径和方法映射到业务资源和动作
+ * 新版本使用权限管理器缓存，提高性能
  */
 export function casbin(): MiddlewareHandler {
   return async (c: Context, next) => {
@@ -137,37 +135,32 @@ export function casbin(): MiddlewareHandler {
       );
     }
 
-    // 查询数据库获取端点权限信息
-    logger.info(`[CASBIN] ${reqId} - 查询端点权限信息: ${method} ${path}`);
-    const endpoint = await db.query.sysEndpoint.findFirst({
-      where: and(
-        eq(sysEndpoint.path, path),
-        eq(sysEndpoint.method, method),
-      ),
-    });
+    // 从权限管理器缓存获取端点权限信息
+    const permissionManager = PermissionConfigManager.getInstance();
+    const endpointPermission = permissionManager.findEndpointPermission(method.toUpperCase(), path);
 
-    if (!endpoint) {
-      // 如果没有找到端点信息，说明该端点不需要权限验证或者尚未同步
+    if (!endpointPermission) {
+      // 如果没有找到端点权限信息，说明该端点不需要权限验证或者是公开接口
       logger.warn(`[CASBIN] ${reqId} - 未找到端点权限信息: ${method} ${path} - 跳过权限验证`);
       await next();
       return;
     }
 
-    logger.info(`[CASBIN] ${reqId} - 端点权限信息: resource=${endpoint.resource}, action=${endpoint.action}`);
+    logger.info(`[CASBIN] ${reqId} - 端点权限信息: resource=${endpointPermission.resource}, action=${endpointPermission.action}`);
 
     // 验证权限
     logger.info(`[CASBIN] ${reqId} - 开始权限检查`);
     for (const role of roles) {
-      logger.info(`[CASBIN] ${reqId} - 检查角色权限: role=${role}, resource=${endpoint.resource}, action=${endpoint.action}, domain=${domain}`);
-      const hasRolePermission = await enforcer.enforce(role, endpoint.resource, endpoint.action, domain);
+      logger.info(`[CASBIN] ${reqId} - 检查角色权限: role=${role}, resource=${endpointPermission.resource}, action=${endpointPermission.action}, domain=${domain}`);
+      const hasRolePermission = await enforcer.enforce(role, endpointPermission.resource, endpointPermission.action, domain);
       logger.info(`[CASBIN] ${reqId} - 角色权限检查结果: role=${role} -> ${hasRolePermission}`);
     }
 
     const hasPermission = await checkPermission(
       enforcer,
       roles,
-      endpoint.resource,
-      endpoint.action,
+      endpointPermission.resource,
+      endpointPermission.action,
       domain,
     );
 
@@ -181,11 +174,90 @@ export function casbin(): MiddlewareHandler {
       );
     }
 
-    // 将角色信息存入上下文
+    // 将角色信息和权限信息存入上下文
     c.set("userRoles", roles);
     c.set("userDomain", domain);
+    c.set("currentPermission", {
+      resource: endpointPermission.resource,
+      action: endpointPermission.action,
+    });
 
     logger.info(`[CASBIN] ${reqId} - Casbin权限验证通过，继续执行`);
+    await next();
+  };
+}
+
+/**
+ * 高性能权限验证中间件
+ * 直接使用权限缓存，避免数据库查询
+ */
+export function casbinFast(): MiddlewareHandler {
+  return async (c: Context, next) => {
+    const reqId = c.get("reqId");
+    const { path, method } = c.req;
+    const logger = c.get("logger");
+
+    logger.info(`[CASBIN-FAST] ${reqId} - 开始快速权限验证: ${method} ${path}`);
+
+    const enforcer = await enforcerLaunchedPromise;
+
+    if (!(enforcer instanceof Enforcer)) {
+      logger.error(`[CASBIN-FAST] ${reqId} - Casbin enforcer初始化失败`);
+      return c.json(
+        { message: HttpStatusPhrases.INTERNAL_SERVER_ERROR },
+        HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const payload: JWTPayload = c.get("jwtPayload");
+    const userId = payload.uid as string;
+    const domain = (payload.domain as string) ?? "default";
+
+    // 从权限管理器缓存获取权限配置
+    const permissionManager = PermissionConfigManager.getInstance();
+    const permissionConfig = permissionManager.findRoutePermission(method.toUpperCase(), path);
+
+    if (!permissionConfig) {
+      // 公开接口或无权限要求的接口
+      logger.info(`[CASBIN-FAST] ${reqId} - 公开接口，跳过权限验证`);
+      await next();
+      return;
+    }
+
+    // 获取用户角色
+    const roles = await getUserRoles(userId, domain);
+
+    if (roles.length === 0) {
+      logger.warn(`[CASBIN-FAST] ${reqId} - 权限验证失败: 用户无任何角色`);
+      return c.json(
+        { message: "Access denied: No roles assigned to user" },
+        HttpStatusCodes.FORBIDDEN,
+      );
+    }
+
+    // 快速权限检查
+    const hasPermission = await checkPermission(
+      enforcer,
+      roles,
+      permissionConfig.resource,
+      permissionConfig.action,
+      domain,
+    );
+
+    if (!hasPermission) {
+      logger.warn(`[CASBIN-FAST] ${reqId} - 权限验证失败: 用户无访问权限`);
+      return c.json(
+        { message: HttpStatusPhrases.FORBIDDEN },
+        HttpStatusCodes.FORBIDDEN,
+      );
+    }
+
+    // 将信息存入上下文
+    c.set("userRoles", roles);
+    c.set("userDomain", domain);
+    c.set("currentPermission", permissionConfig);
+
+    logger.info(`[CASBIN-FAST] ${reqId} - 快速权限验证通过`);
     await next();
   };
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "sys_role_menu" ALTER COLUMN "menu_id" SET DATA TYPE uuid;

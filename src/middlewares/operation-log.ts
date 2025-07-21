@@ -88,6 +88,7 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       startTime,
       endTime,
       duration,
+      createdBy: userId, // 添加创建者字段
     }).catch((error) => {
       console.error("Failed to save operation log:", error);
     });

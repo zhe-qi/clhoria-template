@@ -13,6 +13,7 @@ const tags = ["/sys-menus (系统菜单管理)"];
 
 /** 查询菜单列表 */
 export const list = createRoute({
+  operationId: "sysMenus:read",
   path: "/sys-menus",
   method: "get",
   request: {
@@ -32,6 +33,7 @@ export const list = createRoute({
 
 /** 查询菜单树形结构 */
 export const tree = createRoute({
+  operationId: "sysMenus:read",
   path: "/sys-menus/tree",
   method: "get",
   request: {
@@ -53,7 +55,8 @@ export const tree = createRoute({
 
 /** 根据角色获取菜单 */
 export const getMenusByRole = createRoute({
-  path: "/sys-menus/role/{roleId}",
+  operationId: "sysMenus:read",
+  path: "/sys-menus/role/{id}",
   method: "get",
   request: {
     params: IdUUIDParamsSchema,
@@ -74,6 +77,7 @@ export const getMenusByRole = createRoute({
 
 /** 创建菜单 */
 export const create = createRoute({
+  operationId: "sysMenus:create",
   path: "/sys-menus",
   method: "post",
   request: {
@@ -95,12 +99,11 @@ export const create = createRoute({
 
 /** 根据ID查询菜单 */
 export const getOne = createRoute({
+  operationId: "sysMenus:read",
   path: "/sys-menus/{id}",
   method: "get",
   request: {
-    params: z.object({
-      id: z.coerce.number().int().positive().describe("菜单ID"),
-    }),
+    params: IdUUIDParamsSchema,
   },
   tags,
   summary: "根据ID查询菜单",
@@ -114,9 +117,7 @@ export const getOne = createRoute({
       "菜单不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(z.object({
-        id: z.coerce.number().int().positive(),
-      })),
+      createErrorSchema(IdUUIDParamsSchema),
       "参数验证失败",
     ),
   },
@@ -124,12 +125,11 @@ export const getOne = createRoute({
 
 /** 更新菜单 */
 export const patch = createRoute({
+  operationId: "sysMenus:update",
   path: "/sys-menus/{id}",
   method: "patch",
   request: {
-    params: z.object({
-      id: z.coerce.number().int().positive().describe("菜单ID"),
-    }),
+    params: IdUUIDParamsSchema,
     body: jsonContentRequired(patchSysMenuSchema, "更新参数"),
   },
   tags,
@@ -144,9 +144,7 @@ export const patch = createRoute({
       "菜单不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(patchSysMenuSchema).or(createErrorSchema(z.object({
-        id: z.coerce.number().int().positive(),
-      }))),
+      createErrorSchema(patchSysMenuSchema).or(createErrorSchema(IdUUIDParamsSchema)),
       "参数验证失败",
     ),
   },
@@ -154,6 +152,7 @@ export const patch = createRoute({
 
 /** 获取常量路由 */
 export const getConstantRoutes = createRoute({
+  operationId: "sysMenus:read",
   path: "/sys-menus/constant",
   method: "get",
   tags,
@@ -185,6 +184,7 @@ export const getConstantRoutes = createRoute({
 
 /** 获取用户路由 */
 export const getUserRoutes = createRoute({
+  operationId: "sysMenus:read",
   path: "/sys-menus/user-routes",
   method: "get",
   tags,
@@ -210,12 +210,11 @@ export const getUserRoutes = createRoute({
 
 /** 删除菜单 */
 export const remove = createRoute({
+  operationId: "sysMenus:delete",
   path: "/sys-menus/{id}",
   method: "delete",
   request: {
-    params: z.object({
-      id: z.coerce.number().int().positive().describe("菜单ID"),
-    }),
+    params: IdUUIDParamsSchema,
   },
   tags,
   summary: "删除菜单",
@@ -228,9 +227,7 @@ export const remove = createRoute({
       "菜单不存在",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(z.object({
-        id: z.coerce.number().int().positive(),
-      })),
+      createErrorSchema(IdUUIDParamsSchema),
       "参数验证失败",
     ),
   },

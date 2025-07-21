@@ -11,7 +11,7 @@ export const assignPermissionsToRoleSchema = z.object({
 export const assignRoutesToRoleSchema = z.object({
   roleId: z.string().describe("角色ID"),
   domain: z.string().describe("域/租户"),
-  menuIds: z.array(z.number()).describe("菜单ID列表"),
+  menuIds: z.array(z.string()).describe("菜单ID列表"),
 });
 
 // 分配用户给角色的Schema
@@ -104,5 +104,5 @@ export const rolePermissionsSchema = z.object({
 export const roleMenusSchema = z.object({
   roleId: z.string().describe("角色ID"),
   domain: z.string().describe("域/租户"),
-  menuIds: z.array(z.number()).describe("菜单ID列表"),
+  menuIds: z.array(z.string()).describe("菜单ID列表"),
 });

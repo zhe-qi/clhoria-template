@@ -1,9 +1,9 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const sysRoleMenu = pgTable("sys_role_menu", {
   roleId: uuid().notNull(),
-  menuId: integer().notNull(),
+  menuId: uuid().notNull(),
   domain: varchar({ length: 64 }).notNull(),
 }, table => [
   primaryKey({ columns: [table.roleId, table.menuId, table.domain] }),

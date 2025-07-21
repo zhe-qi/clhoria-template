@@ -83,7 +83,9 @@ export const tree: SysEndpointsRouteHandlerType<"tree"> = async (c) => {
     controller: "ResourceGroup",
     summary: `${resource}资源组`,
     createdAt: new Date().toISOString(),
+    createdBy: "system",
     updatedAt: null,
+    updatedBy: null,
     children,
   }));
 

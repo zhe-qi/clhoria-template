@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import { initCasbinRule } from "./sys/casbinRule";
 import { initSysDomain } from "./sys/sysDomain";
-import { initSysEndpoint } from "./sys/sysEndpoint";
 import { initSysMenu } from "./sys/sysMenu";
 import { initSysRole } from "./sys/sysRole";
 import { initSysRoleMenu } from "./sys/sysRoleMenu";
@@ -12,25 +11,22 @@ async function run() {
   try {
     console.log("-> 初始化系统域...");
     await initSysDomain();
-    
+
     console.log("-> 初始化系统角色...");
     await initSysRole();
-    
+
     console.log("-> 初始化系统用户...");
     await initSysUser();
-    
+
     console.log("-> 初始化系统菜单...");
     await initSysMenu();
-    
-    console.log("-> 初始化系统端点...");
-    await initSysEndpoint();
-    
+
     console.log("-> 初始化用户角色关联...");
     await initSysUserRole();
-    
+
     console.log("-> 初始化角色菜单关联...");
     await initSysRoleMenu();
-    
+
     console.log("-> 初始化 Casbin 权限规则...");
     await initCasbinRule();
   }

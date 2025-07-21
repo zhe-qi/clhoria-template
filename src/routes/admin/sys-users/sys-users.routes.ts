@@ -10,7 +10,7 @@ import { IdUUIDParamsSchema } from "@/lib/schemas";
 
 export const list = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "listSysUsers",
+  operationId: "sysUsers:read",
   summary: "获取系统用户列表",
   method: "get",
   path: "/sys-users",
@@ -27,7 +27,7 @@ export const list = createRoute({
 
 export const create = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "createSysUser",
+  operationId: "sysUsers:create",
   summary: "创建系统用户",
   method: "post",
   path: "/sys-users",
@@ -55,7 +55,7 @@ export const create = createRoute({
 
 export const get = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "getSysUser",
+  operationId: "sysUsers:read",
   summary: "获取系统用户详情",
   method: "get",
   path: "/sys-users/{id}",
@@ -80,7 +80,7 @@ export const get = createRoute({
 
 export const update = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "updateSysUser",
+  operationId: "sysUsers:update",
   summary: "更新系统用户",
   method: "patch",
   path: "/sys-users/{id}",
@@ -109,7 +109,7 @@ export const update = createRoute({
 
 export const remove = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "removeSysUser",
+  operationId: "sysUsers:delete",
   summary: "删除系统用户",
   method: "delete",
   path: "/sys-users/{id}",
@@ -134,7 +134,7 @@ export const remove = createRoute({
 // 用户角色分配路由
 export const assignRoles = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "assignRolesToUser",
+  operationId: "sysUsers:assignRoles",
   summary: "分配角色给用户",
   method: "post",
   path: "/sys-users/{id}/roles",
