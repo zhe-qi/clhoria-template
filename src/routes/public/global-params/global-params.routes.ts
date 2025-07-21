@@ -42,7 +42,6 @@ export const list = createRoute({
       "服务器内部错误",
     ),
   },
-  permission: {},
 });
 
 export const get = createRoute({
@@ -74,7 +73,6 @@ export const get = createRoute({
       "服务器内部错误",
     ),
   },
-  permission: {},
 });
 
 export const create = createRoute({
@@ -109,7 +107,6 @@ export const create = createRoute({
       "服务器内部错误",
     ),
   },
-  permission: {},
 });
 
 export const update = createRoute({
@@ -145,7 +142,6 @@ export const update = createRoute({
       "服务器内部错误",
     ),
   },
-  permission: {},
 });
 
 export const remove = createRoute({
@@ -176,7 +172,6 @@ export const remove = createRoute({
       "服务器内部错误",
     ),
   },
-  permission: {},
 });
 
 export const batch = createRoute({
@@ -208,5 +203,4 @@ export const batch = createRoute({
       "服务器内部错误",
     ),
   },
-  permission: {},
 });
