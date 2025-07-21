@@ -17,6 +17,9 @@ export const CacheConstant = {
 
   /** 端点权限缓存 */
   ENDPOINT_PERMISSIONS: "endpoint:permissions",
+
+  /** 全局参数前缀 */
+  GLOBAL_PARAMS_PREFIX: "global:params:",
 } as const;
 
 /** 缓存常量类型 */
@@ -48,4 +51,18 @@ export function getUserMenusKey(userId: string, domain: string): string {
  */
 export function getMenuTreeKey(domain: string): string {
   return `${CacheConstant.MENU_TREE_PREFIX}${domain}`;
+}
+
+/**
+ * 生成全局参数缓存Key
+ */
+export function getGlobalParamKey(key: string, domain: string): string {
+  return `${CacheConstant.GLOBAL_PARAMS_PREFIX}${domain}:${key}`;
+}
+
+/**
+ * 生成全局参数列表缓存Key
+ */
+export function getGlobalParamsAllKey(domain: string): string {
+  return `${CacheConstant.GLOBAL_PARAMS_PREFIX}${domain}:all`;
 }

@@ -22,4 +22,5 @@ export const list = createRoute({
       "获取成功响应",
     ),
   },
+  permission: {},
 });

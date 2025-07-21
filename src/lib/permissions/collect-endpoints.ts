@@ -12,7 +12,6 @@ import type { EndpointPermission } from "./permission-config";
 import { PermissionConfigManager } from "./permission-config";
 import { extractPermissionFromRoute } from "./permission-inference";
 
-
 /**
  * 从 Hono 应用中收集端点权限信息
  */
@@ -83,7 +82,6 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
   return endpoints;
 }
 
-
 /**
  * 同步端点权限到数据库
  */
@@ -143,7 +141,6 @@ export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermi
   });
 }
 
-
 /**
  * 完整的端点权限收集和同步流程
  */
@@ -171,4 +168,3 @@ export async function collectAndSyncEndpointPermissions(apps: { name: string; ap
   console.log("未发现任何端点权限配置");
   return { inserted: 0, updated: 0 };
 }
-

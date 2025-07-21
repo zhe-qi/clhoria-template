@@ -23,6 +23,9 @@ export const PermissionResource = {
 
   /** 操作日志 */
   OPERATION_LOG: "operation-log",
+
+  /** 全局参数管理 */
+  GLOBAL_PARAMS: "global-params",
 } as const;
 
 /** 权限资源类型 */

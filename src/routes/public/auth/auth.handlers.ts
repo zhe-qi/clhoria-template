@@ -10,9 +10,9 @@ import { AuthType, getUserRolesKey, Status, TokenStatus, TokenType } from "@/lib
 import { redisClient } from "@/lib/redis";
 import { pick } from "@/utils";
 
-import type { AuthRouteHandlerType as RouteHandlerType } from "./auth.index";
+import type { AuthRouteHandlerType } from "./auth.index";
 
-export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
+export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
   const { identifier, password, domain } = body;
 
@@ -129,7 +129,7 @@ export const adminLogin: RouteHandlerType<"adminLogin"> = async (c) => {
 };
 
 /** 后台注册 */
-export const adminRegister: RouteHandlerType<"adminRegister"> = async (c) => {
+export const adminRegister: AuthRouteHandlerType<"adminRegister"> = async (c) => {
   const body = c.req.valid("json");
   const { password, confirmPassword, ...userData } = body;
 
@@ -163,7 +163,7 @@ export const adminRegister: RouteHandlerType<"adminRegister"> = async (c) => {
 };
 
 /** 刷新 Token */
-export const refreshToken: RouteHandlerType<"refreshToken"> = async (c) => {
+export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
   const body = c.req.valid("json");
   const { refreshToken: oldRefreshToken } = body;
 
@@ -230,7 +230,7 @@ export const refreshToken: RouteHandlerType<"refreshToken"> = async (c) => {
 };
 
 /** 获取用户信息 */
-export const getUserInfo: RouteHandlerType<"getUserInfo"> = async (c) => {
+export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
   // 这里需要从 JWT token 中获取用户信息
   // 在实际实现中，这里应该由 JWT 中间件提供用户信息
   const authHeader = c.req.header("authorization");

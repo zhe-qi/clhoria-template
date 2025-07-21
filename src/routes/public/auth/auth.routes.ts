@@ -40,6 +40,7 @@ export const adminLogin = createRoute({
       "用户不存在",
     ),
   },
+  permission: {},
 });
 
 /** 后台注册 */
@@ -70,6 +71,7 @@ export const adminRegister = createRoute({
       "密码不一致",
     ),
   },
+  permission: {},
 });
 
 /** 刷新 Token */
@@ -99,6 +101,7 @@ export const refreshToken = createRoute({
       "刷新令牌无效",
     ),
   },
+  permission: {},
 });
 
 /** 获取用户信息 */
@@ -117,4 +120,5 @@ export const getUserInfo = createRoute({
       "未授权",
     ),
   },
+  permission: {},
 });

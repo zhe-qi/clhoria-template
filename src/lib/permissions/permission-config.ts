@@ -38,7 +38,6 @@ export interface PermissionConfigOptions {
   skipOnInferenceFailure?: boolean;
 }
 
-
 /**
  * 权限规则缓存
  */
