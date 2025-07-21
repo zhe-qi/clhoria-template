@@ -12,20 +12,9 @@ import type { EndpointPermission } from "./permission-config";
 import { PermissionConfigManager } from "./permission-config";
 import { extractPermissionFromRoute } from "./permission-inference";
 
-export interface EndpointInfo {
-  id: string;
-  path: string;
-  method: string;
-  action: string;
-  resource: string;
-  controller: string;
-  summary?: string;
-  operationId?: string;
-}
 
 /**
  * 从 Hono 应用中收集端点权限信息
- * 新的实现基于权限推断机制
  */
 export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): EndpointPermission[] {
   const endpoints: EndpointPermission[] = [];
@@ -89,82 +78,14 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
   }
   catch (error) {
     console.error("Error collecting endpoint permissions:", error);
-
-    // 降级处理：尝试从应用路由中收集
-    try {
-      const routes = app.routes || [];
-
-      for (const route of routes) {
-        const { path, method, handler } = route;
-
-        if (!method)
-          continue;
-
-        const fullPath = prefix + path;
-
-        // 尝试从处理器中提取权限信息
-        const permissionConfig = (handler as any)?.__permission;
-
-        if (!permissionConfig) {
-          continue;
-        }
-
-        const endpointId = createHash("md5")
-          .update(JSON.stringify({
-            path: fullPath,
-            method,
-            resource: permissionConfig.resource,
-            action: permissionConfig.action,
-          }))
-          .digest("hex");
-
-        const controller = handler?.name || "unknown";
-
-        const endpointPermission: EndpointPermission = {
-          id: endpointId,
-          path: fullPath,
-          method: method.toUpperCase(),
-          resource: permissionConfig.resource,
-          action: permissionConfig.action,
-          controller,
-          summary: "",
-          operationId: "",
-        };
-
-        endpoints.push(endpointPermission);
-        permissionManager.registerEndpointPermission(endpointPermission);
-      }
-    }
-    catch (fallbackError) {
-      console.error("Fallback endpoint collection also failed:", fallbackError);
-    }
   }
 
   return endpoints;
 }
 
-/**
- * 向后兼容的端点收集函数
- * 将新的权限端点转换为旧的端点信息格式
- */
-export function collectEndpoints(app: AppOpenAPI, prefix = ""): EndpointInfo[] {
-  const endpointPermissions = collectEndpointPermissions(app, prefix);
-
-  return endpointPermissions.map(ep => ({
-    id: ep.id,
-    path: ep.path,
-    method: ep.method,
-    action: ep.action,
-    resource: ep.resource,
-    controller: ep.controller,
-    summary: ep.summary,
-    operationId: ep.operationId,
-  }));
-}
 
 /**
  * 同步端点权限到数据库
- * 新的实现支持 EndpointPermission 类型
  */
 export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermission[]) {
   if (endpoints.length === 0)
@@ -222,28 +143,9 @@ export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermi
   });
 }
 
-/**
- * 向后兼容的同步函数
- */
-export async function syncEndpointsToDatabase(endpoints: EndpointInfo[]) {
-  // 转换为 EndpointPermission 格式
-  const endpointPermissions: EndpointPermission[] = endpoints.map(ep => ({
-    id: ep.id,
-    path: ep.path,
-    method: ep.method,
-    resource: ep.resource as any,
-    action: ep.action as any,
-    controller: ep.controller,
-    summary: ep.summary,
-    operationId: ep.operationId,
-  }));
-
-  return syncEndpointPermissionsToDatabase(endpointPermissions);
-}
 
 /**
  * 完整的端点权限收集和同步流程
- * 新的实现使用权限推断机制
  */
 export async function collectAndSyncEndpointPermissions(apps: { name: string; app: AppOpenAPI; prefix?: string }[]) {
   const allEndpoints: EndpointPermission[] = [];
@@ -270,22 +172,3 @@ export async function collectAndSyncEndpointPermissions(apps: { name: string; ap
   return { inserted: 0, updated: 0 };
 }
 
-/**
- * 向后兼容的端点收集和同步流程
- */
-export async function collectAndSyncEndpoints(apps: { name: string; app: AppOpenAPI; prefix?: string }[]) {
-  const allEndpoints: EndpointInfo[] = [];
-
-  for (const { app, prefix } of apps) {
-    const endpoints = collectEndpoints(app, prefix);
-    allEndpoints.push(...endpoints);
-  }
-
-  if (allEndpoints.length > 0) {
-    const result = await syncEndpointsToDatabase(allEndpoints);
-    console.log(`端点同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
-    return result;
-  }
-
-  return { inserted: 0, updated: 0 };
-}
