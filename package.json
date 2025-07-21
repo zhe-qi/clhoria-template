@@ -2,7 +2,7 @@
   "name": "hono-template",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.13.0",
+  "packageManager": "pnpm@10.13.1",
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
