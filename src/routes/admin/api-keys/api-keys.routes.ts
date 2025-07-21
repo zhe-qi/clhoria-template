@@ -4,7 +4,7 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
-import { insertApiKeySchema, selectApiKeySchema } from "@/db/schema/api-key";
+import { insertApiKeySchema, selectApiKeySchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 

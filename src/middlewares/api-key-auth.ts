@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
-import { apiKey } from "@/db/schema/api-key";
+import { apiKey } from "@/db/schema";
 import { redisClient } from "@/lib/redis";
 
 /**

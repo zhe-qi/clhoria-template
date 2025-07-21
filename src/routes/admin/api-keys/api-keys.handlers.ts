@@ -4,7 +4,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
-import { apiKey } from "@/db/schema/api-key";
+import { apiKey } from "@/db/schema";
 import { withPaginationAndCount } from "@/lib/pagination";
 import { clearApiKeyCache } from "@/middlewares/api-key-auth";
 

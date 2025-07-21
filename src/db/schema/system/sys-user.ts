@@ -8,7 +8,7 @@ import { statusEnum } from "./enums";
 import { sysUserRole } from "./sys-user-role";
 
 export const sysUser = pgTable("sys_user", {
-  id: defaultColumns.id,
+  ...defaultColumns,
   username: varchar({ length: 64 }).notNull().unique(),
   password: text().notNull(),
   domain: varchar({ length: 64 }).notNull(),
@@ -18,10 +18,6 @@ export const sysUser = pgTable("sys_user", {
   phoneNumber: varchar({ length: 32 }).unique(),
   nickName: varchar({ length: 64 }).notNull(),
   status: statusEnum().notNull().default("ENABLED"),
-  createdAt: defaultColumns.createdAt,
-  createdBy: varchar({ length: 64 }).notNull(),
-  updatedAt: defaultColumns.updatedAt,
-  updatedBy: varchar({ length: 64 }),
 });
 
 export const sysUserRelations = relations(sysUser, ({ many }) => ({
@@ -53,7 +49,9 @@ export const insertSysUserSchema = createInsertSchema(sysUser, {
 }).omit({
   id: true,
   createdAt: true,
+  createdBy: true,
   updatedAt: true,
+  updatedBy: true,
 });
 
 export const patchSysUserSchema = insertSysUserSchema.partial();
