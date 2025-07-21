@@ -242,12 +242,12 @@ export const getUserInfo: RouteHandlerType<"getUserInfo"> = async (c) => {
   const token = authHeader.slice(7);
 
   try {
-    const payload = await verifyJwt(token, env.ADMIN_JWT_SECRET) as any;
+    const payload = await verifyJwt(token, env.ADMIN_JWT_SECRET);
 
     const user = await db.query.sysUser.findFirst({
       where: and(
-        eq(sysUser.id, payload.uid),
-        eq(sysUser.domain, payload.domain),
+        eq(sysUser.id, payload.uid as string),
+        eq(sysUser.domain, payload.domain as string),
       ),
     });
 

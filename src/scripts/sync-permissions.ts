@@ -9,11 +9,6 @@ import { casbinRule } from "@/db/schema";
 import { collectAndSyncEndpointPermissions, PermissionConfigManager } from "@/lib/permissions";
 
 /**
- * 现代化权限同步脚本
- * 集成新的权限推断系统和传统的权限分配功能
- */
-
-/**
  * 第一步：使用新系统收集和同步端点权限
  */
 async function syncEndpointsWithNewSystem() {
