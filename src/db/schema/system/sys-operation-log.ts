@@ -1,8 +1,10 @@
 import { integer, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
+import { defaultColumns } from "@/db/common/default-columns";
+
 export const sysOperationLog = pgTable("sys_operation_log", {
-  id: uuid().primaryKey().defaultRandom(),
+  id: defaultColumns.id,
   userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
@@ -19,7 +21,8 @@ export const sysOperationLog = pgTable("sys_operation_log", {
   startTime: timestamp({ mode: "date" }).notNull(),
   endTime: timestamp({ mode: "date" }).notNull(),
   duration: integer().notNull(),
-  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
+  createdBy: defaultColumns.createdBy,
+  createdAt: defaultColumns.createdAt,
 });
 
 export const selectSysOperationLogSchema = createSelectSchema(sysOperationLog, {
@@ -40,7 +43,6 @@ export const selectSysOperationLogSchema = createSelectSchema(sysOperationLog, {
   startTime: schema => schema.describe("开始时间"),
   endTime: schema => schema.describe("结束时间"),
   duration: schema => schema.describe("持续时间(ms)"),
-  createdAt: schema => schema.describe("创建时间"),
 });
 
 export const insertSysOperationLogSchema = createInsertSchema(sysOperationLog, {

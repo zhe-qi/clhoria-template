@@ -1,17 +1,17 @@
-import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+import { defaultColumns } from "@/db/common/default-columns";
 
 import { statusEnum } from "./enums";
 
 export const sysAccessKey = pgTable("sys_access_key", {
-  id: uuid().primaryKey().defaultRandom(),
+  ...defaultColumns,
   domain: varchar({ length: 64 }).notNull(),
   accessKeyId: varchar({ length: 128 }).notNull().unique(),
   accessKeySecret: varchar({ length: 256 }).notNull().unique(),
   status: statusEnum().notNull().default("ENABLED"),
   description: text(),
-  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
-  createdBy: varchar({ length: 64 }).notNull(),
 });
 
 export const selectSysAccessKeySchema = createSelectSchema(sysAccessKey, {
@@ -21,8 +21,6 @@ export const selectSysAccessKeySchema = createSelectSchema(sysAccessKey, {
   accessKeySecret: schema => schema.describe("访问密钥密码"),
   status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用"),
   description: schema => schema.describe("描述"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
 });
 
 export const insertSysAccessKeySchema = createInsertSchema(sysAccessKey, {

@@ -1,8 +1,10 @@
 import { integer, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
+import { defaultColumns } from "@/db/common/default-columns";
+
 export const sysLoginLog = pgTable("sys_login_log", {
-  id: uuid().primaryKey().defaultRandom(),
+  id: defaultColumns.id,
   userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
@@ -13,8 +15,8 @@ export const sysLoginLog = pgTable("sys_login_log", {
   userAgent: varchar({ length: 512 }).notNull(),
   requestId: varchar({ length: 64 }).notNull(),
   type: varchar({ length: 32 }).notNull(),
-  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
-  createdBy: varchar({ length: 64 }).notNull(),
+  createdBy: defaultColumns.createdBy,
+  createdAt: defaultColumns.createdAt,
 });
 
 export const selectSysLoginLogSchema = createSelectSchema(sysLoginLog, {
@@ -29,8 +31,6 @@ export const selectSysLoginLogSchema = createSelectSchema(sysLoginLog, {
   userAgent: schema => schema.describe("用户代理"),
   requestId: schema => schema.describe("请求ID"),
   type: schema => schema.describe("登录类型"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
 });
 
 export const insertSysLoginLogSchema = createInsertSchema(sysLoginLog, {

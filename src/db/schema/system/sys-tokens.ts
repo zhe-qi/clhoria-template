@@ -2,10 +2,11 @@ import { integer, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
+import { defaultColumns } from "@/db/common/default-columns";
 import { TokenStatus, TokenType } from "@/lib/enums";
 
 export const sysTokens = pgTable("sys_tokens", {
-  id: uuid().primaryKey().defaultRandom(),
+  id: defaultColumns.id,
   accessToken: varchar({ length: 512 }).notNull().unique(),
   refreshToken: varchar({ length: 512 }).notNull().unique(),
   status: varchar({ length: 32 }).notNull(),
@@ -19,8 +20,8 @@ export const sysTokens = pgTable("sys_tokens", {
   userAgent: varchar({ length: 512 }).notNull(),
   requestId: varchar({ length: 64 }).notNull(),
   type: varchar({ length: 32 }).notNull(),
-  createdAt: timestamp({ mode: "date" }).notNull().defaultNow(),
-  createdBy: varchar({ length: 64 }).notNull(),
+  createdBy: defaultColumns.createdBy,
+  createdAt: defaultColumns.createdAt,
 });
 
 export const selectSysTokensSchema = createSelectSchema(sysTokens, {
@@ -38,8 +39,6 @@ export const selectSysTokensSchema = createSelectSchema(sysTokens, {
   userAgent: schema => schema.describe("用户代理"),
   requestId: schema => schema.describe("请求ID"),
   type: schema => schema.describe("类型: WEB=网页登录 MOBILE=移动端 API=API访问 THIRD_PARTY=第三方"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
 });
 
 export const insertSysTokensSchema = createInsertSchema(sysTokens, {

@@ -9,7 +9,7 @@ export async function initSysUserRole() {
   const users = await db.select({ id: sysUser.id, username: sysUser.username }).from(sysUser);
   const roles = await db.select({ id: sysRole.id, code: sysRole.code }).from(sysRole);
 
-  const soybeanUser = users.find(u => u.username === "soybean");
+  const superUser = users.find(u => u.username === "super");
   const adminUser = users.find(u => u.username === "admin");
   const normalUser = users.find(u => u.username === "user");
 
@@ -17,7 +17,7 @@ export async function initSysUserRole() {
   const adminRole = roles.find(r => r.code === "ROLE_ADMIN");
   const userRole = roles.find(r => r.code === "ROLE_USER");
 
-  if (!soybeanUser || !adminUser || !normalUser) {
+  if (!superUser || !adminUser || !normalUser) {
     throw new Error("未找到必要的用户数据");
   }
 
@@ -27,7 +27,7 @@ export async function initSysUserRole() {
 
   const data = [
     {
-      userId: soybeanUser.id,
+      userId: superUser.id,
       roleId: superRole.id,
     },
     {

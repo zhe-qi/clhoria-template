@@ -9,16 +9,12 @@ import { sysRoleMenu } from "./sys-role-menu";
 import { sysUserRole } from "./sys-user-role";
 
 export const sysRole = pgTable("sys_role", {
-  id: defaultColumns.id,
+  ...defaultColumns,
   code: varchar({ length: 64 }).notNull().unique(),
   name: varchar({ length: 64 }).notNull(),
   description: text(),
   pid: varchar({ length: 64 }).notNull().default("0"),
   status: statusEnum().notNull().default("ENABLED"),
-  createdAt: defaultColumns.createdAt,
-  createdBy: varchar({ length: 64 }).notNull(),
-  updatedAt: defaultColumns.updatedAt,
-  updatedBy: varchar({ length: 64 }),
 });
 
 export const sysRoleRelations = relations(sysRole, ({ many }) => ({
@@ -33,10 +29,6 @@ export const selectSysRoleSchema = createSelectSchema(sysRole, {
   description: schema => schema.describe("角色描述"),
   pid: schema => schema.describe("父角色ID"),
   status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
-  updatedAt: schema => schema.describe("更新时间"),
-  updatedBy: schema => schema.describe("更新人"),
 });
 
 export const insertSysRoleSchema = createInsertSchema(sysRole, {

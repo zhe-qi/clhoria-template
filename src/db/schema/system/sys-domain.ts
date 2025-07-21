@@ -6,15 +6,11 @@ import { defaultColumns } from "@/db/common/default-columns";
 import { statusEnum } from "./enums";
 
 export const sysDomain = pgTable("sys_domain", {
-  id: defaultColumns.id,
+  ...defaultColumns,
   code: varchar({ length: 64 }).notNull().unique(),
   name: varchar({ length: 128 }).notNull(),
   description: text(),
   status: statusEnum().notNull().default("ENABLED"),
-  createdAt: defaultColumns.createdAt,
-  createdBy: varchar({ length: 64 }).notNull(),
-  updatedAt: defaultColumns.updatedAt,
-  updatedBy: varchar({ length: 64 }),
 });
 
 export const selectSysDomainSchema = createSelectSchema(sysDomain, {
@@ -23,10 +19,6 @@ export const selectSysDomainSchema = createSelectSchema(sysDomain, {
   name: schema => schema.describe("域名称"),
   description: schema => schema.describe("域描述"),
   status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
-  updatedAt: schema => schema.describe("更新时间"),
-  updatedBy: schema => schema.describe("更新人"),
 });
 
 export const insertSysDomainSchema = createInsertSchema(sysDomain, {

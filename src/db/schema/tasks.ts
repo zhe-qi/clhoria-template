@@ -4,11 +4,9 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { defaultColumns } from "@/db/common/default-columns";
 
 export const tasks = pgTable("tasks", {
-  id: defaultColumns.id,
+  ...defaultColumns,
   name: text().notNull(),
   done: boolean().notNull().default(false),
-  createdAt: defaultColumns.createdAt,
-  updatedAt: defaultColumns.updatedAt,
 });
 
 export const selectTasksSchema = createSelectSchema(tasks);

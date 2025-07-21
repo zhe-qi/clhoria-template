@@ -4,13 +4,11 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { defaultColumns } from "@/db/common/default-columns";
 
 export const clientUsers = pgTable("client_users", {
-  id: defaultColumns.id,
+  ...defaultColumns,
   /** 用户名 */
   username: text().notNull().unique(),
   /** 密码 */
   password: text().notNull(),
-  createdAt: defaultColumns.createdAt,
-  updatedAt: defaultColumns.updatedAt,
 });
 
 export const selectClientUsersSchema = createSelectSchema(clientUsers);

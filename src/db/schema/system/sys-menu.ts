@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgEnum, pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
@@ -10,7 +10,7 @@ import { sysRoleMenu } from "./sys-role-menu";
 export const menuTypeEnum = pgEnum("menu_type", ["directory", "menu"]);
 
 export const sysMenu = pgTable("sys_menu", {
-  id: serial().primaryKey(),
+  ...defaultColumns,
   menuType: menuTypeEnum().notNull(),
   menuName: varchar({ length: 64 }).notNull(),
   iconType: integer().default(1),
@@ -29,10 +29,6 @@ export const sysMenu = pgTable("sys_menu", {
   constant: boolean().notNull().default(false),
   href: varchar({ length: 64 }),
   multiTab: boolean().default(false),
-  createdAt: defaultColumns.createdAt,
-  createdBy: varchar({ length: 64 }).notNull(),
-  updatedAt: defaultColumns.updatedAt,
-  updatedBy: varchar({ length: 64 }),
 });
 
 export const sysMenuRelations = relations(sysMenu, ({ many }) => ({
@@ -59,10 +55,6 @@ export const selectSysMenuSchema = createSelectSchema(sysMenu, {
   constant: schema => schema.describe("是否常量菜单"),
   href: schema => schema.describe("外链地址"),
   multiTab: schema => schema.describe("是否多标签"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
-  updatedAt: schema => schema.describe("更新时间"),
-  updatedBy: schema => schema.describe("更新人"),
 });
 
 export const insertSysMenuSchema = createInsertSchema(sysMenu, {

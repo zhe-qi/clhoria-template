@@ -35,10 +35,6 @@ export const selectSysUserSchema = createSelectSchema(sysUser, {
   phoneNumber: schema => schema.describe("手机号"),
   nickName: schema => schema.describe("昵称"),
   status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用 BANNED=封禁"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
-  updatedAt: schema => schema.describe("更新时间"),
-  updatedBy: schema => schema.describe("更新人"),
 });
 
 export const insertSysUserSchema = createInsertSchema(sysUser, {

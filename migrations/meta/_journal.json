@@ -29,6 +29,13 @@
       "when": 1753003117632,
       "tag": "0003_hesitant_karen_page",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1753070725134,
+      "tag": "0004_strong_gambit",
+      "breakpoints": true
     }
   ]
 }

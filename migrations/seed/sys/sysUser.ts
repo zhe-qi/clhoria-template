@@ -11,14 +11,14 @@ export async function initSysUser() {
 
   const data = [
     {
-      username: "soybean",
+      username: "super",
       password: defaultPassword,
       domain: "built-in",
       builtIn: true,
       avatar: "https://dummyimage.com/200x200/4ADE80/ffffff&text=S",
-      email: "soybean@example.com",
+      email: "super@example.com",
       phoneNumber: "18511111111",
-      nickName: "Soybean",
+      nickName: "super",
       status: "ENABLED" as const,
       createdBy: "-1",
       updatedBy: null,

@@ -4,15 +4,13 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { defaultColumns } from "@/db/common/default-columns";
 
 export const sysEndpoint = pgTable("sys_endpoint", {
-  id: defaultColumns.id,
+  ...defaultColumns,
   path: varchar({ length: 255 }).notNull(),
   method: varchar({ length: 16 }).notNull(),
   action: varchar({ length: 64 }).notNull(),
   resource: varchar({ length: 128 }).notNull(),
   controller: varchar({ length: 128 }).notNull(),
   summary: text(),
-  createdAt: defaultColumns.createdAt,
-  updatedAt: defaultColumns.updatedAt,
 });
 
 export const selectSysEndpointSchema = createSelectSchema(sysEndpoint, {
@@ -23,8 +21,6 @@ export const selectSysEndpointSchema = createSelectSchema(sysEndpoint, {
   resource: schema => schema.describe("资源"),
   controller: schema => schema.describe("控制器"),
   summary: schema => schema.describe("描述"),
-  createdAt: schema => schema.describe("创建时间"),
-  updatedAt: schema => schema.describe("更新时间"),
 });
 
 export const insertSysEndpointSchema = createInsertSchema(sysEndpoint, {
