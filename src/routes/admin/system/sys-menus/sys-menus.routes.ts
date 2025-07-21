@@ -13,7 +13,7 @@ const tags = ["/sys-menus (系统菜单管理)"];
 
 /** 查询菜单列表 */
 export const list = createRoute({
-  operationId: "sysMenus:read",
+  operationId: "sys-menus:read",
   path: "/sys-menus",
   method: "get",
   request: {
@@ -33,7 +33,7 @@ export const list = createRoute({
 
 /** 查询菜单树形结构 */
 export const tree = createRoute({
-  operationId: "sysMenus:read",
+  operationId: "sys-menus:read",
   path: "/sys-menus/tree",
   method: "get",
   request: {
@@ -55,7 +55,7 @@ export const tree = createRoute({
 
 /** 根据角色获取菜单 */
 export const getMenusByRole = createRoute({
-  operationId: "sysMenus:read",
+  operationId: "sys-menus:read",
   path: "/sys-menus/role/{id}",
   method: "get",
   request: {
@@ -77,7 +77,7 @@ export const getMenusByRole = createRoute({
 
 /** 创建菜单 */
 export const create = createRoute({
-  operationId: "sysMenus:create",
+  operationId: "sys-menus:create",
   path: "/sys-menus",
   method: "post",
   request: {
@@ -99,7 +99,7 @@ export const create = createRoute({
 
 /** 根据ID查询菜单 */
 export const getOne = createRoute({
-  operationId: "sysMenus:read",
+  operationId: "sys-menus:read",
   path: "/sys-menus/{id}",
   method: "get",
   request: {
@@ -125,7 +125,7 @@ export const getOne = createRoute({
 
 /** 更新菜单 */
 export const patch = createRoute({
-  operationId: "sysMenus:update",
+  operationId: "sys-menus:update",
   path: "/sys-menus/{id}",
   method: "patch",
   request: {
@@ -152,7 +152,7 @@ export const patch = createRoute({
 
 /** 获取常量路由 */
 export const getConstantRoutes = createRoute({
-  operationId: "sysMenus:read",
+  operationId: "sys-menus:read",
   path: "/sys-menus/constant",
   method: "get",
   tags,
@@ -184,7 +184,7 @@ export const getConstantRoutes = createRoute({
 
 /** 获取用户路由 */
 export const getUserRoutes = createRoute({
-  operationId: "sysMenus:read",
+  operationId: "sys-menus:read",
   path: "/sys-menus/user-routes",
   method: "get",
   tags,
@@ -210,7 +210,7 @@ export const getUserRoutes = createRoute({
 
 /** 删除菜单 */
 export const remove = createRoute({
-  operationId: "sysMenus:delete",
+  operationId: "sys-menus:delete",
   path: "/sys-menus/{id}",
   method: "delete",
   request: {

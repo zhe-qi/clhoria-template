@@ -10,7 +10,7 @@ import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagin
 // 查询API端点列表
 export const list = createRoute({
   tags: ["/sys-endpoints (API端点)"],
-  operationId: "sysEndpoints:read",
+  operationId: "sys-endpoints:read",
   summary: "获取API端点列表",
   method: "get",
   path: "/sys-endpoints",
@@ -33,7 +33,7 @@ export const list = createRoute({
 // 树形结构查询API端点
 export const tree = createRoute({
   tags: ["/sys-endpoints (API端点)"],
-  operationId: "sysEndpoints:read",
+  operationId: "sys-endpoints:read",
   summary: "获取API端点树形结构",
   method: "get",
   path: "/sys-endpoints/tree",
@@ -50,7 +50,7 @@ export const tree = createRoute({
 // 获取角色授权的API端点
 export const authEndpoints = createRoute({
   tags: ["/sys-endpoints (API端点)"],
-  operationId: "sysEndpoints:read",
+  operationId: "sys-endpoints:read",
   summary: "获取角色授权的API端点",
   method: "get",
   path: "/sys-endpoints/auth/{roleCode}",
@@ -74,7 +74,7 @@ export const authEndpoints = createRoute({
 // 创建API端点
 export const create = createRoute({
   tags: ["/sys-endpoints (API端点)"],
-  operationId: "sysEndpoints:create",
+  operationId: "sys-endpoints:create",
   summary: "创建API端点",
   method: "post",
   path: "/sys-endpoints",
@@ -103,7 +103,7 @@ export const create = createRoute({
 // 获取单个API端点
 export const get = createRoute({
   tags: ["/sys-endpoints (API端点)"],
-  operationId: "sysEndpoints:read",
+  operationId: "sys-endpoints:read",
   summary: "获取API端点详情",
   method: "get",
   path: "/sys-endpoints/{id}",
@@ -129,7 +129,7 @@ export const get = createRoute({
 // 更新API端点
 export const update = createRoute({
   tags: ["/sys-endpoints (API端点)"],
-  operationId: "sysEndpoints:update",
+  operationId: "sys-endpoints:update",
   summary: "更新API端点",
   method: "patch",
   path: "/sys-endpoints/{id}",
@@ -163,7 +163,7 @@ export const update = createRoute({
 // 删除API端点
 export const remove = createRoute({
   tags: ["/sys-endpoints (API端点)"],
-  operationId: "sysEndpoints:delete",
+  operationId: "sys-endpoints:delete",
   summary: "删除API端点",
   method: "delete",
   path: "/sys-endpoints/{id}",

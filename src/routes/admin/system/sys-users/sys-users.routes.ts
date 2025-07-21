@@ -9,7 +9,7 @@ import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagin
 
 export const list = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "sysUsers:read",
+  operationId: "sys-users:read",
   summary: "获取系统用户列表",
   method: "get",
   path: "/sys-users",
@@ -26,7 +26,7 @@ export const list = createRoute({
 
 export const create = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "sysUsers:create",
+  operationId: "sys-users:create",
   summary: "创建系统用户",
   method: "post",
   path: "/sys-users",
@@ -54,7 +54,7 @@ export const create = createRoute({
 
 export const get = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "sysUsers:read",
+  operationId: "sys-users:read",
   summary: "获取系统用户详情",
   method: "get",
   path: "/sys-users/{id}",
@@ -79,7 +79,7 @@ export const get = createRoute({
 
 export const update = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "sysUsers:update",
+  operationId: "sys-users:update",
   summary: "更新系统用户",
   method: "patch",
   path: "/sys-users/{id}",
@@ -108,7 +108,7 @@ export const update = createRoute({
 
 export const remove = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "sysUsers:delete",
+  operationId: "sys-users:delete",
   summary: "删除系统用户",
   method: "delete",
   path: "/sys-users/{id}",
@@ -133,7 +133,7 @@ export const remove = createRoute({
 // 用户角色分配路由
 export const assignRoles = createRoute({
   tags: ["/sys-users (系统用户)"],
-  operationId: "sysUsers:assignRoles",
+  operationId: "sys-users:assign-users",
   summary: "分配角色给用户",
   method: "post",
   path: "/sys-users/{id}/roles",

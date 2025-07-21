@@ -17,7 +17,7 @@ export const list = createRoute({
   tags,
   method: "get",
   path: "/operation-log",
-  operationId: "operationLog:list",
+  operationId: "operation-log:read",
   summary: "获取操作日志列表",
   request: {
     query: operationLogQuerySchema,
