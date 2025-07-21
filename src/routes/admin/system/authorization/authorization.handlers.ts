@@ -3,6 +3,8 @@ import type { JWTPayload } from "hono/utils/jwt/types";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
+import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
+
 import db from "@/db";
 import { MenuService } from "@/lib/menu-service";
 import {
@@ -33,8 +35,8 @@ export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermi
   const permissionObjects = permissions.map((perm: string) => {
     const [resource, action] = perm.split(":");
     return {
-      resource: resource as import("@/lib/enums").PermissionResourceType,
-      action: action as import("@/lib/enums").PermissionActionType,
+      resource: resource as PermissionResourceType,
+      action: action as PermissionActionType,
     };
   });
 
