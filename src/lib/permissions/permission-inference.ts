@@ -108,11 +108,6 @@ export function normalizeResource(resource: string): PermissionResourceType {
     "sysEndpoints": PermissionResource.SYS_ENDPOINTS,
     "endpoints": PermissionResource.SYS_ENDPOINTS,
 
-    "sys-access-keys": PermissionResource.SYS_ACCESS_KEYS,
-    "sysAccessKeys": PermissionResource.SYS_ACCESS_KEYS,
-    "access-keys": PermissionResource.SYS_ACCESS_KEYS,
-    "accessKeys": PermissionResource.SYS_ACCESS_KEYS,
-
     "authorization": PermissionResource.AUTHORIZATION,
 
     "login-log": PermissionResource.LOGIN_LOG,
@@ -120,9 +115,6 @@ export function normalizeResource(resource: string): PermissionResourceType {
 
     "operation-log": PermissionResource.OPERATION_LOG,
     "operationLog": PermissionResource.OPERATION_LOG,
-
-    "api-keys": PermissionResource.API_KEYS,
-    "apiKeys": PermissionResource.API_KEYS,
   };
 
   return resourceMap[kebabResource] || resourceMap[resource] || kebabResource as PermissionResourceType;

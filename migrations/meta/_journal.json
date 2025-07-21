@@ -43,6 +43,13 @@
       "when": 1753071893178,
       "tag": "0005_military_wallflower",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1753102421368,
+      "tag": "0006_spotty_giant_girl",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,4 @@
 export * from "./authorization/authorization.index";
-export * from "./sys-access-keys/sys-access-keys.index";
 export * from "./sys-domains/sys-domains.index";
 export * from "./sys-endpoints/sys-endpoints.index";
 export * from "./sys-menus/sys-menus.index";

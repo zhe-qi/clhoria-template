@@ -32,8 +32,7 @@ async function validateUserStatus(userId: string, domain: string): Promise<{ val
 }
 
 /**
- * JWT 认证中间件
- * 验证 JWT token 并设置用户上下文信息
+ * JWT 认证中间件，验证用户状态
  */
 export function jwtAuth(): MiddlewareHandler {
   return async (c: Context, next) => {

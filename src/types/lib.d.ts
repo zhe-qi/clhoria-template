@@ -7,7 +7,6 @@ import type { PermissionConfig } from "@/lib/permissions";
 export interface AppBindings {
   Variables: {
     logger: PinoLogger;
-    apiKey?: string;
     userRoles?: string[];
     userDomain?: string;
     currentPermission?: PermissionConfig;

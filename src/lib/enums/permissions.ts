@@ -15,9 +15,6 @@ export const PermissionResource = {
   /** 端点管理 */
   SYS_ENDPOINTS: "sys-endpoints",
 
-  /** 访问密钥管理 */
-  SYS_ACCESS_KEYS: "sys-access-keys",
-
   /** 授权管理 */
   AUTHORIZATION: "authorization",
 
@@ -26,9 +23,6 @@ export const PermissionResource = {
 
   /** 操作日志 */
   OPERATION_LOG: "operation-log",
-
-  /** API密钥管理 */
-  API_KEYS: "api-keys",
 } as const;
 
 /** 权限资源类型 */

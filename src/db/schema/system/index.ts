@@ -1,6 +1,5 @@
 export * from "./authorization";
 export * from "./enums";
-export * from "./sys-access-key";
 export * from "./sys-domain";
 export * from "./sys-endpoint";
 export * from "./sys-login-log";
