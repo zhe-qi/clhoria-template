@@ -35,3 +35,5 @@ dist
 .dev.vars
 
 *-example
+
+*.local.md
