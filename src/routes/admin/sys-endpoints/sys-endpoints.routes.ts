@@ -12,6 +12,7 @@ import { IdUUIDParamsSchema } from "@/lib/schemas";
 export const list = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   operationId: "listSysEndpoints",
+  summary: "获取API端点列表",
   method: "get",
   path: "/sys-endpoints",
   request: {
@@ -34,6 +35,7 @@ export const list = createRoute({
 export const tree = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   operationId: "getSysEndpointsTree",
+  summary: "获取API端点树形结构",
   method: "get",
   path: "/sys-endpoints/tree",
   responses: {
@@ -50,6 +52,7 @@ export const tree = createRoute({
 export const authEndpoints = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   operationId: "getAuthEndpoints",
+  summary: "获取角色授权的API端点",
   method: "get",
   path: "/sys-endpoints/auth/{roleCode}",
   request: {
@@ -73,6 +76,7 @@ export const authEndpoints = createRoute({
 export const create = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   operationId: "createSysEndpoint",
+  summary: "创建API端点",
   method: "post",
   path: "/sys-endpoints",
   request: {
@@ -101,6 +105,7 @@ export const create = createRoute({
 export const get = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   operationId: "getSysEndpoint",
+  summary: "获取API端点详情",
   method: "get",
   path: "/sys-endpoints/{id}",
   request: {
@@ -126,6 +131,7 @@ export const get = createRoute({
 export const update = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   operationId: "updateSysEndpoint",
+  summary: "更新API端点",
   method: "patch",
   path: "/sys-endpoints/{id}",
   request: {
@@ -159,6 +165,7 @@ export const update = createRoute({
 export const remove = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   operationId: "removeSysEndpoint",
+  summary: "删除API端点",
   method: "delete",
   path: "/sys-endpoints/{id}",
   request: {

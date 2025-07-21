@@ -12,6 +12,7 @@ import { IdUUIDParamsSchema } from "@/lib/schemas";
 export const list = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "listSysRoles",
+  summary: "获取系统角色列表",
   method: "get",
   path: "/sys-roles",
   request: {
@@ -28,6 +29,7 @@ export const list = createRoute({
 export const create = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "createSysRole",
+  summary: "创建系统角色",
   method: "post",
   path: "/sys-roles",
   request: {
@@ -55,6 +57,7 @@ export const create = createRoute({
 export const get = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "getSysRole",
+  summary: "获取系统角色详情",
   method: "get",
   path: "/sys-roles/{id}",
   request: {
@@ -79,6 +82,7 @@ export const get = createRoute({
 export const update = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "updateSysRole",
+  summary: "更新系统角色",
   method: "patch",
   path: "/sys-roles/{id}",
   request: {
@@ -107,6 +111,7 @@ export const update = createRoute({
 export const remove = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "removeSysRole",
+  summary: "删除系统角色",
   method: "delete",
   path: "/sys-roles/{id}",
   request: {
@@ -131,6 +136,7 @@ export const remove = createRoute({
 export const assignPermissions = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "assignPermissionsToRole",
+  summary: "分配权限给角色",
   method: "post",
   path: "/sys-roles/{id}/permissions",
   request: {
@@ -169,6 +175,7 @@ export const assignPermissions = createRoute({
 export const assignMenus = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "assignMenusToRole",
+  summary: "分配菜单给角色",
   method: "post",
   path: "/sys-roles/{id}/menus",
   request: {
@@ -203,6 +210,7 @@ export const assignMenus = createRoute({
 export const assignUsers = createRoute({
   tags: ["/sys-roles (系统角色)"],
   operationId: "assignUsersToRole",
+  summary: "分配用户给角色",
   method: "post",
   path: "/sys-roles/{id}/users",
   request: {

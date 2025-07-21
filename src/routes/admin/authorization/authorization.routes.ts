@@ -20,6 +20,7 @@ import { IdUUIDParamsSchema } from "@/lib/schemas";
 export const assignPermissionsToRole = createRoute({
   tags: ["/authorization (授权管理)"],
   operationId: "assignPermissionsToRole",
+  summary: "分配权限给角色",
   method: "post",
   path: "/authorization/roles/{roleId}/permissions",
   request: {
@@ -51,6 +52,7 @@ export const assignPermissionsToRole = createRoute({
 export const assignRoutesToRole = createRoute({
   tags: ["/authorization (授权管理)"],
   operationId: "assignRoutesToRole",
+  summary: "分配路由给角色",
   method: "post",
   path: "/authorization/roles/{roleId}/routes",
   request: {
@@ -82,6 +84,7 @@ export const assignRoutesToRole = createRoute({
 export const assignUsersToRole = createRoute({
   tags: ["/authorization (授权管理)"],
   operationId: "assignUsersToRole",
+  summary: "分配用户给角色",
   method: "post",
   path: "/authorization/roles/{roleId}/users",
   request: {
@@ -113,6 +116,7 @@ export const assignUsersToRole = createRoute({
 export const getUserRoutes = createRoute({
   tags: ["/authorization (授权管理)"],
   operationId: "getUserRoutes",
+  summary: "获取用户路由",
   method: "get",
   path: "/authorization/users/{userId}/routes",
   request: {
@@ -141,6 +145,7 @@ export const getUserRoutes = createRoute({
 export const getRolePermissions = createRoute({
   tags: ["/authorization (授权管理)"],
   operationId: "getRolePermissions",
+  summary: "获取角色权限",
   method: "get",
   path: "/authorization/roles/{roleId}/permissions",
   request: {
@@ -169,6 +174,7 @@ export const getRolePermissions = createRoute({
 export const getRoleMenus = createRoute({
   tags: ["/authorization (授权管理)"],
   operationId: "getRoleMenus",
+  summary: "获取角色菜单",
   method: "get",
   path: "/authorization/roles/{roleId}/menus",
   request: {
