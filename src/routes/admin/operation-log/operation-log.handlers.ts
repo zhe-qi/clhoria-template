@@ -1,11 +1,10 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
-import db from "@/db";
 import { operationLogs } from "@/db/schema";
-import { withPaginationAndCount } from "@/lib/pagination";
+import { pagination } from "@/lib/pagination";
 
 import type { OperationLogRouteHandlerType } from "./operation-log.index";
 
@@ -31,24 +30,10 @@ export const list: OperationLogRouteHandlerType<"list"> = async (c) => {
   // 组合条件
   const whereCondition = searchCondition ? and(baseCondition, searchCondition) : baseCondition;
 
-  // 构建查询
-  const query = db
-    .select()
-    .from(operationLogs)
-    .where(whereCondition)
-    .orderBy(desc(operationLogs.createdAt))
-    .$dynamic();
-
-  // 构建计数查询
-  const countQuery = db
-    .select({ count: count() })
-    .from(operationLogs)
-    .where(whereCondition);
-
-  const result = await withPaginationAndCount(
-    query,
-    countQuery,
-    { page: params.page, limit: params.limit },
+  const result = await pagination(
+    operationLogs,
+    whereCondition,
+    { page: params.page, limit: params.limit, orderBy: [desc(operationLogs.createdAt)] },
   );
 
   return c.json(result, HttpStatusCodes.OK);

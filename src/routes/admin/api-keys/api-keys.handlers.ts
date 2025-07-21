@@ -1,11 +1,11 @@
-import { and, count, desc, eq, ilike } from "drizzle-orm";
+import { and, desc, eq, ilike } from "drizzle-orm";
 import { createHash, randomBytes } from "node:crypto";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { apiKey } from "@/db/schema";
-import { withPaginationAndCount } from "@/lib/pagination";
+import { pagination } from "@/lib/pagination";
 import { clearApiKeyCache } from "@/middlewares/api-key-auth";
 
 import type { ApiKeysRouteHandlerType } from "./api-keys.index";
@@ -23,24 +23,10 @@ export const list: ApiKeysRouteHandlerType<"list"> = async (c) => {
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  // 构建查询
-  const query = db
-    .select()
-    .from(apiKey)
-    .where(whereClause)
-    .orderBy(desc(apiKey.createdAt))
-    .$dynamic();
-
-  // 构建计数查询
-  const countQuery = db
-    .select({ count: count() })
-    .from(apiKey)
-    .where(whereClause);
-
-  const result = await withPaginationAndCount(
-    query,
-    countQuery,
-    { page: params.page, limit: params.limit },
+  const result = await pagination(
+    apiKey,
+    whereClause,
+    { page: params.page, limit: params.limit, orderBy: [desc(apiKey.createdAt)] },
   );
 
   return c.json(result, HttpStatusCodes.OK);

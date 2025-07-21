@@ -1,13 +1,13 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysAccessKey } from "@/db/schema";
 import { Status } from "@/lib/enums";
-import { withPaginationAndCount } from "@/lib/pagination";
+import { pagination } from "@/lib/pagination";
 
 import type { SysAccessKeysRouteHandlerType } from "./sys-access-keys.index";
 
@@ -31,24 +31,10 @@ export const list: SysAccessKeysRouteHandlerType<"list"> = async (c) => {
   // 组合条件
   const whereCondition = searchCondition ? and(baseCondition, searchCondition) : baseCondition;
 
-  // 构建查询
-  const query = db
-    .select()
-    .from(sysAccessKey)
-    .where(whereCondition)
-    .orderBy(desc(sysAccessKey.createdAt))
-    .$dynamic();
-
-  // 构建计数查询
-  const countQuery = db
-    .select({ count: count() })
-    .from(sysAccessKey)
-    .where(whereCondition);
-
-  const result = await withPaginationAndCount(
-    query,
-    countQuery,
-    { page: params.page, limit: params.limit },
+  const result = await pagination(
+    sysAccessKey,
+    whereCondition,
+    { page: params.page, limit: params.limit, orderBy: [desc(sysAccessKey.createdAt)] },
   );
 
   return c.json(result, HttpStatusCodes.OK);

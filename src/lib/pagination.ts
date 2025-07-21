@@ -1,7 +1,10 @@
-import type { PgSelect } from "drizzle-orm/pg-core";
+import type { SQL } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
 
 import { z } from "@hono/zod-openapi";
 import { count } from "drizzle-orm";
+
+import db from "@/db";
 
 export const PaginationParamsSchema = z.object({
   page: z.coerce.number().min(1).default(1).describe("页码"),
@@ -56,38 +59,26 @@ export function createPaginationMeta(
   };
 }
 
-export async function withPagination<T extends PgSelect>(
-  query: T,
-  options: PaginationOptions,
-): Promise<{ data: Awaited<T>; meta: PaginationMeta }> {
-  const { page, limit } = options;
+export async function pagination(
+  table: PgTable,
+  whereCondition?: SQL,
+  options: PaginationOptions & { orderBy?: any[] } = { page: 1, limit: 10 },
+): Promise<{ data: any[]; meta: PaginationMeta }> {
+  const { page, limit, orderBy } = options;
   const offset = (page - 1) * limit;
 
-  // 获取总数
-  const baseQuery = query as any;
-  const table = baseQuery.config.table;
+  // 构建查询
+  const baseQuery = db.select().from(table as any);
+  let query = whereCondition ? baseQuery.where(whereCondition) : baseQuery;
 
-  const [{ count: total }] = await baseQuery.db
-    .select({ count: count() })
-    .from(table);
+  // 添加排序
+  if (orderBy && orderBy.length > 0) {
+    query = (query as any).orderBy(...orderBy);
+  }
 
-  // 获取分页数据
-  const data = await query.limit(limit).offset(offset);
-
-  const meta = createPaginationMeta(page, limit, total);
-
-  return { data, meta };
-}
-
-type CountQueryResult = Promise<{ count: number }[]>;
-
-export async function withPaginationAndCount<T extends PgSelect>(
-  query: T,
-  countQuery: CountQueryResult,
-  options: PaginationOptions,
-): Promise<{ data: Awaited<T>; meta: PaginationMeta }> {
-  const { page, limit } = options;
-  const offset = (page - 1) * limit;
+  // 构建计数查询
+  const baseCountQuery = db.select({ count: count() }).from(table as any);
+  const countQuery = whereCondition ? baseCountQuery.where(whereCondition) : baseCountQuery;
 
   // 并行执行总数查询和分页数据查询
   const [countResult, data] = await Promise.all([

@@ -1,13 +1,13 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { count, eq, ilike, or } from "drizzle-orm";
+import { eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysDomain } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/constants";
-import { withPaginationAndCount } from "@/lib/pagination";
+import { pagination } from "@/lib/pagination";
 import { formatDate } from "@/utils";
 
 import type { SysDomainsRouteHandlerType } from "./sys-domains.index";
@@ -26,22 +26,9 @@ export const list: SysDomainsRouteHandlerType<"list"> = async (c) => {
     );
   }
 
-  // 构建查询
-  const query = db
-    .select()
-    .from(sysDomain)
-    .where(searchCondition)
-    .$dynamic();
-
-  // 构建计数查询
-  const countQuery = db
-    .select({ count: count() })
-    .from(sysDomain)
-    .where(searchCondition);
-
-  const result = await withPaginationAndCount(
-    query,
-    countQuery,
+  const result = await pagination(
+    sysDomain,
+    searchCondition,
     { page: params.page, limit: params.limit },
   );
 

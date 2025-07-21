@@ -1,13 +1,13 @@
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/constants";
-import { withPaginationAndCount } from "@/lib/pagination";
+import { pagination } from "@/lib/pagination";
 import { assignRolesToUser, createUser } from "@/lib/user";
 
 import type { SysUsersRouteHandlerType } from "./sys-users.index";
@@ -28,20 +28,9 @@ export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
     whereCondition = and(whereCondition, searchCondition)!;
   }
 
-  const query = db
-    .select()
-    .from(sysUser)
-    .where(whereCondition)
-    .$dynamic();
-
-  const countQuery = db
-    .select({ count: count() })
-    .from(sysUser)
-    .where(whereCondition);
-
-  const result = await withPaginationAndCount(
-    query,
-    countQuery,
+  const result = await pagination(
+    sysUser,
+    whereCondition,
     { page: params.page, limit: params.limit },
   );
 

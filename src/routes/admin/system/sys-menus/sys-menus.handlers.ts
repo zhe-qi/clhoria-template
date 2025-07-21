@@ -1,10 +1,10 @@
-import { and, count, eq, like, or } from "drizzle-orm";
+import { and, eq, like, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { sysMenu, sysRoleMenu } from "@/db/schema";
 import { Status } from "@/lib/enums";
-import { withPaginationAndCount } from "@/lib/pagination";
+import { pagination } from "@/lib/pagination";
 import { getUserMenuIds } from "@/lib/permissions";
 
 import type { SysMenusRouteHandlerType as RouteHandlerType } from "./sys-menus.index";
@@ -56,24 +56,10 @@ export const list: RouteHandlerType<"list"> = async (c) => {
     );
   }
 
-  // 构建查询
-  const query = db
-    .select()
-    .from(sysMenu)
-    .where(searchCondition)
-    .orderBy(sysMenu.order, sysMenu.id)
-    .$dynamic();
-
-  // 构建计数查询
-  const countQuery = db
-    .select({ count: count() })
-    .from(sysMenu)
-    .where(searchCondition);
-
-  const result = await withPaginationAndCount(
-    query,
-    countQuery,
-    { page: params.page, limit: params.limit },
+  const result = await pagination(
+    sysMenu,
+    searchCondition,
+    { page: params.page, limit: params.limit, orderBy: [sysMenu.order, sysMenu.id] },
   );
 
   return c.json(result, HttpStatusCodes.OK);

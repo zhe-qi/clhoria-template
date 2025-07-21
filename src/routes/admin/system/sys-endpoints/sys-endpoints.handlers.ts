@@ -1,10 +1,10 @@
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { casbinRule, sysEndpoint } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/constants";
-import { withPaginationAndCount } from "@/lib/pagination";
+import { pagination } from "@/lib/pagination";
 
 import type { SysEndpointsRouteHandlerType } from "./sys-endpoints.index";
 
@@ -37,24 +37,10 @@ export const list: SysEndpointsRouteHandlerType<"list"> = async (c) => {
   // 组合条件
   const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-  // 构建查询
-  const query = db
-    .select()
-    .from(sysEndpoint)
-    .where(whereCondition)
-    .orderBy(sysEndpoint.createdAt)
-    .$dynamic();
-
-  // 构建计数查询
-  const countQuery = db
-    .select({ count: count() })
-    .from(sysEndpoint)
-    .where(whereCondition);
-
-  const result = await withPaginationAndCount(
-    query,
-    countQuery,
-    { page: params.page, limit: params.limit },
+  const result = await pagination(
+    sysEndpoint,
+    whereCondition,
+    { page: params.page, limit: params.limit, orderBy: [sysEndpoint.createdAt] },
   );
 
   return c.json(result, HttpStatusCodes.OK);
