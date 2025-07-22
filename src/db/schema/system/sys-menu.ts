@@ -1,10 +1,11 @@
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgEnum, pgTable, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 
 import { statusEnum } from "./enums";
+import { sysDomain } from "./sys-domain";
 import { sysRoleMenu } from "./sys-role-menu";
 
 export const menuTypeEnum = pgEnum("menu_type", ["directory", "menu"]);
@@ -15,24 +16,29 @@ export const sysMenu = pgTable("sys_menu", {
   menuName: varchar({ length: 64 }).notNull(),
   iconType: integer().default(1),
   icon: varchar({ length: 64 }),
-  routeName: varchar({ length: 64 }).notNull().unique(),
+  routeName: varchar({ length: 64 }).notNull(),
   routePath: varchar({ length: 128 }).notNull(),
   component: varchar({ length: 64 }).notNull(),
   pathParam: varchar({ length: 64 }),
   status: statusEnum().notNull().default("ENABLED"),
   activeMenu: varchar({ length: 64 }),
   hideInMenu: boolean().default(false),
-  pid: integer().notNull().default(0),
+  pid: uuid(),
   order: integer().notNull(),
   i18nKey: varchar({ length: 64 }),
   keepAlive: boolean().default(false),
   constant: boolean().notNull().default(false),
   href: varchar({ length: 64 }),
   multiTab: boolean().default(false),
+  domain: varchar({ length: 64 }).notNull().default("default"),
 });
 
-export const sysMenuRelations = relations(sysMenu, ({ many }) => ({
+export const sysMenuRelations = relations(sysMenu, ({ many, one }) => ({
   roleMenus: many(sysRoleMenu),
+  domain: one(sysDomain, {
+    fields: [sysMenu.domain],
+    references: [sysDomain.code],
+  }),
 }));
 
 export const selectSysMenuSchema = createSelectSchema(sysMenu, {
@@ -55,6 +61,7 @@ export const selectSysMenuSchema = createSelectSchema(sysMenu, {
   constant: schema => schema.describe("是否常量菜单"),
   href: schema => schema.describe("外链地址"),
   multiTab: schema => schema.describe("是否多标签"),
+  domain: schema => schema.describe("所属域"),
 });
 
 export const insertSysMenuSchema = createInsertSchema(sysMenu, {

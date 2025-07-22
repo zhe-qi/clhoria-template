@@ -254,6 +254,10 @@ export const remove = createRoute({
       notFoundSchema,
       "菜单不存在",
     ),
+    [HttpStatusCodes.CONFLICT]: jsonContent(
+      z.object({ message: z.string() }),
+      "菜单包含子菜单，无法删除",
+    ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
       "参数验证失败",

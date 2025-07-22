@@ -1,4 +1,4 @@
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
@@ -10,7 +10,7 @@ export const sysOrganization = pgTable("sys_organization", {
   code: varchar({ length: 64 }).notNull().unique(),
   name: varchar({ length: 128 }).notNull(),
   description: text(),
-  pid: varchar({ length: 64 }).notNull().default("0"),
+  pid: uuid(),
   status: statusEnum().notNull().default("ENABLED"),
 });
 

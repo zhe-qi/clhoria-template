@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747446202082,
-      "tag": "0000_jazzy_swordsman",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1752560704377,
-      "tag": "0001_lucky_timeslip",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1752572418073,
-      "tag": "0002_grey_lorna_dane",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1753003117632,
-      "tag": "0003_hesitant_karen_page",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1753070725134,
-      "tag": "0004_strong_gambit",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1753071893178,
-      "tag": "0005_military_wallflower",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1753102421368,
-      "tag": "0006_spotty_giant_girl",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1753109593270,
-      "tag": "0007_premium_siren",
+      "when": 1753194938495,
+      "tag": "0000_true_adam_warlock",
       "breakpoints": true
     }
   ]

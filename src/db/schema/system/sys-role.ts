@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
@@ -13,7 +13,7 @@ export const sysRole = pgTable("sys_role", {
   code: varchar({ length: 64 }).notNull().unique(),
   name: varchar({ length: 64 }).notNull(),
   description: text(),
-  pid: varchar({ length: 64 }).notNull().default("0"),
+  pid: uuid(),
   status: statusEnum().notNull().default("ENABLED"),
 });
 

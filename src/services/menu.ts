@@ -60,8 +60,8 @@ async function getUserMenuIds(userId: string, domain: string): Promise<string[]>
 /**
  * 构建菜单路由树
  */
-function buildMenuRouteTree(menus: any[], pid = 0): MenuRoute[] {
-  const menuMap = new Map<number, any[]>();
+function buildMenuRouteTree(menus: any[], pid: string | null = null): MenuRoute[] {
+  const menuMap = new Map<string | null, any[]>();
 
   // 按父级ID分组
   for (const menu of menus) {
@@ -71,7 +71,7 @@ function buildMenuRouteTree(menus: any[], pid = 0): MenuRoute[] {
   }
 
   // 递归构建树
-  const buildTree = (parentId: number): MenuRoute[] => {
+  const buildTree = (parentId: string | null): MenuRoute[] => {
     const children = menuMap.get(parentId) || [];
     children.sort((a, b) => a.order - b.order);
 
@@ -124,7 +124,7 @@ function getHomeRoute(routes: MenuRoute[]): string {
 /**
  * 构建通用菜单树
  */
-function buildMenuTree<T extends { id: string; pid: number }>(items: T[]):
+function buildMenuTree<T extends { id: string; pid: string | null }>(items: T[]):
 Array<T & { children?: Array<T & { children?: any }> }> {
   const map = new Map<string, T & { children?: Array<T & { children?: any }> }>();
   const roots: Array<T & { children?: Array<T & { children?: any }> }> = [];
@@ -134,11 +134,45 @@ Array<T & { children?: Array<T & { children?: any }> }> {
     map.set(item.id, { ...item, children: [] });
   }
 
-  // 构建树形结构
+  // 第二次遍历：构建树形结构
   for (const item of items) {
     const node = map.get(item.id)!;
-    roots.push(node);
+
+    if (item.pid === null) {
+      // 根节点
+      roots.push(node);
+    }
+    else {
+      // 子节点
+      const parent = map.get(item.pid);
+      if (parent) {
+        if (!parent.children) {
+          parent.children = [];
+        }
+        parent.children.push(node);
+      }
+      else {
+        // 找不到父节点，当作根节点处理
+        roots.push(node);
+      }
+    }
   }
+
+  // 递归排序所有层级
+  function sortChildren(nodes: Array<T & { children?: Array<T & { children?: any }> }>) {
+    nodes.sort((a, b) => {
+      const aOrder = (a as any).order || 0;
+      const bOrder = (b as any).order || 0;
+      return aOrder - bOrder;
+    });
+    for (const node of nodes) {
+      if (node.children && node.children.length > 0) {
+        sortChildren(node.children);
+      }
+    }
+  }
+
+  sortChildren(roots);
 
   return roots;
 }
@@ -186,6 +220,7 @@ export async function getUserRoutes(userId: string, domain: string): Promise<Use
     .where(and(
       inArray(sysMenu.id, menuIds),
       eq(sysMenu.status, Status.ENABLED),
+      eq(sysMenu.domain, domain),
     ))
     .orderBy(sysMenu.order);
 
@@ -289,16 +324,21 @@ export async function getMenuList(options: {
   search?: string;
   page: number;
   limit: number;
+  domain: string;
 }) {
-  const { search, page, limit } = options;
+  const { search, page, limit, domain } = options;
 
-  let searchCondition;
+  let searchCondition = eq(sysMenu.domain, domain);
+
   if (search) {
-    searchCondition = or(
-      like(sysMenu.menuName, `%${search}%`),
-      like(sysMenu.routeName, `%${search}%`),
-      like(sysMenu.routePath, `%${search}%`),
-    );
+    searchCondition = and(
+      eq(sysMenu.domain, domain),
+      or(
+        like(sysMenu.menuName, `%${search}%`),
+        like(sysMenu.routeName, `%${search}%`),
+        like(sysMenu.routePath, `%${search}%`),
+      ),
+    )!;
   }
 
   return await pagination(
@@ -311,15 +351,16 @@ export async function getMenuList(options: {
 /**
  * 获取菜单树形结构
  */
-export async function getMenuTree(status?: string) {
-  const whereConditions = [];
+export async function getMenuTree(options: { status?: string; domain: string }) {
+  const { status, domain } = options;
+  const whereConditions = [eq(sysMenu.domain, domain)];
 
   if (status !== undefined) {
     whereConditions.push(eq(sysMenu.status, status as any));
   }
 
   const menus = await db.query.sysMenu.findMany({
-    where: whereConditions.length > 0 ? and(...whereConditions) : undefined,
+    where: and(...whereConditions),
     orderBy: [sysMenu.order, sysMenu.id],
   });
 
@@ -329,11 +370,14 @@ export async function getMenuTree(status?: string) {
 /**
  * 根据角色获取菜单
  */
-export async function getMenusByRole(roleId: string) {
+export async function getMenusByRole(roleId: string, domain: string) {
   const menuIds = await db
     .select({ menuId: sysRoleMenu.menuId })
     .from(sysRoleMenu)
-    .where(eq(sysRoleMenu.roleId, roleId));
+    .where(and(
+      eq(sysRoleMenu.roleId, roleId),
+      eq(sysRoleMenu.domain, domain),
+    ));
 
   if (menuIds.length === 0) {
     return [];
@@ -342,6 +386,7 @@ export async function getMenusByRole(roleId: string) {
   return await db.query.sysMenu.findMany({
     where: and(
       eq(sysMenu.status, Status.ENABLED),
+      eq(sysMenu.domain, domain),
       or(...menuIds.map(({ menuId }) => eq(sysMenu.id, menuId))),
     ),
     orderBy: [sysMenu.order, sysMenu.id],
@@ -355,7 +400,7 @@ export async function createMenu(menuData: any) {
   const [newMenu] = await db.insert(sysMenu).values(menuData).returning();
 
   // 清除相关缓存
-  await clearAllMenuCache("default"); // 可以扩展支持多域
+  await clearAllMenuCache(menuData.domain || "default");
 
   return newMenu;
 }
@@ -363,25 +408,37 @@ export async function createMenu(menuData: any) {
 /**
  * 根据ID获取单个菜单
  */
-export async function getMenuById(id: string) {
+export async function getMenuById(id: string, domain?: string) {
+  const whereConditions = [eq(sysMenu.id, id)];
+
+  if (domain) {
+    whereConditions.push(eq(sysMenu.domain, domain));
+  }
+
   return await db.query.sysMenu.findFirst({
-    where: eq(sysMenu.id, id),
+    where: domain ? and(...whereConditions) : eq(sysMenu.id, id),
   });
 }
 
 /**
  * 更新菜单
  */
-export async function updateMenu(id: string, menuData: any) {
+export async function updateMenu(id: string, menuData: any, domain?: string) {
+  const whereConditions = [eq(sysMenu.id, id)];
+
+  if (domain) {
+    whereConditions.push(eq(sysMenu.domain, domain));
+  }
+
   const [updatedMenu] = await db
     .update(sysMenu)
     .set(menuData)
-    .where(eq(sysMenu.id, id))
+    .where(domain ? and(...whereConditions) : eq(sysMenu.id, id))
     .returning();
 
   if (updatedMenu) {
     // 清除相关缓存
-    await clearAllMenuCache("default"); // 可以扩展支持多域
+    await clearAllMenuCache(updatedMenu.domain || "default");
   }
 
   return updatedMenu;
@@ -390,16 +447,32 @@ export async function updateMenu(id: string, menuData: any) {
 /**
  * 删除菜单
  */
-export async function deleteMenu(id: string) {
+export async function deleteMenu(id: string, domain?: string) {
+  const whereConditions = [eq(sysMenu.id, id)];
+
+  if (domain) {
+    whereConditions.push(eq(sysMenu.domain, domain));
+  }
+
+  // 先获取菜单信息用于清除缓存
+  const menuToDelete = await getMenuById(id, domain);
+
+  if (!menuToDelete) {
+    return null;
+  }
+
   // 删除相关的角色菜单关联
   await db.delete(sysRoleMenu).where(eq(sysRoleMenu.menuId, id));
 
   // 删除菜单
-  const [deletedMenu] = await db.delete(sysMenu).where(eq(sysMenu.id, id)).returning({ id: sysMenu.id });
+  const [deletedMenu] = await db
+    .delete(sysMenu)
+    .where(domain ? and(...whereConditions) : eq(sysMenu.id, id))
+    .returning({ id: sysMenu.id });
 
   if (deletedMenu) {
     // 清除相关缓存
-    await clearAllMenuCache("default"); // 可以扩展支持多域
+    await clearAllMenuCache(menuToDelete.domain || "default");
   }
 
   return deletedMenu;
@@ -408,11 +481,12 @@ export async function deleteMenu(id: string) {
 /**
  * 获取常量路由
  */
-export async function getConstantRoutes() {
+export async function getConstantRoutes(domain: string = "default") {
   const constantMenus = await db.query.sysMenu.findMany({
     where: and(
       eq(sysMenu.constant, true),
       eq(sysMenu.status, Status.ENABLED),
+      eq(sysMenu.domain, domain),
     ),
     orderBy: [sysMenu.order, sysMenu.id],
   });
@@ -434,6 +508,7 @@ export async function getConstantRoutes() {
     pid: menu.pid,
     pathParam: menu.pathParam,
     activeMenu: menu.activeMenu,
+    domain: menu.domain,
   }));
 }
 
@@ -454,6 +529,7 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
       or(...menuIds.map(id => eq(sysMenu.id, id))),
       eq(sysMenu.status, Status.ENABLED),
       eq(sysMenu.constant, false), // 排除常量菜单
+      eq(sysMenu.domain, domain),
     ),
     orderBy: [sysMenu.order, sysMenu.id],
   });
@@ -473,4 +549,21 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
 export async function menuExists(id: string): Promise<boolean> {
   const menu = await getMenuById(id);
   return !!menu;
+}
+
+/**
+ * 检查菜单是否有子菜单
+ */
+export async function hasChildMenus(id: string, domain?: string): Promise<boolean> {
+  const whereConditions = [eq(sysMenu.pid, id)];
+
+  if (domain) {
+    whereConditions.push(eq(sysMenu.domain, domain));
+  }
+
+  const children = await db.query.sysMenu.findMany({
+    where: domain ? and(...whereConditions) : eq(sysMenu.pid, id),
+  });
+
+  return children.length > 0;
 }

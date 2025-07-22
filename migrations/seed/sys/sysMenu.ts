@@ -1,10 +1,16 @@
 /* eslint-disable unicorn/filename-case */
 /* eslint-disable no-console */
 
+import { v7 as uuidV7 } from "uuid";
+
 import db from "@/db";
 import { sysMenu } from "@/db/schema";
 
 export async function initSysMenu() {
+  // 预定义一些固定的UUID用于父级菜单
+  const manageMenuId = "01234567-1234-7890-abcd-000000000001";
+  const logMenuId = "01234567-1234-7890-abcd-000000000002";
+
   const data = [
     // 常量菜单
     {
@@ -19,7 +25,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: true,
-      pid: 0,
+      pid: null,
       order: 0,
       i18nKey: "route.login",
       keepAlive: false,
@@ -41,7 +47,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: true,
-      pid: 0,
+      pid: null,
       order: 0,
       i18nKey: "route.403",
       keepAlive: false,
@@ -63,7 +69,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: true,
-      pid: 0,
+      pid: null,
       order: 0,
       i18nKey: "route.404",
       keepAlive: false,
@@ -85,7 +91,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: true,
-      pid: 0,
+      pid: null,
       order: 0,
       i18nKey: "route.500",
       keepAlive: false,
@@ -107,7 +113,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: true,
-      pid: 0,
+      pid: null,
       order: 0,
       i18nKey: "route.iframe-page",
       keepAlive: false,
@@ -130,7 +136,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 0,
+      pid: null,
       order: 0,
       i18nKey: "route.home",
       keepAlive: false,
@@ -142,6 +148,7 @@ export async function initSysMenu() {
     },
     // 系统管理目录
     {
+      id: manageMenuId,
       menuType: "directory" as const,
       menuName: "manage",
       iconType: 1,
@@ -153,7 +160,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 0,
+      pid: null,
       order: 4,
       i18nKey: "route.manage",
       keepAlive: false,
@@ -165,6 +172,7 @@ export async function initSysMenu() {
     },
     // 日志管理目录
     {
+      id: logMenuId,
       menuType: "directory" as const,
       menuName: "log",
       iconType: 1,
@@ -176,7 +184,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 0,
+      pid: null,
       order: 2,
       i18nKey: "route.log",
       keepAlive: false,
@@ -199,7 +207,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 8, // log 菜单的 id
+      pid: logMenuId,
       order: 0,
       i18nKey: "route.log_login",
       keepAlive: false,
@@ -221,7 +229,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 8, // log 菜单的 id
+      pid: logMenuId,
       order: 1,
       i18nKey: "route.log_operation",
       keepAlive: false,
@@ -244,7 +252,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 7, // manage 菜单的 id
+      pid: manageMenuId,
       order: 0,
       i18nKey: "route.manage_user",
       keepAlive: false,
@@ -266,7 +274,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 7, // manage 菜单的 id
+      pid: manageMenuId,
       order: 1,
       i18nKey: "route.manage_role",
       keepAlive: false,
@@ -288,7 +296,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: null,
       hideInMenu: false,
-      pid: 7, // manage 菜单的 id
+      pid: manageMenuId,
       order: 2,
       i18nKey: "route.manage_menu",
       keepAlive: true,
@@ -310,7 +318,7 @@ export async function initSysMenu() {
       status: "ENABLED" as const,
       activeMenu: "manage_user",
       hideInMenu: true,
-      pid: 7, // manage 菜单的 id
+      pid: manageMenuId,
       order: 3,
       i18nKey: "route.manage_user-detail",
       keepAlive: false,
@@ -322,6 +330,12 @@ export async function initSysMenu() {
     },
   ];
 
-  await db.insert(sysMenu).values(data).onConflictDoNothing();
+  // 为没有预定义ID的记录生成UUID
+  const menuData = data.map(item => ({
+    ...item,
+    id: item.id || uuidV7(), // 如果没有预定义ID，则生成新的UUID
+  }));
+
+  await db.insert(sysMenu).values(menuData as any).onConflictDoNothing();
   console.log("系统菜单初始化完成");
 }
