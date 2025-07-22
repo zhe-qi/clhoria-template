@@ -2,7 +2,7 @@ import { jwt } from "hono/jwt";
 
 import type { AppOpenAPI } from "@/types/lib";
 
-import configureOpenAPI from "@/lib/configure-open-api";
+import configureOpenAPI from "@/lib/openapi";
 import * as allAdminExports from "@/routes/admin/admin.index";
 import * as allClientExports from "@/routes/client/client.index";
 import * as allPublicExports from "@/routes/public/public.index";
