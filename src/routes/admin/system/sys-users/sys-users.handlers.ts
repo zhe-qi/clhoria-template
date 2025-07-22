@@ -1,3 +1,4 @@
+import type { InferSelectModel } from "drizzle-orm";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { and, eq, ilike, or } from "drizzle-orm";
@@ -28,7 +29,7 @@ export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
     whereCondition = and(whereCondition, searchCondition)!;
   }
 
-  const result = await pagination(
+  const result = await pagination<InferSelectModel<typeof sysUser>>(
     sysUser,
     whereCondition,
     { page: params.page, limit: params.limit },

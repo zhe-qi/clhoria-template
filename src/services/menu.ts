@@ -1,3 +1,5 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import { and, eq, inArray, like, or } from "drizzle-orm";
 
 import db from "@/db";
@@ -341,7 +343,7 @@ export async function getMenuList(options: {
     )!;
   }
 
-  return await pagination(
+  return await pagination<InferSelectModel<typeof sysMenu>>(
     sysMenu,
     searchCondition,
     { page, limit, orderBy: [sysMenu.order, sysMenu.id] },

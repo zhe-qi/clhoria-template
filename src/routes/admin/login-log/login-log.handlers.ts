@@ -1,3 +1,4 @@
+import type { InferSelectModel } from "drizzle-orm";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { and, desc, eq, ilike, or } from "drizzle-orm";
@@ -29,7 +30,7 @@ export const list: LoginLogRouteHandlerType<"list"> = async (c) => {
   // 组合条件
   const whereCondition = searchCondition ? and(baseCondition, searchCondition) : baseCondition;
 
-  const result = await pagination(
+  const result = await pagination<InferSelectModel<typeof loginLogs>>(
     loginLogs,
     whereCondition,
     { page: params.page, limit: params.limit, orderBy: [desc(loginLogs.createdAt)] },

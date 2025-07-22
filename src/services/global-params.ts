@@ -1,3 +1,5 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import { and, eq, ilike, or } from "drizzle-orm";
 
 import db from "@/db";
@@ -156,7 +158,7 @@ export async function getAdminList(options: GlobalParamsListOptions = {}) {
     );
   }
 
-  return await pagination(
+  return await pagination<InferSelectModel<typeof globalParams>>(
     globalParams,
     whereCondition,
     paginationOptions,

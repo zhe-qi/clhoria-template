@@ -1,3 +1,5 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import { and, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
@@ -37,7 +39,7 @@ export const list: SysEndpointsRouteHandlerType<"list"> = async (c) => {
   // 组合条件
   const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const result = await pagination(
+  const result = await pagination<InferSelectModel<typeof sysEndpoint>>(
     sysEndpoint,
     whereCondition,
     { page: params.page, limit: params.limit, orderBy: [sysEndpoint.createdAt] },

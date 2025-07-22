@@ -1,3 +1,4 @@
+import type { InferSelectModel } from "drizzle-orm";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { eq, ilike, or } from "drizzle-orm";
@@ -26,7 +27,7 @@ export const list: SysDomainsRouteHandlerType<"list"> = async (c) => {
     );
   }
 
-  const result = await pagination(
+  const result = await pagination<InferSelectModel<typeof sysDomain>>(
     sysDomain,
     searchCondition,
     { page: params.page, limit: params.limit },

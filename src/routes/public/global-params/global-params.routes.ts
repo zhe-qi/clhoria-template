@@ -9,11 +9,6 @@ import {
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 
-/** 内部服务器错误响应模式 */
-const internalServerErrorSchema = z.object({
-  message: z.string(),
-});
-
 /** 参数键路径模式 */
 const KeyParamsSchema = z.object({
   key: z.string().min(1, "参数键不能为空").describe("参数键名"),
@@ -34,10 +29,6 @@ export const list = createRoute({
     [HttpStatusCodes.OK]: jsonContent(
       z.array(responseGlobalParamsSchema),
       "获取全局参数列表成功",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -66,10 +57,6 @@ export const get = createRoute({
       notFoundSchema,
       "参数不存在或不是公开参数",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
-    ),
   },
 });
 
@@ -96,10 +83,6 @@ export const batch = createRoute({
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(batchGetGlobalParamsSchema),
       "请求参数错误",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
     ),
   },
 });
