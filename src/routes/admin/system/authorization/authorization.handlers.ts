@@ -6,12 +6,12 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
 import db from "@/db";
-import { MenuService } from "@/lib/menu-service";
 import {
   assignPermissionsToRole as assignPermissionsToRoleLib,
   assignUsersToRole as assignUsersToRoleLib,
 } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
+import { MenuService } from "@/services/menu.service";
 
 import type { AuthorizationRouteHandlerType } from "./authorization.index";
 

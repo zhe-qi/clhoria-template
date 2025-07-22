@@ -1,11 +1,11 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, like, or } from "drizzle-orm";
 
 import db from "@/db";
 import { sysMenu, sysRoleMenu } from "@/db/schema";
 import { getUserMenusKey, Status } from "@/lib/enums";
+import { pagination } from "@/lib/pagination";
+import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
-
-import * as rbac from "./permissions/casbin/rbac";
 
 /**
  * 菜单路由接口
@@ -93,8 +93,8 @@ export class MenuService {
       ))
       .orderBy(sysMenu.order);
 
-    // 构建菜单树
-    const routes = this.buildMenuTree(menus);
+    // 构建菜单路由树
+    const routes = this.buildMenuRouteTree(menus);
 
     // 确定首页路由
     const homeRoute = this.getHomeRoute(routes);
@@ -134,9 +134,9 @@ export class MenuService {
   }
 
   /**
-   * 构建菜单树
+   * 构建菜单路由树 (原始的 buildMenuTree 方法)
    */
-  private buildMenuTree(menus: any[], pid = 0): MenuRoute[] {
+  private buildMenuRouteTree(menus: any[], pid = 0): MenuRoute[] {
     const menuMap = new Map<number, any[]>();
 
     // 按父级ID分组
@@ -271,5 +271,220 @@ export class MenuService {
       ));
 
     return roleMenus.map(rm => rm.menuId);
+  }
+
+  /**
+   * 获取菜单分页列表
+   */
+  async getMenuList(options: {
+    search?: string;
+    page: number;
+    limit: number;
+  }) {
+    const { search, page, limit } = options;
+
+    let searchCondition;
+    if (search) {
+      searchCondition = or(
+        like(sysMenu.menuName, `%${search}%`),
+        like(sysMenu.routeName, `%${search}%`),
+        like(sysMenu.routePath, `%${search}%`),
+      );
+    }
+
+    return await pagination(
+      sysMenu,
+      searchCondition,
+      { page, limit, orderBy: [sysMenu.order, sysMenu.id] },
+    );
+  }
+
+  /**
+   * 获取菜单树形结构
+   */
+  async getMenuTree(status?: string) {
+    const whereConditions = [];
+
+    if (status !== undefined) {
+      whereConditions.push(eq(sysMenu.status, status as any));
+    }
+
+    const menus = await db.query.sysMenu.findMany({
+      where: whereConditions.length > 0 ? and(...whereConditions) : undefined,
+      orderBy: [sysMenu.order, sysMenu.id],
+    });
+
+    return this.buildMenuTree(menus);
+  }
+
+  /**
+   * 构建通用菜单树（与现有的 buildMenuTree 方法统一）
+   */
+  private buildMenuTree<T extends { id: string; pid: number }>(items: T[]):
+  Array<T & { children?: Array<T & { children?: any }> }> {
+    const map = new Map<string, T & { children?: Array<T & { children?: any }> }>();
+    const roots: Array<T & { children?: Array<T & { children?: any }> }> = [];
+
+    // 第一次遍历：创建映射
+    for (const item of items) {
+      map.set(item.id, { ...item, children: [] });
+    }
+
+    // 构建树形结构
+    for (const item of items) {
+      const node = map.get(item.id)!;
+      roots.push(node);
+    }
+
+    return roots;
+  }
+
+  /**
+   * 根据角色获取菜单
+   */
+  async getMenusByRole(roleId: string) {
+    const menuIds = await db
+      .select({ menuId: sysRoleMenu.menuId })
+      .from(sysRoleMenu)
+      .where(eq(sysRoleMenu.roleId, roleId));
+
+    if (menuIds.length === 0) {
+      return [];
+    }
+
+    return await db.query.sysMenu.findMany({
+      where: and(
+        eq(sysMenu.status, Status.ENABLED),
+        or(...menuIds.map(({ menuId }) => eq(sysMenu.id, menuId))),
+      ),
+      orderBy: [sysMenu.order, sysMenu.id],
+    });
+  }
+
+  /**
+   * 创建菜单
+   */
+  async createMenu(menuData: any) {
+    const [newMenu] = await db.insert(sysMenu).values(menuData).returning();
+
+    // 清除相关缓存
+    await this.clearAllMenuCache("default"); // 可以扩展支持多域
+
+    return newMenu;
+  }
+
+  /**
+   * 根据ID获取单个菜单
+   */
+  async getMenuById(id: string) {
+    return await db.query.sysMenu.findFirst({
+      where: eq(sysMenu.id, id),
+    });
+  }
+
+  /**
+   * 更新菜单
+   */
+  async updateMenu(id: string, menuData: any) {
+    const [updatedMenu] = await db
+      .update(sysMenu)
+      .set(menuData)
+      .where(eq(sysMenu.id, id))
+      .returning();
+
+    if (updatedMenu) {
+      // 清除相关缓存
+      await this.clearAllMenuCache("default"); // 可以扩展支持多域
+    }
+
+    return updatedMenu;
+  }
+
+  /**
+   * 删除菜单
+   */
+  async deleteMenu(id: string) {
+    // 删除相关的角色菜单关联
+    await db.delete(sysRoleMenu).where(eq(sysRoleMenu.menuId, id));
+
+    // 删除菜单
+    const [deletedMenu] = await db.delete(sysMenu).where(eq(sysMenu.id, id)).returning({ id: sysMenu.id });
+
+    if (deletedMenu) {
+      // 清除相关缓存
+      await this.clearAllMenuCache("default"); // 可以扩展支持多域
+    }
+
+    return deletedMenu;
+  }
+
+  /**
+   * 获取常量路由
+   */
+  async getConstantRoutes() {
+    const constantMenus = await db.query.sysMenu.findMany({
+      where: and(
+        eq(sysMenu.constant, true),
+        eq(sysMenu.status, Status.ENABLED),
+      ),
+      orderBy: [sysMenu.order, sysMenu.id],
+    });
+
+    return constantMenus.map(menu => ({
+      id: menu.id,
+      menuName: menu.menuName,
+      routeName: menu.routeName,
+      routePath: menu.routePath,
+      component: menu.component,
+      icon: menu.icon,
+      iconType: menu.iconType,
+      i18nKey: menu.i18nKey,
+      hideInMenu: menu.hideInMenu,
+      keepAlive: menu.keepAlive,
+      href: menu.href,
+      multiTab: menu.multiTab,
+      order: menu.order,
+      pid: menu.pid,
+      pathParam: menu.pathParam,
+      activeMenu: menu.activeMenu,
+    }));
+  }
+
+  /**
+   * 获取用户路由（简化版，用于 sys-menus handlers）
+   */
+  async getUserRoutesSimple(userId: string, domain: string) {
+    // 获取用户的菜单ID
+    const menuIds = await this.getUserMenuIds(userId, domain);
+
+    if (menuIds.length === 0) {
+      return { routes: [], home: "/dashboard" };
+    }
+
+    // 获取菜单详情
+    const menus = await db.query.sysMenu.findMany({
+      where: and(
+        or(...menuIds.map(id => eq(sysMenu.id, id))),
+        eq(sysMenu.status, Status.ENABLED),
+        eq(sysMenu.constant, false), // 排除常量菜单
+      ),
+      orderBy: [sysMenu.order, sysMenu.id],
+    });
+
+    // 直接返回数据库菜单结构而不是 MenuRoute 结构
+    const menuTree = this.buildMenuTree(menus);
+
+    return {
+      routes: menuTree,
+      home: "/dashboard", // 可以配置化
+    };
+  }
+
+  /**
+   * 检查菜单是否存在
+   */
+  async menuExists(id: string): Promise<boolean> {
+    const menu = await this.getMenuById(id);
+    return !!menu;
   }
 }

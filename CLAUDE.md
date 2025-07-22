@@ -224,6 +224,127 @@ When creating new routes, ALWAYS follow the admin-users route structure for cons
 
 This structure ensures type safety and consistency across all routes.
 
+### Status Code Standards
+
+**CRITICAL**: All HTTP status codes MUST follow these rules:
+
+1. **Always Use Status Code Constants**:
+   ```typescript
+   // ✅ Correct
+   return c.json(data, HttpStatusCodes.OK);
+   return c.json(error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
+   
+   // ❌ Wrong
+   return c.json(data, 200);
+   return c.json(error, 422 as any);
+   ```
+
+2. **All Possible Status Codes MUST be Defined in Routes**:
+   ```typescript
+   export const someRoute = createRoute({
+     // ... other config
+     responses: {
+       [HttpStatusCodes.OK]: jsonContent(schema, "成功"),
+       [HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "未找到"),
+       [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+         createErrorSchema(requestSchema),
+         "参数验证失败"
+       ),
+       // Include ALL status codes that handlers might return
+     },
+   });
+   ```
+
+3. **Standard Error Status Codes**:
+   - `HttpStatusCodes.BAD_REQUEST` (400) - 客户端请求错误
+   - `HttpStatusCodes.UNAUTHORIZED` (401) - 未授权
+   - `HttpStatusCodes.FORBIDDEN` (403) - 权限不足
+   - `HttpStatusCodes.NOT_FOUND` (404) - 资源不存在
+   - `HttpStatusCodes.CONFLICT` (409) - 资源冲突（如重复键）
+   - `HttpStatusCodes.UNPROCESSABLE_ENTITY` (422) - 参数验证失败
+   - `HttpStatusCodes.INTERNAL_SERVER_ERROR` (500) - 服务器内部错误
+
+4. **Error Response Pattern**:
+   ```typescript
+   // 参数验证错误
+   catch (error: any) {
+     return c.json(
+       { message: error.message || "操作失败" },
+       HttpStatusCodes.UNPROCESSABLE_ENTITY,
+     );
+   }
+   
+   // 资源不存在
+   if (!resource) {
+     return c.json(
+       { message: "资源不存在" },
+       HttpStatusCodes.NOT_FOUND,
+     );
+   }
+   ```
+
+### Error Handling Standards
+
+**CRITICAL**: All error handling MUST follow these rules:
+
+1. **Never Use console.log/error in Route Handlers**:
+   ```typescript
+   // ❌ Wrong - Don't use console logging in handlers
+   catch (error) {
+     console.error("操作失败:", error);
+     return c.json({...}, 500);
+   }
+   
+   // ✅ Correct - Return appropriate error response
+   catch (error: any) {
+     return c.json(
+       { message: error.message || "操作失败" },
+       HttpStatusCodes.INTERNAL_SERVER_ERROR,
+     );
+   }
+   ```
+
+2. **Error Responses MUST Use Correct Status Codes**:
+   ```typescript
+   // ❌ Wrong - Don't return 200 for errors
+   catch (error) {
+     return c.json({ data: [], error: error.message }, HttpStatusCodes.OK);
+   }
+   
+   // ✅ Correct - Use appropriate error status codes
+   catch (error: any) {
+     return c.json(
+       { message: error.message || "操作失败" },
+       HttpStatusCodes.INTERNAL_SERVER_ERROR,
+     );
+   }
+   ```
+
+3. **All Possible Status Codes MUST be in Route Definitions**:
+   - If handler can return 500, route MUST have `INTERNAL_SERVER_ERROR` in responses
+   - If handler can return 404, route MUST have `NOT_FOUND` in responses
+   - If handler can return 422, route MUST have `UNPROCESSABLE_ENTITY` in responses
+
+4. **Error Response Schema Pattern**:
+   ```typescript
+   const errorResponseSchema = z.object({ message: z.string() });
+   
+   // In route definition:
+   responses: {
+     [HttpStatusCodes.OK]: jsonContent(dataSchema, "成功"),
+     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+       errorResponseSchema,
+       "服务器内部错误"
+     ),
+   }
+   ```
+
+5. **Logging Guidelines**:
+   - Use structured logging (Pino) in services, not console
+   - Errors are automatically logged by middleware
+   - Don't duplicate logging in handlers
+   - Let the application's logging infrastructure handle error tracking
+
 ### Router Index File Structure
 
 All route index files MUST follow this exact pattern:

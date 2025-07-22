@@ -39,29 +39,20 @@ export interface PaginationOptions {
   limit: number;
 }
 
-export function createPaginationMeta(
-  page: number,
-  limit: number,
-  total: number,
-): PaginationMeta {
-  return {
-    page,
-    limit,
-    total,
-  };
-}
-
-export async function pagination(
+export async function pagination<T = any>(
   table: PgTable,
   whereCondition?: SQL,
-  options: PaginationOptions & { orderBy?: any[] } = { page: 1, limit: 10 },
-): Promise<{ data: any[]; meta: PaginationMeta }> {
+  options: PaginationOptions & { orderBy?: (SQL<unknown> | any)[] } = { page: 1, limit: 10 },
+): Promise<{ data: T[]; meta: PaginationMeta }> {
   const { page, limit, orderBy } = options;
   const offset = (page - 1) * limit;
 
   // 构建查询
-  const baseQuery = db.select().from(table as any);
-  let query = whereCondition ? baseQuery.where(whereCondition) : baseQuery;
+  let query = db.select().from(table);
+
+  if (whereCondition) {
+    query = query.where(whereCondition) as any;
+  }
 
   // 添加排序
   if (orderBy && orderBy.length > 0) {
@@ -69,7 +60,7 @@ export async function pagination(
   }
 
   // 构建计数查询
-  const baseCountQuery = db.select({ count: count() }).from(table as any);
+  const baseCountQuery = db.select({ count: count() }).from(table);
   const countQuery = whereCondition ? baseCountQuery.where(whereCondition) : baseCountQuery;
 
   // 并行执行总数查询和分页数据查询
@@ -79,7 +70,6 @@ export async function pagination(
   ]);
 
   const [{ count: total }] = countResult;
-  const meta = createPaginationMeta(page, limit, total);
 
-  return { data, meta };
+  return { data: data as T[], meta: { page, total, limit } };
 }
