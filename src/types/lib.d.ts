@@ -1,4 +1,4 @@
-import type { OpenAPIHono, RouteConfig as HonoRouteConfig, RouteHandler } from "@hono/zod-openapi";
+import type { RouteConfig as HonoRouteConfig, OpenAPIHono, RouteHandler } from "@hono/zod-openapi";
 import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
 
@@ -10,7 +10,6 @@ export interface AppBindings {
     userRoles?: string[];
     userDomain?: string;
     currentPermission?: PermissionConfig;
-    requiredPermission?: PermissionConfig;
   };
 };
 

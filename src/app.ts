@@ -11,6 +11,7 @@ import env from "./env";
 import createApp from "./lib/create-app";
 import { casbin } from "./middlewares/casbin-auth";
 import { jwtAuth } from "./middlewares/jwt-auth";
+import { operationLog } from "./middlewares/operation-log";
 
 // 获取OpenAPIHono实例
 const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
@@ -43,6 +44,7 @@ const adminRoutes = Object.values<AppOpenAPI>(allAdminExports);
 adminApp.use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
 adminApp.use("/*", jwtAuth());
 adminApp.use("/*", casbin());
+adminApp.use("/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }));
 adminRoutes.forEach((route) => {
   adminApp.route("/", route);
 });

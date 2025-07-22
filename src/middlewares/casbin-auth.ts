@@ -10,31 +10,6 @@ import { enforcerLaunchedPromise, PermissionConfigManager } from "@/lib/permissi
 import { redisClient } from "@/lib/redis";
 
 /**
- * 从 Redis 获取用户角色
- */
-async function getUserRoles(userId: string, domain: string): Promise<string[]> {
-  const key = getUserRolesKey(userId, domain);
-  const roles = await redisClient.smembers(key);
-  // 过滤掉特殊标记
-  return roles.filter(role => role !== "__no_roles__");
-}
-
-/**
- * 验证权限
- */
-async function checkPermission(
-  enforcer: Enforcer,
-  roles: string[],
-  resource: string,
-  action: string,
-  domain: string,
-): Promise<boolean> {
-  const checks = roles.map(role => enforcer.enforce(role, resource, action, domain));
-  const results = await Promise.all(checks);
-  return results.some(Boolean);
-}
-
-/**
  * 通用 Casbin 权限验证中间件
  */
 export function casbin(): MiddlewareHandler {
@@ -43,59 +18,48 @@ export function casbin(): MiddlewareHandler {
 
     const enforcer = await enforcerLaunchedPromise;
 
+    // 如果没有加载 Enforcer 实例，返回错误
     if (!(enforcer instanceof Enforcer)) {
-      return c.json(
-        { message: HttpStatusPhrases.INTERNAL_SERVER_ERROR },
-        HttpStatusCodes.INTERNAL_SERVER_ERROR,
-      );
+      return c.json({ message: HttpStatusPhrases.INTERNAL_SERVER_ERROR }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
     }
 
+    // 获取 JWT 载荷
     const payload: JWTPayload = c.get("jwtPayload");
-    const userId = payload.uid as string;
-    const domain = payload.domain as string;
+    const { uid: userId, domain } = payload as { uid: string; domain: string };
 
     // 从 Redis 获取用户角色
-    const roles = await getUserRoles(userId, domain);
+    const key = getUserRolesKey(userId, domain);
+    const roles = (await redisClient.smembers(key)).filter(role => role !== "__no_roles__");
 
+    // 如果用户没有角色，返回禁止访问
     if (roles.length === 0) {
-      return c.json(
-        { message: "Access denied: No roles assigned to user" },
-        HttpStatusCodes.FORBIDDEN,
-      );
+      return c.json({ message: "Access denied: No roles assigned to user" }, HttpStatusCodes.FORBIDDEN);
     }
 
     // 从权限管理器缓存获取端点权限信息
     const permissionManager = PermissionConfigManager.getInstance();
     const endpointPermission = permissionManager.findEndpointPermission(method.toUpperCase(), path);
 
+    // 如果没有找到端点权限信息，说明该端点不需要权限验证或者是公开接口
     if (!endpointPermission) {
-      // 如果没有找到端点权限信息，说明该端点不需要权限验证或者是公开接口
-      await next();
-      return;
+      return await next();
     }
 
-    const hasPermission = await checkPermission(
-      enforcer,
-      roles,
-      endpointPermission.resource,
-      endpointPermission.action,
-      domain,
-    );
+    const { resource, action } = endpointPermission;
 
+    // 使用 Casbin 验证用户角色是否有权限访问该资源
+    const checks = roles.map(role => enforcer.enforce(role, resource, action, domain));
+    const hasPermission = (await Promise.all(checks)).some(Boolean);
+
+    // 如果没有权限，返回禁止访问
     if (!hasPermission) {
-      return c.json(
-        { message: HttpStatusPhrases.FORBIDDEN },
-        HttpStatusCodes.FORBIDDEN,
-      );
+      return c.json({ message: HttpStatusPhrases.FORBIDDEN }, HttpStatusCodes.FORBIDDEN);
     }
 
     // 将角色信息和权限信息存入上下文
     c.set("userRoles", roles);
     c.set("userDomain", domain);
-    c.set("currentPermission", {
-      resource: endpointPermission.resource,
-      action: endpointPermission.action,
-    });
+    c.set("currentPermission", { resource, action });
 
     await next();
   };

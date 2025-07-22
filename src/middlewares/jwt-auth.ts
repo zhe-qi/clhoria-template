@@ -39,22 +39,15 @@ export function jwtAuth(): MiddlewareHandler {
     const payload: JWTPayload = c.get("jwtPayload");
 
     if (!payload) {
-      return c.json(
-        { message: HttpStatusPhrases.UNAUTHORIZED },
-        HttpStatusCodes.UNAUTHORIZED,
-      );
+      return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    const userId = payload.uid as string;
-    const domain = payload.domain as string;
+    const { uid: userId, domain } = payload as { uid: string; domain: string };
 
     // 验证用户状态
     const userValidation = await validateUserStatus(userId, domain);
     if (!userValidation.valid) {
-      return c.json(
-        { message: userValidation.message },
-        HttpStatusCodes.UNAUTHORIZED,
-      );
+      return c.json({ message: userValidation.message }, HttpStatusCodes.UNAUTHORIZED);
     }
 
     await next();
