@@ -12,7 +12,7 @@ export async function initSysRole() {
       code: "ROLE_SUPER",
       name: "超级管理员",
       description: "超级管理员",
-      pid: "0",
+      pid: null,
       status: "ENABLED" as const,
       createdBy: "-1",
       updatedBy: null,
