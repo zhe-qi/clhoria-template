@@ -1,7 +1,5 @@
 import { and, eq, ilike, or } from "drizzle-orm";
 
-import type { PaginationOptions } from "@/lib/pagination";
-
 import db from "@/db";
 import { globalParams } from "@/db/schema";
 import { getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enums/cache";
@@ -16,7 +14,10 @@ export interface GlobalParamsListOptions {
   search?: string;
   isPublic?: "0" | "1";
   publicOnly?: "true" | "false";
-  pagination?: PaginationOptions;
+  pagination?: {
+    page: number;
+    limit: number;
+  };
 }
 
 export interface GlobalParamsBatchOptions {

@@ -7,10 +7,9 @@ import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser, sysUserRole } from "@/db/schema";
 import env from "@/env";
 import { Status, TokenStatus, TokenType } from "@/lib/enums";
-
-import { clearUserCache } from "./permissions";
-import * as rbac from "./permissions/casbin/rbac";
-import { redisClient } from "./redis";
+import { clearUserCache } from "@/lib/permissions";
+import * as rbac from "@/lib/permissions/casbin/rbac";
+import { redisClient } from "@/lib/redis";
 
 interface CreateUserParams {
   username: string;

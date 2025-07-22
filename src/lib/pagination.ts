@@ -29,20 +29,10 @@ export function createPaginatedResultSchema<T extends z.ZodTypeAny>(itemSchema: 
   });
 }
 
-export interface PaginatedResult<T> {
-  data: T[];
-  meta: PaginationMeta;
-}
-
-export interface PaginationOptions {
-  page: number;
-  limit: number;
-}
-
 export async function pagination<T = any>(
   table: PgTable,
   whereCondition?: SQL,
-  options: PaginationOptions & { orderBy?: (SQL<unknown> | any)[] } = { page: 1, limit: 10 },
+  options: { orderBy?: (SQL<unknown> | any)[]; page: number; limit: number } = { page: 1, limit: 10 },
 ): Promise<{ data: T[]; meta: PaginationMeta }> {
   const { page, limit, orderBy } = options;
   const offset = (page - 1) * limit;
