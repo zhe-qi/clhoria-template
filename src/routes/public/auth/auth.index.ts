@@ -1,5 +1,6 @@
-import type { AppRouteHandler } from "@/types/lib";
 import type { RouteConfig } from "@hono/zod-openapi";
+
+import type { AppRouteHandler } from "@/types/lib";
 
 import { createRouter } from "@/lib/create-app";
 
