@@ -18,9 +18,6 @@ export const PaginationMetaSchema = z.object({
   page: z.number().describe("当前页码"),
   limit: z.number().describe("每页数量"),
   total: z.number().describe("总数量"),
-  totalPages: z.number().describe("总页数"),
-  hasNext: z.boolean().describe("是否有下一页"),
-  hasPrev: z.boolean().describe("是否有上一页"),
 });
 
 export type PaginationMeta = z.infer<typeof PaginationMetaSchema>;
@@ -47,15 +44,10 @@ export function createPaginationMeta(
   limit: number,
   total: number,
 ): PaginationMeta {
-  const totalPages = Math.ceil(total / limit);
-
   return {
     page,
     limit,
     total,
-    totalPages,
-    hasNext: page < totalPages,
-    hasPrev: page > 1,
   };
 }
 

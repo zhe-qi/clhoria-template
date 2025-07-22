@@ -1,6 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
+import { differenceInMilliseconds } from "date-fns";
 import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
@@ -29,8 +30,7 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
     const userAgent = c.req.header("user-agent") || "";
 
     // 获取请求体和参数
-    let body: any = null;
-    let params: any = null;
+    let [body, params] = [null, null] as [any, any];
 
     try {
       if (method !== "GET" && method !== "DELETE") {
@@ -46,7 +46,7 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
     await next();
 
     const endTime = new Date();
-    const duration = endTime.getTime() - startTime.getTime();
+    const duration = differenceInMilliseconds(endTime, startTime);
 
     // 获取用户信息
     const payload: JWTPayload | undefined = c.get("jwtPayload");

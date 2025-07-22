@@ -15,7 +15,7 @@ import {
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
-import { IdUUIDParamsSchema } from "@/lib/schemas";
+import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 // 分配权限给角色
 export const assignPermissionsToRole = createRoute({
