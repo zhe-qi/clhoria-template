@@ -17,47 +17,30 @@ export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
     limit = 20,
   } = c.req.valid("query");
 
-  try {
-    const result = await globalParamsService.getAdminList({
-      domain,
-      search,
-      isPublic,
-      pagination: { page: Number(page), limit: Number(limit) },
-    });
+  const result = await globalParamsService.getAdminList({
+    domain,
+    search,
+    isPublic,
+    pagination: { page: Number(page), limit: Number(limit) },
+  });
 
-    return c.json(result, HttpStatusCodes.OK);
-  }
-  catch (error: any) {
-    return c.json(
-      { message: error.message || "获取全局参数列表失败" },
-      HttpStatusCodes.INTERNAL_SERVER_ERROR,
-    );
-  }
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
   const { key } = c.req.valid("param");
   const { domain } = c.req.valid("query");
 
-  try {
-    const param = await globalParamsService.getAdminParam(key, domain);
+  const param = await globalParamsService.getAdminParam(key, domain);
 
-    if (!param) {
-      return c.json(
-        { message: "参数不存在" },
-        HttpStatusCodes.NOT_FOUND,
-      );
-    }
-
-    return c.json(param, HttpStatusCodes.OK);
-  }
-  catch (error: any) {
-    // console.error("获取全局参数失败:", error);
+  if (!param) {
     return c.json(
-      { message: error.message || "服务器内部错误" },
-      HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      { message: "参数不存在" },
+      HttpStatusCodes.NOT_FOUND,
     );
   }
+
+  return c.json(param, HttpStatusCodes.OK);
 };
 
 export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
@@ -78,10 +61,10 @@ export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
         HttpStatusCodes.CONFLICT,
       );
     }
-    // console.error("创建全局参数失败:", error);
+
     return c.json(
-      { message: error.message || "服务器内部错误" },
-      HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      { message: error.message || "创建参数失败" },
+      HttpStatusCodes.BAD_REQUEST,
     );
   }
 };
@@ -93,69 +76,42 @@ export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
   const payload: JWTPayload = c.get("jwtPayload");
   const userId = payload.sub as string;
 
-  try {
-    const updated = await globalParamsService.updateParam(key, body, domain, userId);
+  const updated = await globalParamsService.updateParam(key, body, domain, userId);
 
-    if (!updated) {
-      return c.json(
-        { message: HttpStatusPhrases.NOT_FOUND },
-        HttpStatusCodes.NOT_FOUND,
-      );
-    }
-
-    return c.json(updated, HttpStatusCodes.OK);
-  }
-  catch (error: any) {
-    // console.error("更新全局参数失败:", error);
+  if (!updated) {
     return c.json(
-      { message: error.message || "服务器内部错误" },
-      HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      { message: HttpStatusPhrases.NOT_FOUND },
+      HttpStatusCodes.NOT_FOUND,
     );
   }
+
+  return c.json(updated, HttpStatusCodes.OK);
 };
 
 export const remove: GlobalParamsRouteHandlerType<"remove"> = async (c) => {
   const { key } = c.req.valid("param");
   const { domain } = c.req.valid("query");
 
-  try {
-    const deleted = await globalParamsService.deleteParam(key, domain);
+  const deleted = await globalParamsService.deleteParam(key, domain);
 
-    if (!deleted) {
-      return c.json(
-        { message: HttpStatusPhrases.NOT_FOUND },
-        HttpStatusCodes.NOT_FOUND,
-      );
-    }
-
-    return c.body(null, HttpStatusCodes.NO_CONTENT);
-  }
-  catch (error: any) {
-    // console.error("删除全局参数失败:", error);
+  if (!deleted) {
     return c.json(
-      { message: error.message || "服务器内部错误" },
-      HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      { message: HttpStatusPhrases.NOT_FOUND },
+      HttpStatusCodes.NOT_FOUND,
     );
   }
+
+  return c.body(null, HttpStatusCodes.NO_CONTENT);
 };
 
 export const batch: GlobalParamsRouteHandlerType<"batch"> = async (c) => {
   const { keys } = c.req.valid("json");
   const { domain, publicOnly = "false" } = c.req.valid("query");
 
-  try {
-    const result = await globalParamsService.batchGetParams(keys, {
-      domain,
-      publicOnly,
-    });
+  const result = await globalParamsService.batchGetParams(keys, {
+    domain,
+    publicOnly,
+  });
 
-    return c.json(result, HttpStatusCodes.OK);
-  }
-  catch (error: any) {
-    // console.error("批量获取全局参数失败:", error);
-    return c.json(
-      { message: error.message || "服务器内部错误" },
-      HttpStatusCodes.INTERNAL_SERVER_ERROR,
-    );
-  }
+  return c.json(result, HttpStatusCodes.OK);
 };

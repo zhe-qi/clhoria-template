@@ -13,10 +13,6 @@ import { notFoundSchema } from "@/lib/constants";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const internalServerErrorSchema = z.object({
-  message: z.string(),
-});
-
 const KeyParamsSchema = z.object({
   key: z.string().min(1, "参数键不能为空").describe("参数键名"),
 });
@@ -46,10 +42,6 @@ export const list = createRoute({
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(ListQuerySchema),
       "查询参数错误",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -81,10 +73,6 @@ export const get = createRoute({
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
       "参数不存在",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -119,10 +107,6 @@ export const create = createRoute({
     [HttpStatusCodes.CONFLICT]: jsonContent(
       createErrorSchema(insertGlobalParamsSchema),
       "参数键已存在",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -159,10 +143,6 @@ export const update = createRoute({
       notFoundSchema,
       "参数不存在",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
-    ),
   },
 });
 
@@ -192,10 +172,6 @@ export const remove = createRoute({
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
       "参数不存在",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -227,10 +203,6 @@ export const batch = createRoute({
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(batchGetGlobalParamsSchema),
       "请求参数错误",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      internalServerErrorSchema,
-      "服务器内部错误",
     ),
   },
 });
