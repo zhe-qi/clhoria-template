@@ -4,11 +4,9 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import { getDuplicateKeyError } from "@/lib/constants";
-import { GlobalParamsService } from "@/services/global-params.service";
+import * as globalParamsService from "@/services/global-params";
 
 import type { GlobalParamsRouteHandlerType } from "./global-params.index";
-
-const globalParamsService = GlobalParamsService.instance;
 
 export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
   const {

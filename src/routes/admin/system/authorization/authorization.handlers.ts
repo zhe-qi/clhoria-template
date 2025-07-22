@@ -11,7 +11,7 @@ import {
   assignUsersToRole as assignUsersToRoleLib,
 } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
-import { MenuService } from "@/services/menu.service";
+import * as menuService from "@/services/menu";
 
 import type { AuthorizationRouteHandlerType } from "./authorization.index";
 
@@ -61,7 +61,7 @@ export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRo
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const result = await MenuService.instance.assignMenusToRole(roleId, menuIds, currentDomain);
+  const result = await menuService.assignMenusToRole(roleId, menuIds, currentDomain);
 
   return c.json({
     success: result.success,
@@ -108,7 +108,7 @@ export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = asy
   }
 
   // 获取用户路由
-  const userRoutes = await MenuService.instance.getUserRoutes(userId, domain);
+  const userRoutes = await menuService.getUserRoutes(userId, domain);
 
   return c.json(userRoutes, HttpStatusCodes.OK);
 };
@@ -156,7 +156,7 @@ export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async
   }
 
   // 获取角色菜单
-  const menuIds = await MenuService.instance.getRoleMenuIds(roleId, domain);
+  const menuIds = await menuService.getRoleMenuIds(roleId, domain);
 
   return c.json({
     domain: domain as string,

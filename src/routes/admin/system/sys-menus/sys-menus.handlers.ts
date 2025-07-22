@@ -1,10 +1,8 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
-import { MenuService } from "@/services/menu.service";
+import * as menuService from "@/services/menu";
 
 import type { SysMenusRouteHandlerType as RouteHandlerType } from "./sys-menus.index";
-
-const menuService = MenuService.instance;
 
 /** 查询菜单列表 */
 export const list: RouteHandlerType<"list"> = async (c) => {

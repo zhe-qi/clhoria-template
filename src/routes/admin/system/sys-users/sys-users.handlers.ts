@@ -8,7 +8,7 @@ import db from "@/db";
 import { sysUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/constants";
 import { pagination } from "@/lib/pagination";
-import { assignRolesToUser, createUser } from "@/services/user.service";
+import { assignRolesToUser, createUser } from "@/services/user";
 
 import type { SysUsersRouteHandlerType } from "./sys-users.index";
 

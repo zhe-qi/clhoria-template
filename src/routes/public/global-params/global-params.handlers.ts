@@ -1,10 +1,8 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
-import { GlobalParamsService } from "@/services/global-params.service";
+import * as globalParamsService from "@/services/global-params";
 
 import type { GlobalParamsRouteHandlerType } from "./global-params.index";
-
-const globalParamsService = GlobalParamsService.instance;
 
 export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
   const { domain, publicOnly } = c.req.valid("query");
