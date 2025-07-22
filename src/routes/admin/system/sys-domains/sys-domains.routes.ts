@@ -1,12 +1,13 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
+import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysDomainSchema, patchSysDomainSchema, selectSysDomainSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 export const list = createRoute({
   tags: ["/sys-domains (系统域)"],

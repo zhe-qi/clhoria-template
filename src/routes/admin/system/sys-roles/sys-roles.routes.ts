@@ -1,12 +1,13 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
+import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysRoleSchema, patchSysRoleSchema, selectSysRoleSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 export const list = createRoute({
   tags: ["/sys-roles (系统角色)"],
@@ -161,8 +162,8 @@ export const assignPermissions = createRoute({
     body: jsonContentRequired(
       z.object({
         permissions: z.array(z.object({
-          resource: z.enum(Object.values(PermissionResource) as [string, ...string[]]).describe("资源"),
-          action: z.enum(Object.values(PermissionAction) as [string, ...string[]]).describe("动作"),
+          resource: z.enum(Object.values(PermissionResource)).describe("资源"),
+          action: z.enum(Object.values(PermissionAction)).describe("动作"),
         })).describe("权限列表"),
       }),
       "分配权限参数",

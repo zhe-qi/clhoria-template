@@ -1,16 +1,14 @@
 import { createRoute } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
+import { createErrorSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
 import { insertSysMenuSchema, patchSysMenuSchema, selectSysMenuSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { PermissionAction, PermissionResource, Status } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
-
-// 通用错误响应 schema
-const errorResponseSchema = z.object({ message: z.string() });
+import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 const tags = ["/sys-menus (系统菜单管理)"];
 
@@ -33,10 +31,6 @@ export const list = createRoute({
     [HttpStatusCodes.OK]: jsonContent(
       createPaginatedResultSchema(selectSysMenuSchema),
       "查询成功",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      errorResponseSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -63,10 +57,6 @@ export const tree = createRoute({
       })),
       "查询成功",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      errorResponseSchema,
-      "服务器内部错误",
-    ),
   },
 });
 
@@ -91,10 +81,6 @@ export const getMenusByRole = createRoute({
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
       "角色不存在",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      errorResponseSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -149,10 +135,6 @@ export const getOne = createRoute({
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
       "参数验证失败",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      errorResponseSchema,
-      "服务器内部错误",
     ),
   },
 });
@@ -219,10 +201,6 @@ export const getConstantRoutes = createRoute({
       })),
       "获取成功",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      errorResponseSchema,
-      "服务器内部错误",
-    ),
   },
 });
 
@@ -251,10 +229,6 @@ export const getUserRoutes = createRoute({
         message: z.string(),
       }),
       "未授权",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      errorResponseSchema,
-      "服务器内部错误",
     ),
   },
 });

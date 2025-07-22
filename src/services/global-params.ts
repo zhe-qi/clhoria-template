@@ -33,7 +33,7 @@ export async function getCachedParam(key: string, domain: string) {
     const cached = await redisClient.get(getGlobalParamKey(key, domain));
     return cached ? JSON.parse(cached) : null;
   }
-  catch (error) {
+  catch {
     return null;
   }
 }
@@ -49,7 +49,7 @@ export async function setCachedParam(key: string, domain: string, data: any) {
       JSON.stringify(data),
     );
   }
-  catch (error) {
+  catch {
     // Redis错误不影响业务流程，静默处理
   }
 }
@@ -62,7 +62,7 @@ export async function deleteCachedParam(key: string, domain: string) {
     await redisClient.del(getGlobalParamKey(key, domain));
     await redisClient.del(getGlobalParamsAllKey(domain));
   }
-  catch (error) {
+  catch {
     // Redis错误不影响业务流程，静默处理
   }
 }
@@ -79,7 +79,7 @@ export async function clearDomainCache(domain: string) {
     }
     await redisClient.del(getGlobalParamsAllKey(domain));
   }
-  catch (error) {
+  catch {
     // Redis错误不影响业务流程，静默处理
   }
 }

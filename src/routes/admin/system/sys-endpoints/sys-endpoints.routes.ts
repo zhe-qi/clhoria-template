@@ -1,12 +1,13 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
+import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysEndpointSchema, patchSysEndpointSchema, selectSysEndpointSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 // 查询API端点列表
 export const list = createRoute({
