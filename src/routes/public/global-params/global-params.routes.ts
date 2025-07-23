@@ -7,7 +7,7 @@ import {
   batchGetGlobalParamsSchema,
   responseGlobalParamsSchema,
 } from "@/db/schema";
-import { notFoundSchema } from "@/lib/constants";
+import { notFoundSchema } from "@/lib/enums";
 
 /** 参数键路径模式 */
 const KeyParamsSchema = z.object({

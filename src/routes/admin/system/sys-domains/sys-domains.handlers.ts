@@ -7,7 +7,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysDomain } from "@/db/schema";
-import { getDuplicateKeyError } from "@/lib/constants";
+import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 import { formatDate } from "@/utils";
 

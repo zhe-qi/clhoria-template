@@ -13,8 +13,7 @@ import {
   rolePermissionsSchema,
   userRoutesResponseSchema,
 } from "@/db/schema";
-import { notFoundSchema } from "@/lib/constants";
-import { PermissionAction, PermissionResource } from "@/lib/enums";
+import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 // 分配权限给角色

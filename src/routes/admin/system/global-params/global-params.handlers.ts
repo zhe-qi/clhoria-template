@@ -3,7 +3,7 @@ import type { JWTPayload } from "hono/utils/jwt/types";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
-import { getDuplicateKeyError } from "@/lib/constants";
+import { getDuplicateKeyError } from "@/lib/enums";
 import * as globalParamsService from "@/services/global-params";
 
 import type { GlobalParamsRouteHandlerType } from "./global-params.index";

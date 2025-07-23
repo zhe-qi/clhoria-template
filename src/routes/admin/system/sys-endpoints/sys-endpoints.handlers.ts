@@ -5,7 +5,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import db from "@/db";
 import { casbinRule, sysEndpoint } from "@/db/schema";
-import { getDuplicateKeyError } from "@/lib/constants";
+import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 
 import type { SysEndpointsRouteHandlerType } from "./sys-endpoints.index";

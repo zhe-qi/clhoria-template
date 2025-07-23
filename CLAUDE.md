@@ -192,7 +192,7 @@ When creating new routes, ALWAYS follow the admin-users route structure for cons
    import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 
    import { schema imports } from "@/db/schema";
-   import { notFoundSchema } from "@/lib/constants";
+   import { notFoundSchema } from "@/lib/enums";
    import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
    ```
 
@@ -217,10 +217,10 @@ When creating new routes, ALWAYS follow the admin-users route structure for cons
    - ID routes: `createErrorSchema(IdUUIDParamsSchema)`
 
 6. **Error Handling Constants**:
-   - Use standardized error response functions from `@/lib/constants`
+   - Use standardized error response functions from `@/lib/enums`
    - For duplicate key errors: Use `getDuplicateKeyError(field, message)`
    - For validation errors: Use `getQueryValidationError(error)`
-   - Always import error helpers: `import { getDuplicateKeyError } from "@/lib/constants"`
+   - Always import error helpers: `import { getDuplicateKeyError } from "@/lib/enums"`
 
 7. **Field Descriptions**:
    - Use `.describe()` directly for simple field descriptions
@@ -452,7 +452,7 @@ All business logic should be organized as functional services in the `src/servic
 1. **File Naming**: Use kebab-case for service files (e.g., `user.ts`, `global-params.ts`)
 2. **Function Naming**: Use descriptive camelCase names with action prefixes:
    - `create*` - for creation operations
-   - `get*` - for read operations  
+   - `get*` - for read operations
    - `update*` - for update operations
    - `delete*` - for deletion operations
    - `assign*` - for assignment operations
@@ -467,7 +467,7 @@ All business logic should be organized as functional services in the `src/servic
      domain: string;
      // ... other fields
    }
-   
+
    export async function createUser(params: CreateUserParams) {
      // implementation
    }
@@ -519,7 +519,7 @@ All business logic should be organized as functional services in the `src/servic
 
 2. **Drizzle ORM Exception Behavior**:
    - **Database queries**: Return empty arrays `[]` for no results, do NOT throw
-   - **Single record queries**: Return `undefined` for no results, do NOT throw  
+   - **Single record queries**: Return `undefined` for no results, do NOT throw
    - **Insert operations**: Throw on constraint violations (unique, foreign key, etc.)
    - **Update/Delete operations**: Return affected row count, do NOT throw for no matches
    - **Connection errors**: Throw exceptions for network/connection issues
@@ -572,7 +572,7 @@ All business logic should be organized as functional services in the `src/servic
 
 See existing services for reference:
 - `src/services/user.ts` - User management operations
-- `src/services/menu.ts` - Menu and routing operations  
+- `src/services/menu.ts` - Menu and routing operations
 - `src/services/global-params.ts` - Configuration management
 
 ## Environment

@@ -5,7 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
 import { insertSysMenuSchema, patchSysMenuSchema, selectSysMenuSchema } from "@/db/schema";
-import { notFoundSchema } from "@/lib/constants";
+import { notFoundSchema } from "@/lib/enums";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
