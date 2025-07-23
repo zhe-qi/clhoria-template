@@ -136,7 +136,7 @@ When creating enums in the project, follow these conventions:
 export const EnumName = {
   /** 描述选项1 */
   OPTION_1: "value1",
-  
+
   /** 描述选项2 */
   OPTION_2: "value2",
 } as const;
@@ -233,7 +233,7 @@ This structure ensures type safety and consistency across all routes.
    // ✅ Correct
    return c.json(data, HttpStatusCodes.OK);
    return c.json(error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
-   
+
    // ❌ Wrong
    return c.json(data, 200);
    return c.json(error, 422 as any);
@@ -273,7 +273,7 @@ This structure ensures type safety and consistency across all routes.
        HttpStatusCodes.UNPROCESSABLE_ENTITY,
      );
    }
-   
+
    // 资源不存在
    if (!resource) {
      return c.json(
@@ -294,7 +294,7 @@ This structure ensures type safety and consistency across all routes.
      console.error("操作失败:", error);
      return c.json({...}, 500);
    }
-   
+
    // ✅ Correct - Return appropriate error response
    catch (error: any) {
      return c.json(
@@ -310,7 +310,7 @@ This structure ensures type safety and consistency across all routes.
    catch (error) {
      return c.json({ data: [], error: error.message }, HttpStatusCodes.OK);
    }
-   
+
    // ✅ Correct - Use appropriate error status codes
    catch (error: any) {
      return c.json(
@@ -328,7 +328,7 @@ This structure ensures type safety and consistency across all routes.
 4. **Error Response Schema Pattern**:
    ```typescript
    const errorResponseSchema = z.object({ message: z.string() });
-   
+
    // In route definition:
    responses: {
      [HttpStatusCodes.OK]: jsonContent(dataSchema, "成功"),
@@ -380,21 +380,202 @@ Key requirements:
 The system includes domain/tenant management functionality at `/sys-domains` endpoint with the following features:
 
 - **List Domains**: GET `/sys-domains` - Paginated list with search capability
-- **Create Domain**: POST `/sys-domains` - Create new domain/tenant  
+- **Create Domain**: POST `/sys-domains` - Create new domain/tenant
 - **Update Domain**: PATCH `/sys-domains/{id}` - Update existing domain
 - **Delete Domain**: DELETE `/sys-domains/{id}` - Remove domain
 - **Get Domain**: GET `/sys-domains/{id}` - Retrieve single domain details
 
 Domain schema includes: `code` (unique identifier), `name`, `description`, `status` (ENABLED/DISABLED/BANNED), audit fields (`createdBy`, `updatedBy`, timestamps).
 
+### Multi-Domain CRUD Operations
+
+**CRITICAL**: All CRUD operations must consider domain isolation:
+
+1. **Domain Field Requirement**:
+   - All entities that need domain isolation MUST include a `domain` field in their schema
+   - Use `uuid("domain").notNull().references(() => sysDomains.id)` for domain foreign key
+   - Include domain field in all three schemas: `selectSchema`, `insertSchema`, `patchSchema`
+
+2. **CRUD Operation Rules**:
+   - **Create**: Always include domain validation and assignment
+   - **Read**: Filter by domain context in all queries
+   - **Update**: Ensure domain context is maintained and validated
+   - **Delete**: Only allow deletion within the correct domain context
+
+3. **Query Filtering**:
+
+   ```typescript
+   // ✅ Correct - Always filter by domain
+   const results = await db.select()
+     .from(table)
+     .where(and(
+       eq(table.domain, domainId),
+       // other conditions
+     ));
+
+   // ❌ Wrong - Missing domain filter
+   const results = await db.select().from(table);
+   ```
+
+4. **Domain Context in Handlers**:
+   - Extract domain from JWT token or request context
+   - Validate domain permissions before operations
+   - Include domain in all database operations
+
+5. **Schema Example**:
+
+   ```typescript
+   export const selectEntitySchema = createSelectSchema(entities, {
+     id: schema => schema.describe("实体ID"),
+     domain: schema => schema.describe("所属域ID"),
+     name: schema => schema.describe("实体名称"),
+   });
+   ```
+
+## Service Layer Architecture
+
+All business logic should be organized as functional services in the `src/services/` directory:
+
+### Service Organization Rules
+
+1. **Functional Approach**: All services MUST be implemented as pure functions or async functions
+2. **Single Responsibility**: Each service file handles one business domain (user, menu, auth, etc.)
+3. **Export Pattern**: Use named exports for all service functions
+4. **Domain Awareness**: All service functions MUST consider domain context when applicable
+
+### Service Structure Standards
+
+1. **File Naming**: Use kebab-case for service files (e.g., `user.ts`, `global-params.ts`)
+2. **Function Naming**: Use descriptive camelCase names with action prefixes:
+   - `create*` - for creation operations
+   - `get*` - for read operations  
+   - `update*` - for update operations
+   - `delete*` - for deletion operations
+   - `assign*` - for assignment operations
+   - `clear*` - for cache/cleanup operations
+
+3. **Parameter Interfaces**: Define clear interfaces for function parameters:
+
+   ```typescript
+   interface CreateUserParams {
+     username: string;
+     password: string;
+     domain: string;
+     // ... other fields
+   }
+   
+   export async function createUser(params: CreateUserParams) {
+     // implementation
+   }
+   ```
+
+4. **Domain Context**: Always include domain parameter in functions that need isolation:
+
+   ```typescript
+   export async function getUserRoutes(userId: string, domain: string) {
+     // Always filter by domain
+   }
+   ```
+
+5. **Transaction Handling**: Use database transactions for complex operations:
+
+   ```typescript
+   export async function assignRolesToUser(userId: string, roleIds: string[], domain: string) {
+     return db.transaction(async (tx) => {
+       // Multiple related operations
+     });
+   }
+   ```
+
+6. **Cache Management**: Implement cache clearing patterns:
+
+   ```typescript
+   export async function clearUserMenuCache(userId: string, domain: string) {
+     const cacheKey = getUserMenusKey(userId, domain);
+     await redisClient.del(cacheKey);
+   }
+   ```
+
+### Service Integration
+
+- **Import in Handlers**: Services should be imported and called from route handlers
+- **Error Handling**: Services should throw descriptive errors that handlers can catch and convert to appropriate HTTP responses
+- **Type Safety**: Use TypeScript interfaces and return types for all service functions
+- **Testing**: Services should be easily testable as pure functions
+
+### Exception Handling Standards
+
+**CRITICAL**: Do NOT use try-catch blindly in handlers. Always understand the error behavior first:
+
+1. **Research Before Catching**: Before adding try-catch, investigate:
+   - Does the function/library throw exceptions or return error values?
+   - What specific exceptions can be thrown?
+   - What are the different error scenarios?
+   - Can errors be handled through return value checking instead?
+
+2. **Drizzle ORM Exception Behavior**:
+   - **Database queries**: Return empty arrays `[]` for no results, do NOT throw
+   - **Single record queries**: Return `undefined` for no results, do NOT throw  
+   - **Insert operations**: Throw on constraint violations (unique, foreign key, etc.)
+   - **Update/Delete operations**: Return affected row count, do NOT throw for no matches
+   - **Connection errors**: Throw exceptions for network/connection issues
+
+3. **When to Use Try-Catch**:
+   ```typescript
+   // ✅ Correct - Known exception scenarios
+   try {
+     const user = await createUser(userData); // Can throw on duplicate key
+   } catch (error: any) {
+     if (error.message?.includes("duplicate key")) {
+       return c.json(getDuplicateKeyError("username", "用户名已存在"), HttpStatusCodes.CONFLICT);
+     }
+     throw error; // Re-throw unknown errors
+   }
+
+   // ✅ Correct - Check return values instead of try-catch
+   const [user] = await db.select().from(sysUser).where(eq(sysUser.id, id));
+   if (!user) {
+     return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
+   }
+   ```
+
+4. **When NOT to Use Try-Catch**:
+   ```typescript
+   // ❌ Wrong - Unnecessary try-catch for operations that don't throw
+   try {
+     const users = await db.select().from(sysUser); // Never throws, returns []
+     return c.json(users, HttpStatusCodes.OK);
+   } catch (error) {
+     return c.json({ message: "查询失败" }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
+   }
+
+   // ❌ Wrong - Catching without understanding what can be thrown
+   try {
+     const result = await someOperation();
+   } catch (error) {
+     // Generic catch without knowing what errors are possible
+   }
+   ```
+
+5. **Error Research Process**:
+   - Read the library documentation for error handling
+   - Check the source code if documentation is unclear
+   - Test error scenarios in development
+   - Only catch specific, known exceptions
+   - Let unknown exceptions bubble up to global error handler
+
+### Examples
+
+See existing services for reference:
+- `src/services/user.ts` - User management operations
+- `src/services/menu.ts` - Menu and routing operations  
+- `src/services/global-params.ts` - Configuration management
+
 ## Environment
 
 - `NODE_ENV` - Set to "production" for builds and start script
 - `DATABASE_URL` - PostgreSQL connection string
+- `REDIS_URL` - Redis connection string
 - `CLIENT_JWT_SECRET` - JWT secret for client authentication
 - `ADMIN_JWT_SECRET` - JWT secret for admin authentication
 - `PORT` - Server port
-
-## Backend Example Directory
-
-The `backend-example/` contains a more complex NestJS-based architecture with DDD patterns, but the main template uses the simpler Hono structure described above.
