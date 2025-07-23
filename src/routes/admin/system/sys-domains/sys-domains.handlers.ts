@@ -39,7 +39,7 @@ export const list: SysDomainsRouteHandlerType<"list"> = async (c) => {
 export const create: SysDomainsRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.sub as string;
+  const operatorId = payload.uid as string;
 
   try {
     const [domain] = await db
@@ -85,7 +85,7 @@ export const update: SysDomainsRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.sub as string;
+  const operatorId = payload.uid as string;
 
   const [updated] = await db
     .update(sysDomain)

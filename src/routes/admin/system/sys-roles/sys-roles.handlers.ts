@@ -38,7 +38,7 @@ export const list: SysRolesRouteHandlerType<"list"> = async (c) => {
 export const create: SysRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.sub as string;
+  const operatorId = payload.uid as string;
 
   try {
     const [role] = await db.insert(sysRole).values({
@@ -81,7 +81,7 @@ export const update: SysRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.sub as string;
+  const operatorId = payload.uid as string;
 
   const [updated] = await db
     .update(sysRole)

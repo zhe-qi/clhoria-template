@@ -49,9 +49,9 @@ export const create = createRoute({
       responseSysUserSchema,
       "创建成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(insertSysUserSchema),
-      "请求参数错误",
+      "The validation error(s)",
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
       createErrorSchema(insertSysUserSchema),

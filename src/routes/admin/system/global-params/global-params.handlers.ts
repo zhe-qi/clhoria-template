@@ -47,7 +47,7 @@ export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { domain } = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const userId = payload.sub as string;
+  const userId = payload.uid as string;
 
   try {
     const created = await globalParamsService.createParam(body, domain, userId);
@@ -74,7 +74,7 @@ export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { domain } = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
-  const userId = payload.sub as string;
+  const userId = payload.uid as string;
 
   const updated = await globalParamsService.updateParam(key, body, domain, userId);
 

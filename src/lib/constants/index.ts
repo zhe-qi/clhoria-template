@@ -2,6 +2,11 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { createMessageObjectSchema } from "stoker/openapi/schemas";
 
 import { formatZodError } from "@/utils";
+import { ZodErrorCodes, ZodErrorMessages } from "@/lib/enums";
+
+// 为了向后兼容，重新导出枚举
+export const ZOD_ERROR_CODES = ZodErrorCodes;
+export const ZOD_ERROR_MESSAGES = ZodErrorMessages;
 
 export const notFoundSchema = createMessageObjectSchema(HttpStatusPhrases.NOT_FOUND);
 

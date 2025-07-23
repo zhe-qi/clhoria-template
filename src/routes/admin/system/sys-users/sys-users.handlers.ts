@@ -45,8 +45,7 @@ export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
   const domain = payload.domain as string;
-  const operatorId = payload.sub as string;
-
+  const operatorId = payload.uid as string;
   try {
     const user = await createUser({
       ...body,
@@ -101,7 +100,7 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
   const domain = payload.domain as string;
-  const operatorId = payload.sub as string;
+  const operatorId = payload.uid as string;
 
   // 不允许直接更新密码
   const { password, ...updateData } = body as any;
@@ -158,7 +157,7 @@ export const assignRoles: SysUsersRouteHandlerType<"assignRoles"> = async (c) =>
   const { roleIds } = c.req.valid("json");
   const payload: JWTPayload = c.get("jwtPayload");
   const domain = payload.domain as string;
-  const operatorId = payload.sub as string;
+  const operatorId = payload.uid as string;
 
   // 检查用户是否存在
   const [user] = await db
