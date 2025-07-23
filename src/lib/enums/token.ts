@@ -1,13 +1,13 @@
 /** Token 状态枚举 */
 export const TokenStatus = {
   /** 活跃状态 */
-  ACTIVE: "ACTIVE",
+  ACTIVE: 1,
 
   /** 已撤销 */
-  REVOKED: "REVOKED",
+  REVOKED: 0,
 
   /** 已过期 */
-  EXPIRED: "EXPIRED",
+  EXPIRED: -1,
 } as const;
 
 /** Token 状态类型 */

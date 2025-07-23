@@ -11,7 +11,7 @@ export const sysOrganization = pgTable("sys_organization", {
   name: varchar({ length: 128 }).notNull(),
   description: text(),
   pid: uuid(),
-  status: statusEnum().notNull().default("ENABLED"),
+  status: statusEnum().notNull(),
 });
 
 export const selectSysOrganizationSchema = createSelectSchema(sysOrganization, {
@@ -20,7 +20,7 @@ export const selectSysOrganizationSchema = createSelectSchema(sysOrganization, {
   name: schema => schema.describe("组织名称"),
   description: schema => schema.describe("组织描述"),
   pid: schema => schema.describe("父组织ID"),
-  status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用"),
+  status: schema => schema.describe("状态: 1=启用 0=禁用"),
 });
 
 export const insertSysOrganizationSchema = createInsertSchema(sysOrganization, {

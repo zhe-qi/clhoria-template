@@ -10,7 +10,7 @@ export const sysDomain = pgTable("sys_domain", {
   code: varchar({ length: 64 }).notNull().unique(),
   name: varchar({ length: 128 }).notNull(),
   description: text(),
-  status: statusEnum().notNull().default("ENABLED"),
+  status: statusEnum().notNull(),
 });
 
 export const selectSysDomainSchema = createSelectSchema(sysDomain, {
@@ -18,7 +18,7 @@ export const selectSysDomainSchema = createSelectSchema(sysDomain, {
   code: schema => schema.describe("域代码"),
   name: schema => schema.describe("域名称"),
   description: schema => schema.describe("域描述"),
-  status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用"),
+  status: schema => schema.describe("状态: 1=启用 0=禁用"),
 });
 
 export const insertSysDomainSchema = createInsertSchema(sysDomain, {

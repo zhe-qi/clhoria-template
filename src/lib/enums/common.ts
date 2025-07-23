@@ -1,13 +1,13 @@
 /** 通用状态枚举，用于表示实体的启用/禁用状态 */
 export const Status = {
   /** 启用状态 */
-  ENABLED: "ENABLED",
+  ENABLED: 1,
 
   /** 禁用状态 */
-  DISABLED: "DISABLED",
+  DISABLED: 0,
 
   /** 封禁状态 */
-  BANNED: "BANNED",
+  BANNED: -1,
 } as const;
 
 /** 状态类型 */

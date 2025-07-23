@@ -1,6 +1,6 @@
+import { z } from "@hono/zod-openapi";
 import { integer, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod/v4";
 
 import { defaultColumns } from "@/db/common/default-columns";
 

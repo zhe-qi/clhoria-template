@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { insertSysMenuSchema, patchSysMenuSchema, selectSysMenuSchema } from "@/db/schema";
 import { notFoundSchema } from "@/lib/constants";
-import { PermissionAction, PermissionResource, Status } from "@/lib/enums";
+import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
@@ -45,7 +45,7 @@ export const tree = createRoute({
   method: "get",
   request: {
     query: z.object({
-      status: z.enum([Status.ENABLED, Status.DISABLED]).optional().describe("菜单状态"),
+      status: z.number().int().optional().describe("菜单状态: 1=启用 0=禁用"),
     }),
   },
   tags,

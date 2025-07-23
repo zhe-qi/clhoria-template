@@ -3,13 +3,15 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
-import { TokenStatus, TokenType } from "@/lib/enums";
+import { TokenType } from "@/lib/enums";
+
+import { tokenStatusEnum } from "./enums";
 
 export const sysTokens = pgTable("sys_tokens", {
   id: defaultColumns.id,
   accessToken: varchar({ length: 512 }).notNull().unique(),
   refreshToken: varchar({ length: 512 }).notNull().unique(),
-  status: varchar({ length: 32 }).notNull(),
+  status: tokenStatusEnum().notNull(),
   userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
@@ -28,7 +30,7 @@ export const selectSysTokensSchema = createSelectSchema(sysTokens, {
   id: schema => schema.describe("令牌ID"),
   accessToken: schema => schema.describe("访问令牌"),
   refreshToken: schema => schema.describe("刷新令牌"),
-  status: schema => schema.describe("状态: ACTIVE=活跃 REVOKED=已撤销 EXPIRED=已过期"),
+  status: schema => schema.describe("状态: 1=活跃 0=已撤销 -1=已过期"),
   userId: schema => schema.describe("用户ID"),
   username: schema => schema.describe("用户名"),
   domain: schema => schema.describe("域"),
@@ -44,7 +46,7 @@ export const selectSysTokensSchema = createSelectSchema(sysTokens, {
 export const insertSysTokensSchema = createInsertSchema(sysTokens, {
   accessToken: schema => schema.min(1),
   refreshToken: schema => schema.min(1),
-  status: () => z.enum(Object.values(TokenStatus) as [string, ...string[]]),
+  status: () => z.number().int(),
   username: schema => schema.min(1),
   domain: schema => schema.min(1),
   ip: schema => schema.min(1),

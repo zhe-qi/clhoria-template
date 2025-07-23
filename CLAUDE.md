@@ -32,7 +32,6 @@ This is a backend template based on hono. It uses TypeScript, Drizzle ORM and Po
 - `pnpm generate` - Generate Drizzle migrations from schema changes
 - `pnpm push` - Push schema changes directly to database
 - `pnpm studio` - Open Drizzle Studio for database management
-- `pnpm generate:model` - Generate model configurations (custom script)
 
 ## Architecture
 
@@ -52,6 +51,8 @@ Route execution order is critical as it affects middleware execution. Public rou
 - **Schema**: Located in `src/db/schema/` with barrel exports
 - **Configuration**: `drizzle.config.ts` with snake_case convention
 - **Migrations**: Stored in `./migrations/`
+- **Database Instance**: Default export `db` from `@/db` with snake_case convention
+- **Null Handling**: `undefined` values are automatically converted to `null` when stored in database
 
 #### Schema Definition Rules
 
@@ -64,9 +65,12 @@ When creating Drizzle schemas, follow these rules:
    - `patchXxxSchema` - for updating data (partial of insertXxxSchema)
 3. **Field Descriptions**: Use Chinese descriptions that explain the field purpose and format
 4. **Status Fields**: Use `integer().default(1)` for enable/disable flags (1=enabled, 0=disabled)
+5. **Custom Field Schema**: When defining custom field schemas, import zod from `@hono/zod-openapi` to access OpenAPI-specific methods like `.openapi()`
 
 Example:
 ```typescript
+import { z } from "@hono/zod-openapi";
+
 export const selectUsersSchema = createSelectSchema(users, {
   id: schema => schema.describe("用户ID"),
   name: schema => schema.describe("用户名称"),

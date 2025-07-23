@@ -17,7 +17,7 @@ export const sysUser = pgTable("sys_user", {
   email: varchar({ length: 128 }).unique(),
   phoneNumber: varchar({ length: 32 }).unique(),
   nickName: varchar({ length: 64 }).notNull(),
-  status: statusEnum().notNull().default("ENABLED"),
+  status: statusEnum().notNull(),
 });
 
 export const sysUserRelations = relations(sysUser, ({ many }) => ({
@@ -34,7 +34,7 @@ export const selectSysUserSchema = createSelectSchema(sysUser, {
   email: schema => schema.describe("邮箱"),
   phoneNumber: schema => schema.describe("手机号"),
   nickName: schema => schema.describe("昵称"),
-  status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用 BANNED=封禁"),
+  status: schema => schema.describe("状态: 1=启用 0=禁用 -1=封禁"),
 });
 
 export const insertSysUserSchema = createInsertSchema(sysUser, {

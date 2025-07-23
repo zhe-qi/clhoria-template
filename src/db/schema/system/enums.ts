@@ -1,5 +1,6 @@
-import { pgEnum } from "drizzle-orm/pg-core";
+import { integer } from "drizzle-orm/pg-core";
 
-import { Status } from "@/lib/enums";
+import { Status, TokenStatus } from "@/lib/enums";
 
-export const statusEnum = pgEnum("status", [Status.ENABLED, Status.DISABLED, Status.BANNED]);
+export const statusEnum = () => integer().default(Status.ENABLED);
+export const tokenStatusEnum = () => integer().default(TokenStatus.ACTIVE);

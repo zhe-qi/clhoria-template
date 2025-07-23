@@ -14,7 +14,7 @@ export const sysRole = pgTable("sys_role", {
   name: varchar({ length: 64 }).notNull(),
   description: text(),
   pid: uuid(),
-  status: statusEnum().notNull().default("ENABLED"),
+  status: statusEnum().notNull(),
 });
 
 export const sysRoleRelations = relations(sysRole, ({ many }) => ({
@@ -28,7 +28,7 @@ export const selectSysRoleSchema = createSelectSchema(sysRole, {
   name: schema => schema.describe("角色名称"),
   description: schema => schema.describe("角色描述"),
   pid: schema => schema.describe("父角色ID"),
-  status: schema => schema.describe("状态: ENABLED=启用 DISABLED=禁用"),
+  status: schema => schema.describe("状态: 1=启用 0=禁用"),
 });
 
 export const insertSysRoleSchema = createInsertSchema(sysRole, {

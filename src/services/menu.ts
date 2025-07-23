@@ -353,12 +353,12 @@ export async function getMenuList(options: {
 /**
  * 获取菜单树形结构
  */
-export async function getMenuTree(options: { status?: string; domain: string }) {
+export async function getMenuTree(options: { status?: number; domain: string }) {
   const { status, domain } = options;
   const whereConditions = [eq(sysMenu.domain, domain)];
 
   if (status !== undefined) {
-    whereConditions.push(eq(sysMenu.status, status as any));
+    whereConditions.push(eq(sysMenu.status, status));
   }
 
   const menus = await db.query.sysMenu.findMany({
