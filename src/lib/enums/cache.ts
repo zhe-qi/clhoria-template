@@ -20,6 +20,9 @@ export const CacheConstant = {
 
   /** 全局参数前缀 */
   GLOBAL_PARAMS_PREFIX: "global:params:",
+
+  /** 字典前缀 */
+  DICTIONARIES_PREFIX: "dict:",
 } as const;
 
 /** 缓存常量类型 */
@@ -65,4 +68,18 @@ export function getGlobalParamKey(key: string, domain: string): string {
  */
 export function getGlobalParamsAllKey(domain: string): string {
   return `${CacheConstant.GLOBAL_PARAMS_PREFIX}${domain}:all`;
+}
+
+/**
+ * 生成字典缓存Key
+ */
+export function getDictionaryKey(code: string, domain: string): string {
+  return `${CacheConstant.DICTIONARIES_PREFIX}${domain}:${code}`;
+}
+
+/**
+ * 生成字典列表缓存Key
+ */
+export function getDictionariesAllKey(domain: string): string {
+  return `${CacheConstant.DICTIONARIES_PREFIX}${domain}:all`;
 }

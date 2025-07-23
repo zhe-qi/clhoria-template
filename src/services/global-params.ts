@@ -10,6 +10,8 @@ import { redisClient } from "@/lib/redis";
 
 export const DEFAULT_DOMAIN = "default";
 export const CACHE_TTL = 3600; // 1小时
+export const NULL_CACHE_TTL = 300; // 空值缓存5分钟
+export const NULL_CACHE_VALUE = "__NULL__"; // 空值标记
 
 export interface GlobalParamsListOptions {
   domain?: string;
@@ -33,7 +35,12 @@ export interface GlobalParamsBatchOptions {
 export async function getCachedParam(key: string, domain: string) {
   try {
     const cached = await redisClient.get(getGlobalParamKey(key, domain));
-    return cached ? JSON.parse(cached) : null;
+    if (!cached) {
+      return null;
+    }
+    const parsed = JSON.parse(cached);
+    // 检查是否为空值缓存标记
+    return parsed === NULL_CACHE_VALUE ? undefined : parsed;
   }
   catch {
     return null;
@@ -49,6 +56,22 @@ export async function setCachedParam(key: string, domain: string, data: any) {
       getGlobalParamKey(key, domain),
       CACHE_TTL,
       JSON.stringify(data),
+    );
+  }
+  catch {
+    // Redis错误不影响业务流程，静默处理
+  }
+}
+
+/**
+ * 设置空值缓存（防止缓存穿透）
+ */
+export async function setCachedNullParam(key: string, domain: string) {
+  try {
+    await redisClient.setex(
+      getGlobalParamKey(key, domain),
+      NULL_CACHE_TTL,
+      JSON.stringify(NULL_CACHE_VALUE),
     );
   }
   catch {
@@ -171,8 +194,8 @@ export async function getAdminList(options: GlobalParamsListOptions = {}) {
 export async function getPublicParam(key: string, domain: string = DEFAULT_DOMAIN) {
   // 尝试从缓存获取
   const cached = await getCachedParam(key, domain);
-  if (cached) {
-    return cached;
+  if (cached !== null) {
+    return cached; // 如果是undefined表示空值缓存命中
   }
 
   const [param] = await db
@@ -189,6 +212,10 @@ export async function getPublicParam(key: string, domain: string = DEFAULT_DOMAI
     // 缓存结果
     await setCachedParam(key, domain, param);
   }
+  else {
+    // 缓存空值防止穿透
+    await setCachedNullParam(key, domain);
+  }
 
   return param;
 }
@@ -198,8 +225,8 @@ export async function getPublicParam(key: string, domain: string = DEFAULT_DOMAI
  */
 export async function getAdminParam(key: string, domain: string = DEFAULT_DOMAIN) {
   const cached = await getCachedParam(key, domain);
-  if (cached) {
-    return cached;
+  if (cached !== null) {
+    return cached; // 如果是undefined表示空值缓存命中
   }
 
   const [param] = await db
@@ -213,6 +240,10 @@ export async function getAdminParam(key: string, domain: string = DEFAULT_DOMAIN
 
   if (param) {
     await setCachedParam(key, domain, param);
+  }
+  else {
+    // 缓存空值防止穿透
+    await setCachedNullParam(key, domain);
   }
 
   return param;
@@ -300,7 +331,14 @@ export async function batchGetParams(keys: string[], options: GlobalParamsBatchO
     const cachedValue = cached[i];
 
     if (cachedValue) {
-      result[key] = JSON.parse(cachedValue);
+      const parsed = JSON.parse(cachedValue);
+      if (parsed === NULL_CACHE_VALUE) {
+        // 空值缓存命中，直接设为null
+        result[key] = null;
+      }
+      else {
+        result[key] = parsed;
+      }
     }
     else {
       missingKeys.push(key);
@@ -329,6 +367,14 @@ export async function batchGetParams(keys: string[], options: GlobalParamsBatchO
       if (missingKeys.includes(param.key)) {
         result[param.key] = param;
         await setCachedParam(param.key, domain, param);
+      }
+    }
+
+    // 为不存在的key缓存空值
+    const foundKeys = dbParams.map(p => p.key);
+    for (const missingKey of missingKeys) {
+      if (!foundKeys.includes(missingKey)) {
+        await setCachedNullParam(missingKey, domain);
       }
     }
   }

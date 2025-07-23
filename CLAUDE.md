@@ -66,6 +66,11 @@ When creating Drizzle schemas, follow these rules:
 3. **Field Descriptions**: Use Chinese descriptions that explain the field purpose and format
 4. **Status Fields**: Use `integer().default(1)` for enable/disable flags (1=enabled, 0=disabled)
 5. **Custom Field Schema**: When defining custom field schemas, import zod from `@hono/zod-openapi` to access OpenAPI-specific methods like `.openapi()`
+6. **JSON Field Standards**: When using JSON fields, follow these rules:
+   - Always use `jsonb()` instead of `json()` for better performance and indexing
+   - Use `.$type<InterfaceName>()` to provide TypeScript type constraints
+   - Define clear TypeScript interfaces for JSON field structure
+   - Set appropriate default values using `.default()` method
 
 Example:
 ```typescript
@@ -75,6 +80,20 @@ export const selectUsersSchema = createSelectSchema(users, {
   id: schema => schema.describe("用户ID"),
   name: schema => schema.describe("用户名称"),
   status: schema => schema.describe("状态: 1=启用 0=禁用"),
+});
+
+// JSON Field Example
+interface DictionaryItem {
+  code: string;
+  label: string;
+  value: string;
+  status: number;
+}
+
+export const sysDictionaries = pgTable("sys_dictionaries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  items: jsonb("items").$type<DictionaryItem[]>().default([]).notNull(),
+  // ... other fields
 });
 ```
 
@@ -397,7 +416,7 @@ Domain schema includes: `code` (unique identifier), `name`, `description`, `stat
 
 1. **Domain Field Requirement**:
    - All entities that need domain isolation MUST include a `domain` field in their schema
-   - Use `uuid("domain").notNull().references(() => sysDomains.id)` for domain foreign key
+   - **Domain Field Type**: Use `varchar("domain").notNull()` for domain field, do NOT use foreign key references to maintain flexibility
    - Include domain field in all three schemas: `selectSchema`, `insertSchema`, `patchSchema`
 
 2. **CRUD Operation Rules**:

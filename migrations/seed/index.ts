@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { initCasbinRule } from "./sys/casbinRule";
+import { initSysDictionaries } from "./sys/sysDictionaries";
 import { initSysDomain } from "./sys/sysDomain";
 import { initSysMenu } from "./sys/sysMenu";
 import { initSysRole } from "./sys/sysRole";
@@ -11,6 +12,9 @@ async function run() {
   try {
     console.log("-> 初始化系统域...");
     await initSysDomain();
+
+    console.log("-> 初始化系统字典...");
+    await initSysDictionaries();
 
     console.log("-> 初始化系统角色...");
     await initSysRole();

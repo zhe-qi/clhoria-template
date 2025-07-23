@@ -9,8 +9,7 @@ import {
   patchGlobalParamsSchema,
   responseGlobalParamsSchema,
 } from "@/db/schema";
-import { notFoundSchema } from "@/lib/enums";
-import { PermissionAction, PermissionResource } from "@/lib/enums";
+import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const KeyParamsSchema = z.object({

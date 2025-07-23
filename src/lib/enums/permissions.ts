@@ -26,6 +26,9 @@ export const PermissionResource = {
 
   /** 全局参数管理 */
   GLOBAL_PARAMS: "global-params",
+
+  /** 字典管理 */
+  SYS_DICTIONARIES: "sys-dictionaries",
 } as const;
 
 /** 权限资源类型 */

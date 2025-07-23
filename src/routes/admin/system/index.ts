@@ -1,4 +1,5 @@
 export * from "./authorization/authorization.index";
+export * from "./dictionaries/dictionaries.index";
 export * from "./global-params/global-params.index";
 export * from "./sys-domains/sys-domains.index";
 export * from "./sys-endpoints/sys-endpoints.index";

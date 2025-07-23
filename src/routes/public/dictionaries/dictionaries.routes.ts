@@ -1,0 +1,85 @@
+import { createRoute, z } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { createErrorSchema } from "stoker/openapi/schemas";
+
+import {
+  batchGetDictionariesSchema,
+  responseDictionariesSchema,
+} from "@/db/schema";
+import { notFoundSchema } from "@/lib/enums";
+
+const CodeParamsSchema = z.object({
+  code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
+});
+
+export const list = createRoute({
+  tags: ["/dictionaries (字典)"],
+  summary: "获取字典列表",
+  method: "get",
+  path: "/dictionaries",
+  request: {
+    query: z.object({
+      domain: z.string().optional().describe("租户域，不传则使用默认域"),
+    }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.array(responseDictionariesSchema),
+      "获取字典列表成功",
+    ),
+  },
+});
+
+export const get = createRoute({
+  tags: ["/dictionaries (字典)"],
+  summary: "获取单个字典",
+  method: "get",
+  path: "/dictionaries/{code}",
+  request: {
+    params: CodeParamsSchema,
+    query: z.object({
+      domain: z.string().optional().describe("租户域，不传则使用默认域"),
+    }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      responseDictionariesSchema,
+      "获取字典成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(CodeParamsSchema),
+      "字典编码格式错误",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "字典不存在或未启用",
+    ),
+  },
+});
+
+export const batch = createRoute({
+  tags: ["/dictionaries (字典)"],
+  summary: "批量获取字典",
+  method: "post",
+  path: "/dictionaries/batch",
+  request: {
+    query: z.object({
+      domain: z.string().optional().describe("租户域，不传则使用默认域"),
+    }),
+    body: jsonContentRequired(
+      batchGetDictionariesSchema,
+      "批量获取字典参数",
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.record(z.string(), responseDictionariesSchema.nullable()),
+      "批量获取成功，key-value形式返回，不存在的字典返回null",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(batchGetDictionariesSchema),
+      "请求参数错误",
+    ),
+  },
+});
