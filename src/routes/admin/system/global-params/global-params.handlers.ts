@@ -9,10 +9,9 @@ import * as globalParamsService from "@/services/global-params";
 import type { GlobalParamsRouteHandlerType } from "./global-params.index";
 
 export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
-  const { domain, search, isPublic, page = 1, limit = 20 } = c.req.valid("query");
+  const { search, isPublic, page = 1, limit = 20 } = c.req.valid("query");
 
   const result = await globalParamsService.getAdminList({
-    domain,
     search,
     isPublic,
     pagination: { page: Number(page), limit: Number(limit) },
@@ -23,9 +22,8 @@ export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
 
 export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
   const { key } = c.req.valid("param");
-  const { domain } = c.req.valid("query");
 
-  const param = await globalParamsService.getAdminParam(key, domain);
+  const param = await globalParamsService.getAdminParam(key);
 
   if (!param) {
     return c.json({ message: "参数不存在" }, HttpStatusCodes.NOT_FOUND);
@@ -36,12 +34,11 @@ export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
 
 export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const { domain } = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
   const userId = payload.uid as string;
 
   try {
-    const created = await globalParamsService.createParam(body, domain, userId);
+    const created = await globalParamsService.createParam(body, userId);
 
     return c.json(created, HttpStatusCodes.CREATED);
   }
@@ -57,11 +54,10 @@ export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
 export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
   const { key } = c.req.valid("param");
   const body = c.req.valid("json");
-  const { domain } = c.req.valid("query");
   const payload: JWTPayload = c.get("jwtPayload");
   const userId = payload.uid as string;
 
-  const updated = await globalParamsService.updateParam(key, body, domain, userId);
+  const updated = await globalParamsService.updateParam(key, body, userId);
 
   if (!updated) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
@@ -72,9 +68,8 @@ export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
 
 export const remove: GlobalParamsRouteHandlerType<"remove"> = async (c) => {
   const { key } = c.req.valid("param");
-  const { domain } = c.req.valid("query");
 
-  const deleted = await globalParamsService.deleteParam(key, domain);
+  const deleted = await globalParamsService.deleteParam(key);
 
   if (!deleted) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
@@ -85,10 +80,9 @@ export const remove: GlobalParamsRouteHandlerType<"remove"> = async (c) => {
 
 export const batch: GlobalParamsRouteHandlerType<"batch"> = async (c) => {
   const { keys } = c.req.valid("json");
-  const { domain, publicOnly = "false" } = c.req.valid("query");
+  const { publicOnly = "false" } = c.req.valid("query");
 
   const result = await globalParamsService.batchGetParams(keys, {
-    domain,
     publicOnly,
   });
 

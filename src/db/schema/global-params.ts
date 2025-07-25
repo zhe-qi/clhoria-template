@@ -13,7 +13,6 @@ export const globalParams = pgTable("global_params", {
   description: text(),
   isPublic: integer("is_public").notNull().default(1),
   status: integer().notNull().default(1),
-  domain: varchar({ length: 50 }).notNull(),
 });
 
 /** 全局参数选择模式 */
@@ -25,7 +24,6 @@ export const selectGlobalParamsSchema = createSelectSchema(globalParams, {
   description: schema => schema.describe("参数描述"),
   isPublic: schema => schema.describe("是否公开: 1=公开 0=私有"),
   status: schema => schema.describe("状态: 1=启用 0=禁用"),
-  domain: schema => schema.describe("租户域"),
   createdAt: schema => schema.describe("创建时间"),
   updatedAt: schema => schema.describe("更新时间"),
   createdBy: schema => schema.describe("创建者ID"),
@@ -53,7 +51,6 @@ export const insertGlobalParamsSchema = createInsertSchema(globalParams, {
   id: true,
   createdAt: true,
   updatedAt: true,
-  domain: true, // 域会在业务逻辑中自动设置
 });
 
 /** 全局参数更新模式 */

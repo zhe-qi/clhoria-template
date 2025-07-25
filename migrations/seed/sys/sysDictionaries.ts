@@ -14,7 +14,6 @@ export async function initSysDictionaries() {
 
   // 系统状态字典
   const statusDictionary = {
-    domain: defaultDomain,
     code: "SYSTEM_STATUS",
     name: "系统状态",
     description: "系统通用状态字典",
@@ -54,7 +53,6 @@ export async function initSysDictionaries() {
 
   // 用户性别字典
   const genderDictionary = {
-    domain: defaultDomain,
     code: "USER_GENDER",
     name: "用户性别",
     description: "用户性别字典",
@@ -97,7 +95,6 @@ export async function initSysDictionaries() {
 
   // 认证类型字典
   const authTypeDictionary = {
-    domain: defaultDomain,
     code: "AUTH_TYPE",
     name: "认证类型",
     description: "系统认证方式字典",
@@ -160,7 +157,6 @@ export async function initSysDictionaries() {
 
   // 数据类型字典
   const dataTypeDictionary = {
-    domain: defaultDomain,
     code: "DATA_TYPE",
     name: "数据类型",
     description: "系统数据类型字典",
@@ -230,10 +226,7 @@ export async function initSysDictionaries() {
       const [existing] = await db
         .select()
         .from(sysDictionaries)
-        .where(and(
-          eq(sysDictionaries.code, dict.code),
-          eq(sysDictionaries.domain, dict.domain),
-        ));
+        .where(eq(sysDictionaries.code, dict.code));
 
       if (existing) {
         // 更新现有字典（保留用户可能的修改）
@@ -247,10 +240,7 @@ export async function initSysDictionaries() {
             updatedBy: seedUserId,
             updatedAt: new Date(),
           })
-          .where(and(
-            eq(sysDictionaries.code, dict.code),
-            eq(sysDictionaries.domain, dict.domain),
-          ));
+          .where(eq(sysDictionaries.code, dict.code));
       }
       else {
         // 创建新字典

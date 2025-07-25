@@ -5,10 +5,9 @@ import * as globalParamsService from "@/services/global-params";
 import type { GlobalParamsRouteHandlerType } from "./global-params.index";
 
 export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
-  const { domain, publicOnly } = c.req.valid("query");
+  const { publicOnly } = c.req.valid("query");
 
   const result = await globalParamsService.getPublicList({
-    domain,
     publicOnly,
   });
 
@@ -17,9 +16,8 @@ export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
 
 export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
   const { key } = c.req.valid("param");
-  const { domain } = c.req.valid("query");
 
-  const param = await globalParamsService.getPublicParam(key, domain);
+  const param = await globalParamsService.getPublicParam(key);
 
   if (!param) {
     return c.json({ message: "参数不存在或不是公开参数" }, HttpStatusCodes.NOT_FOUND);
@@ -30,10 +28,9 @@ export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
 
 export const batch: GlobalParamsRouteHandlerType<"batch"> = async (c) => {
   const { keys } = c.req.valid("json");
-  const { domain, publicOnly } = c.req.valid("query");
+  const { publicOnly } = c.req.valid("query");
 
   const result = await globalParamsService.batchGetParams(keys, {
-    domain,
     publicOnly,
   });
 

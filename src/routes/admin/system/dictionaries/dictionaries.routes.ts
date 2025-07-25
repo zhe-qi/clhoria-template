@@ -17,7 +17,6 @@ const CodeParamsSchema = z.object({
 });
 
 const ListQuerySchema = PaginationParamsSchema.extend({
-  domain: z.string().optional().describe("租户域，不传则使用默认域"),
   search: z.string().optional().describe("搜索关键词（编码、名称、描述）"),
   status: z.enum(["0", "1"]).optional().describe("字典状态: 1=启用 0=禁用"),
 });
@@ -59,9 +58,6 @@ export const get = createRoute({
   path: "/admin/dictionaries/{code}",
   request: {
     params: CodeParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -90,9 +86,6 @@ export const create = createRoute({
   method: "post",
   path: "/admin/dictionaries",
   request: {
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
     body: jsonContentRequired(
       insertDictionariesSchema,
       "创建字典参数",
@@ -126,9 +119,6 @@ export const update = createRoute({
   path: "/admin/dictionaries/{code}",
   request: {
     params: CodeParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
     body: jsonContentRequired(
       patchDictionariesSchema,
       "更新字典参数",
@@ -166,9 +156,6 @@ export const remove = createRoute({
   path: "/admin/dictionaries/{code}",
   request: {
     params: CodeParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
   },
   responses: {
     [HttpStatusCodes.NO_CONTENT]: {
@@ -197,7 +184,6 @@ export const batch = createRoute({
   path: "/admin/dictionaries/batch",
   request: {
     query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
       enabledOnly: z.enum(["true", "false"]).optional().default("false").describe("是否只获取启用字典"),
     }),
     body: jsonContentRequired(

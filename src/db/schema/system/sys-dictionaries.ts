@@ -31,9 +31,6 @@ export const sysDictionaries = pgTable("sys_dictionaries", {
   /** 主键ID */
   id: uuid("id").primaryKey().defaultRandom(),
 
-  /** 所属域 */
-  domain: varchar("domain", { length: 50 }).notNull(),
-
   /** 字典编码，唯一标识 */
   code: varchar("code", { length: 100 }).notNull(),
 
@@ -84,7 +81,6 @@ export const dictionaryItemSchema = z.object({
  */
 export const selectDictionariesSchema = createSelectSchema(sysDictionaries, {
   id: _schema => _schema.describe("字典ID"),
-  domain: _schema => _schema.describe("所属域"),
   code: _schema => _schema.describe("字典编码"),
   name: _schema => _schema.describe("字典名称"),
   description: _schema => _schema.describe("字典描述"),

@@ -22,7 +22,6 @@ export const list = createRoute({
   path: "/global-params",
   request: {
     query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
       publicOnly: z.enum(["true", "false"]).optional().default("true").describe("是否只获取公开参数"),
     }),
   },
@@ -42,9 +41,6 @@ export const get = createRoute({
   path: "/global-params/{key}",
   request: {
     params: KeyParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -70,7 +66,6 @@ export const batch = createRoute({
   path: "/global-params/batch",
   request: {
     query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
       publicOnly: z.enum(["true", "false"]).optional().default("true").describe("是否只获取公开参数"),
     }),
     body: jsonContentRequired(

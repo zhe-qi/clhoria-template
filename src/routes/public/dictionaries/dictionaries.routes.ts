@@ -19,11 +19,6 @@ export const list = createRoute({
   summary: "获取字典列表",
   method: "get",
   path: "/dictionaries",
-  request: {
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
-  },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.array(responseDictionariesSchema),
@@ -40,9 +35,6 @@ export const get = createRoute({
   path: "/dictionaries/{code}",
   request: {
     params: CodeParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -67,9 +59,6 @@ export const batch = createRoute({
   method: "post",
   path: "/dictionaries/batch",
   request: {
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
     body: jsonContentRequired(
       batchGetDictionariesSchema,
       "批量获取字典参数",

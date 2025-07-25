@@ -17,7 +17,6 @@ const KeyParamsSchema = z.object({
 });
 
 const ListQuerySchema = PaginationParamsSchema.extend({
-  domain: z.string().optional().describe("租户域，不传则使用默认域"),
   isPublic: z.enum(["0", "1"]).optional().describe("是否公开参数: 1=是 0=否"),
 });
 
@@ -58,9 +57,6 @@ export const get = createRoute({
   path: "/admin/global-params/{key}",
   request: {
     params: KeyParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -89,9 +85,6 @@ export const create = createRoute({
   method: "post",
   path: "/admin/global-params",
   request: {
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
     body: jsonContentRequired(
       insertGlobalParamsSchema,
       "创建参数",
@@ -125,9 +118,6 @@ export const update = createRoute({
   path: "/admin/global-params/{key}",
   request: {
     params: KeyParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
     body: jsonContentRequired(
       patchGlobalParamsSchema,
       "更新参数",
@@ -161,9 +151,6 @@ export const remove = createRoute({
   path: "/admin/global-params/{key}",
   request: {
     params: KeyParamsSchema,
-    query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
-    }),
   },
   responses: {
     [HttpStatusCodes.NO_CONTENT]: {
@@ -192,7 +179,6 @@ export const batch = createRoute({
   path: "/admin/global-params/batch",
   request: {
     query: z.object({
-      domain: z.string().optional().describe("租户域，不传则使用默认域"),
       publicOnly: z.enum(["true", "false"]).optional().default("false").describe("是否只获取公开参数"),
     }),
     body: jsonContentRequired(

@@ -10,7 +10,7 @@ import type { DictionaryItem } from "@/db/schema";
 import db from "@/db";
 import { sysDictionaries } from "@/db/schema";
 import { CacheConfig } from "@/lib/enums/cache";
-import { clearDomainDictionaryCache } from "@/services/dictionary";
+import { clearAllDictionaryCache } from "@/services/dictionary";
 
 /**
  * 枚举定义接口
@@ -144,7 +144,7 @@ function parseEnumItems(enumBody: string): DictionaryItem[] {
 /**
  * 同步枚举到数据库
  */
-async function syncEnumToDatabase(enumDef: EnumDefinition, domain: string): Promise<{
+async function syncEnumToDatabase(enumDef: EnumDefinition): Promise<{
   created: boolean;
   itemsAdded: number;
   itemsUpdated: number;
@@ -154,10 +154,7 @@ async function syncEnumToDatabase(enumDef: EnumDefinition, domain: string): Prom
     const [existing] = await db
       .select()
       .from(sysDictionaries)
-      .where(and(
-        eq(sysDictionaries.code, enumDef.name),
-        eq(sysDictionaries.domain, domain),
-      ));
+      .where(eq(sysDictionaries.code, enumDef.name));
 
     const syncUserId = "sync-script";
     let itemsAdded = 0;
@@ -213,10 +210,7 @@ async function syncEnumToDatabase(enumDef: EnumDefinition, domain: string): Prom
           updatedBy: syncUserId,
           updatedAt: new Date(),
         })
-        .where(and(
-          eq(sysDictionaries.code, enumDef.name),
-          eq(sysDictionaries.domain, domain),
-        ));
+        .where(eq(sysDictionaries.code, enumDef.name));
 
       return { created: false, itemsAdded, itemsUpdated };
     }
@@ -225,7 +219,6 @@ async function syncEnumToDatabase(enumDef: EnumDefinition, domain: string): Prom
       await db
         .insert(sysDictionaries)
         .values({
-          domain,
           code: enumDef.name,
           name: enumDef.name,
           description: enumDef.description,
@@ -247,9 +240,8 @@ async function syncEnumToDatabase(enumDef: EnumDefinition, domain: string): Prom
 /**
  * 主同步函数
  */
-async function syncDictionaries(domain: string = CacheConfig.DEFAULT_DOMAIN): Promise<SyncResult> {
+async function syncDictionaries(): Promise<SyncResult> {
   console.log("开始同步枚举到字典...");
-  console.log(`目标域: ${domain}`);
 
   const startTime = Date.now();
   const result: SyncResult = {
@@ -281,7 +273,7 @@ async function syncDictionaries(domain: string = CacheConfig.DEFAULT_DOMAIN): Pr
     for (const enumDef of enumDefinitions) {
       console.log(`正在同步: ${enumDef.name}...`);
 
-      const syncResult = await syncEnumToDatabase(enumDef, domain);
+      const syncResult = await syncEnumToDatabase(enumDef);
 
       if (syncResult.created) {
         result.created++;
@@ -305,7 +297,7 @@ async function syncDictionaries(domain: string = CacheConfig.DEFAULT_DOMAIN): Pr
 
     // 3. 清除缓存
     console.log("\n3. 清除相关缓存...");
-    await clearDomainDictionaryCache(domain);
+    await clearAllDictionaryCache();
     console.log("缓存清除完成");
 
     const endTime = Date.now();
@@ -335,8 +327,7 @@ async function syncDictionaries(domain: string = CacheConfig.DEFAULT_DOMAIN): Pr
  */
 async function main() {
   try {
-    const domain = process.argv[2] || CacheConfig.DEFAULT_DOMAIN;
-    await syncDictionaries(domain);
+    await syncDictionaries();
     process.exit(0);
   }
   catch (error) {
