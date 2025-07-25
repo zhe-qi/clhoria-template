@@ -14,6 +14,7 @@ const KeyParamsSchema = z.object({
   key: z.string().min(1, "参数键不能为空").describe("参数键名"),
 });
 
+/** 获取全局参数列表 */
 export const list = createRoute({
   tags: ["/global-params (全局参数)"],
   summary: "获取全局参数列表",
@@ -33,6 +34,7 @@ export const list = createRoute({
   },
 });
 
+/** 获取单个全局参数 */
 export const get = createRoute({
   tags: ["/global-params (全局参数)"],
   summary: "获取单个全局参数",
@@ -60,6 +62,7 @@ export const get = createRoute({
   },
 });
 
+/** 批量获取全局参数 */
 export const batch = createRoute({
   tags: ["/global-params (全局参数)"],
   summary: "批量获取全局参数",

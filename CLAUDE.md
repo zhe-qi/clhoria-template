@@ -27,6 +27,36 @@ This is a backend template based on hono. It uses TypeScript, Drizzle ORM and Po
   - ✅ Good: `console.log("权限同步完成: 新增 3, 更新 1")`
   - ❌ Bad: `console.log("✅ 权限同步完成: 新增 3, 更新 1")`
 
+### Route Comment Standards
+
+All route definitions MUST include comments using the following format:
+
+1. **Single Line Comments**: Use `/** 描述 */` format for simple route descriptions
+   ```typescript
+   /** 获取用户列表 */
+   export const listUsers = createRoute({
+     // route definition
+   });
+   ```
+
+2. **Multi-line Comments**: Use block comment format for complex descriptions
+   ```typescript
+   /**
+    * 创建新用户
+    * 支持批量创建和角色分配
+    */
+   export const createUser = createRoute({
+     // route definition
+   });
+   ```
+
+3. **Comment Requirements**:
+   - ALWAYS add comments above route definitions
+   - Use Chinese descriptions for better understanding
+   - Keep comments concise and descriptive
+   - DO NOT use JSDoc tags (no @param, @returns, etc.)
+   - Focus on the business purpose of the route
+
 ## Database Commands
 
 - `pnpm generate` - Generate Drizzle migrations from schema changes

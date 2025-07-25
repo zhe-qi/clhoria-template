@@ -11,7 +11,7 @@ import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 const tags = ["/sys-menus (系统菜单管理)"];
 
-/** 查询菜单列表 */
+/** 获取系统菜单分页列表 */
 export const list = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -34,7 +34,7 @@ export const list = createRoute({
   },
 });
 
-/** 查询菜单树形结构 */
+/** 获取系统菜单树形结构 */
 export const tree = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -59,7 +59,7 @@ export const tree = createRoute({
   },
 });
 
-/** 根据角色获取菜单 */
+/** 根据角色ID获取对应菜单 */
 export const getMenusByRole = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -84,7 +84,7 @@ export const getMenusByRole = createRoute({
   },
 });
 
-/** 创建菜单 */
+/** 创建系统菜单 */
 export const create = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -109,7 +109,7 @@ export const create = createRoute({
   },
 });
 
-/** 根据ID查询菜单 */
+/** 根据ID获取菜单详情 */
 export const getOne = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -138,7 +138,7 @@ export const getOne = createRoute({
   },
 });
 
-/** 更新菜单 */
+/** 更新系统菜单 */
 export const patch = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -168,7 +168,7 @@ export const patch = createRoute({
   },
 });
 
-/** 获取常量路由 */
+/** 获取常量路由列表 */
 export const getConstantRoutes = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -203,7 +203,7 @@ export const getConstantRoutes = createRoute({
   },
 });
 
-/** 获取用户路由 */
+/** 获取当前用户路由列表 */
 export const getUserRoutes = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,
@@ -232,7 +232,7 @@ export const getUserRoutes = createRoute({
   },
 });
 
-/** 删除菜单 */
+/** 删除系统菜单 */
 export const remove = createRoute({
   permission: {
     resource: PermissionResource.SYS_MENUS,

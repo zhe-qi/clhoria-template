@@ -14,6 +14,7 @@ const loginLogQuerySchema = PaginationParamsSchema.extend({
   search: z.string().optional().describe("搜索关键词"),
 });
 
+/** 获取登录日志列表 */
 export const list = createRoute({
   tags,
   method: "get",

@@ -8,6 +8,7 @@ import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enum
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
+/** 获取系统角色分页列表 */
 export const list = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {
@@ -28,6 +29,7 @@ export const list = createRoute({
   },
 });
 
+/** 创建系统角色 */
 export const create = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {
@@ -59,6 +61,7 @@ export const create = createRoute({
   },
 });
 
+/** 根据ID获取系统角色详情 */
 export const get = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {
@@ -87,6 +90,7 @@ export const get = createRoute({
   },
 });
 
+/** 更新系统角色 */
 export const update = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {
@@ -119,6 +123,7 @@ export const update = createRoute({
   },
 });
 
+/** 删除系统角色 */
 export const remove = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {
@@ -146,7 +151,7 @@ export const remove = createRoute({
   },
 });
 
-// 角色权限分配路由
+/** 为角色分配权限 */
 export const assignPermissions = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {
@@ -188,7 +193,7 @@ export const assignPermissions = createRoute({
   },
 });
 
-// 角色菜单分配路由
+/** 为角色分配菜单 */
 export const assignMenus = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {
@@ -226,7 +231,7 @@ export const assignMenus = createRoute({
   },
 });
 
-// 角色用户分配路由
+/** 为角色分配用户 */
 export const assignUsers = createRoute({
   tags: ["/sys-roles (系统角色)"],
   permission: {

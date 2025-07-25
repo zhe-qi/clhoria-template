@@ -8,7 +8,7 @@ import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enum
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
-// 查询API端点列表
+/** 获取API端点分页列表 */
 export const list = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   permission: {
@@ -34,7 +34,7 @@ export const list = createRoute({
   },
 });
 
-// 树形结构查询API端点
+/** 获取API端点树形结构 */
 export const tree = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   permission: {
@@ -54,7 +54,7 @@ export const tree = createRoute({
   },
 });
 
-// 获取角色授权的API端点
+/** 根据角色代码获取授权的API端点 */
 export const authEndpoints = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   permission: {
@@ -81,7 +81,7 @@ export const authEndpoints = createRoute({
   },
 });
 
-// 创建API端点
+/** 创建API端点 */
 export const create = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   permission: {
@@ -113,7 +113,7 @@ export const create = createRoute({
   },
 });
 
-// 获取单个API端点
+/** 根据ID获取API端点详情 */
 export const get = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   permission: {
@@ -142,7 +142,7 @@ export const get = createRoute({
   },
 });
 
-// 更新API端点
+/** 更新API端点 */
 export const update = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   permission: {
@@ -179,7 +179,7 @@ export const update = createRoute({
   },
 });
 
-// 删除API端点
+/** 删除API端点 */
 export const remove = createRoute({
   tags: ["/sys-endpoints (API端点)"],
   permission: {

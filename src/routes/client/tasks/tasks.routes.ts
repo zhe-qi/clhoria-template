@@ -6,6 +6,7 @@ import { selectTasksSchema } from "@/db/schema";
 
 const tags = ["/tasks (任务管理)"];
 
+/** 获取任务列表 */
 export const list = createRoute({
   path: "/tasks",
   method: "get",

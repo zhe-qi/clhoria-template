@@ -22,6 +22,7 @@ const ListQuerySchema = PaginationParamsSchema.extend({
   status: z.enum(["0", "1"]).optional().describe("字典状态: 1=启用 0=禁用"),
 });
 
+/** 获取字典列表 */
 export const list = createRoute({
   tags: ["/admin/dictionaries (字典管理)"],
   permission: {
@@ -46,6 +47,7 @@ export const list = createRoute({
   },
 });
 
+/** 获取单个字典详情 */
 export const get = createRoute({
   tags: ["/admin/dictionaries (字典管理)"],
   permission: {
@@ -77,6 +79,7 @@ export const get = createRoute({
   },
 });
 
+/** 创建字典 */
 export const create = createRoute({
   tags: ["/admin/dictionaries (字典管理)"],
   permission: {
@@ -115,6 +118,7 @@ export const create = createRoute({
   },
 });
 
+/** 更新字典 */
 export const update = createRoute({
   tags: ["/admin/dictionaries (字典管理)"],
   permission: {
@@ -158,6 +162,7 @@ export const update = createRoute({
   },
 });
 
+/** 删除字典 */
 export const remove = createRoute({
   tags: ["/admin/dictionaries (字典管理)"],
   permission: {
@@ -192,6 +197,7 @@ export const remove = createRoute({
   },
 });
 
+/** 批量获取字典 */
 export const batch = createRoute({
   tags: ["/admin/dictionaries (字典管理)"],
   permission: {
