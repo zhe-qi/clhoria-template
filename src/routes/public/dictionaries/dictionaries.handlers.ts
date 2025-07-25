@@ -1,8 +1,8 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
+import { CacheConfig } from "@/lib/enums/cache";
 import {
   batchGetDictionaries,
-  DEFAULT_DOMAIN,
   getPublicDictionaries,
   getPublicDictionary,
 } from "@/services/dictionary";
@@ -10,7 +10,7 @@ import {
 import type { DictionariesRouteHandlerType } from "./dictionaries.index";
 
 export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
-  const { domain = DEFAULT_DOMAIN } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN } = c.req.valid("query");
 
   const dictionaries = await getPublicDictionaries({
     domain,
@@ -22,7 +22,7 @@ export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
 
 export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
   const { code } = c.req.valid("param");
-  const { domain = DEFAULT_DOMAIN } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN } = c.req.valid("query");
 
   const dictionary = await getPublicDictionary(code, domain);
 
@@ -38,7 +38,7 @@ export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
 
 export const batch: DictionariesRouteHandlerType<"batch"> = async (c) => {
   const body = c.req.valid("json");
-  const { domain = DEFAULT_DOMAIN } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN } = c.req.valid("query");
 
   const result = await batchGetDictionaries(body.codes, {
     domain,

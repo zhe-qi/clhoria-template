@@ -1,9 +1,9 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
+import { CacheConfig } from "@/lib/enums/cache";
 import {
   batchGetDictionaries,
   createDictionary,
-  DEFAULT_DOMAIN,
   deleteDictionary,
   getAdminDictionaries,
   getAdminDictionary,
@@ -15,7 +15,7 @@ import type { DictionariesRouteHandlerType } from "./dictionaries.index";
 
 export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
-  const { domain = DEFAULT_DOMAIN, search, status, page, limit } = query;
+  const { domain = CacheConfig.DEFAULT_DOMAIN, search, status, page, limit } = query;
 
   const result = await getAdminDictionaries({
     domain,
@@ -29,7 +29,7 @@ export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
 
 export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
   const { code } = c.req.valid("param");
-  const { domain = DEFAULT_DOMAIN } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN } = c.req.valid("query");
 
   const dictionary = await getAdminDictionary(code, domain);
 
@@ -45,7 +45,7 @@ export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
 
 export const create: DictionariesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const { domain = DEFAULT_DOMAIN } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN } = c.req.valid("query");
 
   // 从JWT中获取用户ID（假设middleware已经解析并添加到context）
   const userId = (c.get("userDomain") as any)?.userId || "system";
@@ -80,7 +80,7 @@ export const create: DictionariesRouteHandlerType<"create"> = async (c) => {
 export const update: DictionariesRouteHandlerType<"update"> = async (c) => {
   const { code } = c.req.valid("param");
   const body = c.req.valid("json");
-  const { domain = DEFAULT_DOMAIN } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN } = c.req.valid("query");
 
   // 从JWT中获取用户ID
   const userId = (c.get("userDomain") as any)?.userId || "system";
@@ -133,7 +133,7 @@ export const update: DictionariesRouteHandlerType<"update"> = async (c) => {
 
 export const remove: DictionariesRouteHandlerType<"remove"> = async (c) => {
   const { code } = c.req.valid("param");
-  const { domain = DEFAULT_DOMAIN } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN } = c.req.valid("query");
 
   try {
     const deleted = await deleteDictionary(code, domain);
@@ -157,7 +157,7 @@ export const remove: DictionariesRouteHandlerType<"remove"> = async (c) => {
 
 export const batch: DictionariesRouteHandlerType<"batch"> = async (c) => {
   const body = c.req.valid("json");
-  const { domain = DEFAULT_DOMAIN, enabledOnly = "false" } = c.req.valid("query");
+  const { domain = CacheConfig.DEFAULT_DOMAIN, enabledOnly = "false" } = c.req.valid("query");
 
   try {
     const result = await batchGetDictionaries(body.codes, {

@@ -9,7 +9,8 @@ import type { DictionaryItem } from "@/db/schema";
 
 import db from "@/db";
 import { sysDictionaries } from "@/db/schema";
-import { clearDomainDictionaryCache, DEFAULT_DOMAIN } from "@/services/dictionary";
+import { CacheConfig } from "@/lib/enums/cache";
+import { clearDomainDictionaryCache } from "@/services/dictionary";
 
 /**
  * 枚举定义接口
@@ -246,7 +247,7 @@ async function syncEnumToDatabase(enumDef: EnumDefinition, domain: string): Prom
 /**
  * 主同步函数
  */
-async function syncDictionaries(domain: string = DEFAULT_DOMAIN): Promise<SyncResult> {
+async function syncDictionaries(domain: string = CacheConfig.DEFAULT_DOMAIN): Promise<SyncResult> {
   console.log("开始同步枚举到字典...");
   console.log(`目标域: ${domain}`);
 
@@ -334,7 +335,7 @@ async function syncDictionaries(domain: string = DEFAULT_DOMAIN): Promise<SyncRe
  */
 async function main() {
   try {
-    const domain = process.argv[2] || DEFAULT_DOMAIN;
+    const domain = process.argv[2] || CacheConfig.DEFAULT_DOMAIN;
     await syncDictionaries(domain);
     process.exit(0);
   }
