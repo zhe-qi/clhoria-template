@@ -121,11 +121,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
 
   const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "email", "phoneNumber", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
 
-  return c.json({
-    token: accessToken,
-    refreshToken,
-    user: responseUser,
-  }, HttpStatusCodes.OK);
+  return c.json({ token: accessToken, refreshToken, user: responseUser }, HttpStatusCodes.OK);
 };
 
 /** 后台注册 */
@@ -219,10 +215,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
       })
       .where(eq(sysTokens.id, tokenRecord.id));
 
-    return c.json({
-      token: newAccessToken,
-      refreshToken: newRefreshToken,
-    }, HttpStatusCodes.OK);
+    return c.json({ token: newAccessToken, refreshToken: newRefreshToken }, HttpStatusCodes.OK);
   }
   catch {
     return c.json({ message: "刷新令牌无效" }, HttpStatusCodes.UNAUTHORIZED);

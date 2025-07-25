@@ -72,10 +72,7 @@ export const get: SysDomainsRouteHandlerType<"get"> = async (c) => {
     .where(eq(sysDomain.id, id));
 
   if (!domain) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(domain, HttpStatusCodes.OK);
@@ -98,10 +95,7 @@ export const update: SysDomainsRouteHandlerType<"update"> = async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(updated, HttpStatusCodes.OK);
@@ -116,10 +110,7 @@ export const remove: SysDomainsRouteHandlerType<"remove"> = async (c) => {
     .returning({ id: sysDomain.id });
 
   if (!deleted) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);

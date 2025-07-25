@@ -68,10 +68,7 @@ export const get: SysRolesRouteHandlerType<"get"> = async (c) => {
     .where(eq(sysRole.id, id));
 
   if (!role) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(role, HttpStatusCodes.OK);
@@ -93,10 +90,7 @@ export const update: SysRolesRouteHandlerType<"update"> = async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(updated, HttpStatusCodes.OK);
@@ -111,10 +105,7 @@ export const remove: SysRolesRouteHandlerType<"remove"> = async (c) => {
     .returning({ id: sysRole.id });
 
   if (!deleted) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);
@@ -133,10 +124,7 @@ export const assignPermissions: SysRolesRouteHandlerType<"assignPermissions"> = 
     .where(eq(sysRole.id, id));
 
   if (!role) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   const result = await assignPermissionsToRole(id, permissions, domain);
@@ -156,10 +144,7 @@ export const assignMenus: SysRolesRouteHandlerType<"assignMenus"> = async (c) =>
     .where(eq(sysRole.id, id));
 
   if (!role) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   const result = await assignMenusToRole(id, menuIds, domain);
@@ -179,10 +164,7 @@ export const assignUsers: SysRolesRouteHandlerType<"assignUsers"> = async (c) =>
     .where(eq(sysRole.id, id));
 
   if (!role) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   const result = await assignUsersToRole(id, userIds, domain);

@@ -133,6 +133,25 @@ export const sysDictionaries = pgTable("sys_dictionaries", {
 - **Casbin**: Role-based access control for admin routes
 - **Middleware**: Applied at route group level in `src/app.ts:32-45`
 
+#### JWT User ID Extraction Standards
+
+**CRITICAL**: Always use the correct pattern to extract user ID from JWT payload:
+
+```typescript
+// ✅ Correct - Extract from JWT payload
+const payload: JWTPayload = c.get("jwtPayload");
+const userId = payload.uid as string;
+
+// ❌ Wrong - Never use userDomain for userId
+const userId = (c.get("userDomain") as any)?.userId || "system";
+```
+
+**Rules**:
+1. Always import `JWTPayload` type from `"hono/utils/jwt/types"`
+2. Use `c.get("jwtPayload")` to get the JWT payload
+3. Extract `userId` from `payload.uid`
+4. Never fallback to "system" - user ID should always be available in authenticated routes
+
 ### Application Structure
 
 - **App Creation**: `src/lib/create-app.ts` configures base middlewares (security, CORS, compression, logging)
@@ -292,7 +311,20 @@ This structure ensures type safety and consistency across all routes.
    return c.json(error, 422 as any);
    ```
 
-2. **All Possible Status Codes MUST be Defined in Routes**:
+2. **Single Line Return Format**:
+   ```typescript
+   // ✅ Correct - Use single line format
+   return c.json({ message: "参数不存在" }, HttpStatusCodes.NOT_FOUND);
+   return c.json({ token: accessToken, user: userData }, HttpStatusCodes.OK);
+
+   // ❌ Wrong - Avoid multi-line format unless ESLint requires it
+   return c.json(
+     { message: "参数不存在" },
+     HttpStatusCodes.NOT_FOUND,
+   );
+   ```
+
+3. **All Possible Status Codes MUST be Defined in Routes**:
    ```typescript
    export const someRoute = createRoute({
      // ... other config
@@ -308,7 +340,7 @@ This structure ensures type safety and consistency across all routes.
    });
    ```
 
-3. **Standard Error Status Codes**:
+4. **Standard Error Status Codes**:
    - `HttpStatusCodes.BAD_REQUEST` (400) - 客户端请求错误
    - `HttpStatusCodes.UNAUTHORIZED` (401) - 未授权
    - `HttpStatusCodes.FORBIDDEN` (403) - 权限不足
@@ -317,22 +349,16 @@ This structure ensures type safety and consistency across all routes.
    - `HttpStatusCodes.UNPROCESSABLE_ENTITY` (422) - 参数验证失败
    - `HttpStatusCodes.INTERNAL_SERVER_ERROR` (500) - 服务器内部错误
 
-4. **Error Response Pattern**:
+5. **Error Response Pattern**:
    ```typescript
    // 参数验证错误
    catch (error: any) {
-     return c.json(
-       { message: error.message || "操作失败" },
-       HttpStatusCodes.UNPROCESSABLE_ENTITY,
-     );
+     return c.json({ message: error.message || "操作失败" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
    }
 
    // 资源不存在
    if (!resource) {
-     return c.json(
-       { message: "资源不存在" },
-       HttpStatusCodes.NOT_FOUND,
-     );
+     return c.json({ message: "资源不存在" }, HttpStatusCodes.NOT_FOUND);
    }
    ```
 
@@ -350,10 +376,7 @@ This structure ensures type safety and consistency across all routes.
 
    // ✅ Correct - Return appropriate error response
    catch (error: any) {
-     return c.json(
-       { message: error.message || "操作失败" },
-       HttpStatusCodes.INTERNAL_SERVER_ERROR,
-     );
+     return c.json({ message: error.message || "操作失败" }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
    }
    ```
 
@@ -366,10 +389,7 @@ This structure ensures type safety and consistency across all routes.
 
    // ✅ Correct - Use appropriate error status codes
    catch (error: any) {
-     return c.json(
-       { message: error.message || "操作失败" },
-       HttpStatusCodes.INTERNAL_SERVER_ERROR,
-     );
+     return c.json({ message: error.message || "操作失败" }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
    }
    ```
 
@@ -559,6 +579,8 @@ All business logic should be organized as functional services in the `src/servic
 ### Exception Handling Standards
 
 **CRITICAL**: Do NOT use try-catch blindly in handlers. Always understand the error behavior first:
+
+**重要提醒**: 一般情况下，如果不是确定 Drizzle 会报错，不需要去 try catch。大多数数据库操作（查询、更新、删除）不会抛出异常，只有插入操作在违反约束时才会抛出异常。
 
 1. **Research Before Catching**: Before adding try-catch, investigate:
    - Does the function/library throw exceptions or return error values?

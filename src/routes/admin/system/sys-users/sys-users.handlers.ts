@@ -62,10 +62,7 @@ export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
   }
   catch (error: any) {
     if (error.message?.includes("duplicate key")) {
-      return c.json(
-        getDuplicateKeyError("username", "用户名已存在"),
-        HttpStatusCodes.CONFLICT,
-      );
+      return c.json(getDuplicateKeyError("username", "用户名已存在"), HttpStatusCodes.CONFLICT);
     }
     throw error;
   }
@@ -85,10 +82,7 @@ export const get: SysUsersRouteHandlerType<"get"> = async (c) => {
     ));
 
   if (!user) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   const { password, ...userWithoutPassword } = user;
@@ -119,10 +113,7 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   const { password: _, ...userWithoutPassword } = updated;
@@ -143,10 +134,7 @@ export const remove: SysUsersRouteHandlerType<"remove"> = async (c) => {
     .returning({ id: sysUser.id });
 
   if (!deleted) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);
@@ -169,10 +157,7 @@ export const assignRoles: SysUsersRouteHandlerType<"assignRoles"> = async (c) =>
     ));
 
   if (!user) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   const result = await assignRolesToUser(id, roleIds, domain, operatorId);

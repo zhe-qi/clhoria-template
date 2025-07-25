@@ -111,10 +111,6 @@ export const create = createRoute({
       createErrorSchema(insertDictionariesSchema),
       "字典编码已存在",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      z.object({ message: z.string() }),
-      "服务器内部错误",
-    ),
   },
 });
 
@@ -155,10 +151,6 @@ export const update = createRoute({
       createErrorSchema(patchDictionariesSchema),
       "字典编码已存在",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      z.object({ message: z.string() }),
-      "服务器内部错误",
-    ),
   },
 });
 
@@ -189,10 +181,6 @@ export const remove = createRoute({
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
       "字典不存在",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      z.object({ message: z.string() }),
-      "服务器内部错误",
     ),
   },
 });
@@ -225,10 +213,6 @@ export const batch = createRoute({
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(batchGetDictionariesSchema),
       "请求参数错误",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      z.object({ message: z.string() }),
-      "服务器内部错误",
     ),
   },
 });

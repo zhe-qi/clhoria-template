@@ -63,11 +63,7 @@ export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRo
 
   const result = await menuService.assignMenusToRole(roleId, menuIds, currentDomain);
 
-  return c.json({
-    success: result.success,
-    added: result.count,
-    removed: 0, // TODO: 计算实际删除的数量
-  }, HttpStatusCodes.OK);
+  return c.json({ success: result.success, added: result.count, removed: 0 }, HttpStatusCodes.OK); // TODO: 计算实际删除的数量
 };
 
 // 分配用户给角色
@@ -133,10 +129,7 @@ export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissio
   const permissions = await rbac.getPermissionsForUserInDomain(roleId, domain);
   const permissionStrings = permissions.map(p => `${p[1]}:${p[2]}`);
 
-  return c.json({
-    domain: domain as string,
-    permissions: permissionStrings,
-  }, HttpStatusCodes.OK);
+  return c.json({ domain: domain as string, permissions: permissionStrings }, HttpStatusCodes.OK);
 };
 
 // 获取角色菜单
@@ -158,8 +151,5 @@ export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async
   // 获取角色菜单
   const menuIds = await menuService.getRoleMenuIds(roleId, domain);
 
-  return c.json({
-    domain: domain as string,
-    menuIds,
-  }, HttpStatusCodes.OK);
+  return c.json({ domain: domain as string, menuIds }, HttpStatusCodes.OK);
 };

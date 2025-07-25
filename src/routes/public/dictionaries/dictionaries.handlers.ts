@@ -27,10 +27,7 @@ export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
   const dictionary = await getPublicDictionary(code, domain);
 
   if (!dictionary) {
-    return c.json(
-      { message: "字典不存在或未启用" },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: "字典不存在或未启用" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(dictionary, HttpStatusCodes.OK);

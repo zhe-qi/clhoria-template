@@ -22,10 +22,7 @@ export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
   const param = await globalParamsService.getPublicParam(key, domain);
 
   if (!param) {
-    return c.json(
-      { message: "参数不存在或不是公开参数" },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: "参数不存在或不是公开参数" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(param, HttpStatusCodes.OK);

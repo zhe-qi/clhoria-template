@@ -65,10 +65,7 @@ export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const menu = await menuService.getMenuById(id, payload.domain as string || "default");
 
   if (!menu) {
-    return c.json(
-      { message: `菜单 ${id} 不存在` },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: `菜单 ${id} 不存在` }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(menu, HttpStatusCodes.OK);
@@ -84,10 +81,7 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
   const existingMenu = await menuService.getMenuById(id, domain);
 
   if (!existingMenu) {
-    return c.json(
-      { message: `菜单 ${id} 不存在` },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: `菜单 ${id} 不存在` }, HttpStatusCodes.NOT_FOUND);
   }
 
   const menuData = {
@@ -124,20 +118,14 @@ export const remove: RouteHandlerType<"remove"> = async (c) => {
   const existingMenu = await menuService.getMenuById(id, domain);
 
   if (!existingMenu) {
-    return c.json(
-      { message: `菜单 ${id} 不存在` },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: `菜单 ${id} 不存在` }, HttpStatusCodes.NOT_FOUND);
   }
 
   // 检查是否有子菜单
   const hasChildren = await menuService.hasChildMenus(id, domain);
 
   if (hasChildren) {
-    return c.json(
-      { message: "该菜单包含子菜单，无法删除" },
-      HttpStatusCodes.CONFLICT,
-    );
+    return c.json({ message: "该菜单包含子菜单，无法删除" }, HttpStatusCodes.CONFLICT);
   }
 
   await menuService.deleteMenu(id, domain);

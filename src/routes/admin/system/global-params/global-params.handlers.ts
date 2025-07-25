@@ -9,13 +9,7 @@ import * as globalParamsService from "@/services/global-params";
 import type { GlobalParamsRouteHandlerType } from "./global-params.index";
 
 export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
-  const {
-    domain,
-    search,
-    isPublic,
-    page = 1,
-    limit = 20,
-  } = c.req.valid("query");
+  const { domain, search, isPublic, page = 1, limit = 20 } = c.req.valid("query");
 
   const result = await globalParamsService.getAdminList({
     domain,
@@ -34,10 +28,7 @@ export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
   const param = await globalParamsService.getAdminParam(key, domain);
 
   if (!param) {
-    return c.json(
-      { message: "参数不存在" },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: "参数不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(param, HttpStatusCodes.OK);
@@ -56,16 +47,10 @@ export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
   }
   catch (error: any) {
     if (error.code === "23505") {
-      return c.json(
-        getDuplicateKeyError("key", "参数键已存在"),
-        HttpStatusCodes.CONFLICT,
-      );
+      return c.json(getDuplicateKeyError("key", "参数键已存在"), HttpStatusCodes.CONFLICT);
     }
 
-    return c.json(
-      { message: error.message || "创建参数失败" },
-      HttpStatusCodes.BAD_REQUEST,
-    );
+    return c.json({ message: error.message || "创建参数失败" }, HttpStatusCodes.BAD_REQUEST);
   }
 };
 
@@ -79,10 +64,7 @@ export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
   const updated = await globalParamsService.updateParam(key, body, domain, userId);
 
   if (!updated) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json(updated, HttpStatusCodes.OK);
@@ -95,10 +77,7 @@ export const remove: GlobalParamsRouteHandlerType<"remove"> = async (c) => {
   const deleted = await globalParamsService.deleteParam(key, domain);
 
   if (!deleted) {
-    return c.json(
-      { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCodes.NOT_FOUND,
-    );
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);
