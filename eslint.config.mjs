@@ -14,6 +14,7 @@ export default antfu({
     "CLAUDE.md",
     "CLAUDE.local.md",
     "./.claude/**/*",
+    "./.serena/**/*",
   ],
 }, {
   rules: {

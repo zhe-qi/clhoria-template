@@ -250,15 +250,29 @@ pnpm start
 
 MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
 
+## Claude Code 配置
+
+如果使用 Claude Code 开发此项目，建议配置以下 MCP 插件以获得更好的开发体验：
+
+### 推荐的 MCP 插件
+
+1. **Serena** - 智能代码分析和编辑工具
+   - 提供语义化的代码搜索和编辑功能
+   - 支持符号级别的代码操作
+   - 智能的代码重构和分析能力
+
+2. **Context7** - 实时文档查询工具
+   - 获取最新的库文档和 API 参考
+   - 支持 Hono、Drizzle ORM、Zod 等技术栈的文档查询
+   - 提供准确的代码示例和最佳实践
+
+### 配置步骤
+
+请参考 Claude Code 官方文档配置相应的 MCP 插件：<https://docs.anthropic.com/en/docs/claude-code/mcp>
+
 ## 开发计划
 
 ### 短期计划（当前版本）
-
-- [ ] **字典功能模块**
-
-  - 添加系统字典管理功能
-  - 完善 seed 相关枚举数据
-  - 支持字典项的增删改查和分类管理
 
 - [ ] **单元测试覆盖**
 

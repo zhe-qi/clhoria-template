@@ -1,35 +1,16 @@
+import type { InferInsertModel } from "drizzle-orm";
+
 import { hash, verify } from "@node-rs/argon2";
 import { and, eq, inArray } from "drizzle-orm";
-import { sign } from "hono/jwt";
-import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
-import { sysLoginLog, sysTokens, sysUser, sysUserRole } from "@/db/schema";
-import env from "@/env";
-import { Status, TokenStatus, TokenType } from "@/lib/enums";
+import { sysTokens, sysUser, sysUserRole } from "@/db/schema";
+import { TokenStatus } from "@/lib/enums";
 import { clearUserCache } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
 
-interface CreateUserParams {
-  username: string;
-  password: string;
-  domain: string;
-  nickName: string;
-  email?: string;
-  phoneNumber?: string;
-  avatar?: string;
-  createdBy: string;
-}
-
-interface LoginParams {
-  username: string;
-  password: string;
-  domain: string;
-  ip: string;
-  userAgent: string;
-  requestId: string;
-}
+type CreateUserParams = InferInsertModel<typeof sysUser>;
 
 /**
  * 创建用户
@@ -43,103 +24,6 @@ export async function createUser(params: CreateUserParams) {
   }).returning();
 
   return user;
-}
-
-/**
- * 用户登录
- */
-export async function login(params: LoginParams) {
-  // 查找用户
-  const [user] = await db
-    .select()
-    .from(sysUser)
-    .where(and(
-      eq(sysUser.username, params.username),
-      eq(sysUser.domain, params.domain),
-    ));
-
-  if (!user) {
-    throw new Error("用户不存在");
-  }
-
-  if (user.status !== Status.ENABLED) {
-    throw new Error("用户已被禁用");
-  }
-
-  // 验证密码
-  const isValidPassword = await verify(user.password, params.password);
-  if (!isValidPassword) {
-    throw new Error("密码错误");
-  }
-
-  // 获取用户角色
-  const roles = await rbac.getRolesForUser(user.id, params.domain);
-
-  // 生成 JWT
-  const payload = {
-    sub: user.id,
-    username: user.username,
-    domain: params.domain,
-    roles,
-  };
-
-  const accessToken = await sign(payload, env.ADMIN_JWT_SECRET, "HS256");
-  const refreshToken = await sign(
-    { ...payload, type: "refresh" },
-    env.ADMIN_JWT_SECRET,
-    "HS256",
-  );
-
-  // 保存登录令牌
-  await db.insert(sysTokens).values({
-    accessToken,
-    refreshToken,
-    status: TokenStatus.ACTIVE,
-    userId: user.id,
-    username: user.username,
-    domain: params.domain,
-    ip: params.ip,
-    address: params.ip, // TODO: 可以通过 IP 查询地址
-    userAgent: params.userAgent,
-    requestId: params.requestId,
-    type: TokenType.WEB,
-    createdBy: user.id,
-  });
-
-  // 保存登录日志
-  await db.insert(sysLoginLog).values({
-    userId: user.id,
-    username: user.username,
-    domain: params.domain,
-    ip: params.ip,
-    address: params.ip, // TODO: 可以通过 IP 查询地址
-    userAgent: params.userAgent,
-    requestId: params.requestId,
-    type: "login",
-    createdBy: user.id,
-  });
-
-  // 将角色信息缓存到 Redis
-  if (roles.length > 0) {
-    const key = `user:${params.domain}:${user.id}:roles`;
-    await redisClient.sadd(key, ...roles);
-    // 设置过期时间为 24 小时
-    await redisClient.expire(key, 86400);
-  }
-
-  return {
-    user: {
-      id: user.id,
-      username: user.username,
-      nickName: user.nickName,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      avatar: user.avatar,
-    },
-    accessToken,
-    refreshToken,
-    roles,
-  };
 }
 
 /**
@@ -246,29 +130,4 @@ export async function assignRolesToUser(
       removed: toRemove.length,
     };
   });
-}
-
-/**
- * 初始化超级管理员
- */
-export async function initSuperAdmin() {
-  const domain = "default";
-  const roleId = uuidV7();
-
-  // 创建超级管理员角色
-  await rbac.addPolicy(roleId, "*", "*", domain, "allow");
-
-  // 创建超级管理员用户
-  const user = await createUser({
-    username: "admin",
-    password: "123456",
-    domain,
-    nickName: "超级管理员",
-    createdBy: "system",
-  });
-
-  // 分配角色
-  await assignRolesToUser(user.id, [roleId], domain, "system");
-
-  return { userId: user.id, roleId };
 }
