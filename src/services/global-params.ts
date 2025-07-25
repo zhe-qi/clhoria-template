@@ -4,14 +4,9 @@ import { and, eq, ilike, or } from "drizzle-orm";
 
 import db from "@/db";
 import { globalParams } from "@/db/schema";
-import { getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enums/cache";
+import { CacheConfig, getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enums/cache";
 import { pagination } from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
-
-export const DEFAULT_DOMAIN = "default";
-export const CACHE_TTL = 3600; // 1小时
-export const NULL_CACHE_TTL = 300; // 空值缓存5分钟
-export const NULL_CACHE_VALUE = "__NULL__"; // 空值标记
 
 export interface GlobalParamsListOptions {
   domain?: string;
@@ -40,7 +35,7 @@ export async function getCachedParam(key: string, domain: string) {
     }
     const parsed = JSON.parse(cached);
     // 检查是否为空值缓存标记
-    return parsed === NULL_CACHE_VALUE ? undefined : parsed;
+    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed;
   }
   catch {
     return null;
@@ -54,7 +49,7 @@ export async function setCachedParam(key: string, domain: string, data: any) {
   try {
     await redisClient.setex(
       getGlobalParamKey(key, domain),
-      CACHE_TTL,
+      CacheConfig.CACHE_TTL,
       JSON.stringify(data),
     );
   }
@@ -70,8 +65,8 @@ export async function setCachedNullParam(key: string, domain: string) {
   try {
     await redisClient.setex(
       getGlobalParamKey(key, domain),
-      NULL_CACHE_TTL,
-      JSON.stringify(NULL_CACHE_VALUE),
+      CacheConfig.NULL_CACHE_TTL,
+      JSON.stringify(CacheConfig.NULL_CACHE_VALUE),
     );
   }
   catch {
@@ -113,7 +108,7 @@ export async function clearDomainCache(domain: string) {
  * 获取全局参数列表（简单模式，用于公开API）
  */
 export async function getPublicList(options: GlobalParamsListOptions = {}) {
-  const { domain = DEFAULT_DOMAIN, publicOnly = "true" } = options;
+  const { domain = CacheConfig.DEFAULT_DOMAIN, publicOnly = "true" } = options;
 
   // 尝试从缓存获取
   if (publicOnly === "true") {
@@ -140,7 +135,7 @@ export async function getPublicList(options: GlobalParamsListOptions = {}) {
   if (publicOnly === "true") {
     await redisClient.setex(
       getGlobalParamsAllKey(domain),
-      CACHE_TTL,
+      CacheConfig.CACHE_TTL,
       JSON.stringify(result),
     );
   }
@@ -153,7 +148,7 @@ export async function getPublicList(options: GlobalParamsListOptions = {}) {
  */
 export async function getAdminList(options: GlobalParamsListOptions = {}) {
   const {
-    domain = DEFAULT_DOMAIN,
+    domain = CacheConfig.DEFAULT_DOMAIN,
     search,
     isPublic,
     pagination: paginationOptions = { page: 1, limit: 20 },
@@ -191,7 +186,7 @@ export async function getAdminList(options: GlobalParamsListOptions = {}) {
 /**
  * 获取单个全局参数（公开访问）
  */
-export async function getPublicParam(key: string, domain: string = DEFAULT_DOMAIN) {
+export async function getPublicParam(key: string, domain: string = CacheConfig.DEFAULT_DOMAIN) {
   // 尝试从缓存获取
   const cached = await getCachedParam(key, domain);
   if (cached !== null) {
@@ -223,7 +218,7 @@ export async function getPublicParam(key: string, domain: string = DEFAULT_DOMAI
 /**
  * 获取单个全局参数（管理访问）
  */
-export async function getAdminParam(key: string, domain: string = DEFAULT_DOMAIN) {
+export async function getAdminParam(key: string, domain: string = CacheConfig.DEFAULT_DOMAIN) {
   const cached = await getCachedParam(key, domain);
   if (cached !== null) {
     return cached; // 如果是undefined表示空值缓存命中
@@ -252,7 +247,7 @@ export async function getAdminParam(key: string, domain: string = DEFAULT_DOMAIN
 /**
  * 创建全局参数
  */
-export async function createParam(data: any, domain: string = DEFAULT_DOMAIN, userId: string) {
+export async function createParam(data: any, domain: string = CacheConfig.DEFAULT_DOMAIN, userId: string) {
   const [created] = await db
     .insert(globalParams)
     .values({
@@ -271,7 +266,7 @@ export async function createParam(data: any, domain: string = DEFAULT_DOMAIN, us
 /**
  * 更新全局参数
  */
-export async function updateParam(key: string, data: any, domain: string = DEFAULT_DOMAIN, userId: string) {
+export async function updateParam(key: string, data: any, domain: string = CacheConfig.DEFAULT_DOMAIN, userId: string) {
   const [updated] = await db
     .update(globalParams)
     .set({
@@ -296,7 +291,7 @@ export async function updateParam(key: string, data: any, domain: string = DEFAU
 /**
  * 删除全局参数
  */
-export async function deleteParam(key: string, domain: string = DEFAULT_DOMAIN) {
+export async function deleteParam(key: string, domain: string = CacheConfig.DEFAULT_DOMAIN) {
   const [deleted] = await db
     .delete(globalParams)
     .where(and(
@@ -316,7 +311,7 @@ export async function deleteParam(key: string, domain: string = DEFAULT_DOMAIN) 
  * 批量获取全局参数
  */
 export async function batchGetParams(keys: string[], options: GlobalParamsBatchOptions = {}) {
-  const { domain = DEFAULT_DOMAIN, publicOnly = "true" } = options;
+  const { domain = CacheConfig.DEFAULT_DOMAIN, publicOnly = "true" } = options;
   const result: Record<string, any> = {};
 
   // 尝试从缓存批量获取
@@ -332,7 +327,7 @@ export async function batchGetParams(keys: string[], options: GlobalParamsBatchO
 
     if (cachedValue) {
       const parsed = JSON.parse(cachedValue);
-      if (parsed === NULL_CACHE_VALUE) {
+      if (parsed === CacheConfig.NULL_CACHE_VALUE) {
         // 空值缓存命中，直接设为null
         result[key] = null;
       }

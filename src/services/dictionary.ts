@@ -6,14 +6,9 @@ import type { DictionaryItem } from "@/db/schema";
 
 import db from "@/db";
 import { sysDictionaries } from "@/db/schema";
-import { getDictionariesAllKey, getDictionaryKey } from "@/lib/enums/cache";
+import { CacheConfig, getDictionariesAllKey, getDictionaryKey } from "@/lib/enums/cache";
 import { pagination } from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
-
-export const DEFAULT_DOMAIN = "default";
-export const CACHE_TTL = 3600; // 1小时
-export const NULL_CACHE_TTL = 300; // 空值缓存5分钟
-export const NULL_CACHE_VALUE = "__NULL__"; // 空值标记
 
 export interface DictionariesListOptions {
   domain?: string;
@@ -42,7 +37,7 @@ export async function getCachedDictionary(code: string, domain: string) {
     }
     const parsed = JSON.parse(cached);
     // 检查是否为空值缓存标记
-    return parsed === NULL_CACHE_VALUE ? undefined : parsed;
+    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed;
   }
   catch {
     return null;
@@ -56,7 +51,7 @@ export async function setCachedDictionary(code: string, domain: string, data: an
   try {
     await redisClient.setex(
       getDictionaryKey(code, domain),
-      CACHE_TTL,
+      CacheConfig.CACHE_TTL,
       JSON.stringify(data),
     );
   }
@@ -72,8 +67,8 @@ export async function setCachedNullDictionary(code: string, domain: string) {
   try {
     await redisClient.setex(
       getDictionaryKey(code, domain),
-      NULL_CACHE_TTL,
-      JSON.stringify(NULL_CACHE_VALUE),
+      CacheConfig.NULL_CACHE_TTL,
+      JSON.stringify(CacheConfig.NULL_CACHE_VALUE),
     );
   }
   catch {
@@ -115,7 +110,7 @@ export async function clearDomainDictionaryCache(domain: string) {
  * 获取字典列表（简单模式，用于公开API）
  */
 export async function getPublicDictionaries(options: DictionariesListOptions = {}) {
-  const { domain = DEFAULT_DOMAIN, enabledOnly = true } = options;
+  const { domain = CacheConfig.DEFAULT_DOMAIN, enabledOnly = true } = options;
 
   // 尝试从缓存获取
   if (enabledOnly) {
@@ -143,7 +138,7 @@ export async function getPublicDictionaries(options: DictionariesListOptions = {
   if (enabledOnly) {
     await redisClient.setex(
       getDictionariesAllKey(domain),
-      CACHE_TTL,
+      CacheConfig.CACHE_TTL,
       JSON.stringify(result),
     );
   }
@@ -156,7 +151,7 @@ export async function getPublicDictionaries(options: DictionariesListOptions = {
  */
 export async function getAdminDictionaries(options: DictionariesListOptions = {}) {
   const {
-    domain = DEFAULT_DOMAIN,
+    domain = CacheConfig.DEFAULT_DOMAIN,
     search,
     status,
     pagination: paginationOptions = { page: 1, limit: 20 },
@@ -192,7 +187,7 @@ export async function getAdminDictionaries(options: DictionariesListOptions = {}
 /**
  * 获取单个字典（公开访问）
  */
-export async function getPublicDictionary(code: string, domain: string = DEFAULT_DOMAIN) {
+export async function getPublicDictionary(code: string, domain: string = CacheConfig.DEFAULT_DOMAIN) {
   // 尝试从缓存获取
   const cached = await getCachedDictionary(code, domain);
   if (cached !== null) {
@@ -223,7 +218,7 @@ export async function getPublicDictionary(code: string, domain: string = DEFAULT
 /**
  * 获取单个字典（管理访问）
  */
-export async function getAdminDictionary(code: string, domain: string = DEFAULT_DOMAIN) {
+export async function getAdminDictionary(code: string, domain: string = CacheConfig.DEFAULT_DOMAIN) {
   const cached = await getCachedDictionary(code, domain);
   if (cached !== null) {
     return cached; // 如果是undefined表示空值缓存命中
@@ -251,7 +246,7 @@ export async function getAdminDictionary(code: string, domain: string = DEFAULT_
 /**
  * 创建字典
  */
-export async function createDictionary(data: any, domain: string = DEFAULT_DOMAIN, userId: string) {
+export async function createDictionary(data: any, domain: string = CacheConfig.DEFAULT_DOMAIN, userId: string) {
   const [created] = await db
     .insert(sysDictionaries)
     .values({
@@ -270,7 +265,7 @@ export async function createDictionary(data: any, domain: string = DEFAULT_DOMAI
 /**
  * 更新字典
  */
-export async function updateDictionary(code: string, data: any, domain: string = DEFAULT_DOMAIN, userId: string) {
+export async function updateDictionary(code: string, data: any, domain: string = CacheConfig.DEFAULT_DOMAIN, userId: string) {
   const [updated] = await db
     .update(sysDictionaries)
     .set({
@@ -295,7 +290,7 @@ export async function updateDictionary(code: string, data: any, domain: string =
 /**
  * 删除字典
  */
-export async function deleteDictionary(code: string, domain: string = DEFAULT_DOMAIN) {
+export async function deleteDictionary(code: string, domain: string = CacheConfig.DEFAULT_DOMAIN) {
   const [deleted] = await db
     .delete(sysDictionaries)
     .where(and(
@@ -315,7 +310,7 @@ export async function deleteDictionary(code: string, domain: string = DEFAULT_DO
  * 批量获取字典
  */
 export async function batchGetDictionaries(codes: string[], options: DictionariesBatchOptions = {}) {
-  const { domain = DEFAULT_DOMAIN, enabledOnly = true } = options;
+  const { domain = CacheConfig.DEFAULT_DOMAIN, enabledOnly = true } = options;
   const result: Record<string, any> = {};
 
   // 尝试从缓存批量获取
@@ -331,7 +326,7 @@ export async function batchGetDictionaries(codes: string[], options: Dictionarie
 
     if (cachedValue) {
       const parsed = JSON.parse(cachedValue);
-      if (parsed === NULL_CACHE_VALUE) {
+      if (parsed === CacheConfig.NULL_CACHE_VALUE) {
         // 空值缓存命中，直接设为null
         result[code] = null;
       }
@@ -405,7 +400,7 @@ export function getDictionaryItemByCode(dictionary: InferSelectModel<typeof sysD
 /**
  * 检查字典编码是否存在
  */
-export async function isDictionaryCodeExists(code: string, domain: string = DEFAULT_DOMAIN, excludeId?: string): Promise<boolean> {
+export async function isDictionaryCodeExists(code: string, domain: string = CacheConfig.DEFAULT_DOMAIN, excludeId?: string): Promise<boolean> {
   let whereCondition = and(
     eq(sysDictionaries.code, code),
     eq(sysDictionaries.domain, domain),
