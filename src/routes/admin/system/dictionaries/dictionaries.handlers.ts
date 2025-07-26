@@ -1,5 +1,3 @@
-import type { JWTPayload } from "hono/utils/jwt/types";
-
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import {
@@ -42,9 +40,7 @@ export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
 export const create: DictionariesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
 
-  // 从JWT中获取用户ID
-  const payload: JWTPayload = c.get("jwtPayload");
-  const userId = payload.uid as string;
+  const userId = c.get("userId");
 
   // 检查字典编码是否已存在
   const exists = await isDictionaryCodeExists(body.code);
@@ -59,8 +55,7 @@ export const create: DictionariesRouteHandlerType<"create"> = async (c) => {
 export const update: DictionariesRouteHandlerType<"update"> = async (c) => {
   const { code } = c.req.valid("param");
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const userId = payload.uid as string;
+  const userId = c.get("userId");
 
   // 检查字典是否存在
   const existing = await getAdminDictionary(code);

@@ -1,5 +1,4 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { and, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
@@ -10,13 +9,13 @@ import { sysUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 import { assignRolesToUser, createUser } from "@/services/user";
+import { pickContext } from "@/utils";
 
 import type { SysUsersRouteHandlerType } from "./sys-users.index";
 
 export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   let whereCondition = eq(sysUser.domain, domain);
 
@@ -43,14 +42,13 @@ export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
 
 export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
-  const operatorId = payload.uid as string;
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
+
   try {
     const user = await createUser({
       ...body,
       domain,
-      createdBy: operatorId,
+      createdBy: userId,
       // 处理可选字段
       email: body.email || undefined,
       phoneNumber: body.phoneNumber || undefined,
@@ -70,8 +68,7 @@ export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
 
 export const get: SysUsersRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   const [user] = await db
     .select()
@@ -92,9 +89,7 @@ export const get: SysUsersRouteHandlerType<"get"> = async (c) => {
 export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
-  const operatorId = payload.uid as string;
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   // 不允许直接更新密码
   const { password, ...updateData } = body as any;
@@ -103,7 +98,7 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
     .update(sysUser)
     .set({
       ...updateData,
-      updatedBy: operatorId,
+      updatedBy: userId,
       updatedAt: new Date(),
     })
     .where(and(
@@ -122,8 +117,7 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
 
 export const remove: SysUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   const [deleted] = await db
     .delete(sysUser)
@@ -143,9 +137,7 @@ export const remove: SysUsersRouteHandlerType<"remove"> = async (c) => {
 export const assignRoles: SysUsersRouteHandlerType<"assignRoles"> = async (c) => {
   const { id } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
-  const operatorId = payload.uid as string;
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   // 检查用户是否存在
   const [user] = await db
@@ -160,6 +152,6 @@ export const assignRoles: SysUsersRouteHandlerType<"assignRoles"> = async (c) =>
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const result = await assignRolesToUser(id, roleIds, domain, operatorId);
+  const result = await assignRolesToUser(id, roleIds, domain, userId);
   return c.json(result, HttpStatusCodes.OK);
 };

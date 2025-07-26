@@ -3,8 +3,7 @@ export * from "./date/formatter";
 // #endregion
 
 // #region tools
-export * from "./tools/format-result";
-export * from "./tools/object";
+export * from "./tools";
 // #endregion
 
 // #region zod

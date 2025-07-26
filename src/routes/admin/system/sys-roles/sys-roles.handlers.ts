@@ -1,5 +1,4 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
@@ -37,13 +36,12 @@ export const list: SysRolesRouteHandlerType<"list"> = async (c) => {
 
 export const create: SysRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.uid as string;
+  const userId = c.get("userId");
 
   try {
     const [role] = await db.insert(sysRole).values({
       ...body,
-      createdBy: operatorId,
+      createdBy: userId,
     }).returning();
 
     return c.json(role, HttpStatusCodes.CREATED);
@@ -77,14 +75,13 @@ export const get: SysRolesRouteHandlerType<"get"> = async (c) => {
 export const update: SysRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.uid as string;
+  const userId = c.get("userId");
 
   const [updated] = await db
     .update(sysRole)
     .set({
       ...body,
-      updatedBy: operatorId,
+      updatedBy: userId,
     })
     .where(eq(sysRole.id, id))
     .returning();
@@ -114,8 +111,7 @@ export const remove: SysRolesRouteHandlerType<"remove"> = async (c) => {
 export const assignPermissions: SysRolesRouteHandlerType<"assignPermissions"> = async (c) => {
   const { id } = c.req.valid("param");
   const { permissions } = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   // 检查角色是否存在
   const [role] = await db
@@ -134,8 +130,7 @@ export const assignPermissions: SysRolesRouteHandlerType<"assignPermissions"> = 
 export const assignMenus: SysRolesRouteHandlerType<"assignMenus"> = async (c) => {
   const { id } = c.req.valid("param");
   const { menuIds } = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   // 检查角色是否存在
   const [role] = await db
@@ -154,8 +149,7 @@ export const assignMenus: SysRolesRouteHandlerType<"assignMenus"> = async (c) =>
 export const assignUsers: SysRolesRouteHandlerType<"assignUsers"> = async (c) => {
   const { id } = c.req.valid("param");
   const { userIds } = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   // 检查角色是否存在
   const [role] = await db

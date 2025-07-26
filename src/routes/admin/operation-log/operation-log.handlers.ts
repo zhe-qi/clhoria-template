@@ -1,5 +1,4 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { and, desc, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
@@ -11,8 +10,7 @@ import type { OperationLogRouteHandlerType } from "./operation-log.index";
 
 export const list: OperationLogRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   // 基本查询条件
   const baseCondition = eq(operationLogs.domain, domain);

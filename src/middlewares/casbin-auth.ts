@@ -25,14 +25,14 @@ export function casbin(): MiddlewareHandler {
 
     // 获取 JWT 载荷
     const payload: JWTPayload = c.get("jwtPayload");
-    const { uid: userId, domain } = payload as { uid: string; domain: string };
+    const { uid: userId, domain: userDomain } = payload as { uid: string; domain: string };
 
     // 从 Redis 获取用户角色
-    const key = getUserRolesKey(userId, domain);
-    const roles = (await redisClient.smembers(key)).filter(role => role !== "__no_roles__");
+    const key = getUserRolesKey(userId, userDomain);
+    const userRoles = (await redisClient.smembers(key)).filter(role => role !== "__no_roles__");
 
     // 如果用户没有角色，返回禁止访问
-    if (roles.length === 0) {
+    if (userRoles.length === 0) {
       return c.json({ message: "Access denied: No roles assigned to user" }, HttpStatusCodes.FORBIDDEN);
     }
 
@@ -48,7 +48,7 @@ export function casbin(): MiddlewareHandler {
     const { resource, action } = endpointPermission;
 
     // 使用 Casbin 验证用户角色是否有权限访问该资源
-    const checks = roles.map(role => enforcer.enforce(role, resource, action, domain));
+    const checks = userRoles.map(role => enforcer.enforce(role, resource, action, userDomain));
     const hasPermission = (await Promise.all(checks)).some(Boolean);
 
     // 如果没有权限，返回禁止访问
@@ -56,10 +56,13 @@ export function casbin(): MiddlewareHandler {
       return c.json({ message: HttpStatusPhrases.FORBIDDEN }, HttpStatusCodes.FORBIDDEN);
     }
 
-    // 将角色信息和权限信息存入上下文
-    c.set("userRoles", roles);
-    c.set("userDomain", domain);
-    c.set("currentPermission", { resource, action });
+    const currentPermission = { resource, action };
+
+    const contextData = { userRoles, userDomain, currentPermission, userId };
+
+    Object.entries(contextData).forEach(([key, value]) => {
+      c.set(key, value);
+    });
 
     await next();
   };

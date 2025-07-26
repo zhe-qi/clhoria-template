@@ -1,5 +1,3 @@
-import type { JWTPayload } from "hono/utils/jwt/types";
-
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
@@ -19,8 +17,8 @@ import type { AuthorizationRouteHandlerType } from "./authorization.index";
 export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermissionsToRole"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { permissions, domain } = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const currentDomain = domain || payload.domain as string;
+  const userDomain = c.get("userDomain");
+  const currentDomain = domain || userDomain;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -49,8 +47,8 @@ export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermi
 export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRole"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { menuIds, domain } = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const currentDomain = domain || payload.domain as string;
+  const userDomain = c.get("userDomain");
+  const currentDomain = domain || userDomain;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -70,8 +68,7 @@ export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRo
 export const assignUsersToRole: AuthorizationRouteHandlerType<"assignUsersToRole"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { userIds } = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string;
+  const domain = c.get("userDomain");
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -91,8 +88,8 @@ export const assignUsersToRole: AuthorizationRouteHandlerType<"assignUsersToRole
 export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = async (c) => {
   const { userId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = queryDomain || payload.domain as string;
+  const userDomain = c.get("userDomain");
+  const domain = queryDomain || userDomain;
 
   // 检查用户是否存在
   const user = await db.query.sysUser.findFirst({
@@ -113,8 +110,8 @@ export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = asy
 export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissions"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = queryDomain || payload.domain as string;
+  const userDomain = c.get("userDomain");
+  const domain = queryDomain || userDomain;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({
@@ -136,8 +133,8 @@ export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissio
 export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = queryDomain || payload.domain as string;
+  const userDomain = c.get("userDomain");
+  const domain = queryDomain || userDomain;
 
   // 检查角色是否存在
   const role = await db.query.sysRole.findFirst({

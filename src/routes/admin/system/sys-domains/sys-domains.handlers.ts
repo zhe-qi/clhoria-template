@@ -1,5 +1,4 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
@@ -38,15 +37,14 @@ export const list: SysDomainsRouteHandlerType<"list"> = async (c) => {
 
 export const create: SysDomainsRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.uid as string;
+  const userId = c.get("userId");
 
   try {
     const [domain] = await db
       .insert(sysDomain)
       .values({
         ...body,
-        createdBy: operatorId,
+        createdBy: userId,
       })
       .returning();
 
@@ -81,14 +79,13 @@ export const get: SysDomainsRouteHandlerType<"get"> = async (c) => {
 export const update: SysDomainsRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const operatorId = payload.uid as string;
+  const userId = c.get("userId");
 
   const [updated] = await db
     .update(sysDomain)
     .set({
       ...body,
-      updatedBy: operatorId,
+      updatedBy: userId,
       updatedAt: formatDate(new Date()),
     })
     .where(eq(sysDomain.id, id))

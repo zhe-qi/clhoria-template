@@ -1,5 +1,3 @@
-import type { JWTPayload } from "hono/utils/jwt/types";
-
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
@@ -34,8 +32,7 @@ export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
 
 export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const userId = payload.uid as string;
+  const userId = c.get("userId");
 
   try {
     const created = await globalParamsService.createParam(body, userId);
@@ -54,8 +51,7 @@ export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
 export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
   const { key } = c.req.valid("param");
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const userId = payload.uid as string;
+  const userId = c.get("userId");
 
   const updated = await globalParamsService.updateParam(key, body, userId);
 

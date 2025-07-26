@@ -133,24 +133,38 @@ export const sysDictionaries = pgTable("sys_dictionaries", {
 - **Casbin**: Role-based access control for admin routes
 - **Middleware**: Applied at route group level in `src/app.ts:32-45`
 
-#### JWT User ID Extraction Standards
+#### Context Value Extraction Standards
 
-**CRITICAL**: Always use the correct pattern to extract user ID from JWT payload:
+**CRITICAL**: Always use the correct pattern to extract context values from Hono context:
 
 ```typescript
-// ✅ Correct - Extract from JWT payload
+// ✅ Correct - Single context value extraction
+const domain = c.get("userDomain");
+
+// ✅ Correct - Multiple context values extraction
+const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
+
+// ❌ Wrong - Manual extraction from JWT payload
 const payload: JWTPayload = c.get("jwtPayload");
 const userId = payload.uid as string;
-
-// ❌ Wrong - Never use userDomain for userId
-const userId = (c.get("userDomain") as any)?.userId || "system";
 ```
 
 **Rules**:
-1. Always import `JWTPayload` type from `"hono/utils/jwt/types"`
-2. Use `c.get("jwtPayload")` to get the JWT payload
-3. Extract `userId` from `payload.uid`
-4. Never fallback to "system" - user ID should always be available in authenticated routes
+1. Use `c.get("contextKey")` for single context value extraction
+2. Use `pickContext(c, ["key1", "key2"])` for multiple context values extraction
+3. Import `pickContext` from appropriate utility module when needed
+4. Context values are pre-processed by middleware and should be used directly
+5. Never manually extract from JWT payload when context values are available
+
+#### JWT User ID Extraction Standards (Legacy)
+
+**NOTE**: This pattern is superseded by context extraction above. Only use when context values are not available:
+
+```typescript
+// ✅ Fallback - Extract from JWT payload only when context unavailable
+const payload: JWTPayload = c.get("jwtPayload");
+const userId = payload.uid as string;
+```
 
 ### Application Structure
 

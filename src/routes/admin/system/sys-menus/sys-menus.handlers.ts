@@ -1,21 +1,20 @@
-import type { JWTPayload } from "hono/utils/jwt/types";
-
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import * as menuService from "@/services/menu";
+import { pickContext } from "@/utils";
 
 import type { SysMenusRouteHandlerType as RouteHandlerType } from "./sys-menus.index";
 
 /** 查询菜单列表 */
 export const list: RouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
-  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = c.get("userDomain");
 
   const result = await menuService.getMenuList({
     search: params.search,
     page: params.page,
     limit: params.limit,
-    domain: payload.domain as string || "default",
+    domain,
   });
 
   return c.json(result, HttpStatusCodes.OK);
@@ -24,11 +23,11 @@ export const list: RouteHandlerType<"list"> = async (c) => {
 /** 查询菜单树形结构 */
 export const tree: RouteHandlerType<"tree"> = async (c) => {
   const { status } = c.req.valid("query");
-  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = c.get("userDomain");
 
   const tree = await menuService.getMenuTree({
     status,
-    domain: payload.domain as string || "default",
+    domain,
   });
   return c.json(tree, HttpStatusCodes.OK);
 };
@@ -36,21 +35,21 @@ export const tree: RouteHandlerType<"tree"> = async (c) => {
 /** 根据角色获取菜单 */
 export const getMenusByRole: RouteHandlerType<"getMenusByRole"> = async (c) => {
   const { id: roleId } = c.req.valid("param");
-  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = c.get("userDomain");
 
-  const menus = await menuService.getMenusByRole(roleId, payload.domain as string || "default");
+  const menus = await menuService.getMenusByRole(roleId, domain as string || "default");
   return c.json(menus, HttpStatusCodes.OK);
 };
 
 /** 创建菜单 */
 export const create: RouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   const menuData = {
     ...body,
-    domain: payload.domain as string || "default",
-    createdBy: payload.uid as string,
+    domain,
+    createdBy: userId,
   };
 
   const newMenu = await menuService.createMenu(menuData);
@@ -60,9 +59,9 @@ export const create: RouteHandlerType<"create"> = async (c) => {
 /** 根据ID查询菜单 */
 export const getOne: RouteHandlerType<"getOne"> = async (c) => {
   const { id } = c.req.valid("param");
-  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = c.get("userDomain");
 
-  const menu = await menuService.getMenuById(id, payload.domain as string || "default");
+  const menu = await menuService.getMenuById(id, domain);
 
   if (!menu) {
     return c.json({ message: `菜单 ${id} 不存在` }, HttpStatusCodes.NOT_FOUND);
@@ -75,8 +74,7 @@ export const getOne: RouteHandlerType<"getOne"> = async (c) => {
 export const patch: RouteHandlerType<"patch"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string || "default";
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   const existingMenu = await menuService.getMenuById(id, domain);
 
@@ -86,7 +84,7 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
 
   const menuData = {
     ...body,
-    updatedBy: payload.uid as string,
+    updatedBy: userId,
   };
 
   const updatedMenu = await menuService.updateMenu(id, menuData, domain);
@@ -95,25 +93,24 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
 
 /** 获取常量路由 */
 export const getConstantRoutes: RouteHandlerType<"getConstantRoutes"> = async (c) => {
-  const payload: JWTPayload = c.get("jwtPayload");
+  const domain = c.get("userDomain");
 
-  const routes = await menuService.getConstantRoutes(payload.domain as string || "default");
+  const routes = await menuService.getConstantRoutes(domain);
   return c.json(routes, HttpStatusCodes.OK);
 };
 
 /** 获取用户路由 */
 export const getUserRoutes: RouteHandlerType<"getUserRoutes"> = async (c) => {
-  const payload: JWTPayload = c.get("jwtPayload");
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
-  const result = await menuService.getUserRoutesSimple(payload.uid as string, payload.domain as string);
+  const result = await menuService.getUserRoutesSimple(userId, domain);
   return c.json(result, HttpStatusCodes.OK);
 };
 
 /** 删除菜单 */
 export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
-  const payload: JWTPayload = c.get("jwtPayload");
-  const domain = payload.domain as string || "default";
+  const domain = c.get("userDomain");
 
   const existingMenu = await menuService.getMenuById(id, domain);
 
