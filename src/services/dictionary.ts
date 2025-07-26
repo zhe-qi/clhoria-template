@@ -38,7 +38,8 @@ export async function getCachedDictionary(code: string) {
     // 检查是否为空值缓存标记
     return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed;
   }
-  catch {
+  catch (error) {
+    logger.warn({ error, code }, "字典缓存获取失败");
     return null;
   }
 }

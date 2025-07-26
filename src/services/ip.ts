@@ -1,6 +1,8 @@
 import iconv from "iconv-lite";
 import { Buffer } from "node:buffer";
 
+import { logger } from "@/lib/logger";
+
 interface IPLocationResponse {
   addr: string;
   pro: string;
@@ -37,7 +39,8 @@ export async function getIPAddress(ip: string): Promise<string> {
 
     return data.addr || "unknown";
   }
-  catch {
+  catch (error) {
+    logger.warn({ error, ip }, "IP地址解析失败");
     return "unknown";
   }
 }

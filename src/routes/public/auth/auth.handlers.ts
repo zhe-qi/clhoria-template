@@ -7,6 +7,7 @@ import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
 import env from "@/env";
 import { AuthType, getUserRolesKey, Status, TokenStatus, TokenType } from "@/lib/enums";
+import { logger } from "@/lib/logger";
 import { redisClient } from "@/lib/redis";
 import { getIPAddress } from "@/services/ip";
 import { pick } from "@/utils";
@@ -219,7 +220,8 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
 
     return c.json({ token: newAccessToken, refreshToken: newRefreshToken }, HttpStatusCodes.OK);
   }
-  catch {
+  catch (error) {
+    logger.warn({ error }, "刷新令牌验证失败");
     return c.json({ message: "刷新令牌无效" }, HttpStatusCodes.UNAUTHORIZED);
   }
 };
@@ -254,7 +256,8 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
 
     return c.json(responseUser, HttpStatusCodes.OK);
   }
-  catch {
+  catch (error) {
+    logger.warn({ error }, "用户token验证失败");
     return c.json({ message: "未授权" }, HttpStatusCodes.UNAUTHORIZED);
   }
 };

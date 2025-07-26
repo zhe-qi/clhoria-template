@@ -6,6 +6,7 @@ import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
 import { sysOperationLog } from "@/db/schema";
+import { logger } from "@/lib/logger";
 
 interface OperationLogOptions {
   moduleName: string;
@@ -38,8 +39,8 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       }
       params = c.req.query();
     }
-    catch {
-      // 忽略解析错误
+    catch (error) {
+      logger.warn({ error }, "请求体解析失败");
     }
 
     // 执行实际的处理
@@ -64,8 +65,8 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       const resClone = c.res.clone();
       response = await resClone.json().catch(() => null);
     }
-    catch {
-      // 忽略解析错误
+    catch (error) {
+      logger.warn({ error }, "响应体解析失败");
     }
 
     // 异步记录日志，不阻塞响应
