@@ -4,8 +4,9 @@ import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
 import db from "@/db";
 import { sysEndpoint, sysRoleMenu, sysUserRole } from "@/db/schema";
-import { getUserRolesKey } from "@/lib/enums";
+import { getUserMenusKey, getUserRolesKey } from "@/lib/enums";
 import { redisClient } from "@/lib/redis";
+import { compareObjects } from "@/utils/tools/object";
 
 import * as rbac from "./casbin/rbac";
 
@@ -190,12 +191,7 @@ export async function syncEndpoints(
       if (!existing) {
         toInsert.push({ ...endpoint, createdBy: "system" });
       }
-      else if (
-        existing.action !== endpoint.action
-        || existing.resource !== endpoint.resource
-        || existing.controller !== endpoint.controller
-        || existing.summary !== endpoint.summary
-      ) {
+      else if (!compareObjects(existing, endpoint, ["action", "resource", "controller", "summary"])) {
         toUpdate.push({ id: existing.id, ...endpoint });
       }
     }
@@ -227,7 +223,7 @@ export async function getUserMenuIds(userId: string, domain: string): Promise<st
   // 获取用户的所有角色（包括隐式角色）
   const roles = await rbac.getImplicitRolesForUser(userId, domain);
 
-  if (roles.length === 0) {
+  if (roles.length < 1) {
     return [];
   }
 
@@ -248,7 +244,6 @@ export async function getUserMenuIds(userId: string, domain: string): Promise<st
  */
 export async function clearUserCache(userId: string, domain: string) {
   const userRolesKey = getUserRolesKey(userId, domain);
-  const { getUserMenusKey } = await import("@/lib/enums");
   const userMenusKey = getUserMenusKey(userId, domain);
 
   await redisClient.del(userRolesKey, userMenusKey);
