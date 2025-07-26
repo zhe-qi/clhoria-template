@@ -9,13 +9,15 @@ import {
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/enums";
 
+const tags = ["/dictionaries (字典)"];
+
 const CodeParamsSchema = z.object({
   code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
 });
 
 /** 获取字典列表 */
 export const list = createRoute({
-  tags: ["/dictionaries (字典)"],
+  tags,
   summary: "获取字典列表",
   method: "get",
   path: "/dictionaries",
@@ -29,7 +31,7 @@ export const list = createRoute({
 
 /** 根据编码获取单个字典 */
 export const get = createRoute({
-  tags: ["/dictionaries (字典)"],
+  tags,
   summary: "获取单个字典",
   method: "get",
   path: "/dictionaries/{code}",
@@ -54,7 +56,7 @@ export const get = createRoute({
 
 /** 批量获取字典 */
 export const batch = createRoute({
-  tags: ["/dictionaries (字典)"],
+  tags,
   summary: "批量获取字典",
   method: "post",
   path: "/dictionaries/batch",

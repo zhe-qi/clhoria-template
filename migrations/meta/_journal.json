@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1753194938495,
-      "tag": "0000_true_adam_warlock",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1753246539818,
-      "tag": "0001_amusing_lord_tyger",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1753246818051,
-      "tag": "0002_romantic_sage",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1753438489844,
-      "tag": "0003_rich_eternity",
+      "when": 1753501803859,
+      "tag": "0000_eminent_ares",
       "breakpoints": true
     }
   ]

@@ -12,6 +12,8 @@ import {
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
+const tags = ["/dictionaries (字典管理)"];
+
 const CodeParamsSchema = z.object({
   code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
 });
@@ -23,7 +25,7 @@ const ListQuerySchema = PaginationParamsSchema.extend({
 
 /** 获取字典列表 */
 export const list = createRoute({
-  tags: ["/admin/dictionaries (字典管理)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DICTIONARIES,
     action: PermissionAction.READ,
@@ -48,7 +50,7 @@ export const list = createRoute({
 
 /** 获取单个字典详情 */
 export const get = createRoute({
-  tags: ["/admin/dictionaries (字典管理)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DICTIONARIES,
     action: PermissionAction.READ,
@@ -77,7 +79,7 @@ export const get = createRoute({
 
 /** 创建字典 */
 export const create = createRoute({
-  tags: ["/admin/dictionaries (字典管理)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DICTIONARIES,
     action: PermissionAction.CREATE,
@@ -109,7 +111,7 @@ export const create = createRoute({
 
 /** 更新字典 */
 export const update = createRoute({
-  tags: ["/admin/dictionaries (字典管理)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DICTIONARIES,
     action: PermissionAction.UPDATE,
@@ -146,7 +148,7 @@ export const update = createRoute({
 
 /** 删除字典 */
 export const remove = createRoute({
-  tags: ["/admin/dictionaries (字典管理)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DICTIONARIES,
     action: PermissionAction.DELETE,
@@ -174,7 +176,7 @@ export const remove = createRoute({
 
 /** 批量获取字典 */
 export const batch = createRoute({
-  tags: ["/admin/dictionaries (字典管理)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DICTIONARIES,
     action: PermissionAction.READ,

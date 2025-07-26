@@ -8,9 +8,11 @@ import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enum
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
+const tags = ["/sys-domains (系统域)"];
+
 /** 获取系统域分页列表 */
 export const list = createRoute({
-  tags: ["/sys-domains (系统域)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DOMAINS,
     action: PermissionAction.READ,
@@ -33,7 +35,7 @@ export const list = createRoute({
 
 /** 创建系统域 */
 export const create = createRoute({
-  tags: ["/sys-domains (系统域)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DOMAINS,
     action: PermissionAction.CREATE,
@@ -65,7 +67,7 @@ export const create = createRoute({
 
 /** 根据ID获取系统域详情 */
 export const get = createRoute({
-  tags: ["/sys-domains (系统域)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DOMAINS,
     action: PermissionAction.READ,
@@ -94,7 +96,7 @@ export const get = createRoute({
 
 /** 更新系统域 */
 export const update = createRoute({
-  tags: ["/sys-domains (系统域)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DOMAINS,
     action: PermissionAction.UPDATE,
@@ -127,7 +129,7 @@ export const update = createRoute({
 
 /** 删除系统域 */
 export const remove = createRoute({
-  tags: ["/sys-domains (系统域)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_DOMAINS,
     action: PermissionAction.DELETE,

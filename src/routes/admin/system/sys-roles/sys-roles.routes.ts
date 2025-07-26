@@ -8,9 +8,11 @@ import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enum
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
+const tags = ["/sys-roles (系统角色)"];
+
 /** 获取系统角色分页列表 */
 export const list = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.READ,
@@ -31,7 +33,7 @@ export const list = createRoute({
 
 /** 创建系统角色 */
 export const create = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.CREATE,
@@ -63,7 +65,7 @@ export const create = createRoute({
 
 /** 根据ID获取系统角色详情 */
 export const get = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.READ,
@@ -92,7 +94,7 @@ export const get = createRoute({
 
 /** 更新系统角色 */
 export const update = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.UPDATE,
@@ -125,7 +127,7 @@ export const update = createRoute({
 
 /** 删除系统角色 */
 export const remove = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.DELETE,
@@ -153,7 +155,7 @@ export const remove = createRoute({
 
 /** 为角色分配权限 */
 export const assignPermissions = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.ASSIGN_PERMISSIONS,
@@ -195,7 +197,7 @@ export const assignPermissions = createRoute({
 
 /** 为角色分配菜单 */
 export const assignMenus = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.ASSIGN_ROUTES,
@@ -233,7 +235,7 @@ export const assignMenus = createRoute({
 
 /** 为角色分配用户 */
 export const assignUsers = createRoute({
-  tags: ["/sys-roles (系统角色)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_ROLES,
     action: PermissionAction.ASSIGN_USERS,

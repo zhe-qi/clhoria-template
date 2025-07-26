@@ -16,9 +16,11 @@ import {
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
+const tags = ["/authorization (授权管理)"];
+
 /** 分配权限给角色 */
 export const assignPermissionsToRole = createRoute({
-  tags: ["/authorization (授权管理)"],
+  tags,
   permission: {
     resource: PermissionResource.AUTHORIZATION,
     action: PermissionAction.ASSIGN_PERMISSIONS,
@@ -53,7 +55,7 @@ export const assignPermissionsToRole = createRoute({
 
 /** 分配路由给角色 */
 export const assignRoutesToRole = createRoute({
-  tags: ["/authorization (授权管理)"],
+  tags,
   permission: {
     resource: PermissionResource.AUTHORIZATION,
     action: PermissionAction.ASSIGN_ROUTES,
@@ -88,7 +90,7 @@ export const assignRoutesToRole = createRoute({
 
 /** 分配用户给角色 */
 export const assignUsersToRole = createRoute({
-  tags: ["/authorization (授权管理)"],
+  tags,
   permission: {
     resource: PermissionResource.AUTHORIZATION,
     action: PermissionAction.ASSIGN_USERS,
@@ -123,7 +125,7 @@ export const assignUsersToRole = createRoute({
 
 /** 获取用户路由 */
 export const getUserRoutes = createRoute({
-  tags: ["/authorization (授权管理)"],
+  tags,
   permission: {
     resource: PermissionResource.AUTHORIZATION,
     action: PermissionAction.GET_USER_ROUTES,
@@ -155,7 +157,7 @@ export const getUserRoutes = createRoute({
 
 /** 获取角色权限 */
 export const getRolePermissions = createRoute({
-  tags: ["/authorization (授权管理)"],
+  tags,
   permission: {
     resource: PermissionResource.AUTHORIZATION,
     action: PermissionAction.GET_ROLE_PERMISSIONS,
@@ -187,7 +189,7 @@ export const getRolePermissions = createRoute({
 
 /** 获取角色菜单 */
 export const getRoleMenus = createRoute({
-  tags: ["/authorization (授权管理)"],
+  tags,
   permission: {
     resource: PermissionResource.AUTHORIZATION,
     action: PermissionAction.GET_ROLE_MENUS,

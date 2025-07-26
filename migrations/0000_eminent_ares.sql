@@ -1,4 +1,3 @@
-CREATE TYPE "public"."status" AS ENUM('ENABLED', 'DISABLED', 'BANNED');--> statement-breakpoint
 CREATE TYPE "public"."menu_type" AS ENUM('directory', 'menu');--> statement-breakpoint
 CREATE TABLE "client_users" (
 	"id" uuid PRIMARY KEY NOT NULL,
@@ -23,7 +22,6 @@ CREATE TABLE "global_params" (
 	"description" text,
 	"is_public" integer DEFAULT 1 NOT NULL,
 	"status" integer DEFAULT 1 NOT NULL,
-	"domain" varchar(50) NOT NULL,
 	CONSTRAINT "global_params_key_unique" UNIQUE("key")
 );
 --> statement-breakpoint
@@ -76,6 +74,20 @@ CREATE TABLE "casbin_rule" (
 	"v5" varchar(64)
 );
 --> statement-breakpoint
+CREATE TABLE "sys_dictionaries" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"code" varchar(100) NOT NULL,
+	"name" varchar(200) NOT NULL,
+	"description" varchar(500),
+	"items" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
+	"sort_order" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_by" varchar(50),
+	"updated_by" varchar(50)
+);
+--> statement-breakpoint
 CREATE TABLE "sys_domain" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
@@ -85,7 +97,7 @@ CREATE TABLE "sys_domain" (
 	"code" varchar(64) NOT NULL,
 	"name" varchar(128) NOT NULL,
 	"description" text,
-	"status" "status" DEFAULT 'ENABLED' NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "sys_domain_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
@@ -117,7 +129,7 @@ CREATE TABLE "sys_menu" (
 	"route_path" varchar(128) NOT NULL,
 	"component" varchar(64) NOT NULL,
 	"path_param" varchar(64),
-	"status" "status" DEFAULT 'ENABLED' NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
 	"active_menu" varchar(64),
 	"hide_in_menu" boolean DEFAULT false,
 	"pid" uuid,
@@ -140,7 +152,7 @@ CREATE TABLE "sys_organization" (
 	"name" varchar(128) NOT NULL,
 	"description" text,
 	"pid" uuid,
-	"status" "status" DEFAULT 'ENABLED' NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "sys_organization_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
@@ -154,7 +166,7 @@ CREATE TABLE "sys_role" (
 	"name" varchar(64) NOT NULL,
 	"description" text,
 	"pid" uuid,
-	"status" "status" DEFAULT 'ENABLED' NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "sys_role_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
@@ -169,7 +181,7 @@ CREATE TABLE "sys_tokens" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"access_token" varchar(512) NOT NULL,
 	"refresh_token" varchar(512) NOT NULL,
-	"status" varchar(32) NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
 	"user_id" uuid NOT NULL,
 	"username" varchar(64) NOT NULL,
 	"domain" varchar(64) NOT NULL,
@@ -200,7 +212,7 @@ CREATE TABLE "sys_user" (
 	"email" varchar(128),
 	"phone_number" varchar(32),
 	"nick_name" varchar(64) NOT NULL,
-	"status" "status" DEFAULT 'ENABLED' NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "sys_user_username_unique" UNIQUE("username"),
 	CONSTRAINT "sys_user_email_unique" UNIQUE("email"),
 	CONSTRAINT "sys_user_phoneNumber_unique" UNIQUE("phone_number")

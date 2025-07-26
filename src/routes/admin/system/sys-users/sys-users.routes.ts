@@ -8,9 +8,11 @@ import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enum
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
+const tags = ["/sys-users (系统用户)"];
+
 /** 获取系统用户分页列表 */
 export const list = createRoute({
-  tags: ["/sys-users (系统用户)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_USERS,
     action: PermissionAction.READ,
@@ -31,7 +33,7 @@ export const list = createRoute({
 
 /** 创建系统用户 */
 export const create = createRoute({
-  tags: ["/sys-users (系统用户)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_USERS,
     action: PermissionAction.CREATE,
@@ -63,7 +65,7 @@ export const create = createRoute({
 
 /** 根据ID获取系统用户详情 */
 export const get = createRoute({
-  tags: ["/sys-users (系统用户)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_USERS,
     action: PermissionAction.READ,
@@ -92,7 +94,7 @@ export const get = createRoute({
 
 /** 更新系统用户 */
 export const update = createRoute({
-  tags: ["/sys-users (系统用户)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_USERS,
     action: PermissionAction.UPDATE,
@@ -125,7 +127,7 @@ export const update = createRoute({
 
 /** 删除系统用户 */
 export const remove = createRoute({
-  tags: ["/sys-users (系统用户)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_USERS,
     action: PermissionAction.DELETE,
@@ -153,7 +155,7 @@ export const remove = createRoute({
 
 /** 为用户分配角色 */
 export const assignRoles = createRoute({
-  tags: ["/sys-users (系统用户)"],
+  tags,
   permission: {
     resource: PermissionResource.SYS_USERS,
     action: PermissionAction.ASSIGN_USERS,

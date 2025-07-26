@@ -20,9 +20,11 @@ const ListQuerySchema = PaginationParamsSchema.extend({
   isPublic: z.enum(["0", "1"]).optional().describe("是否公开参数: 1=是 0=否"),
 });
 
+const tags = ["/global-params (全局参数管理)"];
+
 /** 获取全局参数分页列表 */
 export const list = createRoute({
-  tags: ["/admin/global-params (全局参数管理)"],
+  tags,
   permission: {
     resource: PermissionResource.GLOBAL_PARAMS,
     action: PermissionAction.READ,
@@ -47,7 +49,7 @@ export const list = createRoute({
 
 /** 根据键名获取单个全局参数 */
 export const get = createRoute({
-  tags: ["/admin/global-params (全局参数管理)"],
+  tags,
   permission: {
     resource: PermissionResource.GLOBAL_PARAMS,
     action: PermissionAction.READ,
@@ -76,7 +78,7 @@ export const get = createRoute({
 
 /** 创建全局参数 */
 export const create = createRoute({
-  tags: ["/admin/global-params (全局参数管理)"],
+  tags,
   permission: {
     resource: PermissionResource.GLOBAL_PARAMS,
     action: PermissionAction.CREATE,
@@ -108,7 +110,7 @@ export const create = createRoute({
 
 /** 更新全局参数 */
 export const update = createRoute({
-  tags: ["/admin/global-params (全局参数管理)"],
+  tags,
   permission: {
     resource: PermissionResource.GLOBAL_PARAMS,
     action: PermissionAction.UPDATE,
@@ -141,7 +143,7 @@ export const update = createRoute({
 
 /** 删除全局参数 */
 export const remove = createRoute({
-  tags: ["/admin/global-params (全局参数管理)"],
+  tags,
   permission: {
     resource: PermissionResource.GLOBAL_PARAMS,
     action: PermissionAction.DELETE,
@@ -169,7 +171,7 @@ export const remove = createRoute({
 
 /** 批量获取全局参数 */
 export const batch = createRoute({
-  tags: ["/admin/global-params (全局参数管理)"],
+  tags,
   permission: {
     resource: PermissionResource.GLOBAL_PARAMS,
     action: PermissionAction.READ,

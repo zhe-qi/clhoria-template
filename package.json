@@ -17,7 +17,8 @@
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio --config drizzle.config.ts",
     "seed": "tsx migrations/seed/index.ts",
-    "sync:permissions": "tsx scripts/sync-permissions.ts"
+    "sync:permissions": "tsx scripts/sync-permissions.ts",
+    "migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.0.0",

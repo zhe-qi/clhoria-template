@@ -294,6 +294,12 @@ When creating new routes, ALWAYS follow the admin-users route structure for cons
    - Use `.describe()` directly for simple field descriptions
    - Do NOT use `.openapi()` unless complex OpenAPI configuration is needed
 
+8. **Tags Convention**:
+   - Define tags constant at the top of each route file: `const tags = ["/endpoint-name (中文描述)"];`
+   - Use the constant in all route definitions: `tags,` (not `tags: tags`)
+   - Format: endpoint name + space + parentheses with Chinese description
+   - Examples: `["/dictionaries (字典管理)"]`, `["/sys-users (系统用户)"]`
+
 This structure ensures type safety and consistency across all routes.
 
 ### Status Code Standards

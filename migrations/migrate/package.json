@@ -1,0 +1,14 @@
+{
+  "description": "This package.json is used for the migration script the dependencies are only installed within the Dockerfile.",
+  "license": "MIT",
+  "scripts": {
+    "db:migrate": "tsx ./migrate.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.44.3",
+    "postgres": "^3.4.7",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.1-rc"
+  }
+}

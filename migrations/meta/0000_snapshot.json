@@ -1,5 +1,5 @@
 {
-  "id": "212a8688-5466-44ad-a0af-44e5d5c07d6e",
+  "id": "db84823b-4972-4743-a92a-7bcc4173e2d6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -139,12 +139,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": 1
-        },
-        "domain": {
-          "name": "domain",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
         }
       },
       "indexes": {},
@@ -519,6 +513,91 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.sys_dictionaries": {
+      "name": "sys_dictionaries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "items": {
+          "name": "items",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "status": {
+          "name": "status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.sys_domain": {
       "name": "sys_domain",
       "schema": "",
@@ -573,11 +652,10 @@
         },
         "status": {
           "name": "status",
-          "type": "status",
-          "typeSchema": "public",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ENABLED'"
+          "default": 1
         }
       },
       "indexes": {},
@@ -761,11 +839,10 @@
         },
         "status": {
           "name": "status",
-          "type": "status",
-          "typeSchema": "public",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ENABLED'"
+          "default": 1
         },
         "active_menu": {
           "name": "active_menu",
@@ -901,11 +978,10 @@
         },
         "status": {
           "name": "status",
-          "type": "status",
-          "typeSchema": "public",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ENABLED'"
+          "default": 1
         }
       },
       "indexes": {},
@@ -984,11 +1060,10 @@
         },
         "status": {
           "name": "status",
-          "type": "status",
-          "typeSchema": "public",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ENABLED'"
+          "default": 1
         }
       },
       "indexes": {},
@@ -1071,9 +1146,10 @@
         },
         "status": {
           "name": "status",
-          "type": "varchar(32)",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 1
         },
         "user_id": {
           "name": "user_id",
@@ -1257,11 +1333,10 @@
         },
         "status": {
           "name": "status",
-          "type": "status",
-          "typeSchema": "public",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'ENABLED'"
+          "default": 1
         }
       },
       "indexes": {},
@@ -1385,15 +1460,6 @@
     }
   },
   "enums": {
-    "public.status": {
-      "name": "status",
-      "schema": "public",
-      "values": [
-        "ENABLED",
-        "DISABLED",
-        "BANNED"
-      ]
-    },
     "public.menu_type": {
       "name": "menu_type",
       "schema": "public",
