@@ -66,4 +66,4 @@ fi
 echo "权限同步完成，正在启动 Hono 应用服务器..."
 echo "服务器端口: ${PORT:-9999}"
 
-cd /app && node dist/index.js
+cd /app && node dist/src/index.js

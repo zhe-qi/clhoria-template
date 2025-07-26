@@ -64,7 +64,7 @@ RUN pnpm fetch --frozen-lockfile && \
 # 从构建阶段复制构建产物
 COPY --from=builder /app/dist ./dist
 
-# 复制数据库迁移文件
+# 复制数据库迁移文件和种子数据
 COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
@@ -99,9 +99,5 @@ ARG PORT=9999
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
-
-# 启动应用
+# 生产阶段入口点
 ENTRYPOINT ["sh", "./scripts/run.sh"]
