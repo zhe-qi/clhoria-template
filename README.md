@@ -7,7 +7,7 @@
 - 🚀 **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
 - 🔐 **多层认证授权**: JWT + Casbin 基于角色的访问控制
 - 📚 **自动化文档**: OpenAPI 规范，自动生成 API 文档
-- 🏗️ **严格架构**: 三层路由结构（公共/客户端/管理端）
+- 🏗️ **严格架构**: 函数式开发规范、多层路由结构（公共/客户端/管理端）
 - 🔄 **完整 RBAC**: 用户、角色、权限、菜单管理
 - 🌐 **多租户支持**: 域管理和数据隔离
 - ⚡ **高性能**: Redis 缓存 + 限流中间件
@@ -99,39 +99,11 @@
 
 访问 <http://localhost:9999> 查看 API 文档。
 
-## 开发命令
-
-### 开发相关
-
-```bash
-pnpm dev          # 启动开发服务器（文件监听）
-pnpm build        # 生产构建
-pnpm start        # 启动生产服务器
-pnpm typecheck    # TypeScript 类型检查
-pnpm lint         # ESLint 代码检查
-pnpm lint:fix     # 自动修复 ESLint 问题
-pnpm test         # 运行测试
-```
-
-### 数据库相关
-
-```bash
-# 开发环境
-pnpm push              # 直接推送架构变更到开发数据库
-pnpm studio            # 打开 Drizzle Studio 数据库管理界面
-pnpm seed              # 执行数据填充
-pnpm sync:permissions  # 同步权限配置
-
-# 生产环境部署
-pnpm generate          # 生成 Drizzle 迁移文件
-pnpm migrate           # 执行迁移到生产数据库
-```
-
 ## 项目架构
 
 ### 路由架构
 
-应用使用三层路由结构，在 `src/app.ts` 中定义：
+应用使用多层路由结构，在 `src/app.ts` 中定义：
 
 1. **公共路由** (`/routes/public/`) - 无需认证
 2. **客户端路由** (`/routes/client/`) - JWT 认证
@@ -170,39 +142,6 @@ src/
 - **日志**: Pino with hono-pino
 - **限流**: hono-rate-limiter + rate-limit-redis
 - **验证**: Zod with OpenAPI schema generation
-
-## 核心功能
-
-### 用户管理
-
-- 用户注册、登录、个人信息管理
-- 密码安全（Argon2 哈希）
-- JWT 令牌认证
-
-### 权限控制
-
-- 基于 Casbin 的 RBAC 模型
-- 角色、权限、菜单管理
-- 细粒度权限控制
-
-### 多租户支持
-
-- 域管理和数据隔离
-- 租户级别的配置管理
-- 跨域数据访问控制
-
-### 系统配置
-
-- 全局参数配置
-- 运行时配置热更新
-- 环境变量管理
-
-## API 文档
-
-启动开发服务器后，访问以下地址查看 API 文档：
-
-- **Scalar UI**: <http://localhost:9999/reference>
-- **OpenAPI JSON**: <http://localhost:9999/doc>
 
 ## 开发规范
 
