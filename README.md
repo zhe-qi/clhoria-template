@@ -1,6 +1,6 @@
 # Hono Template
 
-基于 Hono 的后端模板项目，使用 TypeScript、Drizzle ORM 和 PostgreSQL，实现严格路由分离的多层架构（公共、客户端、管理端）。
+现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。集成 Drizzle ORM + PostgreSQL 数据层，实现完整的 RBAC 权限体系、多租户架构和 OpenAPI 规范。支持多层路由分离、JWT 认证、Redis 缓存、限流中间件等企业级功能，提供开箱即用的后端解决方案。
 
 ## 项目特性
 
@@ -262,18 +262,6 @@ pnpm build
 pnpm start
 ```
 
-## 贡献指南
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add some amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 创建 Pull Request
-
-## 许可证
-
-MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
-
 ## Claude Code 配置
 
 如果使用 Claude Code 开发此项目，建议配置以下 MCP 插件以获得更好的开发体验：
@@ -349,3 +337,15 @@ MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
 ## 支持
 
 如有问题或建议，请创建 [Issue](https://github.com/your-repo/issues) 或联系维护者。
+
+## 贡献指南
+
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 创建 Pull Request
+
+## 许可证
+
+MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
