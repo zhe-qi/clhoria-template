@@ -9,30 +9,24 @@ export async function initSysUserRole() {
   const users = await db.select({ id: sysUser.id, username: sysUser.username }).from(sysUser);
   const roles = await db.select({ id: sysRole.id, code: sysRole.code }).from(sysRole);
 
-  const superUser = users.find(u => u.username === "super");
   const adminUser = users.find(u => u.username === "admin");
   const normalUser = users.find(u => u.username === "user");
 
   const superRole = roles.find(r => r.code === "ROLE_SUPER");
-  const adminRole = roles.find(r => r.code === "ROLE_ADMIN");
   const userRole = roles.find(r => r.code === "ROLE_USER");
 
-  if (!superUser || !adminUser || !normalUser) {
+  if (!adminUser || !normalUser) {
     throw new Error("未找到必要的用户数据");
   }
 
-  if (!superRole || !adminRole || !userRole) {
+  if (!superRole || !userRole) {
     throw new Error("未找到必要的角色数据");
   }
 
   const data = [
     {
-      userId: superUser.id,
-      roleId: superRole.id,
-    },
-    {
       userId: adminUser.id,
-      roleId: adminRole.id,
+      roleId: superRole.id,
     },
     {
       userId: normalUser.id,

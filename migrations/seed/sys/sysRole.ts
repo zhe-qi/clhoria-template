@@ -29,15 +29,6 @@ export async function initSysRole() {
     // 插入其他角色，pid 指向超级管理员
     const otherRoles = [
       {
-        code: "ROLE_ADMIN",
-        name: "管理员",
-        description: "管理员",
-        pid: superRole[0].id,
-        status: 1,
-        createdBy: "-1",
-        updatedBy: null,
-      },
-      {
         code: "ROLE_USER",
         name: "用户",
         description: "用户",

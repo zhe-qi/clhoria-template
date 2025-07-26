@@ -10,10 +10,9 @@ export async function initSysRoleMenu() {
   const menus = await db.select({ id: sysMenu.id, routeName: sysMenu.routeName }).from(sysMenu);
 
   const superRole = roles.find(r => r.code === "ROLE_SUPER");
-  const adminRole = roles.find(r => r.code === "ROLE_ADMIN");
   const userRole = roles.find(r => r.code === "ROLE_USER");
 
-  if (!superRole || !adminRole || !userRole) {
+  if (!superRole || !userRole) {
     throw new Error("未找到必要的角色数据");
   }
 
@@ -23,22 +22,6 @@ export async function initSysRoleMenu() {
   for (const menu of menus) {
     data.push({
       roleId: superRole.id,
-      menuId: menu.id,
-      domain: "default",
-    });
-  }
-
-  // 普通管理员拥有基础菜单权限
-  const adminMenus = menus.filter(m =>
-    m.routeName === "home"
-    || m.routeName === "manage"
-    || m.routeName === "manage_user"
-    || m.routeName === "manage_role",
-  );
-
-  for (const menu of adminMenus) {
-    data.push({
-      roleId: adminRole.id,
       menuId: menu.id,
       domain: "default",
     });

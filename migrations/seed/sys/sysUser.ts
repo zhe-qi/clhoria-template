@@ -11,19 +11,6 @@ export async function initSysUser() {
 
   const data = [
     {
-      username: "super",
-      password: defaultPassword,
-      domain: "default",
-      builtIn: true,
-      avatar: "https://dummyimage.com/200x200/4ADE80/ffffff&text=S",
-      email: "super@example.com",
-      phoneNumber: "18511111111",
-      nickName: "super",
-      status: 1,
-      createdBy: "-1",
-      updatedBy: null,
-    },
-    {
       username: "admin",
       password: defaultPassword,
       domain: "default",
