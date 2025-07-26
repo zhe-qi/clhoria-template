@@ -8,6 +8,7 @@ import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
 import env from "@/env";
 import { AuthType, getUserRolesKey, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { redisClient } from "@/lib/redis";
+import { getIPAddress } from "@/services/ip";
 import { pick } from "@/utils";
 
 import type { AuthRouteHandlerType } from "./auth.index";
@@ -82,6 +83,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   // 保存 token 记录
   const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
   const userAgent = c.req.header("user-agent") || "unknown";
+  const address = await getIPAddress(clientIP);
 
   // 先撤销该用户的所有活跃 token
   await db.update(sysTokens)
@@ -99,7 +101,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     username: user.username,
     domain: user.domain,
     ip: clientIP,
-    address: "unknown",
+    address,
     userAgent,
     requestId: crypto.randomUUID(),
     type: TokenType.WEB,
@@ -112,7 +114,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     username: user.username,
     domain: user.domain,
     ip: clientIP,
-    address: "unknown",
+    address,
     userAgent,
     requestId: crypto.randomUUID(),
     type: AuthType.PASSWORD,

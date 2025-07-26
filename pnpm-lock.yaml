@@ -53,6 +53,9 @@ importers:
       hono-rate-limiter:
         specifier: ^0.4.2
         version: 0.4.2(hono@4.8.7)
+      iconv-lite:
+        specifier: ^0.6.3
+        version: 0.6.3
       ioredis:
         specifier: ^5.6.1
         version: 5.6.1
