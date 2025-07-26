@@ -1,13 +1,9 @@
-import { pinoLogger as logger } from "hono-pino";
-import pino from "pino";
-import pretty from "pino-pretty";
+import { pinoLogger as honoLogger } from "hono-pino";
 
-import env from "@/env";
+import { logger } from "@/lib/logger";
 
 export function pinoLogger() {
-  return logger({
-    pino: pino({
-      level: env.LOG_LEVEL || "info",
-    }, env.NODE_ENV === "production" ? undefined : pretty()),
+  return honoLogger({
+    pino: logger,
   });
 }

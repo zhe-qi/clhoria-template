@@ -7,6 +7,7 @@ import type { DictionaryItem } from "@/db/schema";
 import db from "@/db";
 import { sysDictionaries } from "@/db/schema";
 import { CacheConfig, getDictionariesAllKey, getDictionaryKey } from "@/lib/enums/cache";
+import { logger } from "@/lib/logger";
 import { pagination } from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
 
@@ -53,8 +54,8 @@ export async function setCachedDictionary(code: string, data: any) {
       JSON.stringify(data),
     );
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error, code }, "设置字典缓存失败");
   }
 }
 
@@ -69,8 +70,8 @@ export async function setCachedNullDictionary(code: string) {
       JSON.stringify(CacheConfig.NULL_CACHE_VALUE),
     );
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error, code }, "设置空值字典缓存失败");
   }
 }
 
@@ -82,8 +83,8 @@ export async function deleteCachedDictionary(code: string) {
     await redisClient.del(getDictionaryKey(code));
     await redisClient.del(getDictionariesAllKey());
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error, code }, "删除字典缓存失败");
   }
 }
 
@@ -99,8 +100,8 @@ export async function clearAllDictionaryCache() {
     }
     await redisClient.del(getDictionariesAllKey());
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error }, "清除所有字典缓存失败");
   }
 }
 

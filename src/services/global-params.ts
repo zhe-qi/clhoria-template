@@ -5,6 +5,7 @@ import { and, eq, ilike, or } from "drizzle-orm";
 import db from "@/db";
 import { globalParams } from "@/db/schema";
 import { CacheConfig, getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enums/cache";
+import { logger } from "@/lib/logger";
 import { pagination } from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
 
@@ -51,8 +52,8 @@ export async function setCachedParam(key: string, data: any) {
       JSON.stringify(data),
     );
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error, key }, "设置全局参数缓存失败");
   }
 }
 
@@ -67,8 +68,8 @@ export async function setCachedNullParam(key: string) {
       JSON.stringify(CacheConfig.NULL_CACHE_VALUE),
     );
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error, key }, "设置空值全局参数缓存失败");
   }
 }
 
@@ -80,8 +81,8 @@ export async function deleteCachedParam(key: string) {
     await redisClient.del(getGlobalParamKey(key));
     await redisClient.del(getGlobalParamsAllKey());
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error, key }, "删除全局参数缓存失败");
   }
 }
 
@@ -97,8 +98,8 @@ export async function clearAllCache() {
     }
     await redisClient.del(getGlobalParamsAllKey());
   }
-  catch {
-    // Redis错误不影响业务流程，静默处理
+  catch (error) {
+    logger.error({ error }, "清除所有全局参数缓存失败");
   }
 }
 
