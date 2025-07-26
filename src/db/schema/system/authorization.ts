@@ -36,11 +36,11 @@ export const assignmentResponseSchema = z.object({
 // 菜单路由Schema
 const menuRouteMetaSchema = z.object({
   title: z.string().describe("菜单标题"),
-  icon: z.string().optional().describe("图标"),
+  icon: z.string().nullable().optional().describe("图标"),
   order: z.number().describe("排序"),
-  hideInMenu: z.boolean().optional().describe("是否在菜单中隐藏"),
-  keepAlive: z.boolean().optional().describe("是否缓存"),
-  activeMenu: z.string().optional().describe("激活菜单"),
+  hideInMenu: z.boolean().nullable().optional().describe("是否在菜单中隐藏"),
+  keepAlive: z.boolean().nullable().optional().describe("是否缓存"),
+  activeMenu: z.string().nullable().optional().describe("激活菜单"),
   constant: z.boolean().optional().describe("是否常量路由"),
 }).describe("路由元信息");
 
@@ -68,11 +68,11 @@ export const menuRouteSchema: z.ZodType<MenuRouteType> = z.lazy(() => z.object({
       type: "object",
       properties: {
         title: { type: "string", description: "菜单标题" },
-        icon: { type: "string", description: "图标" },
+        icon: { type: "string", nullable: true, description: "图标" },
         order: { type: "number", description: "排序" },
-        hideInMenu: { type: "boolean", description: "是否在菜单中隐藏" },
-        keepAlive: { type: "boolean", description: "是否缓存" },
-        activeMenu: { type: "string", description: "激活菜单" },
+        hideInMenu: { type: "boolean", nullable: true, description: "是否在菜单中隐藏" },
+        keepAlive: { type: "boolean", nullable: true, description: "是否缓存" },
+        activeMenu: { type: "string", nullable: true, description: "激活菜单" },
         constant: { type: "boolean", description: "是否常量路由" },
       },
       required: ["title", "order"],

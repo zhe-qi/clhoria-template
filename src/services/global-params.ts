@@ -1,9 +1,13 @@
 import type { InferSelectModel } from "drizzle-orm";
+import type z from "zod/v4";
 
 import { and, eq, ilike, or } from "drizzle-orm";
 
+import type { insertGlobalParamsSchema, patchGlobalParamsSchema, selectGlobalParamsSchema } from "@/db/schema";
+
 import db from "@/db";
 import { globalParams } from "@/db/schema";
+import { Status } from "@/lib/enums";
 import { CacheConfig, getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enums/cache";
 import { logger } from "@/lib/logger";
 import { pagination } from "@/lib/pagination";
@@ -22,6 +26,10 @@ export interface GlobalParamsListOptions {
 export interface GlobalParamsBatchOptions {
   publicOnly?: "true" | "false";
 }
+
+type SelectGlobalParamsData = z.infer<typeof selectGlobalParamsSchema>;
+type UpdateGlobalParamsData = z.infer<typeof patchGlobalParamsSchema>;
+type InsertGlobalParamsData = z.infer<typeof insertGlobalParamsSchema>;
 
 /**
  * 从 Redis 缓存中获取全局参数
@@ -45,7 +53,7 @@ export async function getCachedParam(key: string) {
 /**
  * 设置全局参数到 Redis 缓存
  */
-export async function setCachedParam(key: string, data: any) {
+export async function setCachedParam(key: string, data: InsertGlobalParamsData) {
   try {
     await redisClient.setex(
       getGlobalParamKey(key),
@@ -120,10 +128,10 @@ export async function getPublicList(options: GlobalParamsListOptions = {}) {
   }
 
   // 构建查询条件
-  let whereCondition = eq(globalParams.status, 1);
+  let whereCondition = eq(globalParams.status, Status.ENABLED);
 
   if (publicOnly === "true") {
-    whereCondition = and(whereCondition, eq(globalParams.isPublic, 1))!;
+    whereCondition = and(whereCondition, eq(globalParams.isPublic, Status.ENABLED))!;
   }
 
   const result = await db
@@ -153,7 +161,7 @@ export async function getAdminList(options: GlobalParamsListOptions = {}) {
     pagination: paginationOptions = { page: 1, limit: 20 },
   } = options;
 
-  let whereCondition = eq(globalParams.status, 1);
+  let whereCondition = eq(globalParams.status, Status.ENABLED);
 
   if (search) {
     whereCondition = and(
@@ -194,8 +202,8 @@ export async function getPublicParam(key: string) {
     .from(globalParams)
     .where(and(
       eq(globalParams.key, key),
-      eq(globalParams.status, 1),
-      eq(globalParams.isPublic, 1), // 只允许访问公开参数
+      eq(globalParams.status, Status.ENABLED),
+      eq(globalParams.isPublic, Status.ENABLED), // 只允许访问公开参数
     ));
 
   if (param) {
@@ -224,7 +232,7 @@ export async function getAdminParam(key: string) {
     .from(globalParams)
     .where(and(
       eq(globalParams.key, key),
-      eq(globalParams.status, 1),
+      eq(globalParams.status, Status.ENABLED),
     ));
 
   if (param) {
@@ -241,7 +249,7 @@ export async function getAdminParam(key: string) {
 /**
  * 创建全局参数
  */
-export async function createParam(data: any, userId: string) {
+export async function createParam(data: InsertGlobalParamsData, userId: string) {
   const [created] = await db
     .insert(globalParams)
     .values({
@@ -259,7 +267,7 @@ export async function createParam(data: any, userId: string) {
 /**
  * 更新全局参数
  */
-export async function updateParam(key: string, data: any, userId: string) {
+export async function updateParam(key: string, data: UpdateGlobalParamsData, userId: string) {
   const [updated] = await db
     .update(globalParams)
     .set({
@@ -299,7 +307,7 @@ export async function deleteParam(key: string) {
  */
 export async function batchGetParams(keys: string[], options: GlobalParamsBatchOptions = {}) {
   const { publicOnly = "true" } = options;
-  const result: Record<string, any> = {};
+  const result: Record<string, SelectGlobalParamsData | null> = {};
 
   // 尝试从缓存批量获取
   const cacheKeys = keys.map(key => getGlobalParamKey(key));
@@ -330,10 +338,10 @@ export async function batchGetParams(keys: string[], options: GlobalParamsBatchO
 
   // 从数据库获取未缓存的参数
   if (missingKeys.length > 0) {
-    let whereCondition = eq(globalParams.status, 1);
+    let whereCondition = eq(globalParams.status, Status.ENABLED);
 
     if (publicOnly === "true") {
-      whereCondition = and(whereCondition, eq(globalParams.isPublic, 1))!;
+      whereCondition = and(whereCondition, eq(globalParams.isPublic, Status.ENABLED))!;
     }
 
     const dbParams = await db

@@ -1,3 +1,4 @@
+import { z } from "@hono/zod-openapi";
 import { relations } from "drizzle-orm";
 import { boolean, integer, pgEnum, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -77,3 +78,14 @@ export const insertSysMenuSchema = createInsertSchema(sysMenu, {
 });
 
 export const patchSysMenuSchema = insertSysMenuSchema.partial();
+
+// 菜单树Schema - 与服务层 TreeNode<T> 类型匹配
+export const menuTreeSchema = selectSysMenuSchema.extend({
+  children: z.unknown().optional(),
+}).passthrough();
+
+// 用户路由响应Schema（适用于 sys-menus 模块）
+export const userRoutesSchema = z.object({
+  routes: z.array(menuTreeSchema),
+  home: z.string().describe("首页路由"),
+});

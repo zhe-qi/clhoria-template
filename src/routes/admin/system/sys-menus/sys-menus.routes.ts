@@ -51,9 +51,7 @@ export const tree = createRoute({
   summary: "查询菜单树形结构",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSysMenuSchema.extend({
-        children: z.array(selectSysMenuSchema).optional(),
-      })),
+      z.array(selectSysMenuSchema.partial()),
       "查询成功",
     ),
   },
@@ -216,10 +214,8 @@ export const getUserRoutes = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        routes: z.array(selectSysMenuSchema.extend({
-          children: z.array(selectSysMenuSchema).optional(),
-        })),
-        home: z.string().describe("首页路由"),
+        routes: z.array(selectSysMenuSchema.partial()),
+        home: z.string(),
       }),
       "获取成功",
     ),

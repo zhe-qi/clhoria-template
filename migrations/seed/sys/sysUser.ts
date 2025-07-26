@@ -13,7 +13,7 @@ export async function initSysUser() {
     {
       username: "super",
       password: defaultPassword,
-      domain: "built-in",
+      domain: "default",
       builtIn: true,
       avatar: "https://dummyimage.com/200x200/4ADE80/ffffff&text=S",
       email: "super@example.com",
@@ -26,7 +26,7 @@ export async function initSysUser() {
     {
       username: "admin",
       password: defaultPassword,
-      domain: "built-in",
+      domain: "default",
       builtIn: true,
       avatar: "https://dummyimage.com/200x200/F59E0B/ffffff&text=A",
       email: "admin@example.com",
@@ -39,7 +39,7 @@ export async function initSysUser() {
     {
       username: "user",
       password: defaultPassword,
-      domain: "built-in",
+      domain: "default",
       builtIn: true,
       avatar: "https://dummyimage.com/200x200/8B5CF6/ffffff&text=U",
       email: "user@example.com",

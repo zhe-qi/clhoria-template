@@ -1,11 +1,14 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import type z from "zod/v4";
 
 import { and, eq, ilike, or } from "drizzle-orm";
 
-import type { DictionaryItem } from "@/db/schema";
+import type { DictionaryItem, insertDictionariesSchema, patchDictionariesSchema, selectDictionariesSchema } from "@/db/schema";
+import type { StatusType } from "@/lib/enums";
 
 import db from "@/db";
 import { sysDictionaries } from "@/db/schema";
+import { Status } from "@/lib/enums";
 import { CacheConfig, getDictionariesAllKey, getDictionaryKey } from "@/lib/enums/cache";
 import { logger } from "@/lib/logger";
 import { pagination } from "@/lib/pagination";
@@ -13,7 +16,7 @@ import { redisClient } from "@/lib/redis";
 
 export interface DictionariesListOptions {
   search?: string;
-  status?: 0 | 1;
+  status?: StatusType;
   enabledOnly?: boolean;
   pagination?: {
     page: number;
@@ -24,6 +27,10 @@ export interface DictionariesListOptions {
 export interface DictionariesBatchOptions {
   enabledOnly?: boolean;
 }
+
+type UpdateDictionaryData = z.infer<typeof patchDictionariesSchema>;
+type SelectDictionaryData = z.infer<typeof selectDictionariesSchema>;
+type InsertDictionaryData = z.infer<typeof insertDictionariesSchema>;
 
 /**
  * 从 Redis 缓存中获取字典
@@ -47,7 +54,7 @@ export async function getCachedDictionary(code: string) {
 /**
  * 设置字典到 Redis 缓存
  */
-export async function setCachedDictionary(code: string, data: any) {
+export async function setCachedDictionary(code: string, data: InsertDictionaryData) {
   try {
     await redisClient.setex(
       getDictionaryKey(code),
@@ -122,7 +129,7 @@ export async function getPublicDictionaries(options: DictionariesListOptions = {
   }
 
   // 构建查询条件
-  const whereCondition = enabledOnly ? eq(sysDictionaries.status, 1) : undefined;
+  const whereCondition = enabledOnly ? eq(sysDictionaries.status, Status.ENABLED) : undefined;
 
   const result = await db
     .select()
@@ -152,7 +159,7 @@ export async function getAdminDictionaries(options: DictionariesListOptions = {}
     pagination: paginationOptions = { page: 1, limit: 20 },
   } = options;
 
-  let whereCondition = eq(sysDictionaries.status, 1);
+  let whereCondition = eq(sysDictionaries.status, Status.ENABLED);
 
   if (search) {
     whereCondition = and(
@@ -194,7 +201,7 @@ export async function getPublicDictionary(code: string) {
     .from(sysDictionaries)
     .where(and(
       eq(sysDictionaries.code, code),
-      eq(sysDictionaries.status, 1), // 只允许访问启用的字典
+      eq(sysDictionaries.status, Status.ENABLED), // 只允许访问启用的字典
     ));
 
   if (dictionary) {
@@ -237,7 +244,7 @@ export async function getAdminDictionary(code: string) {
 /**
  * 创建字典
  */
-export async function createDictionary(data: any, userId: string) {
+export async function createDictionary(data: InferInsertModel<typeof sysDictionaries>, userId: string) {
   const [created] = await db
     .insert(sysDictionaries)
     .values({
@@ -255,7 +262,7 @@ export async function createDictionary(data: any, userId: string) {
 /**
  * 更新字典
  */
-export async function updateDictionary(code: string, data: any, userId: string) {
+export async function updateDictionary(code: string, data: UpdateDictionaryData, userId: string) {
   const [updated] = await db
     .update(sysDictionaries)
     .set({
@@ -295,7 +302,7 @@ export async function deleteDictionary(code: string) {
  */
 export async function batchGetDictionaries(codes: string[], options: DictionariesBatchOptions = {}) {
   const { enabledOnly = true } = options;
-  const result: Record<string, any> = {};
+  const result: Record<string, InferSelectModel<typeof sysDictionaries> | null> = {};
 
   // 尝试从缓存批量获取
   const cacheKeys = codes.map(code => getDictionaryKey(code));
@@ -356,21 +363,21 @@ export async function batchGetDictionaries(codes: string[], options: Dictionarie
 /**
  * 获取字典项（从字典的items字段中提取）
  */
-export function getDictionaryItems(dictionary: InferSelectModel<typeof sysDictionaries>): DictionaryItem[] {
+export function getDictionaryItems(dictionary: SelectDictionaryData): DictionaryItem[] {
   if (!dictionary || !dictionary.items) {
     return [];
   }
 
   // 过滤启用的字典项并按排序排列
   return dictionary.items
-    .filter(item => item.status === 1)
+    .filter(item => item.status === Status.ENABLED)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 /**
  * 通过编码获取字典项
  */
-export function getDictionaryItemByCode(dictionary: InferSelectModel<typeof sysDictionaries>, itemCode: string): DictionaryItem | null {
+export function getDictionaryItemByCode(dictionary: SelectDictionaryData, itemCode: string): DictionaryItem | null {
   const items = getDictionaryItems(dictionary);
   return items.find(item => item.code === itemCode) || null;
 }

@@ -7,14 +7,6 @@ import { sysDomain } from "@/db/schema";
 export async function initSysDomain() {
   const data = [
     {
-      code: "built-in",
-      name: "内置域",
-      description: "系统内置域",
-      status: 1,
-      createdBy: "-1",
-      updatedBy: null,
-    },
-    {
       code: "default",
       name: "默认域",
       description: "默认域",

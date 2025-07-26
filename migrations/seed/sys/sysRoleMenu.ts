@@ -24,7 +24,7 @@ export async function initSysRoleMenu() {
     data.push({
       roleId: superRole.id,
       menuId: menu.id,
-      domain: "built-in",
+      domain: "default",
     });
   }
 
@@ -40,7 +40,7 @@ export async function initSysRoleMenu() {
     data.push({
       roleId: adminRole.id,
       menuId: menu.id,
-      domain: "built-in",
+      domain: "default",
     });
   }
 
@@ -51,7 +51,7 @@ export async function initSysRoleMenu() {
     data.push({
       roleId: userRole.id,
       menuId: menu.id,
-      domain: "built-in",
+      domain: "default",
     });
   }
 

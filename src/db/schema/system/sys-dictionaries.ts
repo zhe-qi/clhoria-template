@@ -30,34 +30,24 @@ export interface DictionaryItem {
 export const sysDictionaries = pgTable("sys_dictionaries", {
   /** 主键ID */
   id: uuid("id").primaryKey().defaultRandom(),
-
   /** 字典编码，唯一标识 */
   code: varchar("code", { length: 100 }).notNull(),
-
   /** 字典名称 */
   name: varchar("name", { length: 200 }).notNull(),
-
   /** 字典描述 */
   description: varchar("description", { length: 500 }),
-
   /** 字典项数组 */
   items: jsonb("items").$type<DictionaryItem[]>().default([]).notNull(),
-
   /** 状态: 1=启用 0=禁用 */
   status: integer("status").default(1).notNull(),
-
   /** 排序 */
   sortOrder: integer("sort_order").default(0).notNull(),
-
   /** 创建时间 */
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-
   /** 更新时间 */
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-
   /** 创建人 */
   createdBy: varchar("created_by", { length: 50 }),
-
   /** 更新人 */
   updatedBy: varchar("updated_by", { length: 50 }),
 });

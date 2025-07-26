@@ -92,7 +92,7 @@ async function assignPermissionsToSuperAdmin() {
         v0: superRole.id,
         v1: perm.resource,
         v2: perm.action,
-        v3: "built-in",
+        v3: "default",
         v4: null,
         v5: null,
       }));
