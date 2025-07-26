@@ -1,26 +1,29 @@
 import type { Adapter, Model } from "casbin";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { z } from "zod";
 
 import { Helper } from "casbin";
 import { and, eq, or } from "drizzle-orm";
 
-import type { insertCasbinRuleSchema } from "@/db/schema";
+import type { casbinRule, insertCasbinRuleSchema, sysRole } from "@/db/schema";
+import type * as schema from "@/db/schema";
 
-import db from "@/db";
-import { casbinRule, sysRole } from "@/db/schema";
 import { Status } from "@/lib/enums";
 
 type TCasinTable = z.infer<typeof insertCasbinRuleSchema>;
+type PostgresJsDatabaseSchema = PostgresJsDatabase<typeof schema>;
 
 export class DrizzleCasbinAdapter implements Adapter {
-  private readonly db: typeof db;
+  private readonly db: PostgresJsDatabaseSchema;
   private readonly schema: typeof casbinRule;
   private readonly roleSchema: typeof sysRole;
 
   private filtered = false;
 
-  constructor() {
-    [this.db, this.schema, this.roleSchema] = [db, casbinRule, sysRole];
+  constructor(db: PostgresJsDatabaseSchema, casbinRuleSchema: typeof casbinRule, sysRoleSchema: typeof sysRole) {
+    this.db = db;
+    this.schema = casbinRuleSchema;
+    this.roleSchema = sysRoleSchema;
   }
 
   async loadPolicy(model: Model): Promise<void> {
@@ -117,8 +120,8 @@ export class DrizzleCasbinAdapter implements Adapter {
     await this.db.delete(this.schema).where(and(eq(this.schema.ptype, ptype), ...conditions));
   }
 
-  static async newAdapter() {
-    return new DrizzleCasbinAdapter();
+  static async newAdapter(db: PostgresJsDatabaseSchema, casbinRuleSchema: typeof casbinRule, sysRoleSchema: typeof sysRole) {
+    return new DrizzleCasbinAdapter(db, casbinRuleSchema, sysRoleSchema);
   }
 
   isFiltered(): boolean {
