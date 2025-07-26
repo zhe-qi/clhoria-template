@@ -16,14 +16,36 @@
 
 ## 快速开始
 
-### 环境要求
+### 使用 Docker Compose（推荐）
+
+最简单的方式是使用 Docker Compose 一键启动：
+
+1. **复制配置文件**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **启动服务**
+
+   ```bash
+   docker-compose up --build
+   ```
+
+   这将自动启动 PostgreSQL、Redis 和应用服务。访问 <http://localhost:9999> 查看 API 文档。
+
+### 本地开发环境
+
+如需本地开发，请按以下步骤配置：
+
+#### 环境要求
 
 - Node.js >= 18
 - pnpm >= 8
 - PostgreSQL >= 14
 - Redis >= 6
 
-### 安装步骤
+#### 安装步骤
 
 1. **克隆项目**
 
@@ -44,24 +66,12 @@
    cp .env.example .env
    ```
 
-   编辑 `.env` 文件，填写必要的配置：
-
-   ```bash
-   # 数据库连接
-   DATABASE_URL="postgresql://username:password@localhost:5432/database"
-
-   # Redis 连接
-   REDIS_URL="redis://localhost:6379/0"
-
-   # JWT 密钥（执行命令生成）
-   CLIENT_JWT_SECRET="执行: openssl rand -base64 32"
-   ADMIN_JWT_SECRET="执行: openssl rand -base64 32"
-   ```
+   编辑 `.env` 文件，填写必要的配置。
 
 4. **初始化数据库**
 
    ```bash
-   # 推送数据库架构
+   # 推送数据库架构到开发环境
    pnpm push
 
    # 填充初始数据
@@ -69,6 +79,16 @@
 
    # 同步权限数据
    pnpm sync:permissions
+   ```
+
+   **注意**：生产环境部署时，需要先验证迁移：
+
+   ```bash
+   # 生成迁移文件
+   pnpm generate
+
+   # 执行迁移（生产环境）
+   pnpm migrate
    ```
 
 5. **启动开发服务器**
@@ -96,11 +116,15 @@ pnpm test         # 运行测试
 ### 数据库相关
 
 ```bash
-pnpm generate           # 生成 Drizzle 迁移文件
-pnpm push              # 直接推送架构变更到数据库
+# 开发环境
+pnpm push              # 直接推送架构变更到开发数据库
 pnpm studio            # 打开 Drizzle Studio 数据库管理界面
 pnpm seed              # 执行数据填充
 pnpm sync:permissions  # 同步权限配置
+
+# 生产环境部署
+pnpm generate          # 生成 Drizzle 迁移文件
+pnpm migrate           # 执行迁移到生产数据库
 ```
 
 ## 项目架构
@@ -280,12 +304,6 @@ MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
   - 为所有端点路由添加完整的单元测试
   - 集成测试用例，确保 API 功能正确性
   - 设置测试覆盖率目标和自动化测试流程
-
-- [ ] **容器化支持**
-
-  - 添加 Dockerfile 和 docker-compose 配置
-  - 完善数据库迁移脚本和自动化部署
-  - 支持多环境部署配置
 
 - [ ] **工作流自动化**
   - 集成 n8n 工作流引擎
