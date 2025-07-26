@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /* eslint-disable no-console */
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -9,7 +9,6 @@ import type { DictionaryItem } from "@/db/schema";
 
 import db from "@/db";
 import { sysDictionaries } from "@/db/schema";
-import { CacheConfig } from "@/lib/enums/cache";
 import { clearAllDictionaryCache } from "@/services/dictionary";
 
 /**

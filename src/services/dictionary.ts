@@ -120,7 +120,7 @@ export async function getPublicDictionaries(options: DictionariesListOptions = {
   }
 
   // 构建查询条件
-  let whereCondition = enabledOnly ? eq(sysDictionaries.status, 1) : undefined;
+  const whereCondition = enabledOnly ? eq(sysDictionaries.status, 1) : undefined;
 
   const result = await db
     .select()
@@ -324,7 +324,7 @@ export async function batchGetDictionaries(codes: string[], options: Dictionarie
 
   // 从数据库获取未缓存的字典
   if (missingCodes.length > 0) {
-    let whereCondition = enabledOnly ? eq(sysDictionaries.status, 1) : undefined;
+    const whereCondition = enabledOnly ? eq(sysDictionaries.status, 1) : undefined;
 
     const dbDictionaries = await db
       .select()
