@@ -10,7 +10,7 @@ import { AuthType, getUserRolesKey, Status, TokenStatus, TokenType } from "@/lib
 import { logger } from "@/lib/logger";
 import { redisClient } from "@/lib/redis";
 import { getIPAddress } from "@/services/ip";
-import { pick } from "@/utils";
+import { omit } from "@/utils";
 
 import type { AuthRouteHandlerType } from "./auth.index";
 
@@ -117,7 +117,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     createdBy: "system",
   });
 
-  const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
+  const responseUser = omit(user, ["password"]);
 
   return c.json({ token: accessToken, refreshToken, user: responseUser }, HttpStatusCodes.OK);
 };
@@ -243,7 +243,7 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
       return c.json({ message: "用户不存在" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
+    const responseUser = omit(user, ["password"]);
 
     return c.json(responseUser, HttpStatusCodes.OK);
   }

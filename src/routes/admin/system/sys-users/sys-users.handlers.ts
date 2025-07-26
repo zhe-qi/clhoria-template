@@ -9,7 +9,7 @@ import { sysUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 import { assignRolesToUser, createUser } from "@/services/user";
-import { pickContext } from "@/utils";
+import { omit, pickContext } from "@/utils";
 
 import type { SysUsersRouteHandlerType } from "./sys-users.index";
 
@@ -35,7 +35,7 @@ export const list: SysUsersRouteHandlerType<"list"> = async (c) => {
   );
 
   // 移除密码字段
-  const data = result.data.map(({ password, ...user }) => user);
+  const data = result.data.map(user => omit(user, ["password"]));
 
   return c.json({ data, meta: result.meta }, HttpStatusCodes.OK);
 };
@@ -53,7 +53,7 @@ export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
       avatar: body.avatar || undefined,
     });
 
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = omit(user, ["password"]);
     return c.json(userWithoutPassword, HttpStatusCodes.CREATED);
   }
   catch (error: any) {
@@ -80,7 +80,7 @@ export const get: SysUsersRouteHandlerType<"get"> = async (c) => {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const { password, ...userWithoutPassword } = user;
+  const userWithoutPassword = omit(user, ["password"]);
   return c.json(userWithoutPassword, HttpStatusCodes.OK);
 };
 
@@ -90,14 +90,13 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
   const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   // 不允许直接更新密码
-  const { password, ...updateData } = body as any;
+  const updateData = omit(body as any, ["password"]);
 
   const [updated] = await db
     .update(sysUser)
     .set({
       ...updateData,
       updatedBy: userId,
-      updatedAt: new Date(),
     })
     .where(and(
       eq(sysUser.id, id),
@@ -109,7 +108,7 @@ export const update: SysUsersRouteHandlerType<"update"> = async (c) => {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
-  const { password: _, ...userWithoutPassword } = updated;
+  const userWithoutPassword = omit(updated, ["password"]);
   return c.json(userWithoutPassword, HttpStatusCodes.OK);
 };
 
