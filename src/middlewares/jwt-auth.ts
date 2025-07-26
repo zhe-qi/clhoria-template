@@ -46,6 +46,7 @@ export function jwtAuth(): MiddlewareHandler {
 
     // 验证用户状态
     const userValidation = await validateUserStatus(userId, domain);
+
     if (!userValidation.valid) {
       return c.json({ message: userValidation.message }, HttpStatusCodes.UNAUTHORIZED);
     }

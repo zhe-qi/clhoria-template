@@ -32,7 +32,7 @@ export function casbin(): MiddlewareHandler {
     const userRoles = (await redisClient.smembers(key)).filter(role => role !== "__no_roles__");
 
     // 如果用户没有角色，返回禁止访问
-    if (userRoles.length === 0) {
+    if (userRoles.length < 1) {
       return c.json({ message: "Access denied: No roles assigned to user" }, HttpStatusCodes.FORBIDDEN);
     }
 

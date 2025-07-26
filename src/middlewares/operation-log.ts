@@ -20,10 +20,6 @@ interface OperationLogOptions {
 export function operationLog(options: OperationLogOptions): MiddlewareHandler {
   return async (c: Context, next) => {
     const startTime = new Date();
-    const requestId = uuidV7();
-
-    // 设置请求ID到上下文
-    c.set("requestId", requestId);
 
     // 获取请求信息
     const { method, path } = c.req;
@@ -46,6 +42,7 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
     // 执行实际的处理
     await next();
 
+    const requestId = c.get("requestId") || uuidV7();
     const endTime = new Date();
     const duration = differenceInMilliseconds(endTime, startTime);
 
