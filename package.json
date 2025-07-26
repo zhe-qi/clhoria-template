@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "npx simple-git-hooks",
     "dev": "tsx watch src/index.ts",
     "start": "cross-env NODE_ENV=production tsx dist/index.js",
     "typecheck": "tsc --noEmit",
@@ -53,7 +54,9 @@
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.31.0",
     "eslint-plugin-format": "^1.0.1",
+    "lint-staged": "^16.1.2",
     "rolldown": "1.0.0-beta.29",
+    "simple-git-hooks": "^2.13.0",
     "tsdown": "^0.13.0",
     "tsx": "^4.20.3",
     "typescript": "^5.9.1-rc",
@@ -64,6 +67,15 @@
       "better-sqlite3",
       "esbuild",
       "unrs-resolver"
+    ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "pnpm lint:fix",
+      "bash -c 'pnpm typecheck'"
     ]
   }
 }
