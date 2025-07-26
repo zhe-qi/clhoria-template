@@ -8,6 +8,13 @@
       "when": 1753501803859,
       "tag": "0000_eminent_ares",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753545483861,
+      "tag": "0001_solid_ikaris",
+      "breakpoints": true
     }
   ]
 }

@@ -73,8 +73,6 @@ export const ZodErrorCodes = {
   INVALID_DATE: "invalid_date",
   /** 无效UUID */
   INVALID_UUID: "invalid_uuid",
-  /** 无效邮箱 */
-  INVALID_EMAIL: "invalid_email",
   /** 无效URL */
   INVALID_URL: "invalid_url",
   /** 必填字段 */
@@ -104,8 +102,6 @@ export const ZodErrorMessages = {
   EXPECTED_OBJECT: "期望对象类型",
   /** 无效UUID格式消息 */
   INVALID_UUID: "Invalid uuid",
-  /** 无效邮箱格式消息 */
-  INVALID_EMAIL: "邮箱格式不正确",
   /** 无效URL格式消息 */
   INVALID_URL: "URL格式不正确",
   /** 字符串太短消息 */

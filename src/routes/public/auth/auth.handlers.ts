@@ -1,5 +1,5 @@
 import { hash, verify } from "@node-rs/argon2";
-import { and, eq, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { sign, verify as verifyJwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
@@ -16,9 +16,8 @@ import type { AuthRouteHandlerType } from "./auth.index";
 
 export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
-  const { identifier, password, domain } = body;
+  const { username, password, domain } = body;
 
-  // 支持用户名/邮箱/手机号登录
   const user = await db.query.sysUser.findFirst({
     with: {
       userRoles: {
@@ -28,11 +27,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       },
     },
     where: and(
-      or(
-        eq(sysUser.username, identifier),
-        eq(sysUser.email, identifier),
-        eq(sysUser.phoneNumber, identifier),
-      ),
+      eq(sysUser.username, username),
       eq(sysUser.domain, domain),
     ),
   });
@@ -122,7 +117,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     createdBy: "system",
   });
 
-  const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "email", "phoneNumber", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
+  const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
 
   return c.json({ token: accessToken, refreshToken, user: responseUser }, HttpStatusCodes.OK);
 };
@@ -139,11 +134,7 @@ export const adminRegister: AuthRouteHandlerType<"adminRegister"> = async (c) =>
   // 检查用户名是否已存在
   const existingUser = await db.query.sysUser.findFirst({
     where: and(
-      or(
-        eq(sysUser.username, userData.username),
-        ...(userData.email ? [eq(sysUser.email, userData.email)] : []),
-        ...(userData.phoneNumber ? [eq(sysUser.phoneNumber, userData.phoneNumber)] : []),
-      ),
+      eq(sysUser.username, userData.username),
       eq(sysUser.domain, userData.domain),
     ),
   });
@@ -252,7 +243,7 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
       return c.json({ message: "用户不存在" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "email", "phoneNumber", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
+    const responseUser = pick(user, ["id", "username", "domain", "builtIn", "avatar", "nickName", "status", "createdAt", "createdBy", "updatedAt", "updatedBy"]);
 
     return c.json(responseUser, HttpStatusCodes.OK);
   }

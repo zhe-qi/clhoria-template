@@ -50,8 +50,6 @@ export const create: SysUsersRouteHandlerType<"create"> = async (c) => {
       domain,
       createdBy: userId,
       // 处理可选字段
-      email: body.email || undefined,
-      phoneNumber: body.phoneNumber || undefined,
       avatar: body.avatar || undefined,
     });
 

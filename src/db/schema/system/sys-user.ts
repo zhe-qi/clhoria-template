@@ -14,8 +14,6 @@ export const sysUser = pgTable("sys_user", {
   domain: varchar({ length: 64 }).notNull(),
   builtIn: boolean().default(false),
   avatar: text(),
-  email: varchar({ length: 128 }).unique(),
-  phoneNumber: varchar({ length: 32 }).unique(),
   nickName: varchar({ length: 64 }).notNull(),
   status: statusEnum().notNull(),
 });
@@ -31,8 +29,6 @@ export const selectSysUserSchema = createSelectSchema(sysUser, {
   domain: schema => schema.describe("域/租户"),
   builtIn: schema => schema.describe("是否内置用户"),
   avatar: schema => schema.describe("头像"),
-  email: schema => schema.describe("邮箱"),
-  phoneNumber: schema => schema.describe("手机号"),
   nickName: schema => schema.describe("昵称"),
   status: schema => schema.describe("状态: 1=启用 0=禁用 -1=封禁"),
 });
@@ -54,3 +50,10 @@ export const patchSysUserSchema = insertSysUserSchema.partial();
 
 // 用于响应的 schema（不包含密码）
 export const responseSysUserSchema = selectSysUserSchema.omit({ password: true });
+
+// 用于登录的 schema（仅包含 username，password，domain ）
+export const loginSysUserSchema = insertSysUserSchema.pick({
+  username: true,
+  password: true,
+  domain: true,
+});

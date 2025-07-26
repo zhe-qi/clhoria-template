@@ -2,7 +2,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
-import { insertSysUserSchema, responseSysUserSchema } from "@/db/schema";
+import { insertSysUserSchema, loginSysUserSchema, responseSysUserSchema } from "@/db/schema";
 
 const tags = ["/auth (身份认证)"];
 
@@ -12,11 +12,7 @@ export const adminLogin = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      z.object({
-        identifier: z.string().describe("用户名/邮箱/手机号"),
-        password: z.string().describe("密码"),
-        domain: z.string().default("default").describe("域/租户"),
-      }),
+      loginSysUserSchema,
       "登录请求",
     ),
   },
