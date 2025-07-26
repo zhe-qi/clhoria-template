@@ -68,8 +68,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
-# 复制启动脚本
-COPY --from=builder /app/scripts/run.sh ./scripts/run.sh
+# 复制脚本目录
+COPY --from=builder /app/scripts ./scripts
 RUN chmod +x ./scripts/run.sh
 
 # 安装迁移脚本的依赖

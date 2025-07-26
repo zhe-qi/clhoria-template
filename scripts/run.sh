@@ -45,7 +45,25 @@ if [ $migration_exit_code -ne 0 ]; then
   fi
 fi
 
-echo "迁移完成，正在启动 Hono 应用服务器..."
+echo "迁移完成，开始同步权限端点..."
+
+# 同步权限端点
+cd /app && pnpm sync:permissions
+sync_exit_code=$?
+
+if [ $sync_exit_code -ne 0 ]; then
+  echo "权限同步失败，退出代码 $sync_exit_code"
+  
+  # 如果环境变量设置为忽略同步错误，则继续运行
+  if [ "$IGNORE_SYNC_ERRORS" = "true" ]; then
+    echo "IGNORE_SYNC_ERRORS=true，忽略权限同步错误并继续..."
+  else
+    echo "退出应用，如需忽略权限同步错误并强制启动应用，请设置环境变量 IGNORE_SYNC_ERRORS=true"
+    exit $sync_exit_code
+  fi
+fi
+
+echo "权限同步完成，正在启动 Hono 应用服务器..."
 echo "服务器端口: ${PORT:-9999}"
 
 cd /app && node dist/index.js
