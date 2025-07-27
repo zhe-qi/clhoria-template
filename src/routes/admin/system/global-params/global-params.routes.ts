@@ -20,7 +20,7 @@ const ListQuerySchema = PaginationParamsSchema.extend({
   isPublic: z.enum(["0", "1"]).optional().describe("是否公开参数: 1=是 0=否"),
 });
 
-const tags = ["/global-params (全局参数管理)"];
+const tags = ["/admin-global-params (全局参数管理)"];
 
 /** 获取全局参数分页列表 */
 export const list = createRoute({
@@ -31,7 +31,7 @@ export const list = createRoute({
   },
   summary: "获取全局参数列表（分页）",
   method: "get",
-  path: "/admin/global-params",
+  path: "/admin-global-params",
   request: {
     query: ListQuerySchema,
   },
@@ -56,7 +56,7 @@ export const get = createRoute({
   },
   summary: "获取单个全局参数详情",
   method: "get",
-  path: "/admin/global-params/{key}",
+  path: "/admin-global-params/{key}",
   request: {
     params: KeyParamsSchema,
   },
@@ -85,7 +85,7 @@ export const create = createRoute({
   },
   summary: "创建全局参数",
   method: "post",
-  path: "/admin/global-params",
+  path: "/admin-global-params",
   request: {
     body: jsonContentRequired(
       insertGlobalParamsSchema,
@@ -117,7 +117,7 @@ export const update = createRoute({
   },
   summary: "更新全局参数",
   method: "patch",
-  path: "/admin/global-params/{key}",
+  path: "/admin-global-params/{key}",
   request: {
     params: KeyParamsSchema,
     body: jsonContentRequired(
@@ -150,7 +150,7 @@ export const remove = createRoute({
   },
   summary: "删除全局参数",
   method: "delete",
-  path: "/admin/global-params/{key}",
+  path: "/admin-global-params/{key}",
   request: {
     params: KeyParamsSchema,
   },
@@ -178,7 +178,7 @@ export const batch = createRoute({
   },
   summary: "批量获取全局参数",
   method: "post",
-  path: "/admin/global-params/batch",
+  path: "/admin-global-params/batch",
   request: {
     query: z.object({
       publicOnly: z.enum(["true", "false"]).optional().default("false").describe("是否只获取公开参数"),

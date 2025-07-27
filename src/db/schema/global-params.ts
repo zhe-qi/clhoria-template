@@ -51,6 +51,8 @@ export const insertGlobalParamsSchema = createInsertSchema(globalParams, {
   id: true,
   createdAt: true,
   updatedAt: true,
+  createdBy: true,
+  updatedBy: true,
 });
 
 /** 全局参数更新模式 */

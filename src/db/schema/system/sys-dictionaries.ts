@@ -97,6 +97,8 @@ export const insertDictionariesSchema = createInsertSchema(sysDictionaries, {
   id: true,
   createdAt: true,
   updatedAt: true,
+  createdBy: true,
+  updatedBy: true,
 });
 
 /**

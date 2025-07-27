@@ -12,7 +12,7 @@ import {
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["/dictionaries (字典管理)"];
+const tags = ["/admin-dictionaries (字典管理)"];
 
 const CodeParamsSchema = z.object({
   code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
@@ -32,7 +32,7 @@ export const list = createRoute({
   },
   summary: "获取字典列表（分页）",
   method: "get",
-  path: "/admin/dictionaries",
+  path: "/admin-dictionaries",
   request: {
     query: ListQuerySchema,
   },
@@ -57,7 +57,7 @@ export const get = createRoute({
   },
   summary: "获取单个字典详情",
   method: "get",
-  path: "/admin/dictionaries/{code}",
+  path: "/admin-dictionaries/{code}",
   request: {
     params: CodeParamsSchema,
   },
@@ -86,7 +86,7 @@ export const create = createRoute({
   },
   summary: "创建字典",
   method: "post",
-  path: "/admin/dictionaries",
+  path: "/admin-dictionaries",
   request: {
     body: jsonContentRequired(
       insertDictionariesSchema,
@@ -118,7 +118,7 @@ export const update = createRoute({
   },
   summary: "更新字典",
   method: "patch",
-  path: "/admin/dictionaries/{code}",
+  path: "/admin-dictionaries/{code}",
   request: {
     params: CodeParamsSchema,
     body: jsonContentRequired(
@@ -155,7 +155,7 @@ export const remove = createRoute({
   },
   summary: "删除字典",
   method: "delete",
-  path: "/admin/dictionaries/{code}",
+  path: "/admin-dictionaries/{code}",
   request: {
     params: CodeParamsSchema,
   },
@@ -183,7 +183,7 @@ export const batch = createRoute({
   },
   summary: "批量获取字典",
   method: "post",
-  path: "/admin/dictionaries/batch",
+  path: "/admin-dictionaries/batch",
   request: {
     query: z.object({
       enabledOnly: z.enum(["true", "false"]).optional().default("false").describe("是否只获取启用字典"),
