@@ -2,8 +2,6 @@
 
 现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。集成 Drizzle ORM + PostgreSQL 数据层，实现完整的 RBAC 权限体系、多租户架构和 OpenAPI 规范。支持多层路由分离、JWT 认证、Redis 缓存、限流中间件等企业级功能，提供开箱即用的后端解决方案。
 
-🤖 **特别针对 Claude Code 优化** - 本项目为 Claude Code 提供一流的开发体验，包含详细的 CLAUDE.md 配置文件和推荐的 MCP 插件配置。
-
 ## 项目特性
 
 - 🚀 **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
@@ -106,16 +104,7 @@
 
 访问 <http://localhost:9999> 查看 API 文档。
 
-
 ## 项目架构
-
-### 路由架构
-
-应用使用多层路由结构，在 `src/app.ts` 中定义：
-
-1. **公共路由** (`/routes/public/`) - 无需认证
-2. **客户端路由** (`/routes/client/`) - JWT 认证
-3. **管理端路由** (`/routes/admin/`) - JWT + Casbin 授权
 
 ### 目录结构
 
@@ -130,7 +119,7 @@ src/
 │   ├── public/              # 公共路由（无认证）
 │   ├── client/              # 客户端路由（JWT）
 │   └── admin/               # 管理端路由（JWT + RBAC）
-├── services/                # 业务逻辑层
+├── services/                # 业务逻辑层（函数式服务，支持公共服务抽离）
 ├── lib/
 │   ├── create-app.ts        # 应用创建和中间件配置
 │   ├── configure-open-api.ts # OpenAPI 配置
@@ -138,7 +127,6 @@ src/
 ├── scripts/                 # 脚本文件
 └── types/                   # TypeScript 类型定义
 ```
-
 
 ## 开发规范
 
@@ -161,23 +149,24 @@ src/db/schema/
 
 ### 服务层
 
+服务层采用函数式架构，强调代码复用和模块化设计：
+
 ```text
 src/services/
-├── {domain}.ts             # 业务逻辑服务
+├── {domain}.ts             # 领域业务逻辑服务
+├── shared/                  # 公共服务模块
+│   ├── cache.ts            # 缓存服务
+│   ├── auth.ts             # 认证服务
+│   └── validation.ts       # 验证服务
 └── index.ts                # 统一导出
 ```
 
-## 环境变量
+**设计原则**：
 
-| 变量名              | 描述                  | 默认值        |
-| ------------------- | --------------------- | ------------- |
-| `NODE_ENV`          | 运行环境              | `development` |
-| `PORT`              | 服务器端口            | `9999`        |
-| `LOG_LEVEL`         | 日志级别              | `debug`       |
-| `DATABASE_URL`      | PostgreSQL 连接字符串 | -             |
-| `REDIS_URL`         | Redis 连接字符串      | -             |
-| `CLIENT_JWT_SECRET` | 客户端 JWT 密钥       | -             |
-| `ADMIN_JWT_SECRET`  | 管理端 JWT 密钥       | -             |
+- **函数式设计**: 所有服务都是纯函数或异步函数
+- **公共服务抽离**: 将通用功能抽离为独立的共享服务模块
+- **依赖注入**: 通过参数传递依赖，便于测试和复用
+- **领域隔离**: 按业务领域组织服务，避免交叉依赖
 
 ## 部署
 
@@ -215,6 +204,7 @@ pnpm start
 ### 🚀 推荐的 MCP 插件
 
 1. **Serena** - 智能代码分析和编辑工具
+
    - 语义化代码搜索和符号级编辑
    - 智能重构和架构分析
    - 支持项目记忆和上下文理解
@@ -345,6 +335,7 @@ pnpm start
 - `chore:` 构建工具、依赖更新等
 
 **示例**：
+
 ```bash
 git commit -m "feat: 添加用户权限管理功能"
 git commit -m "fix: 修复登录状态验证问题"
