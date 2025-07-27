@@ -54,6 +54,7 @@
     "papaparse",
     "ptype",
     "setex",
+    "tryit",
     "tsdown"
   ]
 }
