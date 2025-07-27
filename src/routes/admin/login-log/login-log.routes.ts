@@ -32,9 +32,9 @@ export const list = createRoute({
       createPaginatedResultSchema(selectLoginLogSchema),
       "登录日志列表获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(loginLogQuerySchema),
-      "请求参数错误",
+      "参数验证失败",
     ),
   },
 });
