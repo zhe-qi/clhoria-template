@@ -2,6 +2,8 @@
 
 现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。集成 Drizzle ORM + PostgreSQL 数据层，实现完整的 RBAC 权限体系、多租户架构和 OpenAPI 规范。支持多层路由分离、JWT 认证、Redis 缓存、限流中间件等企业级功能，提供开箱即用的后端解决方案。
 
+🤖 **特别针对 Claude Code 优化** - 本项目为 Claude Code 提供一流的开发体验，包含详细的 CLAUDE.md 配置文件和推荐的 MCP 插件配置。
+
 ## 项目特性
 
 - 🚀 **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
@@ -14,6 +16,7 @@
 - 🌍 **边缘就绪**: 为边缘计算和 Serverless 部署优化
 - 🧪 **测试友好**: Vitest 测试框架，完整的测试环境配置
 - 📦 **生产就绪**: 优化构建 + Docker 支持
+- 🤖 **Claude Code 优化**: 专为 Claude Code 优化，包含完整的 CLAUDE.md 配置和 MCP 插件支持
 
 ## 快速开始
 
@@ -103,39 +106,6 @@
 
 访问 <http://localhost:9999> 查看 API 文档。
 
-## 测试
-
-本项目使用 Vitest 作为测试框架，支持完整的单元测试和集成测试。
-
-### 测试环境配置
-
-1. **复制测试配置文件**
-
-   ```bash
-   cp .env.example .env.test
-   ```
-
-   编辑 `.env.test` 文件，配置测试环境的数据库和 Redis 连接。建议使用独立的测试数据库。
-
-2. **运行测试**
-
-   ```bash
-   # 运行所有测试
-   pnpm test
-
-   # 运行测试并查看覆盖率
-   pnpm test:coverage
-
-   # 监视模式运行测试
-   pnpm test:watch
-   ```
-
-### 测试说明
-
-- 测试文件使用 `.test.ts` 或 `.spec.ts` 后缀
-- 测试配置文件位于 `vitest.config.ts`
-- 测试环境会自动加载 `.env.test` 配置文件
-- 支持测试数据库的自动迁移和清理
 
 ## 项目架构
 
@@ -169,17 +139,6 @@ src/
 └── types/                   # TypeScript 类型定义
 ```
 
-### 技术栈
-
-- **Web 框架**: Hono with OpenAPI support
-- **数据库**: PostgreSQL + Drizzle ORM
-- **缓存**: Redis + ioredis
-- **认证**: JWT (@node-rs/argon2 密码哈希)
-- **授权**: Casbin RBAC
-- **文档**: OpenAPI 3.0 + Scalar API Reference
-- **日志**: Pino with hono-pino
-- **限流**: hono-rate-limiter + rate-limit-redis
-- **验证**: Zod with OpenAPI schema generation
 
 ## 开发规范
 
@@ -243,36 +202,42 @@ pnpm start
 
 原则上稍作修改即可兼容 Bun、Deno 等现代 JavaScript 运行时，支持高性能部署。后续规划 Monorepo 架构，单独提供可部署到边缘运行时的模块化代码，涵盖评论系统、文章管理、R2 图片格式化、视频转码等场景，充分利用边缘计算的低延迟和高可用性优势。
 
-## Claude Code 配置
+## Claude Code 一流支持
 
-如果使用 Claude Code 开发此项目，建议配置以下 MCP 插件以获得更好的开发体验：
+本项目专为 Claude Code 开发体验进行了深度优化，提供业界领先的 AI 辅助开发能力。
 
-### 推荐的 MCP 插件
+### 🎯 开箱即用的配置
+
+- **CLAUDE.md 配置文件**: 包含完整的项目架构说明、开发规范和最佳实践
+- **详细的代码注释**: 所有路由、服务和架构层面都有清晰的文档说明
+- **标准化开发模式**: 统一的文件结构、命名约定和开发工作流
+
+### 🚀 推荐的 MCP 插件
 
 1. **Serena** - 智能代码分析和编辑工具
+   - 语义化代码搜索和符号级编辑
+   - 智能重构和架构分析
+   - 支持项目记忆和上下文理解
 
-   - 提供语义化的代码搜索和编辑功能
-   - 支持符号级别的代码操作
-   - 智能的代码重构和分析能力
+2. **Context7** - 实时技术文档查询
+   - Hono、Drizzle ORM、Zod 等技术栈的最新文档
+   - 准确的 API 参考和代码示例
+   - 智能的最佳实践建议
 
-2. **Context7** - 实时文档查询工具
-   - 获取最新的库文档和 API 参考
-   - 支持 Hono、Drizzle ORM、Zod 等技术栈的文档查询
-   - 提供准确的代码示例和最佳实践
+### 💡 Claude Code 优势体验
 
-### 配置步骤
+- **智能代码生成**: 基于项目架构自动生成符合规范的代码
+- **架构理解**: 深度理解多层路由、RBAC 权限体系和服务层架构
+- **测试驱动**: 自动生成测试用例和测试数据
+- **文档同步**: 代码变更时自动更新相关文档
 
-请参考 Claude Code 官方文档配置相应的 MCP 插件：<https://docs.anthropic.com/en/docs/claude-code/mcp>
+### 📚 配置指南
+
+详细的 MCP 插件配置请参考：[Claude Code MCP 文档](https://docs.anthropic.com/en/docs/claude-code/mcp)
 
 ## 开发计划
 
 ### 短期计划（当前版本）
-
-- [ ] **单元测试覆盖**
-
-  - 为所有端点路由添加完整的单元测试
-  - 集成测试用例，确保 API 功能正确性
-  - 设置测试覆盖率目标和自动化测试流程
 
 - [ ] **云存储集成**
 
@@ -304,6 +269,40 @@ pnpm start
   - Vue3 + TypeScript 管理界面
   - 低代码/无代码平台
   - 可视化配置界面
+
+## 测试
+
+本项目使用 Vitest 作为测试框架，支持完整的单元测试和集成测试。
+
+### 测试环境配置
+
+1. **复制测试配置文件**
+
+   ```bash
+   cp .env.example .env.test
+   ```
+
+   编辑 `.env.test` 文件，配置测试环境的数据库和 Redis 连接。建议使用独立的测试数据库。
+
+2. **运行测试**
+
+   ```bash
+   # 运行所有测试
+   pnpm test
+
+   # 运行测试并查看覆盖率
+   pnpm test:coverage
+
+   # 监视模式运行测试
+   pnpm test:watch
+   ```
+
+### 测试说明
+
+- 测试文件使用 `.test.ts` 或 `.spec.ts` 后缀
+- 测试配置文件位于 `vitest.config.ts`
+- 测试环境会自动加载 `.env.test` 配置文件
+- 支持测试数据库的自动迁移和清理
 
 ## 支持
 
