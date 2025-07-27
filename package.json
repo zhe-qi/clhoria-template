@@ -23,6 +23,8 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.0.0",
+    "@aws-sdk/client-s3": "^3.850.0",
+    "@aws-sdk/s3-request-presigner": "^3.850.0",
     "@hono/node-server": "^1.17.1",
     "@hono/zod-openapi": "^1.0.2",
     "@node-rs/argon2": "^2.0.2",

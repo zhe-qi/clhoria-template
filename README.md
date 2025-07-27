@@ -52,7 +52,7 @@
 1. **克隆项目**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/zhe-qi/hono-template
    cd hono-template
    ```
 
@@ -378,7 +378,7 @@ git commit -m "docs: 更新 API 文档"
 
 ## 项目引用
 
-本项目基于优秀的开源项目进行开发，在此表示感谢：
+本项目参考了优秀的开源项目，在此表示感谢：
 
 - **启动模板**: 基于 [hono-open-api-starter](https://github.com/w3cj/hono-open-api-starter) 进行魔改和扩展
 - **后台参考**: 参考了 [soybean-admin-nestjs](https://github.com/soybeanjs/soybean-admin-nestjs) 的大量后台管理代码实现

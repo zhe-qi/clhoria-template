@@ -26,6 +26,12 @@ const EnvSchema = z.object({
   ),
   CLIENT_JWT_SECRET: z.string(),
   ADMIN_JWT_SECRET: z.string(),
+
+  // cloudflare r2
+  ACCESS_KEY_ID: z.string(),
+  SECRET_ACCESS_KEY: z.string(),
+  ENDPOINT: z.url(),
+  BUCKET_NAME: z.string().default("default-bucket"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
