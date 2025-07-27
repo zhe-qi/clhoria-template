@@ -54,6 +54,7 @@ export function casbin(): MiddlewareHandler {
 
     // 如果没有找到端点权限信息，说明该端点不需要权限验证或者是公开接口
     if (!endpointPermission) {
+      setContextData(c, { userRoles, userDomain, userId });
       return await next();
     }
 
@@ -81,12 +82,7 @@ export function casbin(): MiddlewareHandler {
     }
 
     const currentPermission = { resource, action };
-
-    const contextData = { userRoles, userDomain, currentPermission, userId };
-
-    Object.entries(contextData).forEach(([key, value]) => {
-      c.set(key, value);
-    });
+    setContextData(c, { userRoles, userDomain, currentPermission, userId });
 
     await next();
   };
@@ -109,4 +105,15 @@ async function validateUserStatus(userId: string, domain: string): Promise<{ val
   }
 
   return { valid: true };
+}
+
+/**
+ * 设置上下文数据到 Hono Context
+ * @param c Hono Context
+ * @param data 要设置的上下文数据
+ */
+function setContextData(c: Context, data: Record<string, any>): void {
+  Object.entries(data).forEach(([key, value]) => {
+    c.set(key, value);
+  });
 }

@@ -15,6 +15,7 @@ node_modules/
 # env
 .env
 .env.production
+.env.test
 
 # logs
 logs/

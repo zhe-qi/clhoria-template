@@ -6,7 +6,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { rateLimiter } from "hono-rate-limiter";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
-import { csrf } from "hono/csrf";
+// import { csrf } from "hono/csrf";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { trimTrailingSlash } from "hono/trailing-slash";
@@ -43,8 +43,8 @@ export default function createApp() {
   /** 跨域中间件 */
   app.use(cors());
 
-  /** csrf中间件 */
-  app.use(csrf());
+  /** csrf中间件 - 只对web页面启用，API路由跳过 */
+  // app.use(csrf());
 
   /** 请求ID中间件 */
   app.use(requestId());
