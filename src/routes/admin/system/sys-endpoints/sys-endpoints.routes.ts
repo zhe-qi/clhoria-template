@@ -108,6 +108,10 @@ export const create = createRoute({
       createErrorSchema(insertSysEndpointSchema),
       "请求参数错误",
     ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(insertSysEndpointSchema),
+      "参数验证失败",
+    ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
       createErrorSchema(insertSysEndpointSchema),
       "API端点已存在",
@@ -136,6 +140,10 @@ export const get = createRoute({
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
       "ID参数错误",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(IdUUIDParamsSchema),
+      "参数验证失败",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
