@@ -1,7 +1,9 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { createErrorSchema } from "stoker/openapi/schemas";
 
+import { operationLog } from "@/middlewares/operation-log";
 import { optionalJwtAuth } from "@/middlewares/optional-jwt-auth";
 
 const tags = ["/sts-token (对象存储直传)"];
@@ -9,13 +11,11 @@ const tags = ["/sts-token (对象存储直传)"];
 const UploadTokenRequestSchema = z.object({
   fileName: z.string().describe("文件名"),
   fileType: z.string().optional().describe("文件类型"),
-  expiresIn: z.number().min(1).max(604800).optional().describe("过期时间（秒，1-604800）"),
-});
+}).strict();
 
 const DownloadTokenRequestSchema = z.object({
   fileName: z.string().describe("文件名"),
-  expiresIn: z.number().min(1).max(604800).optional().describe("过期时间（秒，1-604800）"),
-});
+}).strict();
 
 const TokenResponseSchema = z.object({
   url: z.string().describe("预签名 URL"),
@@ -30,7 +30,7 @@ const ErrorResponseSchema = z.object({
 export const getUploadToken = createRoute({
   path: "/sts-token/upload",
   method: "post",
-  middleware: [optionalJwtAuth()],
+  middleware: [optionalJwtAuth(), operationLog({ moduleName: "对象存储", description: "对象存储获取上传token" })],
   request: {
     body: jsonContentRequired(
       UploadTokenRequestSchema,
@@ -48,6 +48,10 @@ export const getUploadToken = createRoute({
       ErrorResponseSchema,
       "请求参数错误",
     ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(UploadTokenRequestSchema),
+      "参数验证失败",
+    ),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
       ErrorResponseSchema,
       "服务器内部错误",
@@ -59,7 +63,7 @@ export const getUploadToken = createRoute({
 export const getDownloadToken = createRoute({
   path: "/sts-token/download",
   method: "post",
-  middleware: [optionalJwtAuth()],
+  middleware: [optionalJwtAuth(), operationLog({ moduleName: "对象存储", description: "对象存储获取下载token" })],
   request: {
     body: jsonContentRequired(
       DownloadTokenRequestSchema,
@@ -76,6 +80,10 @@ export const getDownloadToken = createRoute({
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       ErrorResponseSchema,
       "请求参数错误",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(DownloadTokenRequestSchema),
+      "参数验证失败",
     ),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
       ErrorResponseSchema,

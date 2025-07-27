@@ -101,7 +101,6 @@ describe("object-storage routes with real authentication", () => {
         json: {
           fileName: "test-file.jpg",
           fileType: "image/jpeg",
-          expiresIn: 3600,
         },
       });
 
@@ -180,26 +179,14 @@ describe("object-storage routes with real authentication", () => {
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
-    /** 获取上传令牌 - expiresIn 范围验证 */
-    it("should validate expiresIn range", async () => {
+    /** 获取上传令牌 - 无效字段验证 */
+    it("should validate invalid fields", async () => {
       const response = await objectStorageClient["sts-token"].upload.$post({
         // @ts-ignore
         json: {
           fileName: "test-file.jpg",
-          expiresIn: 700000, // 超过最大值 604800
-        },
-      });
-
-      expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
-    });
-
-    /** 获取上传令牌 - expiresIn 最小值验证 */
-    it("should validate minimum expiresIn value", async () => {
-      const response = await objectStorageClient["sts-token"].upload.$post({
-        // @ts-ignore
-        json: {
-          fileName: "test-file.jpg",
-          expiresIn: 0, // 小于最小值 1
+          // @ts-ignore
+          invalidField: "invalid", // 无效字段
         },
       });
 
@@ -252,7 +239,6 @@ describe("object-storage routes with real authentication", () => {
       const response = await objectStorageClient["sts-token"].download.$post({
         json: {
           fileName: "test-file.jpg",
-          expiresIn: 3600,
         },
       });
 
@@ -330,26 +316,14 @@ describe("object-storage routes with real authentication", () => {
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
-    /** 获取下载令牌 - expiresIn 范围验证 */
-    it("should validate expiresIn range for download", async () => {
+    /** 获取下载令牌 - 无效字段验证 */
+    it("should validate invalid fields for download", async () => {
       const response = await objectStorageClient["sts-token"].download.$post({
         // @ts-ignore
         json: {
           fileName: "test-file.jpg",
-          expiresIn: 700000, // 超过最大值 604800
-        },
-      });
-
-      expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
-    });
-
-    /** 获取下载令牌 - expiresIn 最小值验证 */
-    it("should validate minimum expiresIn value for download", async () => {
-      const response = await objectStorageClient["sts-token"].download.$post({
-        // @ts-ignore
-        json: {
-          fileName: "test-file.jpg",
-          expiresIn: 0, // 小于最小值 1
+          // @ts-ignore
+          invalidField: "invalid", // 无效字段
         },
       });
 
@@ -361,7 +335,7 @@ describe("object-storage routes with real authentication", () => {
       const response = await objectStorageClient["sts-token"].download.$post({
         // @ts-ignore
         json: {
-          expiresIn: 3600,
+          // 缺少 fileName 字段
         },
       });
 

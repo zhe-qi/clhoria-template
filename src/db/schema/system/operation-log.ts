@@ -1,25 +1,27 @@
 import { integer, json, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
+import { defaultColumns } from "@/db/common/default-columns";
+
 export const operationLogs = pgTable("sys_operation_log", {
-  id: varchar({ length: 36 }).primaryKey().notNull(),
-  userId: varchar({ length: 36 }).notNull(),
-  username: varchar({ length: 50 }).notNull(),
-  domain: varchar({ length: 100 }).notNull(),
-  moduleName: varchar({ length: 100 }).notNull(),
-  description: varchar({ length: 500 }).notNull(),
-  requestId: varchar({ length: 36 }).notNull(),
-  method: varchar({ length: 10 }).notNull(),
-  url: varchar({ length: 500 }).notNull(),
-  ip: varchar({ length: 45 }).notNull(),
+  id: defaultColumns.id,
+  userId: varchar({ length: 36 }),
+  username: varchar({ length: 50 }),
+  domain: varchar({ length: 100 }),
+  moduleName: varchar({ length: 100 }),
+  description: varchar({ length: 500 }),
+  requestId: varchar({ length: 36 }),
+  method: varchar({ length: 10 }),
+  url: varchar({ length: 500 }),
+  ip: varchar({ length: 45 }),
   userAgent: varchar({ length: 500 }),
   params: json(),
   body: json(),
   response: json(),
-  startTime: timestamp().notNull(),
-  endTime: timestamp().notNull(),
-  duration: integer().notNull(),
-  createdAt: timestamp().defaultNow().notNull(),
+  startTime: timestamp(),
+  endTime: timestamp(),
+  duration: integer(),
+  createdAt: defaultColumns.createdAt,
 });
 
 export const selectOperationLogSchema = createSelectSchema(operationLogs, {

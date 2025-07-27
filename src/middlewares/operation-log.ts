@@ -7,6 +7,7 @@ import { v7 as uuidV7 } from "uuid";
 import db from "@/db";
 import { sysOperationLog } from "@/db/schema";
 import { logger } from "@/lib/logger";
+import { formatDate } from "@/utils";
 
 interface OperationLogOptions {
   moduleName: string;
@@ -22,7 +23,8 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
     const startTime = new Date();
 
     // 获取请求信息
-    const { method, path } = c.req;
+    const method = c.req.method;
+    const urlPath = new URL(c.req.url).pathname;
     const ip = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
     const userAgent = c.req.header("user-agent") || "";
 
@@ -75,7 +77,7 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       description: options.description,
       requestId,
       method,
-      url: path,
+      url: urlPath,
       ip,
       userAgent,
       params: params || null,
@@ -84,7 +86,8 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       startTime,
       endTime,
       duration,
-      createdBy: userId, // 添加创建者字段
+      createdBy: userId,
+      createdAt: formatDate(new Date()),
     }).catch((error) => {
       console.error("Failed to save operation log:", error);
     });

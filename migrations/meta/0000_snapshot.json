@@ -1,5 +1,5 @@
 {
-  "id": "db84823b-4972-4743-a92a-7bcc4173e2d6",
+  "id": "445e1841-fc0b-4b04-b1e8-1f5b71c9b0a0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1313,18 +1313,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "email": {
-          "name": "email",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phone_number": {
-          "name": "phone_number",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
         "nick_name": {
           "name": "nick_name",
           "type": "varchar(64)",
@@ -1348,20 +1336,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "username"
-          ]
-        },
-        "sys_user_email_unique": {
-          "name": "sys_user_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
-        },
-        "sys_user_phoneNumber_unique": {
-          "name": "sys_user_phoneNumber_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "phone_number"
           ]
         }
       },

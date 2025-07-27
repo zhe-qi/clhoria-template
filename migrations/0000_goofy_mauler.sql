@@ -209,13 +209,9 @@ CREATE TABLE "sys_user" (
 	"domain" varchar(64) NOT NULL,
 	"built_in" boolean DEFAULT false,
 	"avatar" text,
-	"email" varchar(128),
-	"phone_number" varchar(32),
 	"nick_name" varchar(64) NOT NULL,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "sys_user_username_unique" UNIQUE("username"),
-	CONSTRAINT "sys_user_email_unique" UNIQUE("email"),
-	CONSTRAINT "sys_user_phoneNumber_unique" UNIQUE("phone_number")
+	CONSTRAINT "sys_user_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
 CREATE TABLE "sys_user_role" (

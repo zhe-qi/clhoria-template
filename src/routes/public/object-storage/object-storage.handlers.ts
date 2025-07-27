@@ -12,7 +12,7 @@ type ObjectStorageRouteHandlerType<T extends keyof typeof routes> = AppRouteHand
 
 export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = async (c) => {
   try {
-    const { fileName, fileType, expiresIn } = c.req.valid("json");
+    const { fileName, fileType } = c.req.valid("json");
 
     // 可选：基于用户身份添加文件路径前缀
     const userId = c.get("userId");
@@ -31,7 +31,6 @@ export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = a
     const result = await generateUploadUrl({
       fileName: finalFileName,
       fileType,
-      expiresIn,
     });
 
     return c.json(result, HttpStatusCodes.OK);
@@ -43,7 +42,7 @@ export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = a
 
 export const getDownloadToken: ObjectStorageRouteHandlerType<"getDownloadToken"> = async (c) => {
   try {
-    const { fileName, expiresIn } = c.req.valid("json");
+    const { fileName } = c.req.valid("json");
 
     // 可选：基于用户身份添加文件路径前缀
     const userId = c.get("userId");
@@ -61,7 +60,6 @@ export const getDownloadToken: ObjectStorageRouteHandlerType<"getDownloadToken">
 
     const result = await generateDownloadUrl({
       fileName: finalFileName,
-      expiresIn,
     });
 
     return c.json(result, HttpStatusCodes.OK);
