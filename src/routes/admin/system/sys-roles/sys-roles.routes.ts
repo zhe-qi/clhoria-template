@@ -56,6 +56,10 @@ export const create = createRoute({
       createErrorSchema(insertSysRoleSchema),
       "请求参数错误",
     ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(insertSysRoleSchema),
+      "参数验证失败",
+    ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
       createErrorSchema(insertSysRoleSchema),
       "角色代码已存在",
