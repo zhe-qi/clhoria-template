@@ -58,6 +58,10 @@ export const create = createRoute({
       createErrorSchema(insertSysDomainSchema),
       "请求参数错误",
     ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(insertSysDomainSchema),
+      "参数验证失败",
+    ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
       createErrorSchema(insertSysDomainSchema),
       "域代码已存在",
@@ -86,6 +90,10 @@ export const get = createRoute({
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
       "ID参数错误",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(IdUUIDParamsSchema),
+      "参数验证失败",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
