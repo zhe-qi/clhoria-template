@@ -41,6 +41,9 @@ export const CacheConstant = {
 
   /** 字典前缀 */
   DICTIONARIES_PREFIX: "dict:",
+
+  /** 权限验证结果前缀 */
+  PERMISSION_RESULT_PREFIX: "perm:result:",
 } as const;
 
 /** 缓存常量类型 */
@@ -100,4 +103,11 @@ export function getDictionaryKey(code: string): string {
  */
 export function getDictionariesAllKey(): string {
   return `${CacheConstant.DICTIONARIES_PREFIX}all`;
+}
+
+/**
+ * 生成权限验证结果缓存Key
+ */
+export function getPermissionResultKey(userId: string, domain: string, method: string, path: string): string {
+  return `${CacheConstant.PERMISSION_RESULT_PREFIX}${domain}:${userId}:${method}:${path}`;
 }

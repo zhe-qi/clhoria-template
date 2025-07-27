@@ -6,10 +6,10 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
 import env from "@/env";
-import { AuthType, getUserRolesKey, Status, TokenStatus, TokenType } from "@/lib/enums";
+import { AuthType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { logger } from "@/lib/logger";
-import { redisClient } from "@/lib/redis";
 import { getIPAddress } from "@/services/ip";
+import { setUserRolesToCache } from "@/services/user";
 import { omit } from "@/utils";
 
 import type { AuthRouteHandlerType } from "./auth.index";
@@ -63,15 +63,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   };
 
   // 将用户角色存储到 Redis
-  const userRolesKey = getUserRolesKey(user.id, user.domain);
-  if (roles.length > 0) {
-    await redisClient.sadd(userRolesKey, ...roles);
-  }
-  else {
-    // 即使没有角色，也要设置一个标记表示已经处理过该用户
-    await redisClient.sadd(userRolesKey, "__no_roles__");
-  }
-  await redisClient.expire(userRolesKey, 7 * 24 * 60 * 60); // 7天过期，与token同步
+  await setUserRolesToCache(user.id, user.domain, roles);
 
   const accessToken = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
   const refreshToken = await sign({ ...tokenPayload, type: "refresh", exp: now + 30 * 24 * 60 * 60, jti: crypto.randomUUID() }, env.ADMIN_JWT_SECRET, "HS256");

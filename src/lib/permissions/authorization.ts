@@ -4,7 +4,7 @@ import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
 import db from "@/db";
 import { sysEndpoint, sysRoleMenu, sysUserRole } from "@/db/schema";
-import { getUserMenusKey, getUserRolesKey } from "@/lib/enums";
+import { getPermissionResultKey, getUserMenusKey, getUserRolesKey } from "@/lib/enums";
 import { redisClient } from "@/lib/redis";
 import { compareObjects } from "@/utils/tools/object";
 
@@ -53,6 +53,11 @@ export async function assignPermissionsToRole(
     toAdd.length > 0 ? rbac.addPolicies(toAdd) : Promise.resolve(true),
     toRemove.length > 0 ? rbac.removePolicies(toRemove) : Promise.resolve(true),
   ]);
+
+  // 清理角色相关用户的权限结果缓存
+  if (toAdd.length > 0 || toRemove.length > 0) {
+    await clearRoleUsersPermissionCache(roleId, domain);
+  }
 
   return {
     success: results.every(Boolean),
@@ -153,6 +158,17 @@ export async function assignUsersToRole(
       ),
     ]);
 
+    // 清理用户权限结果缓存
+    const allAffectedUsers = [...toAdd, ...toRemove];
+    const clearCacheTasks = allAffectedUsers.map(async (userId) => {
+      const pattern = getPermissionResultKey(userId, domain, "*", "*");
+      const keys = await redisClient.keys(pattern);
+      if (keys.length > 0) {
+        await redisClient.del(...keys);
+      }
+    });
+    await Promise.all(clearCacheTasks);
+
     return {
       success: casbinOps.every(Boolean),
       added: toAdd.length,
@@ -247,4 +263,27 @@ export async function clearUserCache(userId: string, domain: string) {
   const userMenusKey = getUserMenusKey(userId, domain);
 
   await redisClient.del(userRolesKey, userMenusKey);
+}
+
+/**
+ * 清理角色相关用户的权限结果缓存
+ */
+export async function clearRoleUsersPermissionCache(roleId: string, domain: string) {
+  // 获取拥有该角色的所有用户
+  const users = await rbac.getUsersForRole(roleId, domain);
+
+  if (users.length === 0) {
+    return;
+  }
+
+  // 清理每个用户的权限结果缓存
+  const clearTasks = users.map(async (userId) => {
+    const pattern = getPermissionResultKey(userId, domain, "*", "*");
+    const keys = await redisClient.keys(pattern);
+    if (keys.length > 0) {
+      await redisClient.del(...keys);
+    }
+  });
+
+  await Promise.all(clearTasks);
 }
