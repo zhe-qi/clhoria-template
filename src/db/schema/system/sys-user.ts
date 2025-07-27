@@ -36,7 +36,7 @@ export const selectSysUserSchema = createSelectSchema(sysUser, {
 export const insertSysUserSchema = createInsertSchema(sysUser, {
   username: schema => schema.min(4).max(15).regex(/^\w+$/),
   password: schema => schema.min(6).max(20),
-  domain: schema => schema.min(1),
+  domain: schema => schema.min(1).default("default"),
   nickName: schema => schema.min(1),
 }).omit({
   id: true,

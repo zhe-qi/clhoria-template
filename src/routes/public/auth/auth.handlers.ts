@@ -1,13 +1,14 @@
 import { hash, verify } from "@node-rs/argon2";
+import { addDays, getUnixTime } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { sign, verify as verifyJwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
 import env from "@/env";
 import { AuthType, Status, TokenStatus, TokenType } from "@/lib/enums";
-import { logger } from "@/lib/logger";
 import { getIPAddress } from "@/services/ip";
 import { setUserRolesToCache } from "@/services/user";
 import { omit } from "@/utils";
@@ -33,11 +34,11 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   });
 
   if (!user) {
-    return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
   if (user.status !== Status.ENABLED) {
-    return c.json({ message: "用户已禁用" }, HttpStatusCodes.UNAUTHORIZED);
+    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
   }
 
   const isPasswordValid = await verify(user.password, password);
@@ -49,7 +50,9 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   // 生成 tokens
   const roles = user.userRoles.map(ur => ur.roleId);
 
-  const now = Math.floor(Date.now() / 1000);
+  const now = getUnixTime(new Date());
+  const accessTokenExp = getUnixTime(addDays(new Date(), 7)); // 7天过期
+  const refreshTokenExp = getUnixTime(addDays(new Date(), 30)); // 30天过期
   const jti = crypto.randomUUID(); // JWT ID 确保唯一性
 
   // JWT payload 只包含核心用户信息
@@ -58,7 +61,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     username: user.username,
     domain: user.domain,
     iat: now,
-    exp: now + 7 * 24 * 60 * 60, // 7天过期
+    exp: accessTokenExp,
     jti,
   };
 
@@ -66,7 +69,12 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   await setUserRolesToCache(user.id, user.domain, roles);
 
   const accessToken = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
-  const refreshToken = await sign({ ...tokenPayload, type: "refresh", exp: now + 30 * 24 * 60 * 60, jti: crypto.randomUUID() }, env.ADMIN_JWT_SECRET, "HS256");
+  const refreshToken = await sign({
+    ...tokenPayload,
+    type: "refresh",
+    exp: refreshTokenExp,
+    jti: crypto.randomUUID(),
+  }, env.ADMIN_JWT_SECRET, "HS256");
 
   // 保存 token 记录
   const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
@@ -151,7 +159,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
 
   try {
     // 验证 refresh token
-    const payload = await verifyJwt(oldRefreshToken, env.ADMIN_JWT_SECRET) as any;
+    const payload = await verifyJwt(oldRefreshToken, env.ADMIN_JWT_SECRET);
 
     if (payload.type !== "refresh") {
       return c.json({ message: "无效的刷新令牌" }, HttpStatusCodes.UNAUTHORIZED);
@@ -170,25 +178,33 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
     }
 
     // 生成新的 tokens
-    const now = Math.floor(Date.now() / 1000);
-    const jti = crypto.randomUUID(); // JWT ID 确保唯一性
+    const now = getUnixTime(new Date());
+    const accessTokenExp = getUnixTime(addDays(new Date(), 7));
+    const refreshTokenExp = getUnixTime(addDays(new Date(), 30));
+
+    const jti = crypto.randomUUID();
     const newTokenPayload = {
       uid: payload.uid,
       username: payload.username,
       domain: payload.domain,
       iat: now,
-      exp: now + 7 * 24 * 60 * 60, // 7天过期
+      exp: accessTokenExp,
       jti,
     };
 
     const newAccessToken = await sign({ ...newTokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
-    const newRefreshToken = await sign({ ...newTokenPayload, type: "refresh", exp: now + 30 * 24 * 60 * 60, jti: crypto.randomUUID() }, env.ADMIN_JWT_SECRET, "HS256");
+    const newRefreshToken = await sign({
+      ...newTokenPayload,
+      type: "refresh",
+      exp: refreshTokenExp,
+      jti: crypto.randomUUID(),
+    }, env.ADMIN_JWT_SECRET, "HS256");
 
     // 先撤销该用户的其他活跃 token
     await db.update(sysTokens)
       .set({ status: TokenStatus.REVOKED })
       .where(and(
-        eq(sysTokens.userId, payload.uid),
+        eq(sysTokens.userId, payload.uid as string),
         eq(sysTokens.status, TokenStatus.ACTIVE),
       ));
 
@@ -203,8 +219,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
 
     return c.json({ token: newAccessToken, refreshToken: newRefreshToken }, HttpStatusCodes.OK);
   }
-  catch (error) {
-    logger.warn({ error }, "刷新令牌验证失败");
+  catch {
     return c.json({ message: "刷新令牌无效" }, HttpStatusCodes.UNAUTHORIZED);
   }
 };
@@ -216,7 +231,7 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
   const authHeader = c.req.header("authorization");
 
   if (!authHeader?.startsWith("Bearer ")) {
-    return c.json({ message: "未授权" }, HttpStatusCodes.UNAUTHORIZED);
+    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
   }
 
   const token = authHeader.slice(7);
@@ -239,8 +254,7 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
 
     return c.json(responseUser, HttpStatusCodes.OK);
   }
-  catch (error) {
-    logger.warn({ error }, "用户token验证失败");
-    return c.json({ message: "未授权" }, HttpStatusCodes.UNAUTHORIZED);
+  catch {
+    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
   }
 };
