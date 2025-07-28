@@ -3,6 +3,7 @@ export * from "./dictionaries/dictionaries.index";
 export * from "./global-params/global-params.index";
 export * from "./login-log/login-log.index";
 export * from "./operation-log/operation-log.index";
+export * from "./scheduled-jobs/scheduled-jobs.index";
 export * from "./sys-domains/sys-domains.index";
 export * from "./sys-endpoints/sys-endpoints.index";
 export * from "./sys-menus/sys-menus.index";

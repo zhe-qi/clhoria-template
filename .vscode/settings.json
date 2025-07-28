@@ -47,12 +47,14 @@
     "postcss"
   ],
   "cSpell.words": [
+    "bullmq",
     "casbin",
     "Hono",
     "ilike",
     "openapi",
     "papaparse",
     "ptype",
+    "rolldown",
     "setex",
     "tryit",
     "tsdown"

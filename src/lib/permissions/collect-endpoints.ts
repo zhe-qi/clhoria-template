@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { eq } from "drizzle-orm";
 import { createHash } from "node:crypto";
 
@@ -6,6 +5,7 @@ import type { AppOpenAPI } from "@/types/lib";
 
 import db from "@/db";
 import { sysEndpoint } from "@/db/schema/system/sys-endpoint";
+import { logger } from "@/lib/logger";
 
 import type { EndpointPermission } from "./permission-config";
 
@@ -40,7 +40,7 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
 
         // 如果无法提取权限配置，跳过该端点（可能是公开接口）
         if (!permissionConfig) {
-          console.log(`跳过无权限配置的端点: ${method} ${fullPath} (operationId: ${operationId})`);
+          logger.debug(`跳过无权限配置的端点: ${method} ${fullPath} (operationId: ${operationId})`);
           continue;
         }
 
@@ -76,7 +76,7 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
     }
   }
   catch (error) {
-    console.error("Error collecting endpoint permissions:", error);
+    logger.error("Error collecting endpoint permissions:", error);
   }
 
   return endpoints;
@@ -152,19 +152,19 @@ export async function collectAndSyncEndpointPermissions(apps: { name: string; ap
   permissionManager.clearAll();
 
   for (const { name, app, prefix } of apps) {
-    console.log(`开始收集应用 ${name} 的端点权限...`);
+    logger.info(`开始收集应用 ${name} 的端点权限...`);
     const endpoints = collectEndpointPermissions(app, prefix);
     allEndpoints.push(...endpoints);
-    console.log(`应用 ${name} 收集到 ${endpoints.length} 个端点`);
+    logger.info(`应用 ${name} 收集到 ${endpoints.length} 个端点`);
   }
 
   if (allEndpoints.length > 0) {
     const result = await syncEndpointPermissionsToDatabase(allEndpoints);
-    console.log(`端点权限同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
-    console.log(`权限管理器缓存统计:`, permissionManager.getStats());
+    logger.info(`端点权限同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
+    logger.info(`权限管理器缓存统计:`, permissionManager.getStats());
     return result;
   }
 
-  console.log("未发现任何端点权限配置");
+  logger.info("未发现任何端点权限配置");
   return { inserted: 0, updated: 0 };
 }

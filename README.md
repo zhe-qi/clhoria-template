@@ -20,12 +20,15 @@
 ## 项目预览
 
 ### Drizzle Studio 数据库管理
+
 ![Drizzle Studio](https://r2.promptez.cn/drizzle-studio.webp)
 
 ### Swagger API 文档
+
 ![Swagger API 文档](https://r2.promptez.cn/swagger.webp)
 
 ### 测试覆盖率报告
+
 ![测试覆盖率](https://r2.promptez.cn/test.webp)
 
 ## 快速开始

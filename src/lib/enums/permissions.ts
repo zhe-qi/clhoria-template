@@ -29,6 +29,9 @@ export const PermissionResource = {
 
   /** 字典管理 */
   SYS_DICTIONARIES: "sys-dictionaries",
+
+  /** 定时任务管理 */
+  SCHEDULED_JOBS: "scheduled-jobs",
 } as const;
 
 /** 权限资源类型 */

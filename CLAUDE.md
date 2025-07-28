@@ -82,6 +82,7 @@ Route execution order is critical as it affects middleware execution. Public rou
 - **Configuration**: `drizzle.config.ts` with snake_case convention
 - **Migrations**: Stored in `./migrations/`
 - **Database Instance**: Default export `db` from `@/db` with snake_case convention
+- **Database Import Pattern**: ALWAYS use default import: `import db from "@/db";` (NOT `import { db } from "@/db";`)
 - **Null Handling**: `undefined` values are automatically converted to `null` when stored in database
 
 #### Schema Definition Rules
@@ -96,10 +97,16 @@ When creating Drizzle schemas, follow these rules:
 3. **Field Descriptions**: Use Chinese descriptions that explain the field purpose and format
 4. **Status Fields**: Use `integer().default(1)` for enable/disable flags (1=enabled, 0=disabled)
 5. **Custom Field Schema**: When defining custom field schemas, import zod from `@hono/zod-openapi` to access OpenAPI-specific methods like `.openapi()`
-6. **JSON Field Standards**: When using JSON fields, follow these rules:
+6. **Field Column Naming**: Use automatic snake_case conversion:
+   - ✅ Correct: `handlerName: varchar({ length: 128 })` (auto-converts to `handler_name`)
+   - ❌ Wrong: `handlerName: varchar("handler_name", { length: 128 })` (redundant mapping)
+7. **VARCHAR Length Requirements**: Always specify length for varchar fields:
+   - ✅ Correct: `varchar({ length: 128 })`
+   - ❌ Wrong: `varchar()` (missing length specification)
+8. **JSON Field Standards**: When using JSON fields, follow these rules:
    - Always use `jsonb()` instead of `json()` for better performance and indexing
-   - Use `.$type<InterfaceName>()` to provide TypeScript type constraints
-   - Define clear TypeScript interfaces for JSON field structure
+   - Use `.$type<InterfaceName>()` to provide TypeScript type constraints with proper interfaces
+   - Define clear TypeScript interfaces for JSON field structure (avoid `any` type)
    - Set appropriate default values using `.default()` method
 
 Example:
@@ -112,7 +119,7 @@ export const selectUsersSchema = createSelectSchema(users, {
   status: schema => schema.describe("状态: 1=启用 0=禁用"),
 });
 
-// JSON Field Example
+// JSON Field Example with proper interface
 interface DictionaryItem {
   code: string;
   label: string;
@@ -121,8 +128,9 @@ interface DictionaryItem {
 }
 
 export const sysDictionaries = pgTable("sys_dictionaries", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  items: jsonb("items").$type<DictionaryItem[]>().default([]).notNull(),
+  id: uuid().primaryKey().defaultRandom(),
+  userName: varchar({ length: 64 }).notNull(), // auto-converts to user_name
+  items: jsonb().$type<DictionaryItem[]>().default([]).notNull(),
   // ... other fields
 });
 ```

@@ -11,6 +11,7 @@ export * from "./sys-operation-log";
 export * from "./sys-organization";
 export * from "./sys-role";
 export * from "./sys-role-menu";
+export * from "./sys-scheduled-jobs";
 export * from "./sys-tokens";
 export * from "./sys-user";
 export * from "./sys-user-role";
