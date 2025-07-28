@@ -20,6 +20,8 @@ export const APP_CONFIG: AppConfig[] = [
 export const OPENAPI_VERSION = "3.1.0";
 export const DOC_ENDPOINT = "/doc";
 
+export const API_BASE_PATH = "/api";
+
 export const SCALAR_CONFIG = {
   theme: "kepler",
   layout: "modern",
