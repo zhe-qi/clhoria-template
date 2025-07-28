@@ -1,3 +1,5 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import { and, desc, eq, ilike, or } from "drizzle-orm";
 
 import type { ScheduledJobConfig } from "@/jobs/types";
@@ -12,7 +14,7 @@ import { JobStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 
 // 类型定义
-type ScheduledJob = typeof sysScheduledJobs.$inferSelect;
+type ScheduledJob = InferSelectModel<typeof sysScheduledJobs>;
 
 /** 创建定时任务参数 */
 interface CreateScheduledJobParams {

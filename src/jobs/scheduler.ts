@@ -1,8 +1,6 @@
-import type z from "zod/v4";
+import type { InferSelectModel } from "drizzle-orm";
 
 import { and, eq } from "drizzle-orm";
-
-import type { selectSysScheduledJobsSchema } from "@/db/schema";
 
 import db from "@/db";
 import { sysScheduledJobs } from "@/db/schema";
@@ -15,7 +13,7 @@ import { JobQueueManager } from "./queue-manager";
 import { syncHandlersToDatabase } from "./registry";
 
 // 类型定义
-type ScheduledJob = z.infer<typeof selectSysScheduledJobsSchema>;
+type ScheduledJob = InferSelectModel<typeof sysScheduledJobs>;
 
 /** 定时任务调度器 */
 export class TaskScheduler {

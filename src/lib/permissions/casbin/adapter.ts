@@ -1,16 +1,16 @@
 import type { Adapter, Model } from "casbin";
+import type { InferInsertModel } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { z } from "zod";
 
 import { Helper } from "casbin";
 import { and, eq, or } from "drizzle-orm";
 
-import type { casbinRule, insertCasbinRuleSchema, sysRole } from "@/db/schema";
 import type * as schema from "@/db/schema";
+import type { casbinRule, sysRole } from "@/db/schema";
 
 import { Status } from "@/lib/enums";
 
-type TCasinTable = z.infer<typeof insertCasbinRuleSchema>;
+type TCasinTable = InferInsertModel<typeof casbinRule>;
 type PostgresJsDatabaseSchema = PostgresJsDatabase<typeof schema>;
 
 export class DrizzleCasbinAdapter implements Adapter {
