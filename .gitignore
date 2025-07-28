@@ -39,3 +39,6 @@ dist
 *.local.md
 
 *-example
+
+# Serena cache
+.serena/
