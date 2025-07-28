@@ -12,16 +12,27 @@ const port = env.PORT;
 
 async function startServer() {
   try {
-    // 权限同步（仅在开发环境）
-    if (env.NODE_ENV !== "production") {
+    if (env.NODE_ENV === "production") {
+      // 生产环境同步执行
       const apps = [
         { name: "admin", app: adminApp, prefix: "/admin" },
       ];
       await collectAndSyncEndpointPermissions(apps);
+      await initializeScheduler();
     }
+    else {
+      // 开发环境异步执行所有初始化任务
+      const apps = [
+        { name: "admin", app: adminApp, prefix: "/admin" },
+      ];
 
-    // 初始化定时任务调度器
-    await initializeScheduler();
+      Promise.all([
+        collectAndSyncEndpointPermissions(apps),
+        initializeScheduler(),
+      ]).catch((error) => {
+        logger.error("初始化任务执行失败:", error);
+      });
+    }
 
     // 启动HTTP服务器
     const message = `服务启动成功 (http://localhost:${port})`;

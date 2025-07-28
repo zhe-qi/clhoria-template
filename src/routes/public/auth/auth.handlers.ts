@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { sign, verify as verifyJwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
+import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
 import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
@@ -99,7 +100,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     ip: clientIP,
     address,
     userAgent,
-    requestId: crypto.randomUUID(),
+    requestId: uuidV7(),
     type: TokenType.WEB,
     createdBy: "system",
   });
@@ -112,7 +113,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     ip: clientIP,
     address,
     userAgent,
-    requestId: crypto.randomUUID(),
+    requestId: uuidV7(),
     type: AuthType.PASSWORD,
     createdBy: "system",
   });
