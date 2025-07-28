@@ -14,7 +14,19 @@
 - 🌍 **边缘就绪**: 为边缘计算和 Serverless 部署优化
 - 🧪 **测试友好**: Vitest 测试框架，完整的测试环境配置
 - 📦 **生产就绪**: 优化构建 + Docker 支持
+- ☁️ **对象存储**: 集成 Cloudflare R2 对象存储服务
 - 🤖 **Claude Code 优化**: 专为 Claude Code 优化，包含完整的 CLAUDE.md 配置和 MCP 插件支持
+
+## 项目预览
+
+### Drizzle Studio 数据库管理
+![Drizzle Studio](https://r2.promptez.cn/drizzle-studio.webp)
+
+### Swagger API 文档
+![Swagger API 文档](https://r2.promptez.cn/swagger.webp)
+
+### 测试覆盖率报告
+![测试覆盖率](https://r2.promptez.cn/test.webp)
 
 ## 快速开始
 
@@ -235,6 +247,13 @@ pnpm start
   - 添加内置模板库
   - 通过大模型能力实现自然语言操作后台
   - 支持工作流可视化配置和执行
+
+- [ ] **性能测试**
+
+  - 集成 k6 压力测试框架
+  - 添加性能基准测试用例
+  - 自动化性能监控和报告
+  - 负载测试和并发测试
 
 - [ ] **模型配置生成器**（考虑中）
 
