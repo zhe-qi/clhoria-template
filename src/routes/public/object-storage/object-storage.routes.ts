@@ -52,10 +52,6 @@ export const getUploadToken = createRoute({
       createErrorSchema(UploadTokenRequestSchema),
       "参数验证失败",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      ErrorResponseSchema,
-      "服务器内部错误",
-    ),
   },
 });
 
@@ -84,10 +80,6 @@ export const getDownloadToken = createRoute({
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(DownloadTokenRequestSchema),
       "参数验证失败",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      ErrorResponseSchema,
-      "服务器内部错误",
     ),
   },
 });
