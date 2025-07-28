@@ -26,6 +26,12 @@ export class BullBoardManager {
     try {
       // 获取队列实例
       const scheduler = getScheduler();
+
+      // 检查调度器是否已初始化
+      if (!scheduler.isReady) {
+        throw new Error("调度器尚未初始化，无法创建 Bull Board");
+      }
+
       const queueManager = scheduler.getQueueManager();
       const queue = queueManager.getQueue();
 
