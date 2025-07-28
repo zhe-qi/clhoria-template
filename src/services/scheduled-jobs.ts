@@ -8,6 +8,7 @@ import { sysJobHandlers, sysScheduledJobs } from "@/db/schema";
 import { getJobMonitor } from "@/jobs/monitoring";
 import { getAvailableHandlerNames, validateHandlerName } from "@/jobs/registry";
 import { getScheduler } from "@/jobs/scheduler";
+import { JobStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 
 // 类型定义
@@ -119,7 +120,7 @@ export async function createScheduledJob(params: CreateScheduledJobParams): Prom
       .returning();
 
     // 如果任务是启用状态，立即添加到调度器
-    if (status === 1) {
+    if (status === JobStatus.ENABLED) {
       try {
         const scheduler = getScheduler();
         const jobConfig = convertToJobConfig(newJob);
@@ -354,7 +355,7 @@ export async function toggleJobStatus(
     // 根据新状态启动或停止任务
     try {
       const scheduler = getScheduler();
-      if (newStatus === 1) {
+      if (newStatus === JobStatus.ENABLED) {
         // 启用任务
         const jobConfig = convertToJobConfig(updatedJob);
         await scheduler.startJob(jobConfig);

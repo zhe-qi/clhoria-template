@@ -1,7 +1,12 @@
+import type z from "zod/v4";
+
 import { and, eq } from "drizzle-orm";
+
+import type { selectSysScheduledJobsSchema } from "@/db/schema";
 
 import db from "@/db";
 import { sysScheduledJobs } from "@/db/schema";
+import { JobStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 
 import type { ScheduledJobConfig } from "./types";
@@ -10,7 +15,7 @@ import { JobQueueManager } from "./queue-manager";
 import { syncHandlersToDatabase } from "./registry";
 
 // 类型定义
-type ScheduledJob = typeof sysScheduledJobs.$inferSelect;
+type ScheduledJob = z.infer<typeof selectSysScheduledJobsSchema>;
 
 /** 定时任务调度器 */
 export class TaskScheduler {
@@ -57,7 +62,7 @@ export class TaskScheduler {
       const enabledJobs = await db
         .select()
         .from(sysScheduledJobs)
-        .where(eq(sysScheduledJobs.status, 1)); // status = 1 表示启用
+        .where(eq(sysScheduledJobs.status, JobStatus.ENABLED));
 
       logger.info(`找到 ${enabledJobs.length} 个启用的定时任务`);
 
@@ -125,7 +130,7 @@ export class TaskScheduler {
         throw new Error(`任务不存在: ${jobId}`);
       }
 
-      if (jobRow.status === 1) { // 只有启用状态的任务才重启
+      if (jobRow.status === JobStatus.ENABLED) { // 只有启用状态的任务才重启
         const jobConfig = this.convertToJobConfig(jobRow);
         await this.startJob(jobConfig);
       }
@@ -188,7 +193,7 @@ export class TaskScheduler {
       for (const jobRow of allJobs) {
         const jobConfig = this.convertToJobConfig(jobRow);
 
-        if (jobRow.status === 1) {
+        if (jobRow.status === JobStatus.ENABLED) {
           // 启用状态：确保任务在运行
           // 这里可以检查 BullMQ 中是否存在该重复任务
           // 如果不存在，则重新添加
@@ -209,6 +214,11 @@ export class TaskScheduler {
     }
   }
 
+  /** 检查调度器是否已初始化 */
+  get isReady(): boolean {
+    return this.isInitialized;
+  }
+
   /** 获取调度器状态 */
   async getSchedulerStatus() {
     try {
@@ -221,7 +231,7 @@ export class TaskScheduler {
       const enabledJobs = await db
         .select({ count: sysScheduledJobs.id })
         .from(sysScheduledJobs)
-        .where(eq(sysScheduledJobs.status, 1));
+        .where(eq(sysScheduledJobs.status, JobStatus.ENABLED));
 
       return {
         isInitialized: this.isInitialized,

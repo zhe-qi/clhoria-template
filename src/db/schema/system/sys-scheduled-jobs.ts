@@ -3,6 +3,8 @@ import { createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 
+import { jobStatusEnum } from "./enums";
+
 /** 任务参数接口 */
 interface JobPayload {
   [key: string]: unknown;
@@ -31,7 +33,7 @@ export const sysScheduledJobs = pgTable("sys_scheduled_jobs", {
   /** 时区 */
   timezone: varchar({ length: 64 }).default("Asia/Shanghai"),
   /** 状态: 1=启用 0=禁用 2=暂停 */
-  status: integer().default(1).notNull(),
+  status: jobStatusEnum().notNull(),
   /** 任务参数 */
   payload: jsonb().$type<JobPayload>().default({}).notNull(),
   /** 重试次数 */

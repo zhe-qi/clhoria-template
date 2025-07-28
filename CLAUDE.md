@@ -268,6 +268,24 @@ export const statusEnum = pgEnum("status", ["ENABLED", "DISABLED", "BANNED"]);
 - Use barrel exports from `src/lib/enums/index.ts`
 - Keep related enums in the same file when appropriate
 
+### 6. Magic Number Elimination
+
+**CRITICAL**: Never use magic numbers in database queries. Always use enums when available:
+
+```typescript
+// ❌ Wrong - Magic numbers
+.where(eq(sysScheduledJobs.status, 1)); // status = 1 表示启用
+
+// ✅ Correct - Use enums
+.where(eq(sysScheduledJobs.status, JobStatus.ENABLED));
+```
+
+**Rules**:
+- ALWAYS define enums for status values, types, and other categorical data
+- Use descriptive enum values instead of numeric constants
+- Import and use the appropriate enum in all database queries and business logic
+- When working with existing magic numbers, refactor them to use enums
+
 ## Route Architecture Standards
 
 When creating new routes, ALWAYS follow the admin-users route structure for consistency:
