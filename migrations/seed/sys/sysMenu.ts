@@ -336,6 +336,6 @@ export async function initSysMenu() {
     id: item.id || uuidV7(), // 如果没有预定义ID，则生成新的UUID
   }));
 
-  await db.insert(sysMenu).values(menuData as any).onConflictDoNothing();
+  await db.insert(sysMenu).values(menuData).onConflictDoNothing();
   console.log("系统菜单初始化完成");
 }

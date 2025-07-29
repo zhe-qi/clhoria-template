@@ -1,7 +1,7 @@
-import type { Job } from "bullmq";
+import type { ConnectionOptions, Job } from "bullmq";
 
 /** 任务执行结果 */
-export interface JobResult {
+export interface JobResult<T = unknown> {
   /** 执行是否成功 */
   success: boolean;
   /** 结果消息 */
@@ -9,11 +9,11 @@ export interface JobResult {
   /** 执行时间戳 */
   executedAt?: string;
   /** 额外数据 */
-  data?: any;
+  data?: T;
 }
 
 /** 任务处理器函数类型 */
-export type JobHandler<T = any, R = any> = (job: Job<T>) => Promise<R>;
+export type JobHandler<T = unknown, R = unknown> = (job: Job<T>) => Promise<R>;
 
 /** 任务处理器元数据 */
 export interface JobHandlerMeta {
@@ -86,7 +86,7 @@ export interface JobExecutionLog {
   /** 执行耗时 */
   durationMs?: number;
   /** 执行结果 */
-  result?: any;
+  result?: unknown;
   /** 错误信息 */
   errorMessage?: string;
   /** 重试次数 */
@@ -149,7 +149,7 @@ export interface QueueOptions {
   /** 队列名称 */
   name: string;
   /** Redis连接配置 */
-  connection?: any;
+  connection: ConnectionOptions;
   /** 默认任务选项 */
   defaultJobOptions?: {
     removeOnComplete?: number;
@@ -172,5 +172,5 @@ export interface WorkerOptions {
     duration: number;
   };
   /** 连接配置 */
-  connection?: any;
+  connection: ConnectionOptions;
 }
