@@ -5,14 +5,15 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import {
   batchGetDictionariesSchema,
-  insertDictionariesSchema,
-  patchDictionariesSchema,
-  responseDictionariesSchema,
+  insertSystemDictionariesSchema,
+  patchSystemDictionariesSchema,
+  responseSystemDictionariesSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["/admin-dictionaries (字典管理)"];
+const routePrefix = "/system/dictionaries";
+const tags = [`${routePrefix}（字典管理）`];
 
 const CodeParamsSchema = z.object({
   code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
@@ -27,18 +28,18 @@ const ListQuerySchema = PaginationParamsSchema.extend({
 export const list = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.SYS_DICTIONARIES,
+    resource: PermissionResource.SYSTEM_DICTIONARIES,
     action: PermissionAction.READ,
   },
   summary: "获取字典列表（分页）",
   method: "get",
-  path: "/admin-dictionaries",
+  path: routePrefix,
   request: {
     query: ListQuerySchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(responseDictionariesSchema),
+      createPaginatedResultSchema(responseSystemDictionariesSchema),
       "获取字典列表成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
@@ -52,18 +53,18 @@ export const list = createRoute({
 export const get = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.SYS_DICTIONARIES,
+    resource: PermissionResource.SYSTEM_DICTIONARIES,
     action: PermissionAction.READ,
   },
   summary: "获取单个字典详情",
   method: "get",
-  path: "/admin-dictionaries/{code}",
+  path: `${routePrefix}/{code}`,
   request: {
     params: CodeParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      responseDictionariesSchema,
+      responseSystemDictionariesSchema,
       "获取字典成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
@@ -81,29 +82,29 @@ export const get = createRoute({
 export const create = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.SYS_DICTIONARIES,
+    resource: PermissionResource.SYSTEM_DICTIONARIES,
     action: PermissionAction.CREATE,
   },
   summary: "创建字典",
   method: "post",
-  path: "/admin-dictionaries",
+  path: routePrefix,
   request: {
     body: jsonContentRequired(
-      insertDictionariesSchema,
+      insertSystemDictionariesSchema,
       "创建字典参数",
     ),
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      responseDictionariesSchema,
+      responseSystemDictionariesSchema,
       "创建成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(insertDictionariesSchema),
+      createErrorSchema(insertSystemDictionariesSchema),
       "请求参数错误",
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
-      createErrorSchema(insertDictionariesSchema),
+      createErrorSchema(patchSystemDictionariesSchema),
       "字典编码已存在",
     ),
   },
@@ -113,26 +114,26 @@ export const create = createRoute({
 export const update = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.SYS_DICTIONARIES,
+    resource: PermissionResource.SYSTEM_DICTIONARIES,
     action: PermissionAction.UPDATE,
   },
   summary: "更新字典",
   method: "patch",
-  path: "/admin-dictionaries/{code}",
+  path: `${routePrefix}/{code}`,
   request: {
     params: CodeParamsSchema,
     body: jsonContentRequired(
-      patchDictionariesSchema,
+      patchSystemDictionariesSchema,
       "更新字典参数",
     ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      responseDictionariesSchema,
+      responseSystemDictionariesSchema,
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(patchDictionariesSchema).or(createErrorSchema(CodeParamsSchema)),
+      createErrorSchema(patchSystemDictionariesSchema).or(createErrorSchema(CodeParamsSchema)),
       "请求参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -140,7 +141,7 @@ export const update = createRoute({
       "字典不存在",
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
-      createErrorSchema(patchDictionariesSchema),
+      createErrorSchema(patchSystemDictionariesSchema),
       "字典编码已存在",
     ),
   },
@@ -150,12 +151,12 @@ export const update = createRoute({
 export const remove = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.SYS_DICTIONARIES,
+    resource: PermissionResource.SYSTEM_DICTIONARIES,
     action: PermissionAction.DELETE,
   },
   summary: "删除字典",
   method: "delete",
-  path: "/admin-dictionaries/{code}",
+  path: `${routePrefix}/{code}`,
   request: {
     params: CodeParamsSchema,
   },
@@ -178,12 +179,12 @@ export const remove = createRoute({
 export const batch = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.SYS_DICTIONARIES,
+    resource: PermissionResource.SYSTEM_DICTIONARIES,
     action: PermissionAction.READ,
   },
   summary: "批量获取字典",
   method: "post",
-  path: "/admin-dictionaries/batch",
+  path: `${routePrefix}/batch`,
   request: {
     query: z.object({
       enabledOnly: z.enum(["true", "false"]).optional().default("false").describe("是否只获取启用字典"),
@@ -195,7 +196,7 @@ export const batch = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.record(z.string(), responseDictionariesSchema.nullable()),
+      z.record(z.string(), responseSystemDictionariesSchema.nullable()),
       "批量获取成功，key-value形式返回，不存在的字典返回null",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(

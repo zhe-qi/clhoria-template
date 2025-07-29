@@ -7,7 +7,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
-import { sysUser } from "@/db/schema";
+import { systemUser } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { enforcerLaunchedPromise, PermissionConfigManager } from "@/lib/permissions";
 import { cachePermissionResult, getPermissionResult, getUserRolesFromCache } from "@/services/user";
@@ -90,10 +90,10 @@ export function casbin(): MiddlewareHandler {
 }
 
 async function validateUserStatus(userId: string, domain: string): Promise<{ valid: boolean; message?: string }> {
-  const user = await db.query.sysUser.findFirst({
+  const user = await db.query.systemUser.findFirst({
     where: and(
-      eq(sysUser.id, userId),
-      eq(sysUser.domain, domain),
+      eq(systemUser.id, userId),
+      eq(systemUser.domain, domain),
     ),
   });
 

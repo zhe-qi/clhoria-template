@@ -4,11 +4,12 @@ import { jsonContent } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
-import { selectLoginLogSchema } from "@/db/schema";
+import { selectSystemLoginLogSchema } from "@/db/schema";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["/login-log (登录日志)"];
+const routePrefix = "/system/login-log";
+const tags = [`${routePrefix}（登录日志）`];
 
 const loginLogQuerySchema = PaginationParamsSchema.extend({
   search: z.string().optional().describe("搜索关键词"),
@@ -18,9 +19,9 @@ const loginLogQuerySchema = PaginationParamsSchema.extend({
 export const list = createRoute({
   tags,
   method: "get",
-  path: "/login-log",
+  path: routePrefix,
   permission: {
-    resource: PermissionResource.LOGIN_LOG,
+    resource: PermissionResource.SYSTEM_LOGIN_LOG,
     action: PermissionAction.READ,
   },
   summary: "获取登录日志列表",
@@ -29,7 +30,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(selectLoginLogSchema),
+      createPaginatedResultSchema(selectSystemLoginLogSchema),
       "登录日志列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

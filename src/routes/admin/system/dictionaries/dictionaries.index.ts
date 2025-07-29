@@ -7,7 +7,7 @@ import { createRouter } from "@/lib/create-app";
 import * as handlers from "./dictionaries.handlers";
 import * as routes from "./dictionaries.routes";
 
-export const dictionaries = createRouter()
+export const systemDictionaries = createRouter()
   .openapi(routes.list, handlers.list)
   .openapi(routes.get, handlers.get)
   .openapi(routes.create, handlers.create)
@@ -19,4 +19,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type DictionariesRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T] & RouteConfig>;
+export type SystemDictionariesRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T] & RouteConfig>;

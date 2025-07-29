@@ -4,7 +4,7 @@
 import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
-import { sysMenu } from "@/db/schema";
+import { systemMenu } from "@/db/schema";
 
 export async function initSysMenu() {
   // 预定义一些固定的UUID用于父级菜单
@@ -336,6 +336,6 @@ export async function initSysMenu() {
     id: item.id || uuidV7(), // 如果没有预定义ID，则生成新的UUID
   }));
 
-  await db.insert(sysMenu).values(menuData).onConflictDoNothing();
+  await db.insert(systemMenu).values(menuData).onConflictDoNothing();
   console.log("系统菜单初始化完成");
 }

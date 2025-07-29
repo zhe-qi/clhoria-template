@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import { initCasbinRule } from "./sys/casbinRule";
 import { initSysDictionaries } from "./sys/sysDictionaries";
 import { initSysDomain } from "./sys/sysDomain";
 import { initSysMenu } from "./sys/sysMenu";
@@ -30,9 +29,6 @@ async function run() {
 
     console.log("-> 初始化角色菜单关联...");
     await initSysRoleMenu();
-
-    console.log("-> 初始化 Casbin 权限规则...");
-    await initCasbinRule();
   }
   catch (error) {
     console.error("初始化过程中出错:", error);

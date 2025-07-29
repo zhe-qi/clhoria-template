@@ -16,18 +16,19 @@ import {
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
-const tags = ["/authorization (授权管理)"];
+const routePrefix = "/system/authorization";
+const tags = [`${routePrefix}（系统授权）`];
 
 /** 分配权限给角色 */
 export const assignPermissionsToRole = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.AUTHORIZATION,
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
     action: PermissionAction.ASSIGN_PERMISSIONS,
   },
   summary: "分配权限给角色",
   method: "post",
-  path: "/authorization/roles/{roleId}/permissions",
+  path: `${routePrefix}/roles/{roleId}/permissions`,
   request: {
     params: IdUUIDParamsSchema.extend({
       roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
@@ -57,12 +58,12 @@ export const assignPermissionsToRole = createRoute({
 export const assignRoutesToRole = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.AUTHORIZATION,
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
     action: PermissionAction.ASSIGN_ROUTES,
   },
   summary: "分配路由给角色",
   method: "post",
-  path: "/authorization/roles/{roleId}/routes",
+  path: `${routePrefix}/roles/{roleId}/routes`,
   request: {
     params: IdUUIDParamsSchema.extend({
       roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
@@ -92,12 +93,12 @@ export const assignRoutesToRole = createRoute({
 export const assignUsersToRole = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.AUTHORIZATION,
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
     action: PermissionAction.ASSIGN_USERS,
   },
   summary: "分配用户给角色",
   method: "post",
-  path: "/authorization/roles/{roleId}/users",
+  path: `${routePrefix}/roles/{roleId}/users`,
   request: {
     params: IdUUIDParamsSchema.extend({
       roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
@@ -127,12 +128,12 @@ export const assignUsersToRole = createRoute({
 export const getUserRoutes = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.AUTHORIZATION,
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
     action: PermissionAction.GET_USER_ROUTES,
   },
   summary: "获取用户路由",
   method: "get",
-  path: "/authorization/users/{userId}/routes",
+  path: `${routePrefix}/users/{userId}/routes`,
   request: {
     params: IdUUIDParamsSchema.extend({
       userId: IdUUIDParamsSchema.shape.id.describe("用户ID"),
@@ -159,12 +160,12 @@ export const getUserRoutes = createRoute({
 export const getRolePermissions = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.AUTHORIZATION,
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
     action: PermissionAction.GET_ROLE_PERMISSIONS,
   },
   summary: "获取角色权限",
   method: "get",
-  path: "/authorization/roles/{roleId}/permissions",
+  path: `${routePrefix}/roles/{roleId}/permissions`,
   request: {
     params: IdUUIDParamsSchema.extend({
       roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
@@ -191,12 +192,12 @@ export const getRolePermissions = createRoute({
 export const getRoleMenus = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.AUTHORIZATION,
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
     action: PermissionAction.GET_ROLE_MENUS,
   },
   summary: "获取角色菜单",
   method: "get",
-  path: "/authorization/roles/{roleId}/menus",
+  path: `${routePrefix}/roles/{roleId}/menus`,
   request: {
     params: IdUUIDParamsSchema.extend({
       roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),

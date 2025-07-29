@@ -3,7 +3,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
 import db from "@/db";
-import { sysEndpoint, sysRoleMenu, sysUserRole } from "@/db/schema";
+import { systemEndpoint, systemRoleMenu, systemUserRole } from "@/db/schema";
 import { getPermissionResultKey, getUserMenusKey, getUserRolesKey } from "@/lib/enums";
 import { redisClient } from "@/lib/redis";
 import { compareObjects } from "@/utils/tools/object";
@@ -77,15 +77,15 @@ export async function assignMenusToRole(
   return db.transaction(async (tx) => {
     // 删除现有的菜单分配
     await tx
-      .delete(sysRoleMenu)
+      .delete(systemRoleMenu)
       .where(and(
-        eq(sysRoleMenu.roleId, roleId),
-        eq(sysRoleMenu.domain, domain),
+        eq(systemRoleMenu.roleId, roleId),
+        eq(systemRoleMenu.domain, domain),
       ));
 
     // 添加新的菜单分配
     if (menuIds.length > 0) {
-      await tx.insert(sysRoleMenu).values(
+      await tx.insert(systemRoleMenu).values(
         menuIds.map(menuId => ({
           roleId,
           menuId,
@@ -126,15 +126,15 @@ export async function assignUsersToRole(
     // 更新数据库
     if (toRemove.length > 0) {
       await tx
-        .delete(sysUserRole)
+        .delete(systemUserRole)
         .where(and(
-          eq(sysUserRole.roleId, roleId),
-          inArray(sysUserRole.userId, toRemove),
+          eq(systemUserRole.roleId, roleId),
+          inArray(systemUserRole.userId, toRemove),
         ));
     }
 
     if (toAdd.length > 0) {
-      await tx.insert(sysUserRole).values(
+      await tx.insert(systemUserRole).values(
         toAdd.map(userId => ({
           userId,
           roleId,
@@ -192,7 +192,7 @@ export async function syncEndpoints(
 ) {
   return db.transaction(async (tx) => {
     // 获取现有端点
-    const existing = await tx.select().from(sysEndpoint);
+    const existing = await tx.select().from(systemEndpoint);
     const existingMap = new Map(
       existing.map(e => [`${e.method}:${e.path}`, e]),
     );
@@ -214,15 +214,15 @@ export async function syncEndpoints(
 
     // 执行插入
     if (toInsert.length > 0) {
-      await tx.insert(sysEndpoint).values(toInsert);
+      await tx.insert(systemEndpoint).values(toInsert);
     }
 
     // 执行更新
     for (const update of toUpdate) {
       await tx
-        .update(sysEndpoint)
+        .update(systemEndpoint)
         .set(update)
-        .where(eq(sysEndpoint.id, update.id));
+        .where(eq(systemEndpoint.id, update.id));
     }
 
     return {
@@ -245,11 +245,11 @@ export async function getUserMenuIds(userId: string, domain: string): Promise<st
 
   // 查询角色对应的菜单
   const roleMenus = await db
-    .select({ menuId: sysRoleMenu.menuId })
-    .from(sysRoleMenu)
+    .select({ menuId: systemRoleMenu.menuId })
+    .from(systemRoleMenu)
     .where(and(
-      inArray(sysRoleMenu.roleId, roles),
-      eq(sysRoleMenu.domain, domain),
+      inArray(systemRoleMenu.roleId, roles),
+      eq(systemRoleMenu.domain, domain),
     ));
 
   return roleMenus.map(rm => rm.menuId);

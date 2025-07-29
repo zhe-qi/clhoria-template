@@ -3,10 +3,10 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as scheduledJobsService from "@/services/scheduled-jobs";
 import { pickContext } from "@/utils/tools/hono-helpers";
 
-import type { ScheduledJobsRouteHandlerType } from "./scheduled-jobs.index";
+import type { SystemScheduledJobsRouteHandlerType } from "./scheduled-jobs.index";
 
 /** 获取定时任务列表 */
-export const list: ScheduledJobsRouteHandlerType<"list"> = async (c) => {
+export const list: SystemScheduledJobsRouteHandlerType<"list"> = async (c) => {
   const domain = c.get("userDomain");
   const query = c.req.valid("query");
 
@@ -24,7 +24,7 @@ export const list: ScheduledJobsRouteHandlerType<"list"> = async (c) => {
 };
 
 /** 获取单个定时任务 */
-export const getById: ScheduledJobsRouteHandlerType<"getById"> = async (c) => {
+export const getById: SystemScheduledJobsRouteHandlerType<"getById"> = async (c) => {
   const [domain] = pickContext(c, ["userDomain"]);
   const { id } = c.req.valid("param");
 
@@ -41,7 +41,7 @@ export const getById: ScheduledJobsRouteHandlerType<"getById"> = async (c) => {
 };
 
 /** 创建定时任务 */
-export const create: ScheduledJobsRouteHandlerType<"create"> = async (c) => {
+export const create: SystemScheduledJobsRouteHandlerType<"create"> = async (c) => {
   const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
   const body = c.req.valid("json");
 
@@ -68,7 +68,7 @@ export const create: ScheduledJobsRouteHandlerType<"create"> = async (c) => {
 };
 
 /** 更新定时任务 */
-export const update: ScheduledJobsRouteHandlerType<"update"> = async (c) => {
+export const update: SystemScheduledJobsRouteHandlerType<"update"> = async (c) => {
   const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
@@ -82,7 +82,7 @@ export const update: ScheduledJobsRouteHandlerType<"update"> = async (c) => {
 };
 
 /** 删除定时任务 */
-export const remove: ScheduledJobsRouteHandlerType<"remove"> = async (c) => {
+export const remove: SystemScheduledJobsRouteHandlerType<"remove"> = async (c) => {
   const [domain] = pickContext(c, ["userDomain"]);
   const { id } = c.req.valid("param");
 
@@ -91,7 +91,7 @@ export const remove: ScheduledJobsRouteHandlerType<"remove"> = async (c) => {
 };
 
 /** 切换任务状态 */
-export const toggleStatus: ScheduledJobsRouteHandlerType<"toggleStatus"> = async (c) => {
+export const toggleStatus: SystemScheduledJobsRouteHandlerType<"toggleStatus"> = async (c) => {
   const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
   const { id } = c.req.valid("param");
   const { status } = c.req.valid("json");
@@ -101,7 +101,7 @@ export const toggleStatus: ScheduledJobsRouteHandlerType<"toggleStatus"> = async
 };
 
 /** 立即执行任务 */
-export const executeNow: ScheduledJobsRouteHandlerType<"executeNow"> = async (c) => {
+export const executeNow: SystemScheduledJobsRouteHandlerType<"executeNow"> = async (c) => {
   const [domain] = pickContext(c, ["userDomain"]);
   const { id } = c.req.valid("param");
 
@@ -110,7 +110,7 @@ export const executeNow: ScheduledJobsRouteHandlerType<"executeNow"> = async (c)
 };
 
 /** 获取任务执行历史 */
-export const getExecutionHistory: ScheduledJobsRouteHandlerType<"getExecutionHistory"> = async (c) => {
+export const getExecutionHistory: SystemScheduledJobsRouteHandlerType<"getExecutionHistory"> = async (c) => {
   const [domain] = pickContext(c, ["userDomain"]);
   const { id } = c.req.valid("param");
   const query = c.req.valid("query");
@@ -127,7 +127,7 @@ export const getExecutionHistory: ScheduledJobsRouteHandlerType<"getExecutionHis
 };
 
 /** 获取任务执行统计 */
-export const getExecutionStats: ScheduledJobsRouteHandlerType<"getExecutionStats"> = async (c) => {
+export const getExecutionStats: SystemScheduledJobsRouteHandlerType<"getExecutionStats"> = async (c) => {
   const [domain] = pickContext(c, ["userDomain"]);
   const { id } = c.req.valid("param");
   const { days } = c.req.valid("query");
@@ -137,7 +137,7 @@ export const getExecutionStats: ScheduledJobsRouteHandlerType<"getExecutionStats
 };
 
 /** 获取可用的任务处理器 */
-export const getAvailableHandlers: ScheduledJobsRouteHandlerType<"getAvailableHandlers"> = async (c) => {
+export const getAvailableHandlers: SystemScheduledJobsRouteHandlerType<"getAvailableHandlers"> = async (c) => {
   const [domain] = pickContext(c, ["userDomain"]);
 
   try {
@@ -150,7 +150,7 @@ export const getAvailableHandlers: ScheduledJobsRouteHandlerType<"getAvailableHa
 };
 
 /** 获取系统任务概览 */
-export const getSystemOverview: ScheduledJobsRouteHandlerType<"getSystemOverview"> = async (c) => {
+export const getSystemOverview: SystemScheduledJobsRouteHandlerType<"getSystemOverview"> = async (c) => {
   const [domain] = pickContext(c, ["userDomain"]);
   const { days } = c.req.valid("query");
 

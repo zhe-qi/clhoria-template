@@ -5,7 +5,7 @@ import { createRouter } from "@/lib/create-app";
 import * as handlers from "./scheduled-jobs.handlers";
 import * as routes from "./scheduled-jobs.routes";
 
-export const scheduledJobs = createRouter()
+export const systemScheduledJobs = createRouter()
   .openapi(routes.list, handlers.list)
   .openapi(routes.create, handlers.create)
   .openapi(routes.getAvailableHandlers, handlers.getAvailableHandlers)
@@ -22,4 +22,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type ScheduledJobsRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type SystemScheduledJobsRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

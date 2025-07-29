@@ -5,7 +5,7 @@ import { differenceInMilliseconds } from "date-fns";
 import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
-import { sysOperationLog } from "@/db/schema";
+import { systemOperationLog } from "@/db/schema";
 import { logger } from "@/lib/logger";
 import { formatDate } from "@/utils";
 
@@ -69,7 +69,7 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
     }
 
     // 异步记录日志，不阻塞响应
-    void db.insert(sysOperationLog).values({
+    void db.insert(systemOperationLog).values({
       userId,
       username,
       domain,

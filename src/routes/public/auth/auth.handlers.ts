@@ -7,7 +7,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
-import { sysLoginLog, sysTokens, sysUser } from "@/db/schema";
+import { systemLoginLog, systemTokens, systemUser } from "@/db/schema";
 import env from "@/env";
 import { AuthType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { getIPAddress } from "@/services/ip";
@@ -20,7 +20,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
   const { username, password, domain } = body;
 
-  const user = await db.query.sysUser.findFirst({
+  const user = await db.query.systemUser.findFirst({
     with: {
       userRoles: {
         with: {
@@ -29,8 +29,8 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       },
     },
     where: and(
-      eq(sysUser.username, username),
-      eq(sysUser.domain, domain),
+      eq(systemUser.username, username),
+      eq(systemUser.domain, domain),
     ),
   });
 
@@ -83,14 +83,14 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const address = await getIPAddress(clientIP);
 
   // 先撤销该用户的所有活跃 token
-  await db.update(sysTokens)
+  await db.update(systemTokens)
     .set({ status: TokenStatus.REVOKED })
     .where(and(
-      eq(sysTokens.userId, user.id),
-      eq(sysTokens.status, TokenStatus.ACTIVE),
+      eq(systemTokens.userId, user.id),
+      eq(systemTokens.status, TokenStatus.ACTIVE),
     ));
 
-  await db.insert(sysTokens).values({
+  await db.insert(systemTokens).values({
     accessToken,
     refreshToken,
     status: TokenStatus.ACTIVE,
@@ -106,7 +106,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   });
 
   // 记录登录日志
-  await db.insert(sysLoginLog).values({
+  await db.insert(systemLoginLog).values({
     userId: user.id,
     username: user.username,
     domain: user.domain,
@@ -133,10 +133,10 @@ export const adminRegister: AuthRouteHandlerType<"adminRegister"> = async (c) =>
   }
 
   // 检查用户名是否已存在
-  const existingUser = await db.query.sysUser.findFirst({
+  const existingUser = await db.query.systemUser.findFirst({
     where: and(
-      eq(sysUser.username, userData.username),
-      eq(sysUser.domain, userData.domain),
+      eq(systemUser.username, userData.username),
+      eq(systemUser.domain, userData.domain),
     ),
   });
 
@@ -144,11 +144,11 @@ export const adminRegister: AuthRouteHandlerType<"adminRegister"> = async (c) =>
     return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
   }
 
-  const [{ id }] = await db.insert(sysUser).values({
+  const [{ id }] = await db.insert(systemUser).values({
     ...userData,
     password: await hash(password),
     createdBy: "system",
-  }).returning({ id: sysUser.id });
+  }).returning({ id: systemUser.id });
 
   return c.json({ id }, HttpStatusCodes.OK);
 };
@@ -167,10 +167,10 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
     }
 
     // 检查 token 记录
-    const tokenRecord = await db.query.sysTokens.findFirst({
+    const tokenRecord = await db.query.systemTokens.findFirst({
       where: and(
-        eq(sysTokens.refreshToken, oldRefreshToken),
-        eq(sysTokens.status, TokenStatus.ACTIVE),
+        eq(systemTokens.refreshToken, oldRefreshToken),
+        eq(systemTokens.status, TokenStatus.ACTIVE),
       ),
     });
 
@@ -202,21 +202,21 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
     }, env.ADMIN_JWT_SECRET, "HS256");
 
     // 先撤销该用户的其他活跃 token
-    await db.update(sysTokens)
+    await db.update(systemTokens)
       .set({ status: TokenStatus.REVOKED })
       .where(and(
-        eq(sysTokens.userId, payload.uid as string),
-        eq(sysTokens.status, TokenStatus.ACTIVE),
+        eq(systemTokens.userId, payload.uid as string),
+        eq(systemTokens.status, TokenStatus.ACTIVE),
       ));
 
     // 更新当前 token 记录
-    await db.update(sysTokens)
+    await db.update(systemTokens)
       .set({
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
         status: TokenStatus.ACTIVE,
       })
-      .where(eq(sysTokens.id, tokenRecord.id));
+      .where(eq(systemTokens.id, tokenRecord.id));
 
     return c.json({ token: newAccessToken, refreshToken: newRefreshToken }, HttpStatusCodes.OK);
   }
@@ -240,10 +240,10 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
   try {
     const payload = await verifyJwt(token, env.ADMIN_JWT_SECRET);
 
-    const user = await db.query.sysUser.findFirst({
+    const user = await db.query.systemUser.findFirst({
       where: and(
-        eq(sysUser.id, payload.uid as string),
-        eq(sysUser.domain, payload.domain as string),
+        eq(systemUser.id, payload.uid as string),
+        eq(systemUser.domain, payload.domain as string),
       ),
     });
 

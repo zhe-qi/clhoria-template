@@ -2,17 +2,15 @@
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import env from "@/env";
 import createApp from "@/lib/create-app";
-import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
-import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
 import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
-import { loginLog } from "./login-log.index";
+import { systemLoginLog } from "./login-log.index";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
@@ -26,10 +24,10 @@ function createAuthApp() {
 // 创建登录日志应用
 function createLoginLogApp() {
   return createApp()
-    .use("/login-log/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
-    .use("/login-log/*", casbin())
-    .use("/login-log/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }))
-    .route("/", loginLog);
+    .use("/system/login-log/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/login-log/*", casbin())
+    .use("/system/login-log/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }))
+    .route("/", systemLoginLog);
 }
 
 const authClient = testClient(createAuthApp());
@@ -38,15 +36,6 @@ const loginLogClient = testClient(createLoginLogApp());
 describe("loginLog routes with real authentication", () => {
   let adminToken: string;
   let userToken: string;
-
-  // 测试前初始化权限配置
-  beforeAll(async () => {
-    await collectAndSyncEndpointPermissions([
-      { name: "login-log", app: loginLog, prefix: "" },
-    ]);
-    // 重新加载Casbin策略以确保权限更新生效
-    await reloadPolicy();
-  });
 
   /** 管理员登录获取 token */
   it("admin login should return valid token", async () => {
@@ -90,7 +79,7 @@ describe("loginLog routes with real authentication", () => {
 
   /** 未认证访问应该返回 401 */
   it("access without token should return 401", async () => {
-    const response = await loginLogClient["login-log"].$get({
+    const response = await loginLogClient.system["login-log"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -101,7 +90,7 @@ describe("loginLog routes with real authentication", () => {
 
   /** 无效 token 应该返回 401 */
   it("access with invalid token should return 401", async () => {
-    const response = await loginLogClient["login-log"].$get(
+    const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "1",
@@ -125,7 +114,7 @@ describe("loginLog routes with real authentication", () => {
       return;
     }
 
-    const response = await loginLogClient["login-log"].$get(
+    const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "1",
@@ -161,7 +150,7 @@ describe("loginLog routes with real authentication", () => {
       return;
     }
 
-    const response = await loginLogClient["login-log"].$get(
+    const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "1",
@@ -194,7 +183,7 @@ describe("loginLog routes with real authentication", () => {
       return;
     }
 
-    const response = await loginLogClient["login-log"].$get(
+    const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "2",
@@ -227,7 +216,7 @@ describe("loginLog routes with real authentication", () => {
       return;
     }
 
-    const response = await loginLogClient["login-log"].$get(
+    const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "1",
@@ -253,7 +242,7 @@ describe("loginLog routes with real authentication", () => {
       return;
     }
 
-    const response = await loginLogClient["login-log"].$get(
+    const response = await loginLogClient.system["login-log"].$get(
       {
         // @ts-ignore
         query: {
@@ -285,7 +274,7 @@ describe("loginLog routes with real authentication", () => {
       return;
     }
 
-    const response = await loginLogClient["login-log"].$get(
+    const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "1",
@@ -324,7 +313,7 @@ describe("loginLog routes with real authentication", () => {
     }
 
     // 搜索用户名
-    const usernameResponse = await loginLogClient["login-log"].$get(
+    const usernameResponse = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "1",
@@ -342,7 +331,7 @@ describe("loginLog routes with real authentication", () => {
     expect(usernameResponse.status).toBe(HttpStatusCodes.OK);
 
     // 搜索登录类型
-    const typeResponse = await loginLogClient["login-log"].$get(
+    const typeResponse = await loginLogClient.system["login-log"].$get(
       {
         query: {
           page: "1",

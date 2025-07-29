@@ -1,53 +1,51 @@
-import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { integer, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 
-export const loginLogs = pgTable("sys_login_log", {
+export const systemLoginLog = pgTable("system_login_log", {
   id: defaultColumns.id,
-  userId: varchar({ length: 36 }).notNull(),
-  username: varchar({ length: 50 }).notNull(),
-  domain: varchar({ length: 100 }).notNull(),
-  loginTime: timestamp().defaultNow().notNull(),
-  ip: varchar({ length: 45 }).notNull(),
+  userId: uuid().notNull(),
+  username: varchar({ length: 64 }).notNull(),
+  domain: varchar({ length: 64 }).notNull(),
+  loginTime: timestamp({ mode: "date" }).notNull().defaultNow(),
+  ip: varchar({ length: 64 }).notNull(),
   port: integer(),
   address: varchar({ length: 255 }).notNull(),
-  userAgent: varchar({ length: 500 }).notNull(),
-  requestId: varchar({ length: 36 }).notNull(),
-  type: varchar({ length: 20 }).notNull(),
-  createdAt: defaultColumns.createdAt,
+  userAgent: varchar({ length: 512 }).notNull(),
+  requestId: varchar({ length: 64 }).notNull(),
+  type: varchar({ length: 32 }).notNull(),
   createdBy: defaultColumns.createdBy,
+  createdAt: defaultColumns.createdAt,
 });
 
-export const selectLoginLogSchema = createSelectSchema(loginLogs, {
-  id: schema => schema.describe("登录日志ID"),
+export const selectSystemLoginLogSchema = createSelectSchema(systemLoginLog, {
+  id: schema => schema.describe("日志ID"),
   userId: schema => schema.describe("用户ID"),
   username: schema => schema.describe("用户名"),
-  domain: schema => schema.describe("域名"),
+  domain: schema => schema.describe("域"),
   loginTime: schema => schema.describe("登录时间"),
   ip: schema => schema.describe("IP地址"),
-  port: schema => schema.describe("端口号"),
-  address: schema => schema.describe("物理或虚拟地址"),
+  port: schema => schema.describe("端口"),
+  address: schema => schema.describe("地址"),
   userAgent: schema => schema.describe("用户代理"),
   requestId: schema => schema.describe("请求ID"),
-  type: schema => schema.describe("登录事件类型"),
-  createdAt: schema => schema.describe("创建时间"),
-  createdBy: schema => schema.describe("创建人"),
+  type: schema => schema.describe("登录类型"),
 });
 
-export const insertLoginLogSchema = createInsertSchema(loginLogs, {
-  userId: schema => schema.describe("用户ID"),
-  username: schema => schema.describe("用户名"),
-  domain: schema => schema.describe("域名"),
-  loginTime: schema => schema.describe("登录时间"),
-  ip: schema => schema.describe("IP地址"),
-  port: schema => schema.describe("端口号"),
-  address: schema => schema.describe("物理或虚拟地址"),
-  userAgent: schema => schema.describe("用户代理"),
-  requestId: schema => schema.describe("请求ID"),
-  type: schema => schema.describe("登录事件类型"),
-  createdBy: schema => schema.describe("创建人"),
+export const insertSystemLoginLogSchema = createInsertSchema(systemLoginLog, {
+  username: schema => schema.min(1),
+  domain: schema => schema.min(1),
+  ip: schema => schema.min(1),
+  address: schema => schema.min(1),
+  userAgent: schema => schema.min(1),
+  requestId: schema => schema.min(1),
+  type: schema => schema.min(1),
+  createdBy: schema => schema.min(1),
 }).omit({
   id: true,
+  loginTime: true,
   createdAt: true,
 });
+
+export const patchSysLoginLogSchema = insertSystemLoginLogSchema.partial();

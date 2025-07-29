@@ -564,7 +564,7 @@ All business logic should be organized as functional services in the `src/servic
 
 ### Service Structure Standards
 
-1. **File Naming**: Use kebab-case for service files (e.g., `user.ts`, `global-params.ts`)
+1. **File Naming**: Use kebab-case for service files (e.g., `user.ts`, `sys-global-params.ts`)
 2. **Function Naming**: Use descriptive camelCase names with action prefixes:
    - `create*` - for creation operations
    - `get*` - for read operations

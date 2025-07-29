@@ -3,18 +3,18 @@ import type { InferSelectModel } from "drizzle-orm";
 
 import { and, eq, inArray, like, or } from "drizzle-orm";
 
-import type { insertSysMenuSchema, patchSysMenuSchema } from "@/db/schema";
+import type { insertSystemMenuSchema, patchSystemMenuSchema } from "@/db/schema";
 
 import db from "@/db";
-import { sysMenu, sysRoleMenu } from "@/db/schema";
+import { systemMenu, systemRoleMenu } from "@/db/schema";
 import { getUserMenusKey, Status } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
 
 // 菜单相关类型定义
-type InsertSysMenuData = z.infer<typeof insertSysMenuSchema>;
-type UpdateSysMenuData = z.infer<typeof patchSysMenuSchema>;
+type InsertSysMenuData = z.infer<typeof insertSystemMenuSchema>;
+type UpdateSysMenuData = z.infer<typeof patchSystemMenuSchema>;
 
 // 用于构建路由树的菜单数据类型
 interface MenuDataForRoute {
@@ -73,11 +73,11 @@ async function getUserMenuIds(userId: string, domain: string): Promise<string[]>
 
   // 查询角色对应的菜单
   const roleMenus = await db
-    .select({ menuId: sysRoleMenu.menuId })
-    .from(sysRoleMenu)
+    .select({ menuId: systemRoleMenu.menuId })
+    .from(systemRoleMenu)
     .where(and(
-      inArray(sysRoleMenu.roleId, roles),
-      eq(sysRoleMenu.domain, domain),
+      inArray(systemRoleMenu.roleId, roles),
+      eq(systemRoleMenu.domain, domain),
     ));
 
   return [...new Set(roleMenus.map(rm => rm.menuId))];
@@ -235,27 +235,27 @@ export async function getUserRoutes(userId: string, domain: string): Promise<Use
   // 查询菜单详情
   const menus = await db
     .select({
-      id: sysMenu.id,
-      menuName: sysMenu.menuName,
-      routeName: sysMenu.routeName,
-      routePath: sysMenu.routePath,
-      component: sysMenu.component,
-      icon: sysMenu.icon,
-      menuType: sysMenu.menuType,
-      pid: sysMenu.pid,
-      order: sysMenu.order,
-      hideInMenu: sysMenu.hideInMenu,
-      keepAlive: sysMenu.keepAlive,
-      constant: sysMenu.constant,
-      activeMenu: sysMenu.activeMenu,
+      id: systemMenu.id,
+      menuName: systemMenu.menuName,
+      routeName: systemMenu.routeName,
+      routePath: systemMenu.routePath,
+      component: systemMenu.component,
+      icon: systemMenu.icon,
+      menuType: systemMenu.menuType,
+      pid: systemMenu.pid,
+      order: systemMenu.order,
+      hideInMenu: systemMenu.hideInMenu,
+      keepAlive: systemMenu.keepAlive,
+      constant: systemMenu.constant,
+      activeMenu: systemMenu.activeMenu,
     })
-    .from(sysMenu)
+    .from(systemMenu)
     .where(and(
-      inArray(sysMenu.id, menuIds),
-      eq(sysMenu.status, Status.ENABLED),
-      eq(sysMenu.domain, domain),
+      inArray(systemMenu.id, menuIds),
+      eq(systemMenu.status, Status.ENABLED),
+      eq(systemMenu.domain, domain),
     ))
-    .orderBy(sysMenu.order);
+    .orderBy(systemMenu.order);
 
   // 构建菜单路由树
   const routes = buildMenuRouteTree(menus);
@@ -309,15 +309,15 @@ export async function assignMenusToRole(roleId: string, menuIds: string[], domai
   const result = await db.transaction(async (tx) => {
     // 删除现有的菜单分配
     await tx
-      .delete(sysRoleMenu)
+      .delete(systemRoleMenu)
       .where(and(
-        eq(sysRoleMenu.roleId, roleId),
-        eq(sysRoleMenu.domain, domain),
+        eq(systemRoleMenu.roleId, roleId),
+        eq(systemRoleMenu.domain, domain),
       ));
 
     // 添加新的菜单分配
     if (menuIds.length > 0) {
-      await tx.insert(sysRoleMenu).values(
+      await tx.insert(systemRoleMenu).values(
         menuIds.map(menuId => ({
           roleId,
           menuId,
@@ -340,11 +340,11 @@ export async function assignMenusToRole(roleId: string, menuIds: string[], domai
  */
 export async function getRoleMenuIds(roleId: string, domain: string): Promise<string[]> {
   const roleMenus = await db
-    .select({ menuId: sysRoleMenu.menuId })
-    .from(sysRoleMenu)
+    .select({ menuId: systemRoleMenu.menuId })
+    .from(systemRoleMenu)
     .where(and(
-      eq(sysRoleMenu.roleId, roleId),
-      eq(sysRoleMenu.domain, domain),
+      eq(systemRoleMenu.roleId, roleId),
+      eq(systemRoleMenu.domain, domain),
     ));
 
   return roleMenus.map(rm => rm.menuId);
@@ -361,22 +361,22 @@ export async function getMenuList(options: {
 }) {
   const { search, page, limit, domain } = options;
 
-  let searchCondition = eq(sysMenu.domain, domain);
+  let searchCondition = eq(systemMenu.domain, domain);
   if (search) {
     searchCondition = and(
-      eq(sysMenu.domain, domain),
+      eq(systemMenu.domain, domain),
       or(
-        like(sysMenu.menuName, `%${search}%`),
-        like(sysMenu.routeName, `%${search}%`),
-        like(sysMenu.routePath, `%${search}%`),
+        like(systemMenu.menuName, `%${search}%`),
+        like(systemMenu.routeName, `%${search}%`),
+        like(systemMenu.routePath, `%${search}%`),
       ),
     )!;
   }
 
-  return await pagination<InferSelectModel<typeof sysMenu>>(
-    sysMenu,
+  return await pagination<InferSelectModel<typeof systemMenu>>(
+    systemMenu,
     searchCondition,
-    { page, limit, orderBy: [sysMenu.order, sysMenu.id] },
+    { page, limit, orderBy: [systemMenu.order, systemMenu.id] },
   );
 }
 
@@ -385,15 +385,15 @@ export async function getMenuList(options: {
  */
 export async function getMenuTree(options: { status?: number; domain: string }) {
   const { status, domain } = options;
-  const whereConditions = [eq(sysMenu.domain, domain)];
+  const whereConditions = [eq(systemMenu.domain, domain)];
 
   if (status !== undefined) {
-    whereConditions.push(eq(sysMenu.status, status));
+    whereConditions.push(eq(systemMenu.status, status));
   }
 
-  const menus = await db.query.sysMenu.findMany({
+  const menus = await db.query.systemMenu.findMany({
     where: and(...whereConditions),
-    orderBy: [sysMenu.order, sysMenu.id],
+    orderBy: [systemMenu.order, systemMenu.id],
   });
 
   return buildMenuTree(menus);
@@ -404,24 +404,24 @@ export async function getMenuTree(options: { status?: number; domain: string }) 
  */
 export async function getMenusByRole(roleId: string, domain: string) {
   const menuIds = await db
-    .select({ menuId: sysRoleMenu.menuId })
-    .from(sysRoleMenu)
+    .select({ menuId: systemRoleMenu.menuId })
+    .from(systemRoleMenu)
     .where(and(
-      eq(sysRoleMenu.roleId, roleId),
-      eq(sysRoleMenu.domain, domain),
+      eq(systemRoleMenu.roleId, roleId),
+      eq(systemRoleMenu.domain, domain),
     ));
 
   if (menuIds.length < 1) {
     return [];
   }
 
-  return await db.query.sysMenu.findMany({
+  return await db.query.systemMenu.findMany({
     where: and(
-      eq(sysMenu.status, Status.ENABLED),
-      eq(sysMenu.domain, domain),
-      or(...menuIds.map(({ menuId }) => eq(sysMenu.id, menuId))),
+      eq(systemMenu.status, Status.ENABLED),
+      eq(systemMenu.domain, domain),
+      or(...menuIds.map(({ menuId }) => eq(systemMenu.id, menuId))),
     ),
-    orderBy: [sysMenu.order, sysMenu.id],
+    orderBy: [systemMenu.order, systemMenu.id],
   });
 }
 
@@ -429,7 +429,7 @@ export async function getMenusByRole(roleId: string, domain: string) {
  * 创建菜单
  */
 export async function createMenu(menuData: InsertSysMenuData) {
-  const [newMenu] = await db.insert(sysMenu).values(menuData).returning();
+  const [newMenu] = await db.insert(systemMenu).values(menuData).returning();
 
   // 清除相关缓存
   await clearAllMenuCache(menuData.domain || "default");
@@ -441,14 +441,14 @@ export async function createMenu(menuData: InsertSysMenuData) {
  * 根据ID获取单个菜单
  */
 export async function getMenuById(id: string, domain?: string) {
-  const whereConditions = [eq(sysMenu.id, id)];
+  const whereConditions = [eq(systemMenu.id, id)];
 
   if (domain) {
-    whereConditions.push(eq(sysMenu.domain, domain));
+    whereConditions.push(eq(systemMenu.domain, domain));
   }
 
-  return await db.query.sysMenu.findFirst({
-    where: domain ? and(...whereConditions) : eq(sysMenu.id, id),
+  return await db.query.systemMenu.findFirst({
+    where: domain ? and(...whereConditions) : eq(systemMenu.id, id),
   });
 }
 
@@ -456,16 +456,16 @@ export async function getMenuById(id: string, domain?: string) {
  * 更新菜单
  */
 export async function updateMenu(id: string, menuData: UpdateSysMenuData, domain?: string) {
-  const whereConditions = [eq(sysMenu.id, id)];
+  const whereConditions = [eq(systemMenu.id, id)];
 
   if (domain) {
-    whereConditions.push(eq(sysMenu.domain, domain));
+    whereConditions.push(eq(systemMenu.domain, domain));
   }
 
   const [updatedMenu] = await db
-    .update(sysMenu)
+    .update(systemMenu)
     .set(menuData)
-    .where(domain ? and(...whereConditions) : eq(sysMenu.id, id))
+    .where(domain ? and(...whereConditions) : eq(systemMenu.id, id))
     .returning();
 
   if (updatedMenu) {
@@ -480,10 +480,10 @@ export async function updateMenu(id: string, menuData: UpdateSysMenuData, domain
  * 删除菜单
  */
 export async function deleteMenu(id: string, domain?: string) {
-  const whereConditions = [eq(sysMenu.id, id)];
+  const whereConditions = [eq(systemMenu.id, id)];
 
   if (domain) {
-    whereConditions.push(eq(sysMenu.domain, domain));
+    whereConditions.push(eq(systemMenu.domain, domain));
   }
 
   // 先获取菜单信息用于清除缓存
@@ -494,13 +494,13 @@ export async function deleteMenu(id: string, domain?: string) {
   }
 
   // 删除相关的角色菜单关联
-  await db.delete(sysRoleMenu).where(eq(sysRoleMenu.menuId, id));
+  await db.delete(systemRoleMenu).where(eq(systemRoleMenu.menuId, id));
 
   // 删除菜单
   const [deletedMenu] = await db
-    .delete(sysMenu)
-    .where(domain ? and(...whereConditions) : eq(sysMenu.id, id))
-    .returning({ id: sysMenu.id });
+    .delete(systemMenu)
+    .where(domain ? and(...whereConditions) : eq(systemMenu.id, id))
+    .returning({ id: systemMenu.id });
 
   if (deletedMenu) {
     // 清除相关缓存
@@ -514,13 +514,13 @@ export async function deleteMenu(id: string, domain?: string) {
  * 获取常量路由
  */
 export async function getConstantRoutes(domain: string = "default") {
-  const constantMenus = await db.query.sysMenu.findMany({
+  const constantMenus = await db.query.systemMenu.findMany({
     where: and(
-      eq(sysMenu.constant, true),
-      eq(sysMenu.status, Status.ENABLED),
-      eq(sysMenu.domain, domain),
+      eq(systemMenu.constant, true),
+      eq(systemMenu.status, Status.ENABLED),
+      eq(systemMenu.domain, domain),
     ),
-    orderBy: [sysMenu.order, sysMenu.id],
+    orderBy: [systemMenu.order, systemMenu.id],
   });
 
   return constantMenus.map(menu => ({
@@ -556,14 +556,14 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
   }
 
   // 获取菜单详情
-  const menus = await db.query.sysMenu.findMany({
+  const menus = await db.query.systemMenu.findMany({
     where: and(
-      or(...menuIds.map(id => eq(sysMenu.id, id))),
-      eq(sysMenu.status, Status.ENABLED),
-      eq(sysMenu.constant, false), // 排除常量菜单
-      eq(sysMenu.domain, domain),
+      or(...menuIds.map(id => eq(systemMenu.id, id))),
+      eq(systemMenu.status, Status.ENABLED),
+      eq(systemMenu.constant, false), // 排除常量菜单
+      eq(systemMenu.domain, domain),
     ),
-    orderBy: [sysMenu.order, sysMenu.id],
+    orderBy: [systemMenu.order, systemMenu.id],
   });
 
   // 直接返回数据库菜单结构而不是 MenuRoute 结构
@@ -587,14 +587,14 @@ export async function menuExists(id: string): Promise<boolean> {
  * 检查菜单是否有子菜单
  */
 export async function hasChildMenus(id: string, domain?: string): Promise<boolean> {
-  const whereConditions = [eq(sysMenu.pid, id)];
+  const whereConditions = [eq(systemMenu.pid, id)];
 
   if (domain) {
-    whereConditions.push(eq(sysMenu.domain, domain));
+    whereConditions.push(eq(systemMenu.domain, domain));
   }
 
-  const children = await db.query.sysMenu.findMany({
-    where: domain ? and(...whereConditions) : eq(sysMenu.pid, id),
+  const children = await db.query.systemMenu.findMany({
+    where: domain ? and(...whereConditions) : eq(systemMenu.pid, id),
   });
 
   return children.length > 0;

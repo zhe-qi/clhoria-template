@@ -2,17 +2,15 @@
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import env from "@/env";
 import createApp from "@/lib/create-app";
-import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
-import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
 import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
-import { dictionaries } from "./dictionaries.index";
+import { systemDictionaries } from "./dictionaries.index";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
@@ -26,10 +24,10 @@ function createAuthApp() {
 // 创建字典管理应用
 function createDictionariesApp() {
   return createApp()
-    .use("/admin-dictionaries/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
-    .use("/admin-dictionaries/*", casbin())
-    .use("/admin-dictionaries/*", operationLog({ moduleName: "字典管理", description: "字典管理操作" }))
-    .route("/", dictionaries);
+    .use("/system/dictionaries/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/dictionaries/*", casbin())
+    .use("/system/dictionaries/*", operationLog({ moduleName: "字典管理", description: "字典管理操作" }))
+    .route("/", systemDictionaries);
 }
 
 const authClient = testClient(createAuthApp());
@@ -40,15 +38,6 @@ describe("dictionaries routes with real authentication", () => {
   let userToken: string;
   let testDictCode: string;
   let testDict: any;
-
-  // 测试前初始化权限配置
-  beforeAll(async () => {
-    await collectAndSyncEndpointPermissions([
-      { name: "dictionaries", app: dictionaries, prefix: "" },
-    ]);
-    // 重新加载Casbin策略以确保权限更新生效
-    await reloadPolicy();
-  });
 
   /** 管理员登录获取 token */
   it("admin login should return valid token", async () => {
@@ -92,7 +81,7 @@ describe("dictionaries routes with real authentication", () => {
 
   /** 未认证访问应该返回 401 */
   it("access without token should return 401", async () => {
-    const response = await dictionariesClient["admin-dictionaries"].$get({
+    const response = await dictionariesClient.system.dictionaries.$get({
       query: {
         page: "1",
         limit: "10",
@@ -103,7 +92,7 @@ describe("dictionaries routes with real authentication", () => {
 
   /** 无效 token 应该返回 401 */
   it("access with invalid token should return 401", async () => {
-    const response = await dictionariesClient["admin-dictionaries"].$get(
+    const response = await dictionariesClient.system.dictionaries.$get(
       {
         query: {
           page: "1",
@@ -151,7 +140,7 @@ describe("dictionaries routes with real authentication", () => {
       ],
     };
 
-    const response = await dictionariesClient["admin-dictionaries"].$post(
+    const response = await dictionariesClient.system.dictionaries.$post(
       {
         json: testDict,
       },
@@ -181,7 +170,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"].$post(
+    const response = await dictionariesClient.system.dictionaries.$post(
       {
         // @ts-ignore
         json: {
@@ -207,7 +196,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"].$get(
+    const response = await dictionariesClient.system.dictionaries.$get(
       {
         query: {
           page: "1",
@@ -243,7 +232,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"].$get(
+    const response = await dictionariesClient.system.dictionaries.$get(
       {
         query: {
           page: "1",
@@ -278,7 +267,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"][":code"].$get(
+    const response = await dictionariesClient.system.dictionaries[":code"].$get(
       {
         param: {
           code: testDictCode,
@@ -331,7 +320,7 @@ describe("dictionaries routes with real authentication", () => {
       ],
     };
 
-    const response = await dictionariesClient["admin-dictionaries"][":code"].$patch(
+    const response = await dictionariesClient.system.dictionaries[":code"].$patch(
       {
         param: {
           code: testDictCode,
@@ -363,7 +352,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"].batch.$post(
+    const response = await dictionariesClient.system.dictionaries.batch.$post(
       {
         query: {
           enabledOnly: "false",
@@ -399,7 +388,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"].$get(
+    const response = await dictionariesClient.system.dictionaries.$get(
       {
         query: {
           page: "1",
@@ -426,7 +415,7 @@ describe("dictionaries routes with real authentication", () => {
     }
 
     // 测试空字符串参数 - 由于路由路径的原因，这会返回404而不是422
-    const response = await dictionariesClient["admin-dictionaries"][":code"].$get(
+    const response = await dictionariesClient.system.dictionaries[":code"].$get(
       {
         param: {
           code: "",
@@ -451,7 +440,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"][":code"].$get(
+    const response = await dictionariesClient.system.dictionaries[":code"].$get(
       {
         param: {
           code: "non_existent_dict_code",
@@ -475,7 +464,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"][":code"].$delete(
+    const response = await dictionariesClient.system.dictionaries[":code"].$delete(
       {
         param: {
           code: testDictCode,
@@ -499,7 +488,7 @@ describe("dictionaries routes with real authentication", () => {
       return;
     }
 
-    const response = await dictionariesClient["admin-dictionaries"][":code"].$get(
+    const response = await dictionariesClient.system.dictionaries[":code"].$get(
       {
         param: {
           code: testDictCode,

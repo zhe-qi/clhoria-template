@@ -6,7 +6,7 @@ import type { ScheduledJobConfig } from "@/jobs/types";
 import type { PaginationParams } from "@/lib/pagination";
 
 import db from "@/db";
-import { sysJobHandlers, sysScheduledJobs } from "@/db/schema";
+import { systemJobHandlers, systemScheduledJobs } from "@/db/schema";
 import { getJobMonitor } from "@/jobs/monitoring";
 import { getAvailableHandlerNames, validateHandlerName } from "@/jobs/registry";
 import { getScheduler } from "@/jobs/scheduler";
@@ -14,7 +14,7 @@ import { JobStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 
 // 类型定义
-type ScheduledJob = InferSelectModel<typeof sysScheduledJobs>;
+type ScheduledJob = InferSelectModel<typeof systemScheduledJobs>;
 
 /** 创建定时任务参数 */
 interface CreateScheduledJobParams {
@@ -89,11 +89,11 @@ export async function createScheduledJob(params: CreateScheduledJobParams): Prom
   return db.transaction(async (tx) => {
     // 检查同一域下任务名称是否重复
     const existingJob = await tx
-      .select({ id: sysScheduledJobs.id })
-      .from(sysScheduledJobs)
+      .select({ id: systemScheduledJobs.id })
+      .from(systemScheduledJobs)
       .where(and(
-        eq(sysScheduledJobs.domain, domain),
-        eq(sysScheduledJobs.name, name),
+        eq(systemScheduledJobs.domain, domain),
+        eq(systemScheduledJobs.name, name),
       ));
 
     if (existingJob.length > 0) {
@@ -102,7 +102,7 @@ export async function createScheduledJob(params: CreateScheduledJobParams): Prom
 
     // 创建任务记录
     const [newJob] = await tx
-      .insert(sysScheduledJobs)
+      .insert(systemScheduledJobs)
       .values({
         domain,
         name,
@@ -172,10 +172,10 @@ export async function updateScheduledJob(
     // 检查任务是否存在
     const [existingJob] = await tx
       .select()
-      .from(sysScheduledJobs)
+      .from(systemScheduledJobs)
       .where(and(
-        eq(sysScheduledJobs.id, jobId),
-        eq(sysScheduledJobs.domain, domain),
+        eq(systemScheduledJobs.id, jobId),
+        eq(systemScheduledJobs.domain, domain),
       ));
 
     if (!existingJob) {
@@ -185,11 +185,11 @@ export async function updateScheduledJob(
     // 检查名称重复（如果有更新名称）
     if (updateData.name && updateData.name !== existingJob.name) {
       const duplicateJob = await tx
-        .select({ id: sysScheduledJobs.id })
-        .from(sysScheduledJobs)
+        .select({ id: systemScheduledJobs.id })
+        .from(systemScheduledJobs)
         .where(and(
-          eq(sysScheduledJobs.domain, domain),
-          eq(sysScheduledJobs.name, updateData.name),
+          eq(systemScheduledJobs.domain, domain),
+          eq(systemScheduledJobs.name, updateData.name),
         ));
 
       if (duplicateJob.length > 0) {
@@ -199,15 +199,15 @@ export async function updateScheduledJob(
 
     // 更新任务记录
     const [updatedJob] = await tx
-      .update(sysScheduledJobs)
+      .update(systemScheduledJobs)
       .set({
         ...updateData,
         updatedAt: new Date().toISOString(),
         updatedBy,
       })
       .where(and(
-        eq(sysScheduledJobs.id, jobId),
-        eq(sysScheduledJobs.domain, domain),
+        eq(systemScheduledJobs.id, jobId),
+        eq(systemScheduledJobs.domain, domain),
       ))
       .returning();
 
@@ -239,10 +239,10 @@ export async function deleteScheduledJob(jobId: string, domain: string): Promise
     // 检查任务是否存在
     const [existingJob] = await tx
       .select()
-      .from(sysScheduledJobs)
+      .from(systemScheduledJobs)
       .where(and(
-        eq(sysScheduledJobs.id, jobId),
-        eq(sysScheduledJobs.domain, domain),
+        eq(systemScheduledJobs.id, jobId),
+        eq(systemScheduledJobs.domain, domain),
       ));
 
     if (!existingJob) {
@@ -266,10 +266,10 @@ export async function deleteScheduledJob(jobId: string, domain: string): Promise
 
     // 删除任务记录
     await tx
-      .delete(sysScheduledJobs)
+      .delete(systemScheduledJobs)
       .where(and(
-        eq(sysScheduledJobs.id, jobId),
-        eq(sysScheduledJobs.domain, domain),
+        eq(systemScheduledJobs.id, jobId),
+        eq(systemScheduledJobs.domain, domain),
       ));
 
     logger.info("定时任务删除成功", { jobId, domain });
@@ -281,30 +281,30 @@ export async function getScheduledJobs(params: QueryScheduledJobsParams): Promis
   const { domain, search, status, handlerName, page = 1, limit = 20 } = params;
   const offset = (page - 1) * limit;
 
-  const whereConditions = [eq(sysScheduledJobs.domain, domain)];
+  const whereConditions = [eq(systemScheduledJobs.domain, domain)];
 
   if (search) {
     whereConditions.push(
       or(
-        ilike(sysScheduledJobs.name, `%${search}%`),
-        ilike(sysScheduledJobs.description, `%${search}%`),
+        ilike(systemScheduledJobs.name, `%${search}%`),
+        ilike(systemScheduledJobs.description, `%${search}%`),
       )!,
     );
   }
 
   if (status !== undefined) {
-    whereConditions.push(eq(sysScheduledJobs.status, status));
+    whereConditions.push(eq(systemScheduledJobs.status, status));
   }
 
   if (handlerName) {
-    whereConditions.push(eq(sysScheduledJobs.handlerName, handlerName));
+    whereConditions.push(eq(systemScheduledJobs.handlerName, handlerName));
   }
 
   const jobs = await db
     .select()
-    .from(sysScheduledJobs)
+    .from(systemScheduledJobs)
     .where(and(...whereConditions))
-    .orderBy(desc(sysScheduledJobs.createdAt))
+    .orderBy(desc(systemScheduledJobs.createdAt))
     .limit(limit)
     .offset(offset);
 
@@ -315,10 +315,10 @@ export async function getScheduledJobs(params: QueryScheduledJobsParams): Promis
 export async function getScheduledJobById(jobId: string, domain: string): Promise<ScheduledJob> {
   const [job] = await db
     .select()
-    .from(sysScheduledJobs)
+    .from(systemScheduledJobs)
     .where(and(
-      eq(sysScheduledJobs.id, jobId),
-      eq(sysScheduledJobs.domain, domain),
+      eq(systemScheduledJobs.id, jobId),
+      eq(systemScheduledJobs.domain, domain),
     ));
 
   if (!job) {
@@ -338,15 +338,15 @@ export async function toggleJobStatus(
   return db.transaction(async (tx) => {
     // 更新任务状态
     const [updatedJob] = await tx
-      .update(sysScheduledJobs)
+      .update(systemScheduledJobs)
       .set({
         status: newStatus,
         updatedAt: new Date().toISOString(),
         updatedBy,
       })
       .where(and(
-        eq(sysScheduledJobs.id, jobId),
-        eq(sysScheduledJobs.domain, domain),
+        eq(systemScheduledJobs.id, jobId),
+        eq(systemScheduledJobs.domain, domain),
       ))
       .returning();
 
@@ -458,8 +458,8 @@ export async function getAvailableHandlers(_domain: string): Promise<Array<{
   // 从数据库获取处理器详细信息
   const handlerDetails = await db
     .select()
-    .from(sysJobHandlers)
-    .where(eq(sysJobHandlers.isActive, true));
+    .from(systemJobHandlers)
+    .where(eq(systemJobHandlers.isActive, true));
 
   // 合并信息
   return availableHandlers.map((name) => {

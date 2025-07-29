@@ -2,7 +2,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
-import { insertSysUserSchema, loginSysUserSchema, responseSysUserSchema } from "@/db/schema";
+import { insertSystemUserSchema, loginSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
 
 const tags = ["/auth (身份认证)"];
 
@@ -12,7 +12,7 @@ export const adminLogin = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      loginSysUserSchema,
+      loginSystemUserSchema,
       "登录请求",
     ),
   },
@@ -23,7 +23,7 @@ export const adminLogin = createRoute({
       z.object({
         token: z.string(),
         refreshToken: z.string(),
-        user: responseSysUserSchema,
+        user: responseSystemUserSchema,
       }),
       "登录成功",
     ),
@@ -44,7 +44,7 @@ export const adminRegister = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      insertSysUserSchema.extend({
+      insertSystemUserSchema.extend({
         confirmPassword: z.string().describe("确认密码"),
       }),
       "注册请求",
@@ -105,7 +105,7 @@ export const getUserInfo = createRoute({
   summary: "获取当前用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      responseSysUserSchema,
+      responseSystemUserSchema,
       "获取成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(

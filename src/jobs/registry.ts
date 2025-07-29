@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import db from "@/db";
-import { sysJobHandlers } from "@/db/schema";
+import { systemJobHandlers } from "@/db/schema";
 import { logger } from "@/lib/logger";
 
 import type { JobHandlerMeta } from "./types";
@@ -53,7 +53,7 @@ export async function syncHandlersToDatabase(): Promise<void> {
     const systemUserId = "system"; // 系统用户ID
 
     // 获取数据库中现有的处理器
-    const existingHandlers = await db.select().from(sysJobHandlers);
+    const existingHandlers = await db.select().from(systemJobHandlers);
     const existingNames = new Set(existingHandlers.map(h => h.name));
 
     let addedCount = 0;
@@ -65,7 +65,7 @@ export async function syncHandlersToDatabase(): Promise<void> {
       if (existingNames.has(handler.name)) {
         // 更新现有处理器
         await db
-          .update(sysJobHandlers)
+          .update(systemJobHandlers)
           .set({
             description: handler.description,
             filePath: handler.filePath,
@@ -73,13 +73,13 @@ export async function syncHandlersToDatabase(): Promise<void> {
             updatedAt: new Date().toISOString(),
             updatedBy: systemUserId,
           })
-          .where(eq(sysJobHandlers.name, handler.name));
+          .where(eq(systemJobHandlers.name, handler.name));
 
         updatedCount++;
       }
       else {
         // 添加新处理器
-        await db.insert(sysJobHandlers).values({
+        await db.insert(systemJobHandlers).values({
           name: handler.name,
           description: handler.description,
           filePath: handler.filePath,
@@ -97,13 +97,13 @@ export async function syncHandlersToDatabase(): Promise<void> {
     for (const existingHandler of existingHandlers) {
       if (!registeredNames.has(existingHandler.name) && existingHandler.isActive) {
         await db
-          .update(sysJobHandlers)
+          .update(systemJobHandlers)
           .set({
             isActive: false,
             updatedAt: new Date().toISOString(),
             updatedBy: systemUserId,
           })
-          .where(eq(sysJobHandlers.name, existingHandler.name));
+          .where(eq(systemJobHandlers.name, existingHandler.name));
 
         deactivatedCount++;
       }

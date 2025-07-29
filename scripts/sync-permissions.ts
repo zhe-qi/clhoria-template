@@ -34,7 +34,7 @@ async function assignPermissionsToSuperAdmin() {
 
   try {
     // 查找超级管理员角色
-    const superRole = await db.query.sysRole.findFirst({
+    const superRole = await db.query.systemRole.findFirst({
       where: (table, { eq }) => eq(table.code, "ROLE_SUPER"),
     });
 

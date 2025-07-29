@@ -4,15 +4,16 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
 
 import {
-  insertSysScheduledJobsSchema,
-  patchSysScheduledJobsSchema,
-  selectSysJobExecutionLogsSchema,
-  selectSysScheduledJobsSchema,
+  insertSystemScheduledJobsSchema,
+  patchSystemScheduledJobsSchema,
+  selectSystemJobExecutionLogsSchema,
+  selectSystemScheduledJobsSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { PaginationParamsSchema } from "@/lib/pagination";
 
-const tags = ["/scheduled-jobs (定时任务管理)"];
+const routePrefix = "/system/scheduled-jobs";
+const tags = [`${routePrefix}（定时任务管理）`];
 
 const errorResponseSchema = z.object({ message: z.string() });
 
@@ -43,11 +44,11 @@ const StatsQuerySchema = z.object({
 /** 获取定时任务列表 */
 export const list = createRoute({
   method: "get",
-  path: "/scheduled-jobs",
+  path: routePrefix,
   tags,
   summary: "获取定时任务列表",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.READ,
   },
   request: {
@@ -55,7 +56,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSysScheduledJobsSchema),
+      z.array(selectSystemScheduledJobsSchema),
       "获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -72,18 +73,18 @@ export const list = createRoute({
 /** 获取单个定时任务 */
 export const getById = createRoute({
   method: "get",
-  path: "/scheduled-jobs/{id}",
+  path: `${routePrefix}/{id}`,
   tags,
   summary: "获取单个定时任务",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.READ,
   },
   request: {
     params: IdUUIDParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(selectSysScheduledJobsSchema, "获取成功"),
+    [HttpStatusCodes.OK]: jsonContent(selectSystemScheduledJobsSchema, "获取成功"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "任务不存在"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
@@ -99,18 +100,18 @@ export const getById = createRoute({
 /** 创建定时任务 */
 export const create = createRoute({
   method: "post",
-  path: "/scheduled-jobs",
+  path: routePrefix,
   tags,
   summary: "创建定时任务",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.CREATE,
   },
   request: {
-    body: jsonContentRequired(insertSysScheduledJobsSchema, "创建参数"),
+    body: jsonContentRequired(insertSystemScheduledJobsSchema, "创建参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(selectSysScheduledJobsSchema, "创建成功"),
+    [HttpStatusCodes.OK]: jsonContent(selectSystemScheduledJobsSchema, "创建成功"),
     [HttpStatusCodes.CONFLICT]: jsonContent(errorResponseSchema, "任务名称已存在"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       z.object({ success: z.boolean(), error: z.string() }),
@@ -126,23 +127,23 @@ export const create = createRoute({
 /** 更新定时任务 */
 export const update = createRoute({
   method: "patch",
-  path: "/scheduled-jobs/{id}",
+  path: `${routePrefix}/{id}`,
   tags,
   summary: "更新定时任务",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.UPDATE,
   },
   request: {
     params: IdUUIDParamsSchema,
-    body: jsonContentRequired(patchSysScheduledJobsSchema, "更新参数"),
+    body: jsonContentRequired(patchSystemScheduledJobsSchema, "更新参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(selectSysScheduledJobsSchema, "更新成功"),
+    [HttpStatusCodes.OK]: jsonContent(selectSystemScheduledJobsSchema, "更新成功"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "任务不存在"),
     [HttpStatusCodes.CONFLICT]: jsonContent(errorResponseSchema, "任务名称已存在"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(patchSysScheduledJobsSchema).or(createErrorSchema(IdUUIDParamsSchema)),
+      createErrorSchema(patchSystemScheduledJobsSchema).or(createErrorSchema(IdUUIDParamsSchema)),
       "参数验证失败",
     ),
   },
@@ -151,11 +152,11 @@ export const update = createRoute({
 /** 删除定时任务 */
 export const remove = createRoute({
   method: "delete",
-  path: "/scheduled-jobs/{id}",
+  path: `${routePrefix}/{id}`,
   tags,
   summary: "删除定时任务",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.DELETE,
   },
   request: {
@@ -177,11 +178,11 @@ export const remove = createRoute({
 /** 切换任务状态 */
 export const toggleStatus = createRoute({
   method: "patch",
-  path: "/scheduled-jobs/{id}/status",
+  path: `${routePrefix}/{id}/status`,
   tags,
   summary: "切换任务状态",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.UPDATE,
   },
   request: {
@@ -189,7 +190,7 @@ export const toggleStatus = createRoute({
     body: jsonContentRequired(ToggleStatusSchema, "状态参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(selectSysScheduledJobsSchema, "状态切换成功"),
+    [HttpStatusCodes.OK]: jsonContent(selectSystemScheduledJobsSchema, "状态切换成功"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "任务不存在"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(ToggleStatusSchema).or(createErrorSchema(IdUUIDParamsSchema)),
@@ -201,11 +202,11 @@ export const toggleStatus = createRoute({
 /** 立即执行任务 */
 export const executeNow = createRoute({
   method: "post",
-  path: "/scheduled-jobs/{id}/execute",
+  path: `${routePrefix}/{id}/execute`,
   tags,
   summary: "立即执行任务",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.UPDATE,
   },
   request: {
@@ -227,11 +228,11 @@ export const executeNow = createRoute({
 /** 获取任务执行历史 */
 export const getExecutionHistory = createRoute({
   method: "get",
-  path: "/scheduled-jobs/{id}/history",
+  path: `${routePrefix}/{id}/history`,
   tags,
   summary: "获取任务执行历史",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.READ,
   },
   request: {
@@ -240,7 +241,7 @@ export const getExecutionHistory = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSysJobExecutionLogsSchema),
+      z.array(selectSystemJobExecutionLogsSchema),
       "获取成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "任务不存在"),
@@ -254,11 +255,11 @@ export const getExecutionHistory = createRoute({
 /** 获取任务执行统计 */
 export const getExecutionStats = createRoute({
   method: "get",
-  path: "/scheduled-jobs/{id}/stats",
+  path: `${routePrefix}/{id}/stats`,
   tags,
   summary: "获取任务执行统计",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.READ,
   },
   request: {
@@ -288,11 +289,11 @@ export const getExecutionStats = createRoute({
 /** 获取可用的任务处理器 */
 export const getAvailableHandlers = createRoute({
   method: "get",
-  path: "/scheduled-jobs/handlers",
+  path: `${routePrefix}/handlers`,
   tags,
   summary: "获取可用的任务处理器",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.READ,
   },
   responses: {
@@ -317,11 +318,11 @@ export const getAvailableHandlers = createRoute({
 /** 获取系统任务概览 */
 export const getSystemOverview = createRoute({
   method: "get",
-  path: "/scheduled-jobs/overview",
+  path: `${routePrefix}/overview`,
   tags,
   summary: "获取系统任务概览",
   permission: {
-    resource: PermissionResource.SCHEDULED_JOBS,
+    resource: PermissionResource.SYSTEM_SCHEDULED_JOBS,
     action: PermissionAction.READ,
   },
   request: {

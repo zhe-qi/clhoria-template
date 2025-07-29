@@ -20,18 +20,19 @@ const ListQuerySchema = PaginationParamsSchema.extend({
   isPublic: z.enum(["0", "1"]).optional().describe("是否公开参数: 1=是 0=否"),
 });
 
-const tags = ["/admin-global-params (全局参数管理)"];
+const routePrefix = "/system/global-params";
+const tags = [`${routePrefix}（全局参数管理）`];
 
 /** 获取全局参数分页列表 */
 export const list = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.GLOBAL_PARAMS,
+    resource: PermissionResource.SYSTEM_GLOBAL_PARAMS,
     action: PermissionAction.READ,
   },
   summary: "获取全局参数列表（分页）",
   method: "get",
-  path: "/admin-global-params",
+  path: routePrefix,
   request: {
     query: ListQuerySchema,
   },
@@ -51,12 +52,12 @@ export const list = createRoute({
 export const get = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.GLOBAL_PARAMS,
+    resource: PermissionResource.SYSTEM_GLOBAL_PARAMS,
     action: PermissionAction.READ,
   },
   summary: "获取单个全局参数详情",
   method: "get",
-  path: "/admin-global-params/{key}",
+  path: `${routePrefix}/{key}`,
   request: {
     params: KeyParamsSchema,
   },
@@ -80,12 +81,12 @@ export const get = createRoute({
 export const create = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.GLOBAL_PARAMS,
+    resource: PermissionResource.SYSTEM_GLOBAL_PARAMS,
     action: PermissionAction.CREATE,
   },
   summary: "创建全局参数",
   method: "post",
-  path: "/admin-global-params",
+  path: routePrefix,
   request: {
     body: jsonContentRequired(
       insertGlobalParamsSchema,
@@ -112,12 +113,12 @@ export const create = createRoute({
 export const update = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.GLOBAL_PARAMS,
+    resource: PermissionResource.SYSTEM_GLOBAL_PARAMS,
     action: PermissionAction.UPDATE,
   },
   summary: "更新全局参数",
   method: "patch",
-  path: "/admin-global-params/{key}",
+  path: `${routePrefix}/{key}`,
   request: {
     params: KeyParamsSchema,
     body: jsonContentRequired(
@@ -145,12 +146,12 @@ export const update = createRoute({
 export const remove = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.GLOBAL_PARAMS,
+    resource: PermissionResource.SYSTEM_GLOBAL_PARAMS,
     action: PermissionAction.DELETE,
   },
   summary: "删除全局参数",
   method: "delete",
-  path: "/admin-global-params/{key}",
+  path: `${routePrefix}/{key}`,
   request: {
     params: KeyParamsSchema,
   },
@@ -173,12 +174,12 @@ export const remove = createRoute({
 export const batch = createRoute({
   tags,
   permission: {
-    resource: PermissionResource.GLOBAL_PARAMS,
+    resource: PermissionResource.SYSTEM_GLOBAL_PARAMS,
     action: PermissionAction.READ,
   },
   summary: "批量获取全局参数",
   method: "post",
-  path: "/admin-global-params/batch",
+  path: `${routePrefix}/batch`,
   request: {
     query: z.object({
       publicOnly: z.enum(["true", "false"]).optional().default("false").describe("是否只获取公开参数"),

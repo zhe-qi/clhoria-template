@@ -4,7 +4,7 @@
 import { eq } from "drizzle-orm";
 
 import db from "@/db";
-import { sysRole } from "@/db/schema";
+import { systemRole } from "@/db/schema";
 
 export async function initSysRole() {
   const data = [
@@ -20,11 +20,11 @@ export async function initSysRole() {
   ];
 
   // 先插入超级管理员角色
-  await db.insert(sysRole).values(data).onConflictDoNothing();
+  await db.insert(systemRole).values(data).onConflictDoNothing();
 
   // 获取超级管理员角色的 ID
-  const superRole = await db.select({ id: sysRole.id }).from(sysRole).where(eq(sysRole.code, "ROLE_SUPER"));
-  
+  const superRole = await db.select({ id: systemRole.id }).from(systemRole).where(eq(systemRole.code, "ROLE_SUPER"));
+
   if (superRole.length > 0) {
     // 插入其他角色，pid 指向超级管理员
     const otherRoles = [
@@ -39,7 +39,7 @@ export async function initSysRole() {
       },
     ];
 
-    await db.insert(sysRole).values(otherRoles).onConflictDoNothing();
+    await db.insert(systemRole).values(otherRoles).onConflictDoNothing();
   }
 
   console.log("系统角色初始化完成");

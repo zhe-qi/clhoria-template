@@ -2,7 +2,7 @@
 import { eq, and } from "drizzle-orm";
 
 import db from "@/db";
-import { sysDictionaries } from "@/db/schema";
+import { systemDictionaries } from "@/db/schema";
 import type { DictionaryItem } from "@/db/schema";
 
 /**
@@ -28,7 +28,7 @@ export async function initSysDictionaries() {
         sortOrder: 0,
       },
       {
-        code: "DISABLED", 
+        code: "DISABLED",
         label: "禁用",
         value: "0",
         description: "禁用状态",
@@ -39,7 +39,7 @@ export async function initSysDictionaries() {
       {
         code: "BANNED",
         label: "封禁",
-        value: "-1", 
+        value: "-1",
         description: "封禁状态",
         color: "#ff4d4f",
         status: 1,
@@ -69,7 +69,7 @@ export async function initSysDictionaries() {
       },
       {
         code: "FEMALE",
-        label: "女", 
+        label: "女",
         value: "F",
         description: "女性",
         color: "#eb2f96",
@@ -112,7 +112,7 @@ export async function initSysDictionaries() {
       {
         code: "SMS",
         label: "短信验证码",
-        value: "SMS", 
+        value: "SMS",
         description: "手机短信验证码认证",
         color: "#52c41a",
         icon: "message",
@@ -123,7 +123,7 @@ export async function initSysDictionaries() {
         code: "EMAIL",
         label: "邮箱验证码",
         value: "EMAIL",
-        description: "邮箱验证码认证", 
+        description: "邮箱验证码认证",
         color: "#faad14",
         icon: "mail",
         status: 1,
@@ -140,7 +140,7 @@ export async function initSysDictionaries() {
         sortOrder: 3,
       },
       {
-        code: "BIOMETRIC", 
+        code: "BIOMETRIC",
         label: "生物识别",
         value: "BIOMETRIC",
         description: "生物识别认证",
@@ -191,7 +191,7 @@ export async function initSysDictionaries() {
       {
         code: "DATE",
         label: "日期",
-        value: "date", 
+        value: "date",
         description: "日期类型",
         color: "#722ed1",
         status: 1,
@@ -225,14 +225,14 @@ export async function initSysDictionaries() {
       // 检查字典是否已存在
       const [existing] = await db
         .select()
-        .from(sysDictionaries)
-        .where(eq(sysDictionaries.code, dict.code));
+        .from(systemDictionaries)
+        .where(eq(systemDictionaries.code, dict.code));
 
       if (existing) {
         // 更新现有字典（保留用户可能的修改）
         console.log(`更新字典: ${dict.name}`);
         await db
-          .update(sysDictionaries)
+          .update(systemDictionaries)
           .set({
             name: dict.name,
             description: dict.description,
@@ -240,12 +240,12 @@ export async function initSysDictionaries() {
             updatedBy: seedUserId,
             updatedAt: new Date(),
           })
-          .where(eq(sysDictionaries.code, dict.code));
+          .where(eq(systemDictionaries.code, dict.code));
       }
       else {
         // 创建新字典
         console.log(`创建字典: ${dict.name}`);
-        await db.insert(sysDictionaries).values(dict);
+        await db.insert(systemDictionaries).values(dict);
       }
     }
     catch (error) {

@@ -4,7 +4,7 @@
 import { hash } from "@node-rs/argon2";
 
 import db from "@/db";
-import { sysUser } from "@/db/schema";
+import { systemUser } from "@/db/schema";
 
 export async function initSysUser() {
   const defaultPassword = await hash("123456");
@@ -34,6 +34,6 @@ export async function initSysUser() {
     },
   ];
 
-  await db.insert(sysUser).values(data).onConflictDoNothing();
+  await db.insert(systemUser).values(data).onConflictDoNothing();
   console.log("系统用户初始化完成");
 }

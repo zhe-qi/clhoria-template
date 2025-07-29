@@ -3,7 +3,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import { and, eq } from "drizzle-orm";
 
 import db from "@/db";
-import { sysScheduledJobs } from "@/db/schema";
+import { systemScheduledJobs } from "@/db/schema";
 import { JobStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 
@@ -13,7 +13,7 @@ import { JobQueueManager } from "./queue-manager";
 import { syncHandlersToDatabase } from "./registry";
 
 // 类型定义
-type ScheduledJob = InferSelectModel<typeof sysScheduledJobs>;
+type ScheduledJob = InferSelectModel<typeof systemScheduledJobs>;
 
 /** 定时任务调度器 */
 export class TaskScheduler {
@@ -59,8 +59,8 @@ export class TaskScheduler {
       // 查询所有启用状态的定时任务
       const enabledJobs = await db
         .select()
-        .from(sysScheduledJobs)
-        .where(eq(sysScheduledJobs.status, JobStatus.ENABLED));
+        .from(systemScheduledJobs)
+        .where(eq(systemScheduledJobs.status, JobStatus.ENABLED));
 
       logger.info(`找到 ${enabledJobs.length} 个启用的定时任务`);
 
@@ -118,10 +118,10 @@ export class TaskScheduler {
       // 重新加载任务配置
       const [jobRow] = await db
         .select()
-        .from(sysScheduledJobs)
+        .from(systemScheduledJobs)
         .where(and(
-          eq(sysScheduledJobs.id, jobId),
-          eq(sysScheduledJobs.domain, domain),
+          eq(systemScheduledJobs.id, jobId),
+          eq(systemScheduledJobs.domain, domain),
         ));
 
       if (!jobRow) {
@@ -146,10 +146,10 @@ export class TaskScheduler {
     try {
       const [jobRow] = await db
         .select()
-        .from(sysScheduledJobs)
+        .from(systemScheduledJobs)
         .where(and(
-          eq(sysScheduledJobs.id, jobId),
-          eq(sysScheduledJobs.domain, domain),
+          eq(systemScheduledJobs.id, jobId),
+          eq(systemScheduledJobs.domain, domain),
         ));
 
       if (!jobRow) {
@@ -186,7 +186,7 @@ export class TaskScheduler {
   private async checkJobStatusChanges(): Promise<void> {
     try {
       // 获取所有任务的当前状态
-      const allJobs = await db.select().from(sysScheduledJobs);
+      const allJobs = await db.select().from(systemScheduledJobs);
 
       for (const jobRow of allJobs) {
         const jobConfig = this.convertToJobConfig(jobRow);
@@ -223,13 +223,13 @@ export class TaskScheduler {
       const queueStatus = await this.queueManager.getQueueStatus();
 
       const totalJobs = await db
-        .select({ count: sysScheduledJobs.id })
-        .from(sysScheduledJobs);
+        .select({ count: systemScheduledJobs.id })
+        .from(systemScheduledJobs);
 
       const enabledJobs = await db
-        .select({ count: sysScheduledJobs.id })
-        .from(sysScheduledJobs)
-        .where(eq(sysScheduledJobs.status, JobStatus.ENABLED));
+        .select({ count: systemScheduledJobs.id })
+        .from(systemScheduledJobs)
+        .where(eq(systemScheduledJobs.status, JobStatus.ENABLED));
 
       return {
         isInitialized: this.isInitialized,

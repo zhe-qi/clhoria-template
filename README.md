@@ -207,6 +207,17 @@ pnpm start
 
 原则上稍作修改即可兼容 Bun、Deno 等现代 JavaScript 运行时，支持高性能部署。后续规划 Monorepo 架构，单独提供可部署到边缘运行时的模块化代码，涵盖评论系统、文章管理、R2 图片格式化、视频转码等场景，充分利用边缘计算的低延迟和高可用性优势。
 
+## 性能对比
+
+### Hono vs Fastify 性能分析
+
+在 Node.js 环境下，Fastify 依然保持性能优势，但差距已经不大：
+
+- **Fastify (Node.js)**: 142,695 req/s
+- **Hono (Node.js)**: 129,234 req/s
+
+详细基准测试：[bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
+
 ## Claude Code 一流支持
 
 本项目专为 Claude Code 开发体验进行了深度优化，提供业界领先的 AI 辅助开发能力。

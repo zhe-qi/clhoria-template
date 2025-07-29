@@ -8,7 +8,7 @@ import { join } from "node:path";
 import type { DictionaryItem } from "@/db/schema";
 
 import db from "@/db";
-import { sysDictionaries } from "@/db/schema";
+import { systemDictionaries } from "@/db/schema";
 import { clearAllDictionaryCache } from "@/services/dictionary";
 
 /**
@@ -152,8 +152,8 @@ async function syncEnumToDatabase(enumDef: EnumDefinition): Promise<{
     // 查找现有字典
     const [existing] = await db
       .select()
-      .from(sysDictionaries)
-      .where(eq(sysDictionaries.code, enumDef.name));
+      .from(systemDictionaries)
+      .where(eq(systemDictionaries.code, enumDef.name));
 
     const syncUserId = "sync-script";
     let itemsAdded = 0;
@@ -201,7 +201,7 @@ async function syncEnumToDatabase(enumDef: EnumDefinition): Promise<{
       mergedItems.sort((a, b) => a.sortOrder - b.sortOrder);
 
       await db
-        .update(sysDictionaries)
+        .update(systemDictionaries)
         .set({
           name: enumDef.name,
           description: enumDef.description,
@@ -209,14 +209,14 @@ async function syncEnumToDatabase(enumDef: EnumDefinition): Promise<{
           updatedBy: syncUserId,
           updatedAt: new Date(),
         })
-        .where(eq(sysDictionaries.code, enumDef.name));
+        .where(eq(systemDictionaries.code, enumDef.name));
 
       return { created: false, itemsAdded, itemsUpdated };
     }
     else {
       // 创建新字典
       await db
-        .insert(sysDictionaries)
+        .insert(systemDictionaries)
         .values({
           code: enumDef.name,
           name: enumDef.name,

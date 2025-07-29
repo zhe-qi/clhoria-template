@@ -2,12 +2,12 @@
 /* eslint-disable no-console */
 
 import db from "@/db";
-import { sysMenu, sysRole, sysRoleMenu } from "@/db/schema";
+import { systemMenu, systemRole, systemRoleMenu } from "@/db/schema";
 
 export async function initSysRoleMenu() {
   // 获取角色和菜单的 ID
-  const roles = await db.select({ id: sysRole.id, code: sysRole.code }).from(sysRole);
-  const menus = await db.select({ id: sysMenu.id, routeName: sysMenu.routeName }).from(sysMenu);
+  const roles = await db.select({ id: systemRole.id, code: systemRole.code }).from(systemRole);
+  const menus = await db.select({ id: systemMenu.id, routeName: systemMenu.routeName }).from(systemMenu);
 
   const superRole = roles.find(r => r.code === "ROLE_SUPER");
   const userRole = roles.find(r => r.code === "ROLE_USER");
@@ -38,6 +38,6 @@ export async function initSysRoleMenu() {
     });
   }
 
-  await db.insert(sysRoleMenu).values(data).onConflictDoNothing();
+  await db.insert(systemRoleMenu).values(data).onConflictDoNothing();
   console.log("角色菜单权限初始化完成");
 }

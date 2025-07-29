@@ -3,11 +3,11 @@ import type z from "zod/v4";
 
 import { and, eq, ilike, or } from "drizzle-orm";
 
-import type { DictionaryItem, insertDictionariesSchema, patchDictionariesSchema, selectDictionariesSchema } from "@/db/schema";
+import type { DictionaryItem, insertSystemDictionariesSchema, patchSystemDictionariesSchema, selectSystemDictionariesSchema } from "@/db/schema";
 import type { StatusType } from "@/lib/enums";
 
 import db from "@/db";
-import { sysDictionaries } from "@/db/schema";
+import { systemDictionaries } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { CacheConfig, getDictionariesAllKey, getDictionaryKey } from "@/lib/enums/cache";
 import { logger } from "@/lib/logger";
@@ -28,9 +28,9 @@ export interface DictionariesBatchOptions {
   enabledOnly?: boolean;
 }
 
-type UpdateDictionaryData = z.infer<typeof patchDictionariesSchema>;
-type SelectDictionaryData = z.infer<typeof selectDictionariesSchema>;
-type InsertDictionaryData = z.infer<typeof insertDictionariesSchema>;
+type UpdateDictionaryData = z.infer<typeof patchSystemDictionariesSchema>;
+type SelectDictionaryData = z.infer<typeof selectSystemDictionariesSchema>;
+type InsertDictionaryData = z.infer<typeof insertSystemDictionariesSchema>;
 
 /**
  * 从 Redis 缓存中获取字典
@@ -129,13 +129,13 @@ export async function getPublicDictionaries(options: DictionariesListOptions = {
   }
 
   // 构建查询条件
-  const whereCondition = enabledOnly ? eq(sysDictionaries.status, Status.ENABLED) : undefined;
+  const whereCondition = enabledOnly ? eq(systemDictionaries.status, Status.ENABLED) : undefined;
 
   const result = await db
     .select()
-    .from(sysDictionaries)
+    .from(systemDictionaries)
     .where(whereCondition)
-    .orderBy(sysDictionaries.sortOrder, sysDictionaries.createdAt);
+    .orderBy(systemDictionaries.sortOrder, systemDictionaries.createdAt);
 
   // 如果是启用的字典，缓存结果
   if (enabledOnly) {
@@ -159,15 +159,15 @@ export async function getAdminDictionaries(options: DictionariesListOptions = {}
     pagination: paginationOptions = { page: 1, limit: 20 },
   } = options;
 
-  let whereCondition = eq(sysDictionaries.status, Status.ENABLED);
+  let whereCondition = eq(systemDictionaries.status, Status.ENABLED);
 
   if (search) {
     whereCondition = and(
       whereCondition,
       or(
-        ilike(sysDictionaries.code, `%${search}%`),
-        ilike(sysDictionaries.name, `%${search}%`),
-        ilike(sysDictionaries.description, `%${search}%`),
+        ilike(systemDictionaries.code, `%${search}%`),
+        ilike(systemDictionaries.name, `%${search}%`),
+        ilike(systemDictionaries.description, `%${search}%`),
       ),
     )!;
   }
@@ -175,12 +175,12 @@ export async function getAdminDictionaries(options: DictionariesListOptions = {}
   if (status !== undefined) {
     whereCondition = and(
       whereCondition,
-      eq(sysDictionaries.status, status),
+      eq(systemDictionaries.status, status),
     )!;
   }
 
-  return await pagination<InferSelectModel<typeof sysDictionaries>>(
-    sysDictionaries,
+  return await pagination<InferSelectModel<typeof systemDictionaries>>(
+    systemDictionaries,
     whereCondition!,
     paginationOptions,
   );
@@ -198,10 +198,10 @@ export async function getPublicDictionary(code: string) {
 
   const [dictionary] = await db
     .select()
-    .from(sysDictionaries)
+    .from(systemDictionaries)
     .where(and(
-      eq(sysDictionaries.code, code),
-      eq(sysDictionaries.status, Status.ENABLED), // 只允许访问启用的字典
+      eq(systemDictionaries.code, code),
+      eq(systemDictionaries.status, Status.ENABLED), // 只允许访问启用的字典
     ));
 
   if (dictionary) {
@@ -227,8 +227,8 @@ export async function getAdminDictionary(code: string) {
 
   const [dictionary] = await db
     .select()
-    .from(sysDictionaries)
-    .where(eq(sysDictionaries.code, code));
+    .from(systemDictionaries)
+    .where(eq(systemDictionaries.code, code));
 
   if (dictionary) {
     await setCachedDictionary(code, dictionary);
@@ -244,9 +244,9 @@ export async function getAdminDictionary(code: string) {
 /**
  * 创建字典
  */
-export async function createDictionary(data: InferInsertModel<typeof sysDictionaries>, userId: string) {
+export async function createDictionary(data: InferInsertModel<typeof systemDictionaries>, userId: string) {
   const [created] = await db
-    .insert(sysDictionaries)
+    .insert(systemDictionaries)
     .values({
       ...data,
       createdBy: userId,
@@ -264,13 +264,13 @@ export async function createDictionary(data: InferInsertModel<typeof sysDictiona
  */
 export async function updateDictionary(code: string, data: UpdateDictionaryData, userId: string) {
   const [updated] = await db
-    .update(sysDictionaries)
+    .update(systemDictionaries)
     .set({
       ...data,
       updatedBy: userId,
       updatedAt: new Date(),
     })
-    .where(eq(sysDictionaries.code, code))
+    .where(eq(systemDictionaries.code, code))
     .returning();
 
   if (updated) {
@@ -286,9 +286,9 @@ export async function updateDictionary(code: string, data: UpdateDictionaryData,
  */
 export async function deleteDictionary(code: string) {
   const [deleted] = await db
-    .delete(sysDictionaries)
-    .where(eq(sysDictionaries.code, code))
-    .returning({ code: sysDictionaries.code });
+    .delete(systemDictionaries)
+    .where(eq(systemDictionaries.code, code))
+    .returning({ code: systemDictionaries.code });
 
   if (deleted) {
     await deleteCachedDictionary(code);
@@ -302,7 +302,7 @@ export async function deleteDictionary(code: string) {
  */
 export async function batchGetDictionaries(codes: string[], options: DictionariesBatchOptions = {}) {
   const { enabledOnly = true } = options;
-  const result: Record<string, InferSelectModel<typeof sysDictionaries> | null> = {};
+  const result: Record<string, InferSelectModel<typeof systemDictionaries> | null> = {};
 
   // 尝试从缓存批量获取
   const cacheKeys = codes.map(code => getDictionaryKey(code));
@@ -333,11 +333,11 @@ export async function batchGetDictionaries(codes: string[], options: Dictionarie
 
   // 从数据库获取未缓存的字典
   if (missingCodes.length > 0) {
-    const whereCondition = enabledOnly ? eq(sysDictionaries.status, 1) : undefined;
+    const whereCondition = enabledOnly ? eq(systemDictionaries.status, 1) : undefined;
 
     const dbDictionaries = await db
       .select()
-      .from(sysDictionaries)
+      .from(systemDictionaries)
       .where(whereCondition);
 
     // 更新结果和缓存
@@ -386,15 +386,15 @@ export function getDictionaryItemByCode(dictionary: SelectDictionaryData, itemCo
  * 检查字典编码是否存在
  */
 export async function isDictionaryCodeExists(code: string, excludeId?: string): Promise<boolean> {
-  let whereCondition = eq(sysDictionaries.code, code);
+  let whereCondition = eq(systemDictionaries.code, code);
 
   if (excludeId) {
-    whereCondition = and(whereCondition, eq(sysDictionaries.id, excludeId))!;
+    whereCondition = and(whereCondition, eq(systemDictionaries.id, excludeId))!;
   }
 
   const [existing] = await db
-    .select({ id: sysDictionaries.id })
-    .from(sysDictionaries)
+    .select({ id: systemDictionaries.id })
+    .from(systemDictionaries)
     .where(whereCondition)
     .limit(1);
 

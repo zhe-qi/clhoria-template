@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 
 import db from "@/db";
-import { sysDomain } from "@/db/schema";
+import { systemDomain } from "@/db/schema";
 
 export async function initSysDomain() {
   const data = [
@@ -16,6 +16,6 @@ export async function initSysDomain() {
     },
   ];
 
-  await db.insert(sysDomain).values(data).onConflictDoNothing();
+  await db.insert(systemDomain).values(data).onConflictDoNothing();
   console.log("系统域初始化完成");
 }

@@ -4,13 +4,13 @@ import { hash, verify } from "@node-rs/argon2";
 import { and, eq, inArray } from "drizzle-orm";
 
 import db from "@/db";
-import { sysTokens, sysUser, sysUserRole } from "@/db/schema";
+import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
 import { CacheConfig, getPermissionResultKey, getUserRolesKey, TokenStatus } from "@/lib/enums";
 import { clearUserCache } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
 
-type CreateUserParams = InferInsertModel<typeof sysUser>;
+type CreateUserParams = InferInsertModel<typeof systemUser>;
 
 /**
  * 创建用户
@@ -18,7 +18,7 @@ type CreateUserParams = InferInsertModel<typeof sysUser>;
 export async function createUser(params: CreateUserParams) {
   const hashedPassword = await hash(params.password);
 
-  const [user] = await db.insert(sysUser).values({
+  const [user] = await db.insert(systemUser).values({
     ...params,
     password: hashedPassword,
   }).returning();
@@ -32,9 +32,9 @@ export async function createUser(params: CreateUserParams) {
 export async function logout(userId: string, domain: string, accessToken: string) {
   // 更新令牌状态
   await db
-    .update(sysTokens)
+    .update(systemTokens)
     .set({ status: TokenStatus.REVOKED })
-    .where(eq(sysTokens.accessToken, accessToken));
+    .where(eq(systemTokens.accessToken, accessToken));
 
   // 清理 Redis 缓存
   await clearUserPermissionCache(userId, domain);
@@ -49,9 +49,9 @@ export async function updatePassword(
   newPassword: string,
 ) {
   const [user] = await db
-    .select({ password: sysUser.password })
-    .from(sysUser)
-    .where(eq(sysUser.id, userId));
+    .select({ password: systemUser.password })
+    .from(systemUser)
+    .where(eq(systemUser.id, userId));
 
   if (!user) {
     throw new Error("用户不存在");
@@ -66,9 +66,9 @@ export async function updatePassword(
   // 更新密码
   const hashedPassword = await hash(newPassword);
   await db
-    .update(sysUser)
+    .update(systemUser)
     .set({ password: hashedPassword })
-    .where(eq(sysUser.id, userId));
+    .where(eq(systemUser.id, userId));
 }
 
 /**
@@ -100,15 +100,15 @@ export async function assignRolesToUser(
     // 更新数据库
     if (toRemove.length > 0) {
       await tx
-        .delete(sysUserRole)
+        .delete(systemUserRole)
         .where(and(
-          eq(sysUserRole.userId, userId),
-          inArray(sysUserRole.roleId, toRemove),
+          eq(systemUserRole.userId, userId),
+          inArray(systemUserRole.roleId, toRemove),
         ));
     }
 
     if (toAdd.length > 0) {
-      await tx.insert(sysUserRole).values(
+      await tx.insert(systemUserRole).values(
         toAdd.map(roleId => ({
           userId,
           roleId,
@@ -168,9 +168,9 @@ export async function setUserRolesToCache(userId: string, domain: string, roles:
 export async function refreshUserRoleCache(userId: string, domain: string): Promise<string[]> {
   // 从数据库查询用户角色
   const userRoles = await db
-    .select({ roleId: sysUserRole.roleId })
-    .from(sysUserRole)
-    .where(eq(sysUserRole.userId, userId));
+    .select({ roleId: systemUserRole.roleId })
+    .from(systemUserRole)
+    .where(eq(systemUserRole.userId, userId));
 
   const roles = userRoles.map(ur => ur.roleId);
 

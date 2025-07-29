@@ -10,9 +10,9 @@ import {
   updateDictionary,
 } from "@/services/dictionary";
 
-import type { DictionariesRouteHandlerType } from "./dictionaries.index";
+import type { SystemDictionariesRouteHandlerType } from "./dictionaries.index";
 
-export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
+export const list: SystemDictionariesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
   const { search, status, page, limit } = query;
 
@@ -25,7 +25,7 @@ export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
+export const get: SystemDictionariesRouteHandlerType<"get"> = async (c) => {
   const { code } = c.req.valid("param");
 
   const dictionary = await getAdminDictionary(code);
@@ -37,7 +37,7 @@ export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
   return c.json(dictionary, HttpStatusCodes.OK);
 };
 
-export const create: DictionariesRouteHandlerType<"create"> = async (c) => {
+export const create: SystemDictionariesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
 
   const userId = c.get("userId");
@@ -52,7 +52,7 @@ export const create: DictionariesRouteHandlerType<"create"> = async (c) => {
   return c.json(dictionary, HttpStatusCodes.CREATED);
 };
 
-export const update: DictionariesRouteHandlerType<"update"> = async (c) => {
+export const update: SystemDictionariesRouteHandlerType<"update"> = async (c) => {
   const { code } = c.req.valid("param");
   const body = c.req.valid("json");
   const userId = c.get("userId");
@@ -76,7 +76,7 @@ export const update: DictionariesRouteHandlerType<"update"> = async (c) => {
   return c.json(dictionary, HttpStatusCodes.OK);
 };
 
-export const remove: DictionariesRouteHandlerType<"remove"> = async (c) => {
+export const remove: SystemDictionariesRouteHandlerType<"remove"> = async (c) => {
   const { code } = c.req.valid("param");
 
   const deleted = await deleteDictionary(code);
@@ -88,7 +88,7 @@ export const remove: DictionariesRouteHandlerType<"remove"> = async (c) => {
   return c.body(null, HttpStatusCodes.NO_CONTENT);
 };
 
-export const batch: DictionariesRouteHandlerType<"batch"> = async (c) => {
+export const batch: SystemDictionariesRouteHandlerType<"batch"> = async (c) => {
   const body = c.req.valid("json");
   const { enabledOnly = "false" } = c.req.valid("query");
 

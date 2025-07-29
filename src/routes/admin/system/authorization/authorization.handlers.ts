@@ -11,17 +11,17 @@ import {
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import * as menuService from "@/services/menu";
 
-import type { AuthorizationRouteHandlerType } from "./authorization.index";
+import type { SystemAuthorizationRouteHandlerType } from "./authorization.index";
 
 // 分配权限给角色
-export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermissionsToRole"> = async (c) => {
+export const assignPermissionsToRole: SystemAuthorizationRouteHandlerType<"assignPermissionsToRole"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { permissions, domain } = c.req.valid("json");
   const userDomain = c.get("userDomain");
   const currentDomain = domain || userDomain;
 
   // 检查角色是否存在
-  const role = await db.query.sysRole.findFirst({
+  const role = await db.query.systemRole.findFirst({
     where: (table, { eq }) => eq(table.id, roleId),
   });
 
@@ -44,14 +44,14 @@ export const assignPermissionsToRole: AuthorizationRouteHandlerType<"assignPermi
 };
 
 // 分配路由给角色
-export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRole"> = async (c) => {
+export const assignRoutesToRole: SystemAuthorizationRouteHandlerType<"assignRoutesToRole"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { menuIds, domain } = c.req.valid("json");
   const userDomain = c.get("userDomain");
   const currentDomain = domain || userDomain;
 
   // 检查角色是否存在
-  const role = await db.query.sysRole.findFirst({
+  const role = await db.query.systemRole.findFirst({
     where: (table, { eq }) => eq(table.id, roleId),
   });
 
@@ -65,13 +65,13 @@ export const assignRoutesToRole: AuthorizationRouteHandlerType<"assignRoutesToRo
 };
 
 // 分配用户给角色
-export const assignUsersToRole: AuthorizationRouteHandlerType<"assignUsersToRole"> = async (c) => {
+export const assignUsersToRole: SystemAuthorizationRouteHandlerType<"assignUsersToRole"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { userIds } = c.req.valid("json");
   const domain = c.get("userDomain");
 
   // 检查角色是否存在
-  const role = await db.query.sysRole.findFirst({
+  const role = await db.query.systemRole.findFirst({
     where: (table, { eq }) => eq(table.id, roleId),
   });
 
@@ -85,14 +85,14 @@ export const assignUsersToRole: AuthorizationRouteHandlerType<"assignUsersToRole
 };
 
 // 获取用户路由
-export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = async (c) => {
+export const getUserRoutes: SystemAuthorizationRouteHandlerType<"getUserRoutes"> = async (c) => {
   const { userId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
   const userDomain = c.get("userDomain");
   const domain = queryDomain || userDomain;
 
   // 检查用户是否存在
-  const user = await db.query.sysUser.findFirst({
+  const user = await db.query.systemUser.findFirst({
     where: (table, { eq }) => eq(table.id, userId),
   });
 
@@ -107,14 +107,14 @@ export const getUserRoutes: AuthorizationRouteHandlerType<"getUserRoutes"> = asy
 };
 
 // 获取角色权限
-export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissions"> = async (c) => {
+export const getRolePermissions: SystemAuthorizationRouteHandlerType<"getRolePermissions"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
   const userDomain = c.get("userDomain");
   const domain = queryDomain || userDomain;
 
   // 检查角色是否存在
-  const role = await db.query.sysRole.findFirst({
+  const role = await db.query.systemRole.findFirst({
     where: (table, { eq }) => eq(table.id, roleId),
   });
 
@@ -130,14 +130,14 @@ export const getRolePermissions: AuthorizationRouteHandlerType<"getRolePermissio
 };
 
 // 获取角色菜单
-export const getRoleMenus: AuthorizationRouteHandlerType<"getRoleMenus"> = async (c) => {
+export const getRoleMenus: SystemAuthorizationRouteHandlerType<"getRoleMenus"> = async (c) => {
   const { roleId } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
   const userDomain = c.get("userDomain");
   const domain = queryDomain || userDomain;
 
   // 检查角色是否存在
-  const role = await db.query.sysRole.findFirst({
+  const role = await db.query.systemRole.findFirst({
     where: (table, { eq }) => eq(table.id, roleId),
   });
 

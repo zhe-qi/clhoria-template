@@ -1,37 +1,37 @@
 /** 权限资源枚举，定义系统中所有可管理的业务资源 */
 export const PermissionResource = {
   /** 用户管理 */
-  SYS_USERS: "sys-users",
+  SYSTEM_USERS: "system-users",
 
   /** 角色管理 */
-  SYS_ROLES: "sys-roles",
+  SYSTEM_ROLES: "system-roles",
 
   /** 菜单管理 */
-  SYS_MENUS: "sys-menus",
+  SYSTEM_MENUS: "system-menus",
 
   /** 域管理 */
-  SYS_DOMAINS: "sys-domains",
+  SYSTEM_DOMAINS: "system-domains",
 
   /** 端点管理 */
-  SYS_ENDPOINTS: "sys-endpoints",
+  SYSTEM_ENDPOINTS: "system-endpoints",
 
   /** 授权管理 */
-  AUTHORIZATION: "authorization",
+  SYSTEM_AUTHORIZATION: "system-authorization",
 
   /** 登录日志 */
-  LOGIN_LOG: "login-log",
+  SYSTEM_LOGIN_LOG: "system-login-log",
 
   /** 操作日志 */
-  OPERATION_LOG: "operation-log",
+  SYSTEM_OPERATION_LOG: "system-operation-log",
 
   /** 全局参数管理 */
-  GLOBAL_PARAMS: "global-params",
+  SYSTEM_GLOBAL_PARAMS: "system-global-params",
 
   /** 字典管理 */
-  SYS_DICTIONARIES: "sys-dictionaries",
+  SYSTEM_DICTIONARIES: "system-dictionaries",
 
   /** 定时任务管理 */
-  SCHEDULED_JOBS: "scheduled-jobs",
+  SYSTEM_SCHEDULED_JOBS: "system-scheduled-jobs",
 } as const;
 
 /** 权限资源类型 */

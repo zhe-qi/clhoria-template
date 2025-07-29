@@ -4,9 +4,9 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { getDuplicateKeyError } from "@/lib/enums";
 import * as globalParamsService from "@/services/global-params";
 
-import type { GlobalParamsRouteHandlerType } from "./global-params.index";
+import type { SystemGlobalParamsRouteHandlerType } from "./global-params.index";
 
-export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
+export const list: SystemGlobalParamsRouteHandlerType<"list"> = async (c) => {
   const { search, isPublic, page = 1, limit = 20 } = c.req.valid("query");
 
   const result = await globalParamsService.getAdminList({
@@ -18,7 +18,7 @@ export const list: GlobalParamsRouteHandlerType<"list"> = async (c) => {
   return c.json(result, HttpStatusCodes.OK);
 };
 
-export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
+export const get: SystemGlobalParamsRouteHandlerType<"get"> = async (c) => {
   const { key } = c.req.valid("param");
 
   const param = await globalParamsService.getAdminParam(key);
@@ -30,7 +30,7 @@ export const get: GlobalParamsRouteHandlerType<"get"> = async (c) => {
   return c.json(param, HttpStatusCodes.OK);
 };
 
-export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
+export const create: SystemGlobalParamsRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const userId = c.get("userId");
 
@@ -48,7 +48,7 @@ export const create: GlobalParamsRouteHandlerType<"create"> = async (c) => {
   }
 };
 
-export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
+export const update: SystemGlobalParamsRouteHandlerType<"update"> = async (c) => {
   const { key } = c.req.valid("param");
   const body = c.req.valid("json");
   const userId = c.get("userId");
@@ -62,7 +62,7 @@ export const update: GlobalParamsRouteHandlerType<"update"> = async (c) => {
   return c.json(updated, HttpStatusCodes.OK);
 };
 
-export const remove: GlobalParamsRouteHandlerType<"remove"> = async (c) => {
+export const remove: SystemGlobalParamsRouteHandlerType<"remove"> = async (c) => {
   const { key } = c.req.valid("param");
 
   const deleted = await globalParamsService.deleteParam(key);
@@ -74,7 +74,7 @@ export const remove: GlobalParamsRouteHandlerType<"remove"> = async (c) => {
   return c.body(null, HttpStatusCodes.NO_CONTENT);
 };
 
-export const batch: GlobalParamsRouteHandlerType<"batch"> = async (c) => {
+export const batch: SystemGlobalParamsRouteHandlerType<"batch"> = async (c) => {
   const { keys } = c.req.valid("json");
   const { publicOnly = "false" } = c.req.valid("query");
 

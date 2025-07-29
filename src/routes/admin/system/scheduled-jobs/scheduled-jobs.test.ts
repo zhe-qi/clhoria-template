@@ -6,17 +6,15 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import db from "@/db";
-import { casbinRule, sysRole, sysScheduledJobs } from "@/db/schema";
+import { systemScheduledJobs } from "@/db/schema";
 import env from "@/env";
 import { getScheduler } from "@/jobs/scheduler";
 import createApp from "@/lib/create-app";
-import { collectAndSyncEndpointPermissions, PermissionConfigManager } from "@/lib/permissions";
-import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
 import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
-import { scheduledJobs } from "./scheduled-jobs.index";
+import { systemScheduledJobs as systemScheduledJobsRoutes } from "./scheduled-jobs.index";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
@@ -30,10 +28,10 @@ function createAuthApp() {
 // 创建定时任务管理应用
 function createScheduledJobsApp() {
   return createApp()
-    .use("/scheduled-jobs/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
-    .use("/scheduled-jobs/*", casbin())
-    .use("/scheduled-jobs/*", operationLog({ moduleName: "定时任务管理", description: "定时任务管理操作" }))
-    .route("/", scheduledJobs);
+    .use("/system/scheduled-jobs/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/scheduled-jobs/*", casbin())
+    .use("/system/scheduled-jobs/*", operationLog({ moduleName: "定时任务管理", description: "定时任务管理操作" }))
+    .route("/", systemScheduledJobsRoutes);
 }
 
 const authClient = testClient(createAuthApp());
@@ -76,66 +74,6 @@ describe("scheduledJobs routes with real authentication", () => {
     // 初始化任务处理器到数据库
     const { syncHandlersToDatabase } = await import("@/jobs/registry");
     await syncHandlersToDatabase();
-
-    await collectAndSyncEndpointPermissions([
-      { name: "scheduled-jobs", app: scheduledJobs, prefix: "" },
-    ]);
-
-    // 为超级管理员分配权限
-    const superRole = await db.query.sysRole.findFirst({
-      where: eq(sysRole.code, "ROLE_SUPER"),
-    });
-
-    if (superRole) {
-      const permissionManager = PermissionConfigManager.getInstance();
-      const allEndpointPermissions = permissionManager.getAllEndpointPermissions();
-
-      // 获取现有的超级管理员权限
-      const existingRules = await db
-        .select()
-        .from(casbinRule)
-        .where(eq(casbinRule.v0, superRole.id));
-
-      // 创建权限映射
-      const existingPermissions = new Set(
-        existingRules.map(rule => `${rule.v1}:${rule.v2}`),
-      );
-
-      // 收集需要添加的权限
-      const newPermissions: Array<{
-        resource: string;
-        action: string;
-      }> = [];
-
-      for (const endpoint of allEndpointPermissions) {
-        const permissionKey = `${endpoint.resource}:${endpoint.action}`;
-
-        if (!existingPermissions.has(permissionKey)) {
-          newPermissions.push({
-            resource: endpoint.resource,
-            action: endpoint.action,
-          });
-        }
-      }
-
-      // 添加缺失的权限
-      if (newPermissions.length > 0) {
-        const rulesToInsert = newPermissions.map(perm => ({
-          ptype: "p" as const,
-          v0: superRole.id,
-          v1: perm.resource,
-          v2: perm.action,
-          v3: "default",
-          v4: null,
-          v5: null,
-        }));
-
-        await db.insert(casbinRule).values(rulesToInsert).onConflictDoNothing();
-      }
-    }
-
-    // 重新加载Casbin策略以确保权限更新生效
-    await reloadPolicy();
   });
 
   // 测试后清理资源
@@ -144,7 +82,7 @@ describe("scheduledJobs routes with real authentication", () => {
       // 清理测试创建的任务
       if (createdJobIds.length > 0) {
         for (const jobId of createdJobIds) {
-          await db.delete(sysScheduledJobs).where(eq(sysScheduledJobs.id, jobId));
+          await db.delete(systemScheduledJobs).where(eq(systemScheduledJobs.id, jobId));
         }
       }
 
@@ -199,7 +137,7 @@ describe("scheduledJobs routes with real authentication", () => {
 
   /** 未认证访问应该返回 401 */
   it("access without token should return 401", async () => {
-    const response = await scheduledJobsClient["scheduled-jobs"].$get({
+    const response = await scheduledJobsClient.system["scheduled-jobs"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -210,7 +148,7 @@ describe("scheduledJobs routes with real authentication", () => {
 
   /** 无效 token 应该返回 401 */
   it("access with invalid token should return 401", async () => {
-    const response = await scheduledJobsClient["scheduled-jobs"].$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"].$get(
       {
         query: {
           page: "1",
@@ -234,7 +172,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"].handlers.$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"].handlers.$get(
       {},
       {
         headers: {
@@ -281,7 +219,7 @@ describe("scheduledJobs routes with real authentication", () => {
       priority: 1,
     };
 
-    const response = await scheduledJobsClient["scheduled-jobs"].$post(
+    const response = await scheduledJobsClient.system["scheduled-jobs"].$post(
       {
         json: testJob,
       },
@@ -314,7 +252,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"].$post(
+    const response = await scheduledJobsClient.system["scheduled-jobs"].$post(
       {
         // @ts-ignore
         json: {
@@ -346,7 +284,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"].$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"].$get(
       {
         query: {
           page: "1",
@@ -376,7 +314,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
       {
         param: {
           id: createdJobId,
@@ -411,7 +349,7 @@ describe("scheduledJobs routes with real authentication", () => {
       priority: 2,
     };
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].$patch(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$patch(
       {
         param: {
           id: createdJobId,
@@ -446,7 +384,7 @@ describe("scheduledJobs routes with real authentication", () => {
     const jobNotInRedis = await verifyJobInRedis(testJob.name, false);
     expect(jobNotInRedis).toBe(true);
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].status.$patch(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].status.$patch(
       {
         param: {
           id: createdJobId,
@@ -472,7 +410,7 @@ describe("scheduledJobs routes with real authentication", () => {
       expect(jobInRedis).toBe(true);
 
       // 再次切换为禁用状态以避免实际执行
-      const disableResponse = await scheduledJobsClient["scheduled-jobs"][":id"].status.$patch(
+      const disableResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].status.$patch(
         {
           param: {
             id: createdJobId,
@@ -504,7 +442,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].execute.$post(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].execute.$post(
       {
         param: {
           id: createdJobId,
@@ -533,7 +471,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].history.$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].history.$get(
       {
         param: {
           id: createdJobId,
@@ -567,7 +505,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].stats.$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].stats.$get(
       {
         param: {
           id: createdJobId,
@@ -602,7 +540,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"].overview.$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"].overview.$get(
       {
         query: {
           days: "7",
@@ -634,7 +572,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"].$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"].$get(
       {
         query: {
           page: "1",
@@ -660,7 +598,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
       {
         param: {
           id: "invalid-uuid",
@@ -684,7 +622,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
       {
         param: {
           id: "550e8400-e29b-41d4-a716-446655440000", // 不存在的 UUID
@@ -712,7 +650,7 @@ describe("scheduledJobs routes with real authentication", () => {
     const beforeDelete = await getRedisRepeatableJobs();
     const initialJobCount = beforeDelete.length;
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].$delete(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$delete(
       {
         param: {
           id: createdJobId,
@@ -761,7 +699,7 @@ describe("scheduledJobs routes with real authentication", () => {
     };
 
     // 1. 创建任务
-    const createResponse = await scheduledJobsClient["scheduled-jobs"].$post(
+    const createResponse = await scheduledJobsClient.system["scheduled-jobs"].$post(
       { json: redisTestJob },
       { headers: { Authorization: `Bearer ${adminToken}` } },
     );
@@ -779,7 +717,7 @@ describe("scheduledJobs routes with real authentication", () => {
     }
 
     // 2. 启用任务
-    const enableResponse = await scheduledJobsClient["scheduled-jobs"][":id"].status.$patch(
+    const enableResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].status.$patch(
       {
         param: { id: testJobId },
         json: { status: 1 },
@@ -802,7 +740,7 @@ describe("scheduledJobs routes with real authentication", () => {
     }
 
     // 3. 禁用任务
-    const disableResponse = await scheduledJobsClient["scheduled-jobs"][":id"].status.$patch(
+    const disableResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].status.$patch(
       {
         param: { id: testJobId },
         json: { status: 0 },
@@ -818,7 +756,7 @@ describe("scheduledJobs routes with real authentication", () => {
     }
 
     // 4. 删除任务
-    const deleteResponse = await scheduledJobsClient["scheduled-jobs"][":id"].$delete(
+    const deleteResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].$delete(
       { param: { id: testJobId } },
       { headers: { Authorization: `Bearer ${adminToken}` } },
     );
@@ -839,7 +777,7 @@ describe("scheduledJobs routes with real authentication", () => {
       return;
     }
 
-    const response = await scheduledJobsClient["scheduled-jobs"][":id"].$get(
+    const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
       {
         param: {
           id: createdJobId,

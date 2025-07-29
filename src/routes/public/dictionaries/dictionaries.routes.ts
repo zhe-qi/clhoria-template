@@ -5,7 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import {
   batchGetDictionariesSchema,
-  responseDictionariesSchema,
+  responseSystemDictionariesSchema,
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/enums";
 
@@ -23,7 +23,7 @@ export const list = createRoute({
   path: "/dictionaries",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(responseDictionariesSchema),
+      z.array(responseSystemDictionariesSchema),
       "获取字典列表成功",
     ),
   },
@@ -40,7 +40,7 @@ export const get = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      responseDictionariesSchema,
+      responseSystemDictionariesSchema,
       "获取字典成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
@@ -68,7 +68,7 @@ export const batch = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.record(z.string(), responseDictionariesSchema.nullable()),
+      z.record(z.string(), responseSystemDictionariesSchema.nullable()),
       "批量获取成功，key-value形式返回，不存在的字典返回null",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(

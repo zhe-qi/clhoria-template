@@ -2,17 +2,15 @@
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import env from "@/env";
 import createApp from "@/lib/create-app";
-import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
-import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
 import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
-import { globalParams } from "./global-params.index";
+import { systemGlobalParams } from "./global-params.index";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
@@ -24,31 +22,22 @@ function createAuthApp() {
 }
 
 // 创建全局参数管理应用
-function createGlobalParamsApp() {
+function createSysGlobalParamsApp() {
   return createApp()
-    .use("/admin-global-params/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
-    .use("/admin-global-params/*", casbin())
-    .use("/admin-global-params/*", operationLog({ moduleName: "全局参数管理", description: "全局参数管理操作" }))
-    .route("/", globalParams);
+    .use("/system/global-params/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/global-params/*", casbin())
+    .use("/system/global-params/*", operationLog({ moduleName: "全局参数管理", description: "全局参数管理操作" }))
+    .route("/", systemGlobalParams);
 }
 
 const authClient = testClient(createAuthApp());
-const globalParamsClient = testClient(createGlobalParamsApp());
+const sysGlobalParamsClient = testClient(createSysGlobalParamsApp());
 
-describe("globalParams routes with real authentication", () => {
+describe("sysGlobalParams routes with real authentication", () => {
   let adminToken: string;
   let userToken: string;
   let testParamKey: string;
   let testParam: any;
-
-  // 测试前初始化权限配置
-  beforeAll(async () => {
-    await collectAndSyncEndpointPermissions([
-      { name: "global-params", app: globalParams, prefix: "" },
-    ]);
-    // 重新加载Casbin策略以确保权限更新生效
-    await reloadPolicy();
-  });
 
   /** 管理员登录获取 token */
   it("admin login should return valid token", async () => {
@@ -92,7 +81,7 @@ describe("globalParams routes with real authentication", () => {
 
   /** 未认证访问应该返回 401 */
   it("access without token should return 401", async () => {
-    const response = await globalParamsClient["admin-global-params"].$get({
+    const response = await sysGlobalParamsClient.system["global-params"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -103,7 +92,7 @@ describe("globalParams routes with real authentication", () => {
 
   /** 无效 token 应该返回 401 */
   it("access with invalid token should return 401", async () => {
-    const response = await globalParamsClient["admin-global-params"].$get(
+    const response = await sysGlobalParamsClient.system["global-params"].$get(
       {
         query: {
           page: "1",
@@ -135,7 +124,7 @@ describe("globalParams routes with real authentication", () => {
       isPublic: 0,
     };
 
-    const response = await globalParamsClient["admin-global-params"].$post(
+    const response = await sysGlobalParamsClient.system["global-params"].$post(
       {
         json: testParam,
       },
@@ -163,7 +152,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"].$post(
+    const response = await sysGlobalParamsClient.system["global-params"].$post(
       {
         // @ts-ignore
         json: {
@@ -189,7 +178,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"].$get(
+    const response = await sysGlobalParamsClient.system["global-params"].$get(
       {
         query: {
           page: "1",
@@ -225,7 +214,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"][":key"].$get(
+    const response = await sysGlobalParamsClient.system["global-params"][":key"].$get(
       {
         param: {
           key: testParamKey,
@@ -261,7 +250,7 @@ describe("globalParams routes with real authentication", () => {
       isPublic: 1,
     };
 
-    const response = await globalParamsClient["admin-global-params"][":key"].$patch(
+    const response = await sysGlobalParamsClient.system["global-params"][":key"].$patch(
       {
         param: {
           key: testParamKey,
@@ -292,7 +281,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"].batch.$post(
+    const response = await sysGlobalParamsClient.system["global-params"].batch.$post(
       {
         query: {
           publicOnly: "false",
@@ -328,7 +317,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"].$get(
+    const response = await sysGlobalParamsClient.system["global-params"].$get(
       {
         query: {
           page: "1",
@@ -355,7 +344,7 @@ describe("globalParams routes with real authentication", () => {
     }
 
     // 测试空字符串参数 - 由于路由路径的原因，这会返回404而不是422
-    const response = await globalParamsClient["admin-global-params"][":key"].$get(
+    const response = await sysGlobalParamsClient.system["global-params"][":key"].$get(
       {
         param: {
           key: "",
@@ -380,7 +369,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"][":key"].$get(
+    const response = await sysGlobalParamsClient.system["global-params"][":key"].$get(
       {
         param: {
           key: "non_existent_param_key",
@@ -404,7 +393,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"][":key"].$delete(
+    const response = await sysGlobalParamsClient.system["global-params"][":key"].$delete(
       {
         param: {
           key: testParamKey,
@@ -428,7 +417,7 @@ describe("globalParams routes with real authentication", () => {
       return;
     }
 
-    const response = await globalParamsClient["admin-global-params"][":key"].$get(
+    const response = await sysGlobalParamsClient.system["global-params"][":key"].$get(
       {
         param: {
           key: testParamKey,

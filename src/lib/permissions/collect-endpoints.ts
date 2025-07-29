@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import type { AppOpenAPI } from "@/types/lib";
 
 import db from "@/db";
-import { sysEndpoint } from "@/db/schema/system/sys-endpoint";
+import { systemEndpoint } from "@/db/schema/system/endpoint";
 import { logger } from "@/lib/logger";
 
 import type { EndpointPermission } from "./permission-config";
@@ -91,7 +91,7 @@ export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermi
 
   return db.transaction(async (tx) => {
     // 获取现有端点
-    const existing = await tx.select().from(sysEndpoint);
+    const existing = await tx.select().from(systemEndpoint);
     const existingMap = new Map(
       existing.map(e => [`${e.method}:${e.path}`, e]),
     );
@@ -105,7 +105,7 @@ export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermi
 
       if (!existingEndpoint) {
         // 插入新端点
-        await tx.insert(sysEndpoint).values({
+        await tx.insert(systemEndpoint).values({
           path: endpoint.path,
           method: endpoint.method,
           action: endpoint.action,
@@ -124,7 +124,7 @@ export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermi
       ) {
         // 更新现有端点
         await tx
-          .update(sysEndpoint)
+          .update(systemEndpoint)
           .set({
             action: endpoint.action,
             resource: endpoint.resource,
@@ -132,7 +132,7 @@ export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermi
             summary: endpoint.summary,
             updatedBy: "system",
           })
-          .where(eq(sysEndpoint.id, existingEndpoint.id));
+          .where(eq(systemEndpoint.id, existingEndpoint.id));
         updated++;
       }
     }

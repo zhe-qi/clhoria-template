@@ -2,17 +2,15 @@
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import env from "@/env";
 import createApp from "@/lib/create-app";
-import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
-import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
 import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
-import { authorization } from "./authorization.index";
+import { systemAuthorization } from "./authorization.index";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
@@ -26,10 +24,10 @@ function createAuthApp() {
 // 创建授权管理应用
 function createAuthorizationApp() {
   return createApp()
-    .use("/authorization/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
-    .use("/authorization/*", casbin())
-    .use("/authorization/*", operationLog({ moduleName: "授权管理", description: "授权管理操作" }))
-    .route("/", authorization);
+    .use("/system/authorization/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/authorization/*", casbin())
+    .use("/system/authorization/*", operationLog({ moduleName: "授权管理", description: "授权管理操作" }))
+    .route("/", systemAuthorization);
 }
 
 const authClient = testClient(createAuthApp());
@@ -40,15 +38,6 @@ describe("authorization routes with real authentication", () => {
   let userToken: string;
   let testRoleId: string;
   let testUserId: string;
-
-  // 测试前初始化权限配置
-  beforeAll(async () => {
-    await collectAndSyncEndpointPermissions([
-      { name: "authorization", app: authorization, prefix: "" },
-    ]);
-    // 重新加载Casbin策略以确保权限更新生效
-    await reloadPolicy();
-  });
 
   /** 管理员登录获取 token */
   it("admin login should return valid token", async () => {
@@ -93,7 +82,7 @@ describe("authorization routes with real authentication", () => {
 
   /** 未认证访问应该返回 401 */
   it("access without token should return 401", async () => {
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$post({
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post({
       param: { roleId: "550e8400-e29b-41d4-a716-446655440000" },
       json: {
         domain: "default",
@@ -105,7 +94,7 @@ describe("authorization routes with real authentication", () => {
 
   /** 无效 token 应该返回 401 */
   it("access with invalid token should return 401", async () => {
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$post(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
       {
         param: { roleId: "550e8400-e29b-41d4-a716-446655440000" },
         json: {
@@ -133,7 +122,7 @@ describe("authorization routes with real authentication", () => {
     // 使用一个已知的角色ID（假设系统中存在默认角色）
     testRoleId = "550e8400-e29b-41d4-a716-446655440000";
 
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$post(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
       {
         param: { roleId: testRoleId },
         json: {
@@ -167,7 +156,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$post(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
       {
         param: { roleId: "invalid-uuid" },
         // @ts-ignore
@@ -199,7 +188,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].routes.$post(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].routes.$post(
       {
         param: { roleId: testRoleId },
         json: {
@@ -233,7 +222,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].users.$post(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].users.$post(
       {
         param: { roleId: testRoleId },
         json: {
@@ -267,7 +256,7 @@ describe("authorization routes with real authentication", () => {
     }
 
     // 使用管理员自己的用户ID
-    const response = await authorizationClient.authorization.users[":userId"].routes.$get(
+    const response = await authorizationClient.system.authorization.users[":userId"].routes.$get(
       {
         param: { userId: testUserId || "550e8400-e29b-41d4-a716-446655440000" },
         query: {
@@ -299,7 +288,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.users[":userId"].routes.$get(
+    const response = await authorizationClient.system.authorization.users[":userId"].routes.$get(
       {
         param: { userId: "invalid-uuid" },
         query: {
@@ -324,7 +313,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$get(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
       {
         param: { roleId: testRoleId },
         query: {
@@ -355,7 +344,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].menus.$get(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].menus.$get(
       {
         param: { roleId: testRoleId },
         query: {
@@ -386,7 +375,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$post(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
       {
         param: { roleId: testRoleId },
         json: {
@@ -413,7 +402,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$get(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
       {
         param: { roleId: "invalid-uuid" },
         query: {
@@ -438,7 +427,7 @@ describe("authorization routes with real authentication", () => {
       return;
     }
 
-    const response = await authorizationClient.authorization.roles[":roleId"].permissions.$get(
+    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
       {
         param: { roleId: "550e8400-e29b-41d4-a716-446655441111" }, // 不存在的 UUID
         query: {

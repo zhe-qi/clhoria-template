@@ -6,9 +6,9 @@ import {
   getPublicDictionary,
 } from "@/services/dictionary";
 
-import type { DictionariesRouteHandlerType } from "./dictionaries.index";
+import type { SystemDictionariesRouteHandlerType } from "./dictionaries.index";
 
-export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
+export const list: SystemDictionariesRouteHandlerType<"list"> = async (c) => {
   const dictionaries = await getPublicDictionaries({
     enabledOnly: true,
   });
@@ -16,7 +16,7 @@ export const list: DictionariesRouteHandlerType<"list"> = async (c) => {
   return c.json(dictionaries, HttpStatusCodes.OK);
 };
 
-export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
+export const get: SystemDictionariesRouteHandlerType<"get"> = async (c) => {
   const { code } = c.req.valid("param");
 
   const dictionary = await getPublicDictionary(code);
@@ -28,7 +28,7 @@ export const get: DictionariesRouteHandlerType<"get"> = async (c) => {
   return c.json(dictionary, HttpStatusCodes.OK);
 };
 
-export const batch: DictionariesRouteHandlerType<"batch"> = async (c) => {
+export const batch: SystemDictionariesRouteHandlerType<"batch"> = async (c) => {
   const body = c.req.valid("json");
 
   const result = await batchGetDictionaries(body.codes, {

@@ -3,7 +3,7 @@ import type { Job } from "bullmq";
 import { and, desc, eq, gte, lt } from "drizzle-orm";
 
 import db from "@/db";
-import { sysJobExecutionLogs } from "@/db/schema";
+import { systemJobExecutionLogs } from "@/db/schema";
 import { logger } from "@/lib/logger";
 
 import type { JobResult } from "./types";
@@ -13,7 +13,7 @@ export class JobMonitor {
   /** 记录任务开始执行 */
   async logJobStart(job: Job): Promise<void> {
     try {
-      await db.insert(sysJobExecutionLogs).values({
+      await db.insert(systemJobExecutionLogs).values({
         jobId: this.extractJobConfigId(job),
         executionId: job.id || "unknown",
         status: "active",
@@ -43,7 +43,7 @@ export class JobMonitor {
         : null;
 
       await db
-        .update(sysJobExecutionLogs)
+        .update(systemJobExecutionLogs)
         .set({
           status: "completed",
           finishedAt: new Date().toISOString(),
@@ -53,8 +53,8 @@ export class JobMonitor {
           updatedBy: "system",
         })
         .where(and(
-          eq(sysJobExecutionLogs.jobId, this.extractJobConfigId(job)),
-          eq(sysJobExecutionLogs.executionId, job.id || "unknown"),
+          eq(systemJobExecutionLogs.jobId, this.extractJobConfigId(job)),
+          eq(systemJobExecutionLogs.executionId, job.id || "unknown"),
         ));
 
       logger.debug("任务完成日志记录成功", {
@@ -80,7 +80,7 @@ export class JobMonitor {
         : null;
 
       await db
-        .update(sysJobExecutionLogs)
+        .update(systemJobExecutionLogs)
         .set({
           status: "failed",
           finishedAt: new Date().toISOString(),
@@ -91,8 +91,8 @@ export class JobMonitor {
           updatedBy: "system",
         })
         .where(and(
-          eq(sysJobExecutionLogs.jobId, this.extractJobConfigId(job)),
-          eq(sysJobExecutionLogs.executionId, job.id || "unknown"),
+          eq(systemJobExecutionLogs.jobId, this.extractJobConfigId(job)),
+          eq(systemJobExecutionLogs.executionId, job.id || "unknown"),
         ));
 
       logger.debug("任务失败日志记录成功", {
@@ -126,29 +126,29 @@ export class JobMonitor {
     try {
       const { limit = 50, offset = 0, status, startDate, endDate } = options;
 
-      const conditions = [eq(sysJobExecutionLogs.jobId, jobId)];
+      const conditions = [eq(systemJobExecutionLogs.jobId, jobId)];
 
       // 添加状态过滤
       if (status) {
-        conditions.push(eq(sysJobExecutionLogs.status, status));
+        conditions.push(eq(systemJobExecutionLogs.status, status));
       }
 
       // 添加日期范围过滤
       if (startDate) {
-        conditions.push(gte(sysJobExecutionLogs.startedAt, startDate.toISOString()));
+        conditions.push(gte(systemJobExecutionLogs.startedAt, startDate.toISOString()));
       }
 
       if (endDate) {
-        conditions.push(lt(sysJobExecutionLogs.startedAt, endDate.toISOString()));
+        conditions.push(lt(systemJobExecutionLogs.startedAt, endDate.toISOString()));
       }
 
       const query = db
         .select()
-        .from(sysJobExecutionLogs)
+        .from(systemJobExecutionLogs)
         .where(and(...conditions));
 
       const results = await query
-        .orderBy(desc(sysJobExecutionLogs.createdAt))
+        .orderBy(desc(systemJobExecutionLogs.createdAt))
         .limit(limit)
         .offset(offset);
 
@@ -171,10 +171,10 @@ export class JobMonitor {
 
       const logs = await db
         .select()
-        .from(sysJobExecutionLogs)
+        .from(systemJobExecutionLogs)
         .where(and(
-          eq(sysJobExecutionLogs.jobId, jobId),
-          gte(sysJobExecutionLogs.startedAt, startDate.toISOString()),
+          eq(systemJobExecutionLogs.jobId, jobId),
+          gte(systemJobExecutionLogs.startedAt, startDate.toISOString()),
         ));
 
       const stats = {
@@ -221,8 +221,8 @@ export class JobMonitor {
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
       const deletedRows = await db
-        .delete(sysJobExecutionLogs)
-        .where(lt(sysJobExecutionLogs.createdAt, cutoffDate.toISOString()));
+        .delete(systemJobExecutionLogs)
+        .where(lt(systemJobExecutionLogs.createdAt, cutoffDate.toISOString()));
 
       const deletedCount = deletedRows.length;
 
@@ -250,8 +250,8 @@ export class JobMonitor {
 
       const logs = await db
         .select()
-        .from(sysJobExecutionLogs)
-        .where(gte(sysJobExecutionLogs.startedAt, startDate.toISOString()));
+        .from(systemJobExecutionLogs)
+        .where(gte(systemJobExecutionLogs.startedAt, startDate.toISOString()));
 
       // 按任务ID分组统计
       const jobStats = new Map<string, {
