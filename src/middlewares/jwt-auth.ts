@@ -11,6 +11,7 @@ import { sysUser } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { enforcerLaunchedPromise, PermissionConfigManager } from "@/lib/permissions";
 import { cachePermissionResult, getPermissionResult, getUserRolesFromCache } from "@/services/user";
+import { setContextData } from "@/utils";
 
 /**
  * 通用 Casbin 权限验证中间件
@@ -105,15 +106,4 @@ async function validateUserStatus(userId: string, domain: string): Promise<{ val
   }
 
   return { valid: true };
-}
-
-/**
- * 设置上下文数据到 Hono Context
- * @param c Hono Context
- * @param data 要设置的上下文数据
- */
-function setContextData(c: Context, data: Record<string, any>): void {
-  Object.entries(data).forEach(([key, value]) => {
-    c.set(key, value);
-  });
 }

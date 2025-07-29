@@ -8,7 +8,7 @@ import { initializeScheduler } from "./jobs/scheduler";
 import { initializeBullBoard } from "./lib/bull-board";
 import { logger } from "./lib/logger";
 import { collectAndSyncEndpointPermissions } from "./lib/permissions";
-import { jwtWithQuery } from "./middlewares/jwt-auth-with-query";
+import { jwtWithQuery } from "./middlewares/special/jwt-auth-with-query";
 
 const port = env.PORT;
 

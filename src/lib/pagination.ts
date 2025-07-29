@@ -1,5 +1,5 @@
 import type { SQL } from "drizzle-orm";
-import type { PgTable } from "drizzle-orm/pg-core";
+import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 
 import { z } from "@hono/zod-openapi";
 import { count } from "drizzle-orm";
@@ -32,21 +32,21 @@ export function createPaginatedResultSchema<T extends z.ZodTypeAny>(itemSchema: 
 export async function pagination<T = any>(
   table: PgTable,
   whereCondition?: SQL,
-  options: { orderBy?: (SQL<unknown> | any)[]; page: number; limit: number } = { page: 1, limit: 10 },
+  options: { orderBy?: (PgColumn | SQL | SQL.Aliased)[]; page: number; limit: number } = { page: 1, limit: 10 },
 ): Promise<{ data: T[]; meta: PaginationMeta }> {
   const { page, limit, orderBy } = options;
   const offset = (page - 1) * limit;
 
   // 构建查询
-  let query = db.select().from(table);
+  let query = db.select().from(table).$dynamic();
 
   if (whereCondition) {
-    query = query.where(whereCondition) as any;
+    query = query.where(whereCondition);
   }
 
   // 添加排序
   if (orderBy && orderBy.length > 0) {
-    query = (query as any).orderBy(...orderBy);
+    query = query.orderBy(...orderBy);
   }
 
   // 构建计数查询

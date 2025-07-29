@@ -20,3 +20,14 @@ export function pickContext<
 } {
   return keys.map(key => c.get(key)) as any;
 }
+
+/**
+ * 设置上下文数据到 Hono Context
+ * @param c Hono Context
+ * @param data 要设置的上下文数据
+ */
+export function setContextData(c: Context, data: Record<string, any>): void {
+  Object.entries(data).forEach(([key, value]) => {
+    c.set(key, value);
+  });
+}

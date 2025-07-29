@@ -4,7 +4,7 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { operationLog } from "@/middlewares/operation-log";
-import { optionalJwtAuth } from "@/middlewares/optional-jwt-auth";
+import { optionalJwtAuth } from "@/middlewares/special/optional-jwt-auth";
 
 const tags = ["/sts-token (对象存储直传)"];
 
