@@ -243,14 +243,16 @@ export async function getUserMenuIds(userId: string, domain: string): Promise<st
     return [];
   }
 
-  // 查询角色对应的菜单
-  const roleMenus = await db
-    .select({ menuId: systemRoleMenu.menuId })
-    .from(systemRoleMenu)
-    .where(and(
+  // 使用关联查询获取菜单ID
+  const roleMenus = await db.query.systemRoleMenu.findMany({
+    where: and(
       inArray(systemRoleMenu.roleId, roles),
       eq(systemRoleMenu.domain, domain),
-    ));
+    ),
+    columns: {
+      menuId: true,
+    },
+  });
 
   return roleMenus.map(rm => rm.menuId);
 }

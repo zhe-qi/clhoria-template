@@ -61,29 +61,6 @@ export interface UserRoute {
 }
 
 /**
- * 获取用户的菜单ID列表
- */
-async function getUserMenuIds(userId: string, domain: string): Promise<string[]> {
-  // 获取用户的所有角色（包括隐式角色）
-  const roles = await rbac.getImplicitRolesForUser(userId, domain);
-
-  if (roles.length < 1) {
-    return [];
-  }
-
-  // 查询角色对应的菜单
-  const roleMenus = await db
-    .select({ menuId: systemRoleMenu.menuId })
-    .from(systemRoleMenu)
-    .where(and(
-      inArray(systemRoleMenu.roleId, roles),
-      eq(systemRoleMenu.domain, domain),
-    ));
-
-  return [...new Set(roleMenus.map(rm => rm.menuId))];
-}
-
-/**
  * 构建菜单路由树
  */
 function buildMenuRouteTree(menus: MenuDataForRoute[], pid: string | null = null): MenuRoute[] {
@@ -222,40 +199,53 @@ export async function getUserRoutes(userId: string, domain: string): Promise<Use
     return JSON.parse(cachedRoutes);
   }
 
-  // 从数据库获取
-  const menuIds = await getUserMenuIds(userId, domain);
+  // 获取用户的所有角色（包括隐式角色）
+  const roles = await rbac.getImplicitRolesForUser(userId, domain);
 
-  if (menuIds.length === 0) {
+  if (roles.length === 0) {
     const emptyResult: UserRoute = { home: "", routes: [] };
     // 缓存空结果，避免重复查询
     await redisClient.setex(cacheKey, 300, JSON.stringify(emptyResult)); // 5分钟过期
     return emptyResult;
   }
 
-  // 查询菜单详情
-  const menus = await db
-    .select({
-      id: systemMenu.id,
-      menuName: systemMenu.menuName,
-      routeName: systemMenu.routeName,
-      routePath: systemMenu.routePath,
-      component: systemMenu.component,
-      icon: systemMenu.icon,
-      menuType: systemMenu.menuType,
-      pid: systemMenu.pid,
-      order: systemMenu.order,
-      hideInMenu: systemMenu.hideInMenu,
-      keepAlive: systemMenu.keepAlive,
-      constant: systemMenu.constant,
-      activeMenu: systemMenu.activeMenu,
-    })
-    .from(systemMenu)
-    .where(and(
-      inArray(systemMenu.id, menuIds),
-      eq(systemMenu.status, Status.ENABLED),
-      eq(systemMenu.domain, domain),
-    ))
-    .orderBy(systemMenu.order);
+  // 使用关联查询一次性获取角色菜单数据
+  const roleMenus = await db.query.systemRoleMenu.findMany({
+    where: and(
+      inArray(systemRoleMenu.roleId, roles),
+      eq(systemRoleMenu.domain, domain),
+    ),
+    with: {
+      menu: true,
+    },
+  });
+
+  // 提取去重的菜单数据并过滤状态
+  const menusMap = new Map<string, MenuDataForRoute>();
+  roleMenus.forEach((rm) => {
+    if (rm.menu
+      && rm.menu.status === Status.ENABLED
+      && rm.menu.domain === domain
+      && !menusMap.has(rm.menu.id)) {
+      menusMap.set(rm.menu.id, {
+        id: rm.menu.id,
+        menuName: rm.menu.menuName,
+        routeName: rm.menu.routeName,
+        routePath: rm.menu.routePath,
+        component: rm.menu.component,
+        icon: rm.menu.icon,
+        menuType: rm.menu.menuType,
+        pid: rm.menu.pid,
+        order: rm.menu.order,
+        hideInMenu: rm.menu.hideInMenu,
+        keepAlive: rm.menu.keepAlive,
+        constant: rm.menu.constant,
+        activeMenu: rm.menu.activeMenu,
+      });
+    }
+  });
+
+  const menus = Array.from(menusMap.values()).sort((a, b) => a.order - b.order);
 
   // 构建菜单路由树
   const routes = buildMenuRouteTree(menus);
@@ -403,26 +393,20 @@ export async function getMenuTree(options: { status?: number; domain: string }) 
  * 根据角色获取菜单
  */
 export async function getMenusByRole(roleId: string, domain: string) {
-  const menuIds = await db
-    .select({ menuId: systemRoleMenu.menuId })
-    .from(systemRoleMenu)
-    .where(and(
+  const roleMenus = await db.query.systemRoleMenu.findMany({
+    where: and(
       eq(systemRoleMenu.roleId, roleId),
       eq(systemRoleMenu.domain, domain),
-    ));
-
-  if (menuIds.length < 1) {
-    return [];
-  }
-
-  return await db.query.systemMenu.findMany({
-    where: and(
-      eq(systemMenu.status, Status.ENABLED),
-      eq(systemMenu.domain, domain),
-      or(...menuIds.map(({ menuId }) => eq(systemMenu.id, menuId))),
     ),
-    orderBy: [systemMenu.order, systemMenu.id],
+    with: {
+      menu: true,
+    },
   });
+
+  return roleMenus
+    .map(rm => rm.menu)
+    .filter(menu => menu !== null && menu.status === Status.ENABLED && menu.domain === domain)
+    .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
 }
 
 /**
@@ -548,23 +532,37 @@ export async function getConstantRoutes(domain: string = "default") {
  * 获取用户路由（简化版，用于 sys-menus handlers）
  */
 export async function getUserRoutesSimple(userId: string, domain: string) {
-  // 获取用户的菜单ID
-  const menuIds = await getUserMenuIds(userId, domain);
+  // 获取用户的所有角色（包括隐式角色）
+  const roles = await rbac.getImplicitRolesForUser(userId, domain);
 
-  if (menuIds.length === 0) {
+  if (roles.length === 0) {
     return { routes: [], home: "/dashboard" };
   }
 
-  // 获取菜单详情
-  const menus = await db.query.systemMenu.findMany({
+  // 使用关联查询一次性获取角色菜单数据
+  const roleMenus = await db.query.systemRoleMenu.findMany({
     where: and(
-      or(...menuIds.map(id => eq(systemMenu.id, id))),
-      eq(systemMenu.status, Status.ENABLED),
-      eq(systemMenu.constant, false), // 排除常量菜单
-      eq(systemMenu.domain, domain),
+      inArray(systemRoleMenu.roleId, roles),
+      eq(systemRoleMenu.domain, domain),
     ),
-    orderBy: [systemMenu.order, systemMenu.id],
+    with: {
+      menu: true,
+    },
   });
+
+  // 提取去重的菜单数据并过滤
+  const menusMap = new Map();
+  roleMenus.forEach((rm) => {
+    if (rm.menu
+      && rm.menu.status === Status.ENABLED
+      && rm.menu.constant === false // 排除常量菜单
+      && rm.menu.domain === domain
+      && !menusMap.has(rm.menu.id)) {
+      menusMap.set(rm.menu.id, rm.menu);
+    }
+  });
+
+  const menus = Array.from(menusMap.values()).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
 
   // 直接返回数据库菜单结构而不是 MenuRoute 结构
   const menuTree = buildMenuTree(menus);

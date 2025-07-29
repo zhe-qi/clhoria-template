@@ -1,6 +1,9 @@
 import { relations } from "drizzle-orm";
 import { pgTable, primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
 
+import { systemMenu } from "./menu";
+import { systemRole } from "./role";
+
 export const systemRoleMenu = pgTable("system_role_menu", {
   roleId: uuid().notNull(),
   menuId: uuid().notNull(),
@@ -9,6 +12,13 @@ export const systemRoleMenu = pgTable("system_role_menu", {
   primaryKey({ columns: [table.roleId, table.menuId, table.domain] }),
 ]);
 
-export const systemRoleMenuRelations = relations(systemRoleMenu, () => ({
-  // Relations will be defined in system-role.ts and system-menu.ts to avoid circular dependencies
+export const systemRoleMenuRelations = relations(systemRoleMenu, ({ one }) => ({
+  role: one(systemRole, {
+    fields: [systemRoleMenu.roleId],
+    references: [systemRole.id],
+  }),
+  menu: one(systemMenu, {
+    fields: [systemRoleMenu.menuId],
+    references: [systemMenu.id],
+  }),
 }));
