@@ -241,6 +241,59 @@ pnpm start
 
 详细的 MCP 插件配置请参考：[Claude Code MCP 文档](https://docs.anthropic.com/en/docs/claude-code/mcp)
 
+## 监控和可观测性
+
+### Sentry 错误监控
+
+本项目集成了 Sentry 用于错误监控和性能追踪。
+
+#### 自托管 Sentry
+
+如需自托管 Sentry 服务，请参考官方文档：[Sentry Self-Hosted Documentation](https://develop.sentry.dev/self-hosted/)
+
+#### 配置说明
+
+在 `.env` 文件中配置 Sentry DSN：
+
+```bash
+SENTRY_DSN=your_sentry_dsn_here
+```
+
+### Prometheus 监控
+
+项目提供 Prometheus 指标监控端点，用于应用性能监控和告警。
+
+#### 访问指标
+
+访问 `/metrics` 端点获取 Prometheus 格式的监控指标：
+
+```bash
+curl http://localhost:9999/metrics
+```
+
+#### 监控指标
+
+- HTTP 请求数量和响应时间
+- 数据库连接池状态
+- Redis 连接状态
+- 内存和 CPU 使用情况
+- 自定义业务指标
+
+### BullMQ 任务队列监控
+
+项目集成了 BullMQ 任务队列系统，提供可视化监控界面。
+
+#### 访问队列监控
+
+访问 `/admin/ui/queues?token=xxxxx` 查看任务队列状态：
+
+- 队列任务统计
+- 任务执行状态
+- 失败任务重试
+- 实时任务监控
+
+**注意**：需要提供正确的访问 token 才能查看监控界面。
+
 ## 开发计划
 
 ### 短期计划（当前版本）

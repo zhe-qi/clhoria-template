@@ -32,6 +32,9 @@ const EnvSchema = z.object({
   SECRET_ACCESS_KEY: z.string(),
   ENDPOINT: z.url(),
   BUCKET_NAME: z.string().default("default-bucket"),
+
+  // sentry
+  SENTRY_DSN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

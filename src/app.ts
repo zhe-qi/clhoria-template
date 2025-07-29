@@ -1,3 +1,5 @@
+import { prometheus } from "@hono/prometheus";
+import { sentry } from "@hono/sentry";
 import { jwt } from "hono/jwt";
 
 import type { AppOpenAPI } from "@/types/lib";
@@ -20,6 +22,13 @@ const app = createApp();
 
 // 配置文档主页（非生产环境）
 configureMainDoc?.(app);
+
+const { printMetrics, registerMetrics } = prometheus();
+
+app.use("*", registerMetrics);
+app.get("/metrics", printMetrics);
+
+app.use("*", sentry({ dsn: env.SENTRY_DSN }));
 
 // #region 公共路由
 const publicRoutes = Object.values<AppOpenAPI>(allPublicExports);
