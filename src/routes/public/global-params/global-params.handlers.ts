@@ -1,6 +1,6 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
-import * as globalParamsService from "@/services/global-params";
+import * as globalParamsService from "@/services/system/global-params";
 
 import type { GlobalParamsRouteHandlerType } from "./global-params.index";
 

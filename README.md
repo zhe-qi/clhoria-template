@@ -254,9 +254,102 @@ pnpm start
 
 ## 监控和可观测性
 
-### Sentry 错误监控
+项目提供完整的监控和可观测性解决方案，支持多种部署模式和专业监控工具集成。
 
-本项目集成了 Sentry 用于错误监控和性能追踪。
+### 🚀 快速启动监控服务
+
+使用 Docker Compose Profiles 快速启动监控栈：
+
+```bash
+# 启动监控服务（推荐用于数据库连接池监控）
+docker-compose --profile monitoring up -d
+
+# 启动完整应用 + 监控
+docker-compose --profile full up -d
+
+# 查看可用的 profiles
+docker-compose config --profiles
+```
+
+### 📊 监控服务访问
+
+启动监控服务后，可通过以下地址访问各个监控组件：
+
+| 服务 | 地址 | 用途 | 默认账号 |
+|------|------|------|----------|
+| **Grafana** | <http://localhost:3000> | 可视化仪表板和告警 | admin/admin123 |
+| **Prometheus** | <http://localhost:9090> | 指标数据库和查询 | 无需认证 |
+| **PgBouncer Exporter** | <http://localhost:9127/metrics> | 数据库连接池指标 | 无需认证 |
+| **应用指标** | <http://localhost:9999/metrics> | 应用性能指标 | 无需认证 |
+
+### 🏗️ 监控架构
+
+```text
+┌─────────────┐    ┌──────────────────┐    ┌─────────────┐    ┌─────────────┐
+│   PgBouncer │───▶│ pgbouncer_exporter│───▶│ Prometheus  │───▶│   Grafana   │
+│ (连接池)     │    │   (指标导出)       │    │ (时序数据库) │    │ (可视化面板) │
+└─────────────┘    └──────────────────┘    └─────────────┘    └─────────────┘
+
+┌─────────────┐    ┌─────────────┐
+│  Hono App   │───▶│ Prometheus  │
+│ (应用指标)   │    │ (采集指标)   │
+└─────────────┘    └─────────────┘
+```
+
+### 📈 内置监控指标
+
+#### 应用性能指标
+
+- HTTP 请求数量和响应时间
+- 路由级别的性能统计
+- 内存和 CPU 使用情况
+- 自定义业务指标
+
+#### 数据库监控指标
+
+- PgBouncer 连接池状态
+- 数据库连接数和等待队列
+- 查询性能和慢查询统计
+- 事务统计和错误率
+
+#### Redis 缓存指标
+
+- 连接状态和性能
+- 缓存命中率
+- 内存使用情况
+
+### 🔧 Docker Compose 配置说明
+
+项目支持多种 Docker Compose Profiles：
+
+```bash
+# 基础服务（默认）- PostgreSQL + Redis
+docker-compose up
+
+# 开发服务 - 基础服务 + PgBouncer
+docker-compose --profile services up
+
+# 完整应用 - 所有服务 + Hono应用
+docker-compose --profile app up
+
+# 监控服务 - 所有服务 + Prometheus + Grafana
+docker-compose --profile monitoring up
+
+# 全部服务 - 应用 + 监控的完整栈
+docker-compose --profile full up
+```
+
+### 📊 预配置 Grafana 仪表板
+
+项目包含预配置的 Grafana 仪表板：
+
+- **数据库监控面板**: 显示 PgBouncer 连接池和 PostgreSQL 性能指标
+- **应用性能面板**: HTTP 请求、响应时间、错误率统计
+- **系统资源面板**: CPU、内存、网络使用情况
+
+所有仪表板配置文件位于 `docker/grafana/dashboards/` 目录。
+
+### 🚨 错误监控 - Sentry
 
 #### 自托管 Sentry
 
@@ -270,27 +363,7 @@ pnpm start
 SENTRY_DSN=your_sentry_dsn_here
 ```
 
-### Prometheus 监控
-
-项目提供 Prometheus 指标监控端点，用于应用性能监控和告警。
-
-#### 访问指标
-
-访问 `/metrics` 端点获取 Prometheus 格式的监控指标：
-
-```bash
-curl http://localhost:9999/metrics
-```
-
-#### 监控指标
-
-- HTTP 请求数量和响应时间
-- 数据库连接池状态
-- Redis 连接状态
-- 内存和 CPU 使用情况
-- 自定义业务指标
-
-### BullMQ 任务队列监控
+### 📊 BullMQ 任务队列监控
 
 项目集成了 BullMQ 任务队列系统，提供可视化监控界面。
 
@@ -304,6 +377,16 @@ curl http://localhost:9999/metrics
 - 实时任务监控
 
 **注意**：需要提供正确的访问 token 才能查看监控界面。
+
+### ⚙️ 生产环境监控建议
+
+对于生产环境，建议：
+
+1. **外部监控服务**: 使用专业的监控服务（如 Datadog、New Relic）
+2. **告警配置**: 在 Grafana 中配置关键指标告警
+3. **日志聚合**: 集成 ELK Stack 或 Loki 进行日志分析
+4. **性能监控**: 定期进行性能基准测试和容量规划
+5. **安全监控**: 集成安全扫描和异常检测工具
 
 ## 开发计划
 
@@ -386,17 +469,22 @@ curl http://localhost:9999/metrics
 
 1. **Fork 项目** - 点击右上角的 Fork 按钮
 2. **克隆到本地**
+
    ```bash
    git clone https://github.com/your-username/hono-template.git
    cd hono-template
    ```
+
 3. **创建功能分支**
+
    ```bash
    git checkout -b feature/your-feature-name
    # 或者
    git checkout -b fix/your-fix-name
    ```
+
 4. **本地开发**
+
    ```bash
    pnpm install
    pnpm dev
@@ -434,6 +522,7 @@ git commit -m "docs: 更新 API 文档"
 ### 📋 PR 流程
 
 1. **推送到你的 Fork**
+
    ```bash
    git push origin feature/your-feature-name
    ```

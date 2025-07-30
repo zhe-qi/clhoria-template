@@ -53,6 +53,7 @@
     "ilike",
     "openapi",
     "papaparse",
+    "pgbouncer",
     "ptype",
     "rolldown",
     "setex",

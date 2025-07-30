@@ -8,7 +8,7 @@ import {
   getAdminDictionary,
   isDictionaryCodeExists,
   updateDictionary,
-} from "@/services/dictionary";
+} from "@/services/system/dictionary";
 
 import type { SystemDictionariesRouteHandlerType } from "./dictionaries.index";
 

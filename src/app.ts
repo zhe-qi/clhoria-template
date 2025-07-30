@@ -8,6 +8,8 @@ import configureOpenAPI from "@/lib/openapi";
 import * as allAdminExports from "@/routes/admin/admin.index";
 import * as allClientExports from "@/routes/client/client.index";
 import * as allPublicExports from "@/routes/public/public.index";
+// 移除复杂的内部监控，使用外部工具：Prometheus + Grafana + PgBouncer Exporter
+// import { connectionPoolMonitor } from "@/services/monitoring";
 
 import env from "./env";
 import createApp from "./lib/create-app";
@@ -23,10 +25,14 @@ const app = createApp();
 // 配置文档主页（非生产环境）
 configureMainDoc?.(app);
 
-const { printMetrics, registerMetrics } = prometheus();
+// 数据库健康检查已迁移到外部监控工具
+// 使用 Grafana 仪表板查看详细的数据库和连接池状态
 
-app.use("*", registerMetrics);
-app.get("/metrics", printMetrics);
+// 数据库连接池监控已迁移到外部工具：
+// - PgBouncer Exporter: 监控连接池指标
+// - Prometheus: 收集和存储指标
+// - Grafana: 可视化监控面板
+// 启动方法: ./scripts/start-monitoring.sh
 
 app.use("*", sentry({ dsn: env.SENTRY_DSN }));
 
@@ -63,6 +69,13 @@ const appGroups = [publicApp, clientApp, adminApp];
 appGroups.forEach((group) => {
   app.route("/", group);
 });
+
+const { printMetrics, registerMetrics } = prometheus();
+
+app.use("*", registerMetrics);
+
+// 添加 metrics 端点（必须在路由分组之后）
+app.get("/metrics", printMetrics);
 
 export default app;
 

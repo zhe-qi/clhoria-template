@@ -1,6 +1,4 @@
 import { serve } from "@hono/node-server";
-import chalk from "chalk";
-import gradient from "gradient-string";
 
 import app, { adminApp } from "./app";
 import env from "./env";
@@ -79,16 +77,24 @@ function initializeDevelopment(): void {
 /**
  * 打印服务启动消息
  */
-function logServerStart(): void {
+async function logServerStart(): Promise<void> {
   const message = ` 🚀 服务启动成功 → (http://localhost:${port}) `;
 
   if (env.NODE_ENV === "production") {
     logger.info(message);
   }
   else {
-    // 开发环境使用渐变色彩
-    const styledMessage = gradient(["cyan", "magenta"])(chalk.bold(message));
-    logger.info(styledMessage);
+    try {
+      // 开发环境动态导入 chalk 和 gradient-string
+      const { default: chalk } = await import("chalk");
+      const { default: gradient } = await import("gradient-string");
+      const styledMessage = gradient(["cyan", "magenta"])(chalk.bold(message));
+      logger.info(styledMessage);
+    }
+    catch {
+      // 如果动态导入失败，回退到普通日志
+      logger.info(message);
+    }
   }
 }
 
@@ -109,7 +115,7 @@ async function startServer(): Promise<void> {
     serve({ fetch: app.fetch, port });
 
     // 打印启动成功消息
-    logServerStart();
+    await logServerStart();
   }
   catch (error) {
     logger.error("服务启动失败:", error);

@@ -9,7 +9,7 @@ import {
   assignUsersToRole as assignUsersToRoleLib,
 } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
-import * as menuService from "@/services/menu";
+import * as menuService from "@/services/system/menu";
 
 import type { SystemAuthorizationRouteHandlerType } from "./authorization.index";
 

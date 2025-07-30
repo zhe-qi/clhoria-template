@@ -6,7 +6,7 @@ import env from "@/env";
 import * as schema from "./schema";
 
 const queryClient = postgres(
-  env.DATABASE_URL ?? "postgres://localhost:5432/postgres",
+  env.DATABASE_URL,
   {
     max: 10, // 默认最大连接数=10
     idle_timeout: 10, // 空闲连接保留10秒

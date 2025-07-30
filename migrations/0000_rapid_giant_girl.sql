@@ -21,22 +21,7 @@ CREATE TABLE "casbin_rule" (
 	"v5" varchar(64)
 );
 --> statement-breakpoint
-CREATE TABLE "sys_global_params" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"created_at" timestamp,
-	"created_by" varchar(64) NOT NULL,
-	"updated_at" timestamp,
-	"updated_by" varchar(64),
-	"key" varchar(100) NOT NULL,
-	"value" text NOT NULL,
-	"type" varchar(20) DEFAULT 'string' NOT NULL,
-	"description" text,
-	"is_public" integer DEFAULT 1 NOT NULL,
-	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "sys_global_params_key_unique" UNIQUE("key")
-);
---> statement-breakpoint
-CREATE TABLE "sys_dictionaries" (
+CREATE TABLE "system_dictionaries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"code" varchar(100) NOT NULL,
 	"name" varchar(200) NOT NULL,
@@ -50,7 +35,7 @@ CREATE TABLE "sys_dictionaries" (
 	"updated_by" varchar(50)
 );
 --> statement-breakpoint
-CREATE TABLE "sys_domain" (
+CREATE TABLE "system_domain" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64) NOT NULL,
@@ -60,10 +45,10 @@ CREATE TABLE "sys_domain" (
 	"name" varchar(128) NOT NULL,
 	"description" text,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "sys_domain_code_unique" UNIQUE("code")
+	CONSTRAINT "system_domain_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
-CREATE TABLE "sys_endpoint" (
+CREATE TABLE "system_endpoint" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64) NOT NULL,
@@ -77,7 +62,51 @@ CREATE TABLE "sys_endpoint" (
 	"summary" text
 );
 --> statement-breakpoint
-CREATE TABLE "sys_login_log" (
+CREATE TABLE "system_global_params" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"created_at" timestamp,
+	"created_by" varchar(64) NOT NULL,
+	"updated_at" timestamp,
+	"updated_by" varchar(64),
+	"key" varchar(100) NOT NULL,
+	"value" text NOT NULL,
+	"type" varchar(20) DEFAULT 'string' NOT NULL,
+	"description" text,
+	"is_public" integer DEFAULT 1 NOT NULL,
+	"status" integer DEFAULT 1 NOT NULL,
+	CONSTRAINT "system_global_params_key_unique" UNIQUE("key")
+);
+--> statement-breakpoint
+CREATE TABLE "system_job_execution_logs" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"created_at" timestamp,
+	"created_by" varchar(64) NOT NULL,
+	"updated_at" timestamp,
+	"updated_by" varchar(64),
+	"job_id" varchar(64) NOT NULL,
+	"execution_id" varchar(128) NOT NULL,
+	"status" varchar(32) NOT NULL,
+	"started_at" timestamp,
+	"finished_at" timestamp,
+	"duration_ms" integer,
+	"result" jsonb,
+	"error_message" text,
+	"retry_count" integer DEFAULT 0 NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "system_job_handlers" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"created_at" timestamp,
+	"created_by" varchar(64) NOT NULL,
+	"updated_at" timestamp,
+	"updated_by" varchar(64),
+	"name" varchar(128) NOT NULL,
+	"description" text,
+	"file_path" varchar(512),
+	"is_active" boolean DEFAULT true NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "system_login_log" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" uuid NOT NULL,
 	"username" varchar(64) NOT NULL,
@@ -93,7 +122,7 @@ CREATE TABLE "sys_login_log" (
 	"created_at" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE "sys_menu" (
+CREATE TABLE "system_menu" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64) NOT NULL,
@@ -120,7 +149,7 @@ CREATE TABLE "sys_menu" (
 	"domain" varchar(64) DEFAULT 'default' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "sys_operation_log" (
+CREATE TABLE "system_operation_log" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" uuid NOT NULL,
 	"username" varchar(64) NOT NULL,
@@ -142,7 +171,7 @@ CREATE TABLE "sys_operation_log" (
 	"created_at" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE "sys_organization" (
+CREATE TABLE "system_organization" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64) NOT NULL,
@@ -153,10 +182,10 @@ CREATE TABLE "sys_organization" (
 	"description" text,
 	"pid" uuid,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "sys_organization_code_unique" UNIQUE("code")
+	CONSTRAINT "system_organization_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
-CREATE TABLE "sys_role" (
+CREATE TABLE "system_role" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64) NOT NULL,
@@ -167,46 +196,17 @@ CREATE TABLE "sys_role" (
 	"description" text,
 	"pid" uuid,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "sys_role_code_unique" UNIQUE("code")
+	CONSTRAINT "system_role_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
-CREATE TABLE "sys_role_menu" (
+CREATE TABLE "system_role_menu" (
 	"role_id" uuid NOT NULL,
 	"menu_id" uuid NOT NULL,
 	"domain" varchar(64) NOT NULL,
-	CONSTRAINT "sys_role_menu_role_id_menu_id_domain_pk" PRIMARY KEY("role_id","menu_id","domain")
+	CONSTRAINT "system_role_menu_role_id_menu_id_domain_pk" PRIMARY KEY("role_id","menu_id","domain")
 );
 --> statement-breakpoint
-CREATE TABLE "sys_job_execution_logs" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"created_at" timestamp,
-	"created_by" varchar(64) NOT NULL,
-	"updated_at" timestamp,
-	"updated_by" varchar(64),
-	"job_id" varchar(64) NOT NULL,
-	"execution_id" varchar(128) NOT NULL,
-	"status" varchar(32) NOT NULL,
-	"started_at" timestamp,
-	"finished_at" timestamp,
-	"duration_ms" integer,
-	"result" jsonb,
-	"error_message" text,
-	"retry_count" integer DEFAULT 0 NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "sys_job_handlers" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"created_at" timestamp,
-	"created_by" varchar(64) NOT NULL,
-	"updated_at" timestamp,
-	"updated_by" varchar(64),
-	"name" varchar(128) NOT NULL,
-	"description" text,
-	"file_path" varchar(512),
-	"is_active" boolean DEFAULT true NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "sys_scheduled_jobs" (
+CREATE TABLE "system_scheduled_jobs" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64) NOT NULL,
@@ -226,7 +226,7 @@ CREATE TABLE "sys_scheduled_jobs" (
 	"priority" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "sys_tokens" (
+CREATE TABLE "system_tokens" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"access_token" varchar(512) NOT NULL,
 	"refresh_token" varchar(512) NOT NULL,
@@ -243,11 +243,11 @@ CREATE TABLE "sys_tokens" (
 	"type" varchar(32) NOT NULL,
 	"created_by" varchar(64) NOT NULL,
 	"created_at" timestamp,
-	CONSTRAINT "sys_tokens_accessToken_unique" UNIQUE("access_token"),
-	CONSTRAINT "sys_tokens_refreshToken_unique" UNIQUE("refresh_token")
+	CONSTRAINT "system_tokens_accessToken_unique" UNIQUE("access_token"),
+	CONSTRAINT "system_tokens_refreshToken_unique" UNIQUE("refresh_token")
 );
 --> statement-breakpoint
-CREATE TABLE "sys_user" (
+CREATE TABLE "system_user" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64) NOT NULL,
@@ -260,13 +260,13 @@ CREATE TABLE "sys_user" (
 	"avatar" text,
 	"nick_name" varchar(64) NOT NULL,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "sys_user_username_unique" UNIQUE("username")
+	CONSTRAINT "system_user_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
-CREATE TABLE "sys_user_role" (
+CREATE TABLE "system_user_role" (
 	"user_id" uuid NOT NULL,
 	"role_id" uuid NOT NULL,
-	CONSTRAINT "sys_user_role_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
+	CONSTRAINT "system_user_role_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
 );
 --> statement-breakpoint
 CREATE TABLE "tasks" (

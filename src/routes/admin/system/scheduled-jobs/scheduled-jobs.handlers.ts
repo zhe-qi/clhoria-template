@@ -1,6 +1,6 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
-import * as scheduledJobsService from "@/services/scheduled-jobs";
+import * as scheduledJobsService from "@/services/system/scheduled-jobs";
 import { pickContext } from "@/utils/tools/hono-helpers";
 
 import type { SystemScheduledJobsRouteHandlerType } from "./scheduled-jobs.index";

@@ -11,7 +11,7 @@ import { systemLoginLog, systemTokens, systemUser } from "@/db/schema";
 import env from "@/env";
 import { AuthType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { getIPAddress } from "@/services/ip";
-import { setUserRolesToCache } from "@/services/user";
+import { setUserRolesToCache } from "@/services/system/user";
 import { omit } from "@/utils";
 
 import type { AuthRouteHandlerType } from "./auth.index";

@@ -692,11 +692,44 @@ See existing services for reference:
 - `src/services/menu.ts` - Menu and routing operations
 - `src/services/global-params.ts` - Configuration management
 
+## Monitoring and Observability
+
+### Built-in Metrics
+
+- **Prometheus Metrics**: `/metrics` endpoint for application performance metrics
+- **OpenAPI Documentation**: Auto-generated API documentation
+
+### External Monitoring Stack (Recommended)
+
+Use professional monitoring tools for comprehensive observability:
+
+- **PgBouncer Exporter**: Collects connection pool metrics from PgBouncer
+- **Prometheus**: Time-series database for metrics storage
+- **Grafana**: Visualization dashboards and alerting
+
+### Quick Setup
+
+```bash
+# Start monitoring services (recommended for database monitoring)
+docker-compose --profile monitoring up -d
+
+# Start complete application with monitoring
+docker-compose --profile full up -d
+
+# Access services:
+# - Grafana: http://localhost:3000 (admin/admin123)
+# - Prometheus: http://localhost:9090
+# - PgBouncer Metrics: http://localhost:9127/metrics
+```
+
+**Architecture**: `PgBouncer → pgbouncer_exporter → Prometheus → Grafana`
+
 ## Environment
 
 - `NODE_ENV` - Set to "production" for builds and start script
-- `DATABASE_URL` - PostgreSQL connection string
+- `DATABASE_URL` - PostgreSQL connection string (through PgBouncer connection pool)
 - `REDIS_URL` - Redis connection string
 - `CLIENT_JWT_SECRET` - JWT secret for client authentication
 - `ADMIN_JWT_SECRET` - JWT secret for admin authentication
 - `PORT` - Server port
+- `PGBOUNCER_ADMIN_URL` - (Optional) PgBouncer admin connection for monitoring

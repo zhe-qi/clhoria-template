@@ -9,7 +9,7 @@ import type { DictionaryItem } from "@/db/schema";
 
 import db from "@/db";
 import { systemDictionaries } from "@/db/schema";
-import { clearAllDictionaryCache } from "@/services/dictionary";
+import { clearAllDictionaryCache } from "@/services/system/dictionary";
 
 /**
  * 枚举定义接口
@@ -40,13 +40,17 @@ function scanEnumDefinitions(): EnumDefinition[] {
   const enums: EnumDefinition[] = [];
 
   try {
+    console.log(`扫描目录: ${enumsPath}`);
     const files = readdirSync(enumsPath).filter(file => file.endsWith(".ts") && file !== "index.ts");
+    console.log(`找到文件: ${files.join(", ")}`);
 
     for (const file of files) {
+      console.log(`处理文件: ${file}`);
       const filePath = join(enumsPath, file);
       const content = readFileSync(filePath, "utf-8");
 
       const enumMatches = extractEnumsFromFile(content, filePath);
+      console.log(`文件 ${file} 找到 ${enumMatches.length} 个枚举`);
       enums.push(...enumMatches);
     }
   }
@@ -66,18 +70,23 @@ function extractEnumsFromFile(content: string, filePath: string): EnumDefinition
   // 匹配枚举定义的正则表达式
   const enumRegex = /\/\*\*([^*]|\*(?!\/))*\*\/\s*export\s+const\s+(\w+)\s*=\s*\{([^}]+)\}\s*as\s+const;/g;
 
-  let match = enumRegex.exec(content);
-  while (match !== null) {
+  let match;
+  // eslint-disable-next-line no-cond-assign
+  while ((match = enumRegex.exec(content)) !== null) {
     const [, description, name, body] = match;
+    console.log(`    找到枚举: ${name}`);
+
     // 提取注释内容
     const cleanDescription = description.replace(/\/\*\*|\*\/|\*/g, "").trim();
 
     // 跳过非字典类型的枚举（如 Status, AuthType 等系统枚举）
     if (isSystemEnum(name)) {
+      console.log(`    跳过系统枚举: ${name}`);
       continue;
     }
 
     const items = parseEnumItems(body);
+    console.log(`    解析到 ${items.length} 个枚举项`);
 
     if (items.length > 0) {
       enums.push({
@@ -87,7 +96,6 @@ function extractEnumsFromFile(content: string, filePath: string): EnumDefinition
         filePath,
       });
     }
-    match = enumRegex.exec(content);
   }
 
   return enums;
@@ -118,10 +126,11 @@ function parseEnumItems(enumBody: string): DictionaryItem[] {
   // 匹配枚举项的正则表达式
   const itemRegex = /\/\*\*([^*]|\*(?!\/))*\*\/\s*(\w+):\s*"([^"]+)"/g;
 
-  let match = itemRegex.exec(enumBody);
+  let match;
   let sortOrder = 0;
 
-  while (match !== null) {
+  // eslint-disable-next-line no-cond-assign
+  while ((match = itemRegex.exec(enumBody)) !== null) {
     const [, description, code, value] = match;
     // 清理注释内容
     const cleanDescription = description.replace(/\/\*\*|\*\/|\*/g, "").trim();
@@ -134,7 +143,6 @@ function parseEnumItems(enumBody: string): DictionaryItem[] {
       status: 1,
       sortOrder: sortOrder++,
     });
-    match = itemRegex.exec(enumBody);
   }
 
   return items;

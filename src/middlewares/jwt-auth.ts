@@ -10,7 +10,7 @@ import db from "@/db";
 import { systemUser } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { enforcerLaunchedPromise, PermissionConfigManager } from "@/lib/permissions";
-import { cachePermissionResult, getPermissionResult, getUserRolesFromCache } from "@/services/user";
+import { cachePermissionResult, getPermissionResult, getUserRolesFromCache } from "@/services/system/user";
 import { setContextData } from "@/utils";
 
 /**

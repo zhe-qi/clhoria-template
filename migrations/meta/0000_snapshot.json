@@ -1,5 +1,5 @@
 {
-  "id": "1cc09e4b-44ac-431d-93aa-b3ed1ee70de1",
+  "id": "4b24717a-5194-4a1b-b44d-282472ac99da",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -204,98 +204,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_global_params": {
-      "name": "sys_global_params",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "key": {
-          "name": "key",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'string'"
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_public": {
-          "name": "is_public",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "status": {
-          "name": "status",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "sys_global_params_key_unique": {
-          "name": "sys_global_params_key_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "key"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.sys_dictionaries": {
-      "name": "sys_dictionaries",
+    "public.system_dictionaries": {
+      "name": "system_dictionaries",
       "schema": "",
       "columns": {
         "id": {
@@ -379,8 +289,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_domain": {
-      "name": "sys_domain",
+    "public.system_domain": {
+      "name": "system_domain",
       "schema": "",
       "columns": {
         "id": {
@@ -443,8 +353,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "sys_domain_code_unique": {
-          "name": "sys_domain_code_unique",
+        "system_domain_code_unique": {
+          "name": "system_domain_code_unique",
           "nullsNotDistinct": false,
           "columns": [
             "code"
@@ -455,8 +365,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_endpoint": {
-      "name": "sys_endpoint",
+    "public.system_endpoint": {
+      "name": "system_endpoint",
       "schema": "",
       "columns": {
         "id": {
@@ -534,8 +444,264 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_login_log": {
-      "name": "sys_login_log",
+    "public.system_global_params": {
+      "name": "system_global_params",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "key": {
+          "name": "key",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'string'"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_public": {
+          "name": "is_public",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "status": {
+          "name": "status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "system_global_params_key_unique": {
+          "name": "system_global_params_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.system_job_execution_logs": {
+      "name": "system_job_execution_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "execution_id": {
+          "name": "execution_id",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "duration_ms": {
+          "name": "duration_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result": {
+          "name": "result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "retry_count": {
+          "name": "retry_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.system_job_handlers": {
+      "name": "system_job_handlers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.system_login_log": {
+      "name": "system_login_log",
       "schema": "",
       "columns": {
         "id": {
@@ -626,8 +792,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_menu": {
-      "name": "sys_menu",
+    "public.system_menu": {
+      "name": "system_menu",
       "schema": "",
       "columns": {
         "id": {
@@ -791,8 +957,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_operation_log": {
-      "name": "sys_operation_log",
+    "public.system_operation_log": {
+      "name": "system_operation_log",
       "schema": "",
       "columns": {
         "id": {
@@ -918,8 +1084,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_organization": {
-      "name": "sys_organization",
+    "public.system_organization": {
+      "name": "system_organization",
       "schema": "",
       "columns": {
         "id": {
@@ -988,8 +1154,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "sys_organization_code_unique": {
-          "name": "sys_organization_code_unique",
+        "system_organization_code_unique": {
+          "name": "system_organization_code_unique",
           "nullsNotDistinct": false,
           "columns": [
             "code"
@@ -1000,8 +1166,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_role": {
-      "name": "sys_role",
+    "public.system_role": {
+      "name": "system_role",
       "schema": "",
       "columns": {
         "id": {
@@ -1070,8 +1236,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "sys_role_code_unique": {
-          "name": "sys_role_code_unique",
+        "system_role_code_unique": {
+          "name": "system_role_code_unique",
           "nullsNotDistinct": false,
           "columns": [
             "code"
@@ -1082,8 +1248,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_role_menu": {
-      "name": "sys_role_menu",
+    "public.system_role_menu": {
+      "name": "system_role_menu",
       "schema": "",
       "columns": {
         "role_id": {
@@ -1108,8 +1274,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "sys_role_menu_role_id_menu_id_domain_pk": {
-          "name": "sys_role_menu_role_id_menu_id_domain_pk",
+        "system_role_menu_role_id_menu_id_domain_pk": {
+          "name": "system_role_menu_role_id_menu_id_domain_pk",
           "columns": [
             "role_id",
             "menu_id",
@@ -1122,174 +1288,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_job_execution_logs": {
-      "name": "sys_job_execution_logs",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "job_id": {
-          "name": "job_id",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "execution_id": {
-          "name": "execution_id",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "started_at": {
-          "name": "started_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "finished_at": {
-          "name": "finished_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "duration_ms": {
-          "name": "duration_ms",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "result": {
-          "name": "result",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "error_message": {
-          "name": "error_message",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "retry_count": {
-          "name": "retry_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.sys_job_handlers": {
-      "name": "sys_job_handlers",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "file_path": {
-          "name": "file_path",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.sys_scheduled_jobs": {
-      "name": "sys_scheduled_jobs",
+    "public.system_scheduled_jobs": {
+      "name": "system_scheduled_jobs",
       "schema": "",
       "columns": {
         "id": {
@@ -1410,8 +1410,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_tokens": {
-      "name": "sys_tokens",
+    "public.system_tokens": {
+      "name": "system_tokens",
       "schema": "",
       "columns": {
         "id": {
@@ -1517,15 +1517,15 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "sys_tokens_accessToken_unique": {
-          "name": "sys_tokens_accessToken_unique",
+        "system_tokens_accessToken_unique": {
+          "name": "system_tokens_accessToken_unique",
           "nullsNotDistinct": false,
           "columns": [
             "access_token"
           ]
         },
-        "sys_tokens_refreshToken_unique": {
-          "name": "sys_tokens_refreshToken_unique",
+        "system_tokens_refreshToken_unique": {
+          "name": "system_tokens_refreshToken_unique",
           "nullsNotDistinct": false,
           "columns": [
             "refresh_token"
@@ -1536,8 +1536,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_user": {
-      "name": "sys_user",
+    "public.system_user": {
+      "name": "system_user",
       "schema": "",
       "columns": {
         "id": {
@@ -1619,8 +1619,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "sys_user_username_unique": {
-          "name": "sys_user_username_unique",
+        "system_user_username_unique": {
+          "name": "system_user_username_unique",
           "nullsNotDistinct": false,
           "columns": [
             "username"
@@ -1631,8 +1631,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sys_user_role": {
-      "name": "sys_user_role",
+    "public.system_user_role": {
+      "name": "system_user_role",
       "schema": "",
       "columns": {
         "user_id": {
@@ -1651,8 +1651,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "sys_user_role_user_id_role_id_pk": {
-          "name": "sys_user_role_user_id_role_id_pk",
+        "system_user_role_user_id_role_id_pk": {
+          "name": "system_user_role_user_id_role_id_pk",
           "columns": [
             "user_id",
             "role_id"
