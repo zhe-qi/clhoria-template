@@ -38,6 +38,10 @@ const EnvSchema = z.object({
 
   // sentry
   SENTRY_DSN: z.string().optional(),
+
+  // arcjet
+  ARCJET_ENV: z.enum(["development", "production"]).default("development"),
+  ARCJET_KEY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

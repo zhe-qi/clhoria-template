@@ -6,11 +6,12 @@
 
 - 🚀 **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
 - 🔐 **多层认证授权**: JWT + Casbin 基于角色的访问控制
-- 📚 **自动化文档**: OpenAPI 规范，自动生成 API 文档
+- �️ **智能安全防护**: 集成 Arcjet 安全防护，提供机器人检测、攻击防护和智能限流
+- �📚 **自动化文档**: OpenAPI 规范，自动生成 API 文档
 - 🏗️ **严格架构**: 函数式开发规范、多层路由结构（公共/客户端/管理端）
 - 🔄 **完整 RBAC**: 用户、角色、权限、菜单管理
 - 🌐 **多租户支持**: 域管理和数据隔离
-- ⚡ **高性能缓存**: Redis 缓存 + 限流中间件
+- ⚡ **高性能缓存**: Redis 缓存 + 多层限流策略
 - 🌍 **边缘就绪**: 为边缘计算和 Serverless 部署优化
 - 🧪 **测试友好**: Vitest 测试框架，完整的测试环境配置
 - 📦 **生产就绪**: 优化构建 + Docker 支持
@@ -80,11 +81,14 @@
 
 3. **配置环境变量**
 
+   复制环境变量模板文件并根据需要进行配置：
+
    ```bash
    cp .env.example .env
    ```
 
-   编辑 `.env` 文件，填写必要的配置。
+   编辑 `.env` 文件，填写必要的配置：
+   **注意**：不配置 `ARCJET_KEY` 会自动回退到 Redis 限流。
 
 4. **初始化数据库**
 
@@ -119,8 +123,6 @@
    ```
 
 访问 <http://localhost:9999> 查看 API 文档。
-
-## 项目架构
 
 ### 目录结构
 
@@ -218,244 +220,63 @@ pnpm start
 
 详细基准测试：[bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
 
-## Claude Code 一流支持
+## Claude Code 支持
 
-本项目专为 Claude Code 开发体验进行了深度优化，提供业界领先的 AI 辅助开发能力。
+专为 Claude Code 开发体验优化，包含完整的 CLAUDE.md 配置文件和详细代码注释。
 
-### 🎯 开箱即用的配置
+### 推荐 MCP 插件
 
-- **CLAUDE.md 配置文件**: 包含完整的项目架构说明、开发规范和最佳实践
-- **详细的代码注释**: 所有路由、服务和架构层面都有清晰的文档说明
-- **标准化开发模式**: 统一的文件结构、命名约定和开发工作流
+- **Serena**: 智能代码分析和编辑
+- **Context7**: 实时技术文档查询
 
-### 🚀 推荐的 MCP 插件
+## 监控
 
-1. **Serena** - 智能代码分析和编辑工具
+提供完整的监控解决方案，包含 Grafana、Prometheus、数据库连接池监控等。
 
-   - 语义化代码搜索和符号级编辑
-   - 智能重构和架构分析
-   - 支持项目记忆和上下文理解
-
-2. **Context7** - 实时技术文档查询
-   - Hono、Drizzle ORM、Zod 等技术栈的最新文档
-   - 准确的 API 参考和代码示例
-   - 智能的最佳实践建议
-
-### 💡 Claude Code 优势体验
-
-- **智能代码生成**: 基于项目架构自动生成符合规范的代码
-- **架构理解**: 深度理解多层路由、RBAC 权限体系和服务层架构
-- **测试驱动**: 自动生成测试用例和测试数据
-- **文档同步**: 代码变更时自动更新相关文档
-
-### 📚 配置指南
-
-详细的 MCP 插件配置请参考：[Claude Code MCP 文档](https://docs.anthropic.com/en/docs/claude-code/mcp)
-
-## 监控和可观测性
-
-项目提供完整的监控和可观测性解决方案，支持多种部署模式和专业监控工具集成。
-
-### 🚀 快速启动监控服务
-
-使用 Docker Compose Profiles 快速启动监控栈：
+### 快速启动
 
 ```bash
-# 启动监控服务（推荐用于数据库连接池监控）
+# 启动监控服务
 docker-compose --profile monitoring up -d
 
 # 启动完整应用 + 监控
 docker-compose --profile full up -d
-
-# 查看可用的 profiles
-docker-compose config --profiles
 ```
 
-### 📊 监控服务访问
+### 访问地址
 
-启动监控服务后，可通过以下地址访问各个监控组件：
-
-| 服务 | 地址 | 用途 | 默认账号 |
-|------|------|------|----------|
-| **Grafana** | <http://localhost:3000> | 可视化仪表板和告警 | admin/admin123 |
-| **Prometheus** | <http://localhost:9090> | 指标数据库和查询 | 无需认证 |
-| **PgBouncer Exporter** | <http://localhost:9127/metrics> | 数据库连接池指标 | 无需认证 |
-| **应用指标** | <http://localhost:9999/metrics> | 应用性能指标 | 无需认证 |
-
-### 🏗️ 监控架构
-
-```text
-┌─────────────┐    ┌──────────────────┐    ┌─────────────┐    ┌─────────────┐
-│   PgBouncer │───▶│ pgbouncer_exporter│───▶│ Prometheus  │───▶│   Grafana   │
-│ (连接池)     │    │   (指标导出)       │    │ (时序数据库) │    │ (可视化面板) │
-└─────────────┘    └──────────────────┘    └─────────────┘    └─────────────┘
-
-┌─────────────┐    ┌─────────────┐
-│  Hono App   │───▶│ Prometheus  │
-│ (应用指标)   │    │ (采集指标)   │
-└─────────────┘    └─────────────┘
-```
-
-### 📈 内置监控指标
-
-#### 应用性能指标
-
-- HTTP 请求数量和响应时间
-- 路由级别的性能统计
-- 内存和 CPU 使用情况
-- 自定义业务指标
-
-#### 数据库监控指标
-
-- PgBouncer 连接池状态
-- 数据库连接数和等待队列
-- 查询性能和慢查询统计
-- 事务统计和错误率
-
-#### Redis 缓存指标
-
-- 连接状态和性能
-- 缓存命中率
-- 内存使用情况
-
-### 🔧 Docker Compose 配置说明
-
-项目支持多种 Docker Compose Profiles：
-
-```bash
-# 基础服务（默认）- PostgreSQL + Redis
-docker-compose up
-
-# 开发服务 - 基础服务 + PgBouncer
-docker-compose --profile services up
-
-# 完整应用 - 所有服务 + Hono应用
-docker-compose --profile app up
-
-# 监控服务 - 所有服务 + Prometheus + Grafana
-docker-compose --profile monitoring up
-
-# 全部服务 - 应用 + 监控的完整栈
-docker-compose --profile full up
-```
-
-### 📊 预配置 Grafana 仪表板
-
-项目包含预配置的 Grafana 仪表板：
-
-- **数据库监控面板**: 显示 PgBouncer 连接池和 PostgreSQL 性能指标
-- **应用性能面板**: HTTP 请求、响应时间、错误率统计
-- **系统资源面板**: CPU、内存、网络使用情况
-
-所有仪表板配置文件位于 `docker/grafana/dashboards/` 目录。
-
-### 🚨 错误监控 - Sentry
-
-#### 自托管 Sentry
-
-如需自托管 Sentry 服务，请参考官方文档：[Sentry Self-Hosted Documentation](https://develop.sentry.dev/self-hosted/)
-
-#### 配置说明
-
-在 `.env` 文件中配置 Sentry DSN：
-
-```bash
-SENTRY_DSN=your_sentry_dsn_here
-```
-
-### 📊 BullMQ 任务队列监控
-
-项目集成了 BullMQ 任务队列系统，提供可视化监控界面。
-
-#### 访问队列监控
-
-访问 `/admin/ui/queues?token=xxxxx` 查看任务队列状态：
-
-- 队列任务统计
-- 任务执行状态
-- 失败任务重试
-- 实时任务监控
-
-**注意**：需要提供正确的访问 token 才能查看监控界面。
-
-### ⚙️ 生产环境监控建议
-
-对于生产环境，建议：
-
-1. **外部监控服务**: 使用专业的监控服务（如 Datadog、New Relic）
-2. **告警配置**: 在 Grafana 中配置关键指标告警
-3. **日志聚合**: 集成 ELK Stack 或 Loki 进行日志分析
-4. **性能监控**: 定期进行性能基准测试和容量规划
-5. **安全监控**: 集成安全扫描和异常检测工具
+| 服务       | 地址                            | 默认账号       |
+| ---------- | ------------------------------- | -------------- |
+| Grafana    | <http://localhost:3000>         | admin/admin123 |
+| Prometheus | <http://localhost:9090>         | 无需认证       |
+| 应用指标   | <http://localhost:9999/metrics> | 无需认证       |
 
 ## 开发计划
 
-### 短期计划（当前版本）
+### 最新更新（v1.1.0）
 
-- [ ] **工作流自动化**
+- ✅ **Arcjet 安全防护**: 智能限流、机器人检测、攻击防护
+- ✅ **依赖更新**: AWS SDK v3.857.0、Zod v4.0.14 等
+- ✅ **性能优化**: 应用启动流程和中间件执行优化
 
-  - 集成 n8n 工作流引擎
-  - 添加内置模板库
-  - 通过大模型能力实现自然语言操作后台
-  - 支持工作流可视化配置和执行
+### 后续计划
 
-- [ ] **性能测试**
-
-  - 集成 k6 压力测试框架
-  - 添加性能基准测试用例
-  - 自动化性能监控和报告
-  - 负载测试和并发测试
-
-- [ ] **模型配置生成器**（考虑中）
-
-  - 发现使用 Claude Code 生成会更好，暂时搁置此功能
-  - 基于 AI 的代码生成更灵活且符合项目规范
-
-- [ ] **AI 智能化**
-
-  - 基于自然语言的代码生成
-  - 智能化的业务逻辑推理
-  - 自动化测试用例生成
-
-- [ ] **前端集成**
-
-  - Vue3 + TypeScript 管理界面
-  - 低代码/无代码平台
-  - 可视化配置界面
+- [ ] **工作流自动化**: 集成 n8n 工作流引擎
+- [ ] **性能测试**: 集成 k6 压力测试框架
+- [ ] **AI 智能化**: 自然语言代码生成和业务逻辑推理
+- [ ] **前端集成**: Vue3 管理界面和低代码平台
 
 ## 测试
 
-本项目使用 Vitest 作为测试框架，支持完整的单元测试和集成测试。
+使用 Vitest 测试框架，支持完整的单元测试和集成测试。
 
-### 测试环境配置
+```bash
+# 运行测试
+pnpm test
 
-1. **复制测试配置文件**
-
-   ```bash
-   cp .env.example .env.test
-   ```
-
-   编辑 `.env.test` 文件，配置测试环境的数据库和 Redis 连接。建议使用独立的测试数据库。
-
-2. **运行测试**
-
-   ```bash
-   # 运行所有测试
-   pnpm test
-
-   # 运行测试并查看覆盖率
-   pnpm test:coverage
-
-   # 监视模式运行测试
-   pnpm test:watch
-   ```
-
-### 测试说明
-
-- 测试文件使用 `.test.ts` 或 `.spec.ts` 后缀
-- 测试配置文件位于 `vitest.config.ts`
-- 测试环境会自动加载 `.env.test` 配置文件
-- 支持测试数据库的自动迁移和清理
+# 查看覆盖率
+pnpm test:coverage
+```
 
 ## 支持
 
@@ -463,87 +284,15 @@ SENTRY_DSN=your_sentry_dsn_here
 
 ## 贡献指南
 
-我们欢迎所有形式的贡献！无论是新功能、Bug 修复、文档改进还是测试用例，都能帮助项目变得更好。
-
-### 🚀 快速开始贡献
-
-1. **Fork 项目** - 点击右上角的 Fork 按钮
-2. **克隆到本地**
-
-   ```bash
-   git clone https://github.com/your-username/hono-template.git
-   cd hono-template
-   ```
-
-3. **创建功能分支**
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   # 或者
-   git checkout -b fix/your-fix-name
-   ```
-
-4. **本地开发**
-
-   ```bash
-   pnpm install
-   pnpm dev
-   ```
-
-### 📝 提交规范
-
-请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
-
-- `feat:` 新功能
-- `fix:` Bug 修复
-- `docs:` 文档更新
-- `style:` 代码格式化
-- `refactor:` 代码重构
-- `test:` 测试相关
-- `chore:` 构建工具、依赖更新等
-
-**示例**：
+欢迎贡献！请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范。
 
 ```bash
+# 示例提交
 git commit -m "feat: 添加用户权限管理功能"
 git commit -m "fix: 修复登录状态验证问题"
-git commit -m "docs: 更新 API 文档"
 ```
 
-### 🧪 测试要求
-
-提交 PR 前请确保：
-
-- [ ] 新功能包含相应的测试用例
-- [ ] 所有测试通过：`pnpm test`
-- [ ] 代码通过 lint 检查：`pnpm lint`
-- [ ] TypeScript 类型检查通过：`pnpm typecheck`
-
-### 📋 PR 流程
-
-1. **推送到你的 Fork**
-
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-2. **创建 Pull Request**
-   - 提供清晰的标题和描述
-   - 说明更改的原因和内容
-   - 如果修复了 Issue，请关联相关 Issue
-3. **代码审查**
-   - 响应审查意见并进行必要的修改
-   - 保持 PR 内容专注和简洁
-4. **合并**
-   - 维护者审查通过后将合并你的贡献
-
-### 💡 贡献建议
-
-- **Issue 优先**：在开始大型功能之前，请先创建 Issue 讨论
-- **保持简洁**：每个 PR 专注于一个功能或修复
-- **文档同步**：代码更改时请同步更新相关文档
-- **Claude Code 友好**：如果你使用 Claude Code，请确保遵循项目的 CLAUDE.md 规范
-
-感谢你的贡献！🎉
+提交 PR 前请确保测试通过：`pnpm test` 和 `pnpm lint`。
 
 ## 项目引用
 

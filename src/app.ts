@@ -14,6 +14,10 @@ import createApp from "./lib/create-app";
 import { casbin } from "./middlewares/jwt-auth";
 import { operationLog } from "./middlewares/operation-log";
 
+/**
+ * byd 这个页面 ts 服务巨 tm 卡，等一手 ts-go 吧
+ */
+
 // 获取OpenAPIHono实例
 const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
 
@@ -22,6 +26,10 @@ const app = createApp();
 
 // 配置文档主页（非生产环境）
 configureMainDoc?.(app);
+
+const { printMetrics, registerMetrics } = prometheus();
+
+app.use("*", registerMetrics);
 
 // 配置 Sentry
 app.use("*", sentry({ dsn: env.SENTRY_DSN }));
@@ -59,10 +67,6 @@ const appGroups = [publicApp, clientApp, adminApp];
 appGroups.forEach((group) => {
   app.route("/", group);
 });
-
-const { printMetrics, registerMetrics } = prometheus();
-
-app.use("*", registerMetrics);
 
 // 添加 metrics 端点（必须在路由分组之后）
 app.get("/metrics", printMetrics);
