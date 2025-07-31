@@ -29,7 +29,7 @@ services:
       POSTGRES_DB: ${DB_NAME:-postgres}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --locale=C
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -38,7 +38,7 @@ services:
     networks:
       - app_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres}"]
+      test: [CMD-SHELL, "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -66,7 +66,7 @@ services:
     volumes:
       - pgbouncer_logs:/var/log/pgbouncer
     healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=${DB_PASSWORD:-postgres} psql -h localhost -p 6432 -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres} -c 'SELECT 1;' || exit 1"]
+      test: [CMD-SHELL, "PGPASSWORD=${DB_PASSWORD:-postgres} psql -h localhost -p 6432 -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres} -c 'SELECT 1;' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -110,7 +110,7 @@ services:
     networks:
       - app_network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [CMD, redis-cli, ping]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -167,14 +167,14 @@ services:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=15d'
-      - '--storage.tsdb.retention.size=512MB'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.enable-lifecycle'
-      - '--web.enable-admin-api'
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --storage.tsdb.retention.size=512MB
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.enable-lifecycle
+      - --web.enable-admin-api
     networks:
       - app_network
     restart: unless-stopped

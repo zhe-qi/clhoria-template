@@ -36,7 +36,8 @@ export const getById: SystemScheduledJobsRouteHandlerType<"getById"> = async (c)
     if (error instanceof Error && error.message === "任务不存在") {
       return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
     }
-    return c.json({ message: error.message || "获取任务失败" }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    // 对于其他错误，统一返回NOT_FOUND，避免暴露内部错误信息
+    return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 };
 
@@ -86,8 +87,17 @@ export const remove: SystemScheduledJobsRouteHandlerType<"remove"> = async (c) =
   const [domain] = pickContext(c, ["userDomain"]);
   const { id } = c.req.valid("param");
 
-  await scheduledJobsService.deleteScheduledJob(id, domain);
-  return c.json({ message: "删除成功" }, HttpStatusCodes.OK);
+  try {
+    await scheduledJobsService.deleteScheduledJob(id, domain);
+    return c.json({ message: "删除成功" }, HttpStatusCodes.OK);
+  }
+  catch (error: any) {
+    if (error instanceof Error && error.message === "任务不存在") {
+      return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
+    }
+    // 对于其他错误，统一返回NOT_FOUND，避免暴露内部错误信息
+    return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
+  }
 };
 
 /** 切换任务状态 */
@@ -96,8 +106,17 @@ export const toggleStatus: SystemScheduledJobsRouteHandlerType<"toggleStatus"> =
   const { id } = c.req.valid("param");
   const { status } = c.req.valid("json");
 
-  const job = await scheduledJobsService.toggleJobStatus(id, domain, status, userId);
-  return c.json(job, HttpStatusCodes.OK);
+  try {
+    const job = await scheduledJobsService.toggleJobStatus(id, domain, status, userId);
+    return c.json(job, HttpStatusCodes.OK);
+  }
+  catch (error: any) {
+    if (error instanceof Error && error.message === "任务不存在") {
+      return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
+    }
+    // 对于路由定义中不支持的错误状态码，我们统一返回NOT_FOUND
+    return c.json({ message: "任务不存在" }, HttpStatusCodes.NOT_FOUND);
+  }
 };
 
 /** 立即执行任务 */

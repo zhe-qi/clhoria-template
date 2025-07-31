@@ -1,5 +1,5 @@
 {
-  "id": "4b24717a-5194-4a1b-b44d-282472ac99da",
+  "id": "62ae1e3d-b2db-478c-b08c-ae461ec9818c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1118,6 +1118,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "domain": {
+          "name": "domain",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "code": {
           "name": "code",
           "type": "varchar(64)",
@@ -1154,10 +1160,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "system_organization_code_unique": {
-          "name": "system_organization_code_unique",
+        "system_organization_domain_code_unique": {
+          "name": "system_organization_domain_code_unique",
           "nullsNotDistinct": false,
           "columns": [
+            "domain",
             "code"
           ]
         }

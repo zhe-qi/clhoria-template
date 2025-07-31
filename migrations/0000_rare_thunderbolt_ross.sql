@@ -177,12 +177,13 @@ CREATE TABLE "system_organization" (
 	"created_by" varchar(64) NOT NULL,
 	"updated_at" timestamp,
 	"updated_by" varchar(64),
+	"domain" varchar(64) NOT NULL,
 	"code" varchar(64) NOT NULL,
 	"name" varchar(128) NOT NULL,
 	"description" text,
 	"pid" uuid,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "system_organization_code_unique" UNIQUE("code")
+	CONSTRAINT "system_organization_domain_code_unique" UNIQUE("domain","code")
 );
 --> statement-breakpoint
 CREATE TABLE "system_role" (

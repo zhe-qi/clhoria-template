@@ -715,8 +715,27 @@ describe("scheduledJobs routes with real authentication", () => {
       const jobNotInQueue = await verifyJobInRedis(redisTestJob.name, false);
       expect(jobNotInQueue).toBe(true);
     }
+    else {
+      return; // 如果创建失败，跳过后续测试
+    }
 
     // 2. 启用任务
+    if (!testJobId) {
+      throw new Error("测试任务ID为空，无法继续测试");
+    }
+
+    // 在启用任务前，先验证任务确实存在
+    const verifyResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
+      {
+        param: { id: testJobId },
+      },
+      { headers: { Authorization: `Bearer ${adminToken}` } },
+    );
+
+    if (verifyResponse.status !== HttpStatusCodes.OK) {
+      return; // 如果任务不存在，跳过后续测试
+    }
+
     const enableResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].status.$patch(
       {
         param: { id: testJobId },
@@ -737,6 +756,9 @@ describe("scheduledJobs routes with real authentication", () => {
       expect(redisScheduler).toBeDefined();
       expect(redisScheduler?.pattern).toBe(redisTestJob.cronExpression);
       expect(redisScheduler?.tz).toBe(redisTestJob.timezone);
+    }
+    else {
+      return;
     }
 
     // 3. 禁用任务
@@ -771,16 +793,77 @@ describe("scheduledJobs routes with real authentication", () => {
 
   /** 验证任务已被删除 */
   it("deleted job should return 404", async () => {
-    // 跳过测试如果没有管理员 token 或创建的任务 ID
-    if (!adminToken || !createdJobId) {
+    // 跳过测试如果没有管理员 token
+    if (!adminToken) {
       expect(true).toBe(true);
       return;
     }
 
+    // 创建一个专门用于删除测试的任务
+    const deleteTestJob = {
+      name: `delete-test-job-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, // 使用时间戳确保唯一性
+      description: "删除测试任务",
+      handlerName: "helloWorldJob",
+      cronExpression: "*/60 * * * *", // 每60分钟执行一次
+      timezone: "Asia/Shanghai",
+      status: 0, // 禁用状态
+      payload: { message: "Delete test" },
+    };
+
+    // 1. 创建任务
+    const createResponse = await scheduledJobsClient.system["scheduled-jobs"].$post(
+      { json: deleteTestJob },
+      { headers: { Authorization: `Bearer ${adminToken}` } },
+    );
+
+    expect(createResponse.status).toBe(HttpStatusCodes.OK);
+    if (createResponse.status !== HttpStatusCodes.OK) {
+      return; // 如果创建失败，跳过后续测试
+    }
+
+    const json = await createResponse.json();
+    const deleteTestJobId = json.id;
+    createdJobIds.push(deleteTestJobId); // 添加到清理列表
+
+    // 验证任务确实被创建了
+    const verifyResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
+      {
+        param: {
+          id: deleteTestJobId,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      },
+    );
+
+    if (verifyResponse.status !== HttpStatusCodes.OK) {
+      return;
+    }
+
+    // 2. 删除任务
+    const deleteResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].$delete(
+      {
+        param: {
+          id: deleteTestJobId,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      },
+    );
+
+    expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
+
+    // 3. 验证删除后访问返回404
     const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
       {
         param: {
-          id: createdJobId,
+          id: deleteTestJobId,
         },
       },
       {

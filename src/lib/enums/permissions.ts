@@ -9,6 +9,9 @@ export const PermissionResource = {
   /** 菜单管理 */
   SYSTEM_MENUS: "system-menus",
 
+  /** 组织管理 */
+  SYSTEM_ORGANIZATION: "system-organization",
+
   /** 域管理 */
   SYSTEM_DOMAINS: "system-domains",
 

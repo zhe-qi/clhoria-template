@@ -109,6 +109,193 @@ When creating Drizzle schemas, follow these rules:
    - Define clear TypeScript interfaces for JSON field structure (avoid `any` type)
    - Set appropriate default values using `.default()` method
 
+#### Drizzle ORM 约束和索引定义规范
+
+基于 Drizzle ORM 最新版本（0.31.0+）的约束和索引定义最佳实践：
+
+##### 1. Unique 约束定义
+
+**单列唯一约束**:
+```typescript
+export const user = pgTable("user", {
+  id: serial("id").primaryKey(),
+  email: text("email").unique(), // 简单唯一约束
+  username: text("username").unique("custom_unique_name"), // 自定义约束名
+});
+```
+
+**复合唯一约束** - ✅ 正确方式（返回数组）：
+```typescript
+export const systemOrganization = pgTable("system_organization", {
+  ...defaultColumns,
+  domain: varchar({ length: 64 }).notNull(),
+  code: varchar({ length: 64 }).notNull(),
+  status: statusEnum().notNull(),
+}, table => [
+  // 域内组织代码唯一
+  unique().on(table.domain, table.code),
+  unique("custom_name").on(table.domain, table.code), // 自定义约束名
+]);
+```
+
+**❌ 错误方式（返回对象）**：
+```typescript
+// 不要这样写！
+}, (table) => ({
+  domainCodeUnique: unique().on(table.domain, table.code), // 错误！
+})
+```
+
+##### 2. 索引定义
+
+**基础索引定义**:
+```typescript
+export const user = pgTable("user", {
+  id: serial("id").primaryKey(),
+  name: text("name"),
+  email: text("email"),
+}, table => [
+  // 普通索引
+  index("name_idx").on(table.name),
+  // 唯一索引（推荐用于需要查询性能的唯一字段）
+  uniqueIndex("email_idx").on(table.email),
+  // 复合索引
+  index("name_email_idx").on(table.name, table.email),
+]);
+```
+
+**高级索引选项（v0.31.0+）**:
+```typescript
+export const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
+  title: text("title"),
+  content: text("content"),
+  createdAt: timestamp("created_at").defaultNow(),
+  userId: integer("user_id"),
+}, table => [
+  // 带排序的索引
+  index("title_idx").on(table.title.asc()),
+  index("created_at_idx").on(table.createdAt.desc()),
+  
+  // 处理 NULL 值的索引
+  index("user_id_idx").on(table.userId.nullsFirst()),
+  
+  // 条件索引
+  index("active_posts_idx")
+    .on(table.title)
+    .where(sql`${table.userId} IS NOT NULL`),
+  
+  // 并发创建索引
+  index("content_idx")
+    .on(table.content)
+    .concurrently(),
+  
+  // 带参数的索引
+  index("title_gin_idx")
+    .on(table.title)
+    .using(sql`gin`)
+    .with({ fillfactor: "70" }),
+]);
+```
+
+##### 3. 索引 vs 唯一约束选择原则
+
+**使用 unique() 约束的场景**:
+- 纯粹的数据完整性约束
+- 不经常用于查询的唯一字段
+- 简单的唯一性要求
+
+**使用 uniqueIndex() 的场景**:
+- 需要查询性能优化的唯一字段
+- 经常用于 WHERE 条件的唯一字段
+- 需要排序或范围查询的唯一字段
+
+```typescript
+export const user = pgTable("user", {
+  id: serial("id").primaryKey(),
+  email: text("email"), // 经常用于登录查询
+  socialSecurityNumber: text("ssn"), // 很少查询，只需要唯一性
+}, table => [
+  uniqueIndex("email_idx").on(table.email), // 需要查询性能
+  unique().on(table.socialSecurityNumber), // 只需要唯一性
+]);
+```
+
+##### 4. 常见模式和最佳实践
+
+**多租户系统的唯一约束**:
+```typescript
+export const tenantResource = pgTable("tenant_resource", {
+  id: uuid().primaryKey().defaultRandom(),
+  tenantId: varchar({ length: 64 }).notNull(),
+  code: varchar({ length: 64 }).notNull(),
+  name: varchar({ length: 128 }).notNull(),
+}, table => [
+  // 租户内代码唯一
+  unique().on(table.tenantId, table.code),
+  // 为查询性能添加索引
+  index("tenant_code_idx").on(table.tenantId, table.code),
+]);
+```
+
+**层级结构的索引优化**:
+```typescript
+export const categories = pgTable("categories", {
+  id: uuid().primaryKey().defaultRandom(),
+  parentId: uuid(),
+  name: varchar({ length: 128 }).notNull(),
+  path: text(), // 存储层级路径，如 "/root/child/grandchild"
+}, table => [
+  // 父子关系查询优化
+  index("parent_id_idx").on(table.parentId),
+  // 路径查询优化（使用 GIN 索引支持模式匹配）
+  index("path_gin_idx").on(table.path).using(sql`gin`),
+]);
+```
+
+##### 5. 约束命名规范
+
+```typescript
+// 推荐的命名规范
+export const posts = pgTable("posts", {
+  // ...columns
+}, table => [
+  // 格式：表名_列名_约束类型
+  unique("posts_slug_unique").on(table.slug),
+  index("posts_created_at_idx").on(table.createdAt),
+  uniqueIndex("posts_user_title_unique_idx").on(table.userId, table.title),
+]);
+```
+
+##### 6. 常见错误和解决方案
+
+**约束定义语法错误**:
+```typescript
+// ❌ 错误：返回对象而不是数组
+}, (table) => ({
+  unique: unique().on(table.col1, table.col2)
+})
+
+// ✅ 正确：返回数组
+}, (table) => [
+  unique().on(table.col1, table.col2)
+]
+```
+
+**类型错误处理**:
+```typescript
+// 处理可选搜索条件
+const searchFields = or(
+  ilike(table.name, `%${search}%`),
+  table.description ? ilike(table.description, `%${search}%`) : undefined,
+);
+
+// 安全的条件组合
+if (searchFields) {
+  whereCondition = and(baseCondition, searchFields);
+}
+```
+
 Example:
 ```typescript
 import { z } from "@hono/zod-openapi";

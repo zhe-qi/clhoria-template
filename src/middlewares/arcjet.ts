@@ -1,3 +1,4 @@
+import type { ArcjetNode } from "@arcjet/node";
 import type { Context, MiddlewareHandler } from "hono";
 
 import { isSpoofedBot } from "@arcjet/inspect";
@@ -9,35 +10,41 @@ import type { AppBindings } from "@/types/lib";
 import env from "@/env";
 
 // 创建 Arcjet 实例
-const aj = arcjet({
-  key: env.ARCJET_KEY!,
-  rules: [
+let aj: ArcjetNode<{
+  requested: number;
+}> | null = null;
+
+if (env.ARCJET_KEY) {
+  aj = arcjet({
+    key: env.ARCJET_KEY!,
+    rules: [
     // Shield 保护应用免受常见攻击，如 SQL 注入
-    shield({ mode: "LIVE" }),
-    // 创建机器人检测规则
-    detectBot({
-      mode: "LIVE", // 阻止请求。使用 "DRY_RUN" 仅记录日志
-      // 阻止所有机器人，除了以下类型
-      allow: [
-        "CATEGORY:SEARCH_ENGINE", // Google, Bing 等搜索引擎
+      shield({ mode: "LIVE" }),
+      // 创建机器人检测规则
+      detectBot({
+        mode: "LIVE", // 阻止请求。使用 "DRY_RUN" 仅记录日志
+        // 阻止所有机器人，除了以下类型
+        allow: [
+          "CATEGORY:SEARCH_ENGINE", // Google, Bing 等搜索引擎
         // 取消注释以允许其他常见的机器人类别
         // 查看完整列表：https://arcjet.com/bot-list
         // "CATEGORY:MONITOR", // 正常运行时间监控服务
         // "CATEGORY:PREVIEW", // 链接预览，如 Slack, Discord
-      ],
-    }),
-    // 创建令牌桶速率限制，支持其他算法
-    tokenBucket({
-      mode: "LIVE",
-      // 默认按 IP 地址跟踪，但可以自定义
-      // 查看：https://docs.arcjet.com/fingerprints
-      // characteristics: ["ip.src"],
-      refillRate: 5, // 每个间隔补充 5 个令牌
-      interval: 10, // 每 10 秒补充一次
-      capacity: 10, // 桶容量为 10 个令牌
-    }),
-  ],
-});
+        ],
+      }),
+      // 创建令牌桶速率限制，支持其他算法
+      tokenBucket({
+        mode: "LIVE",
+        // 默认按 IP 地址跟踪，但可以自定义
+        // 查看：https://docs.arcjet.com/fingerprints
+        // characteristics: ["ip.src"],
+        refillRate: 5, // 每个间隔补充 5 个令牌
+        interval: 10, // 每 10 秒补充一次
+        capacity: 10, // 桶容量为 10 个令牌
+      }),
+    ],
+  });
+}
 
 /**
  * Arcjet 中间件
@@ -47,7 +54,11 @@ export function arcjetMiddleware(): MiddlewareHandler<AppBindings> {
   return async (c: Context<AppBindings>, next) => {
     try {
       // 使用 Arcjet 保护请求，从桶中扣除 1 个令牌
-      const decision = await aj.protect(c.env.incoming, { requested: 1 });
+      const decision = await aj?.protect(c.env.incoming, { requested: 1 });
+
+      if (!decision) {
+        return;
+      }
 
       // 如果请求被拒绝
       if (decision.isDenied()) {
