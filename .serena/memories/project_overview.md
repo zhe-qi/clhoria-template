@@ -25,7 +25,7 @@
 src/
 ├── app.ts                 # 应用入口和路由配置
 ├── routes/               # 路由层（按 public/client/admin 分层）
-├── services/             # 业务逻辑层
+├── services/             # 业务逻辑层仅需要复用时抽离至此
 ├── db/schema/           # 数据库架构定义
 ├── lib/                 # 工具库和配置
 ├── middlewares/         # 中间件
