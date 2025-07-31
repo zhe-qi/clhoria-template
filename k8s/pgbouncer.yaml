@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgbouncer-config
+  namespace: hono-template
+data:
+  pgbouncer.ini: |
+    [databases]
+    postgres = host=postgres-service port=5432 dbname=postgres
+
+    [pgbouncer]
+    listen_port = 6432
+    listen_addr = *
+    auth_type = md5
+    auth_file = /etc/pgbouncer/userlist.txt
+
+    # 连接池配置
+    pool_mode = transaction
+    max_client_conn = 100
+    default_pool_size = 20
+    min_pool_size = 5
+    reserve_pool_size = 5
+    reserve_pool_timeout = 5
+
+    # 统计配置
+    stats_users = stats
+    stats_period = 60
+
+    # 日志配置
+    log_connections = 1
+    log_disconnections = 1
+    log_pooler_errors = 1
+
+    # 超时配置
+    server_lifetime = 3600
+    server_idle_timeout = 600
+    client_idle_timeout = 0
+
+  userlist.txt: |
+    "postgres" "SCRAM-SHA-256$4096:ZWJhOGRjM2E5NGY0ZmEwMg==$9EhJgXtmhsAj8A6sLo8dMt0A2VdgF2KkZ6qTMjkqjXY=$AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHw=="
+    "stats" "SCRAM-SHA-256$4096:ZWJhOGRjM2E5NGY0ZmEwMg==$stats123hash$AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHw=="
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgbouncer
+  namespace: hono-template
+  labels:
+    app: pgbouncer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgbouncer
+  template:
+    metadata:
+      labels:
+        app: pgbouncer
+    spec:
+      containers:
+        - name: pgbouncer
+          image: pgbouncer/pgbouncer:1.21.0
+          ports:
+            - containerPort: 6432
+          env:
+            - name: DATABASES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: hono-config
+                  key: DB_HOST
+            - name: DATABASES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: hono-config
+                  key: DB_PORT
+            - name: DATABASES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: hono-secrets
+                  key: DB_USER
+            - name: DATABASES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hono-secrets
+                  key: DB_PASSWORD
+            - name: DATABASES_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: hono-secrets
+                  key: DB_NAME
+          volumeMounts:
+            - name: pgbouncer-config
+              mountPath: /etc/pgbouncer
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            tcpSocket:
+              port: 6432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 6432
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: pgbouncer-config
+          configMap:
+            name: pgbouncer-config
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command: [sh, -c]
+          args:
+            - |
+              until pg_isready -h postgres-service -p 5432 -U postgres; do
+                echo "等待 PostgreSQL 启动..."
+                sleep 2
+              done
+              echo "PostgreSQL 已就绪"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgbouncer-service
+  namespace: hono-template
+  labels:
+    app: pgbouncer
+spec:
+  selector:
+    app: pgbouncer
+  ports:
+    - port: 6432
+      targetPort: 6432
+      protocol: TCP
+  type: ClusterIP

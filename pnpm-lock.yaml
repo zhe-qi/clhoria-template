@@ -30,11 +30,11 @@ importers:
         specifier: ^6.12.0
         version: 6.12.0(hono@4.8.10)
       '@hono/node-server':
-        specifier: ^1.17.1
-        version: 1.17.1(hono@4.8.10)
+        specifier: 1.18.0
+        version: 1.18.0(hono@4.8.10)
       '@hono/node-ws':
         specifier: ^1.2.0
-        version: 1.2.0(@hono/node-server@1.17.1(hono@4.8.10))(hono@4.8.10)
+        version: 1.2.0(@hono/node-server@1.18.0(hono@4.8.10))(hono@4.8.10)
       '@hono/prometheus':
         specifier: ^1.0.2
         version: 1.0.2(hono@4.8.10)(prom-client@15.1.3)
@@ -51,8 +51,8 @@ importers:
         specifier: ^0.9.13
         version: 0.9.13(hono@4.8.10)
       bullmq:
-        specifier: ^5.56.8
-        version: 5.56.8
+        specifier: ^5.56.9
+        version: 5.56.9
       casbin:
         specifier: ^5.38.0
         version: 5.38.0
@@ -87,8 +87,8 @@ importers:
         specifier: ^0.6.3
         version: 0.6.3
       ioredis:
-        specifier: ^5.6.1
-        version: 5.6.1
+        specifier: 5.7.0
+        version: 5.7.0
       pino:
         specifier: ^9.7.0
         version: 9.7.0
@@ -1043,8 +1043,8 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@hono/node-server@1.17.1':
-    resolution: {integrity: sha512-SY79W/C+2b1MyAzmIcV32Q47vO1b5XwLRwj8S9N6Jr5n1QCkIfAIH6umOSgqWZ4/v67hg6qq8Ha5vZonVidGsg==}
+  '@hono/node-server@1.18.0':
+    resolution: {integrity: sha512-CJ0H3/ouk/JWnyiuYOJLdpuWhO2D2BTNigHaFixnW3CrwZb+E+4s/KoFkcikHXcVmXoxaLJx1nlGa3JChEFtFA==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -1100,8 +1100,8 @@ packages:
     resolution: {integrity: sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ==}
     engines: {node: '>=18.18'}
 
-  '@ioredis/commands@1.2.0':
-    resolution: {integrity: sha512-Sx1pU8EM64o2BrqNpEO1CNLtKQwyhuXuqyfH7oGKCk+1a33d2r5saW8zNwm3j6BTExtjrv2BxTgzzkMwts6vGg==}
+  '@ioredis/commands@1.3.0':
+    resolution: {integrity: sha512-M/T6Zewn7sDaBQEqIZ8Rb+i9y8qfGmq+5SDFSf9sA2lUZTmdDLVdOiQaeDp+Q4wElZ9HG1GAX5KhDaidp6LQsQ==}
 
   '@jridgewell/gen-mapping@0.3.12':
     resolution: {integrity: sha512-OuLGC46TjB5BbN1dH8JULVVZY4WTdkF7tV9Ys6wLL1rubZnCMstOhNHueU5bLCrnRuDhKPDM4g6sw4Bel5Gzqg==}
@@ -2083,8 +2083,8 @@ packages:
     resolution: {integrity: sha512-bkXY9WsVpY7CvMhKSR6pZilZu9Ln5WDrKVBUXf2S443etkmEO4V58heTecXcUIsNsi4Rx8JUO4NfX1IcQl4deg==}
     engines: {node: '>=18.20'}
 
-  bullmq@5.56.8:
-    resolution: {integrity: sha512-4vcgfLCyHKDWKDUxJGNz/plBVNWFsvOm1r63XIqA2BkfaUjmnq7G8zV+0liV5SEGy1lQb8zFMTVoG1uFUOkjNg==}
+  bullmq@5.56.9:
+    resolution: {integrity: sha512-SL7OZG0x9sh/PC6ZVKqibSmPsbjViBaiFAyr3ujJRxb6nlZefb1hU0biJuvfI8/hQa4HtEG9sCHRMiz905B2eg==}
 
   bytes@3.1.2:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
@@ -2996,8 +2996,8 @@ packages:
   ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
 
-  ioredis@5.6.1:
-    resolution: {integrity: sha512-UxC0Yv1Y4WRJiGQxQkP0hfdL0/5/6YvdfOOClRgJ0qppSarkhneSa6UvkMkms0AkdGimSH3Ikqm+6mkMmX7vGA==}
+  ioredis@5.7.0:
+    resolution: {integrity: sha512-NUcA93i1lukyXU+riqEyPtSEkyFq8tX90uL659J+qpCZ3rEdViB/APC58oAhIh3+bJln2hzdlZbBZsGNrlsR8g==}
     engines: {node: '>=12.22.0'}
 
   ipaddr.js@1.9.1:
@@ -5232,13 +5232,13 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@hono/node-server@1.17.1(hono@4.8.10)':
+  '@hono/node-server@1.18.0(hono@4.8.10)':
     dependencies:
       hono: 4.8.10
 
-  '@hono/node-ws@1.2.0(@hono/node-server@1.17.1(hono@4.8.10))(hono@4.8.10)':
+  '@hono/node-ws@1.2.0(@hono/node-server@1.18.0(hono@4.8.10))(hono@4.8.10)':
     dependencies:
-      '@hono/node-server': 1.17.1(hono@4.8.10)
+      '@hono/node-server': 1.18.0(hono@4.8.10)
       hono: 4.8.10
       ws: 8.18.0
     transitivePeerDependencies:
@@ -5281,7 +5281,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.2': {}
 
-  '@ioredis/commands@1.2.0': {}
+  '@ioredis/commands@1.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.12':
     dependencies:
@@ -6373,10 +6373,10 @@ snapshots:
 
   builtin-modules@5.0.0: {}
 
-  bullmq@5.56.8:
+  bullmq@5.56.9:
     dependencies:
       cron-parser: 4.9.0
-      ioredis: 5.6.1
+      ioredis: 5.7.0
       msgpackr: 1.11.5
       node-abort-controller: 3.1.1
       semver: 7.7.2
@@ -7293,9 +7293,9 @@ snapshots:
   ini@1.3.8:
     optional: true
 
-  ioredis@5.6.1:
+  ioredis@5.7.0:
     dependencies:
-      '@ioredis/commands': 1.2.0
+      '@ioredis/commands': 1.3.0
       cluster-key-slot: 1.1.2
       debug: 4.4.1
       denque: 2.1.0

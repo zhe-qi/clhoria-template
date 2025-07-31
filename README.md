@@ -201,6 +201,14 @@ pnpm build
 pnpm start
 ```
 
+### Kubernetes 部署
+
+项目包含 Kubernetes 部署配置文件：
+
+剪切 scripts/k8s/Dockerfile.k8s 到根目录，查看部署文档 scripts/k8s/KUBERNETES.md
+
+**移除 K8s 配置**：如不需要 Kubernetes 部署，可删除 `k8s/` 和 `script/k8s` 目录
+
 ## 运行时兼容性
 
 原则上稍作修改即可兼容 Bun、Deno 等现代 JavaScript 运行时，支持高性能部署。后续规划 Monorepo 架构，单独提供可部署到边缘运行时的模块化代码，涵盖评论系统、文章管理、R2 图片格式化、视频转码等场景，充分利用边缘计算的低延迟和高可用性优势。

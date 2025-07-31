@@ -99,6 +99,10 @@ src/**/*.spec.ts
 # Docker optimization files
 Dockerfile.optimized
 Dockerfile.distroless
+Dockerfile.k8s
+
+# Kubernetes files
+k8s/
 
 # Development tools
 .eslintrc*
