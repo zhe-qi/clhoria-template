@@ -7,6 +7,7 @@ export * from "./login-log/login-log.index";
 export * from "./menus/menus.index";
 export * from "./operation-log/operation-log.index";
 export * from "./organization/organization.index";
+export * from "./posts/posts.index";
 export * from "./roles/roles.index";
 export * from "./scheduled-jobs/scheduled-jobs.index";
 export * from "./users/users.index";

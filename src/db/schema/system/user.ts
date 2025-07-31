@@ -5,6 +5,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { defaultColumns } from "@/db/common/default-columns";
 
 import { statusEnum } from "../../common/enums";
+import { systemUserPost } from "./user-post";
 import { systemUserRole } from "./user-role";
 
 export const systemUser = pgTable("system_user", {
@@ -17,10 +18,6 @@ export const systemUser = pgTable("system_user", {
   nickName: varchar({ length: 64 }).notNull(),
   status: statusEnum().notNull(),
 });
-
-export const systemUserRelations = relations(systemUser, ({ many }) => ({
-  userRoles: many(systemUserRole),
-}));
 
 export const selectSystemUserSchema = createSelectSchema(systemUser, {
   id: schema => schema.describe("用户ID"),
@@ -57,3 +54,9 @@ export const loginSystemUserSchema = insertSystemUserSchema.pick({
   password: true,
   domain: true,
 });
+
+// 用户关系定义，包含用户角色和用户岗位关系
+export const systemUserRelations = relations(systemUser, ({ many }) => ({
+  userRoles: many(systemUserRole),
+  userPosts: many(systemUserPost),
+}));

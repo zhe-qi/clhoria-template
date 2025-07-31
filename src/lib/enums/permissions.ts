@@ -6,6 +6,9 @@ export const PermissionResource = {
   /** 角色管理 */
   SYSTEM_ROLES: "system-roles",
 
+  /** 岗位管理 */
+  SYSTEM_POSTS: "system-posts",
+
   /** 菜单管理 */
   SYSTEM_MENUS: "system-menus",
 

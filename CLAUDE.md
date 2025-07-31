@@ -109,6 +109,40 @@ When creating Drizzle schemas, follow these rules:
    - Define clear TypeScript interfaces for JSON field structure (avoid `any` type)
    - Set appropriate default values using `.default()` method
 
+9. **Relations Definition Standards**: Follow these rules for defining table relationships:
+   - **Location**: Define relations in the same file as the table definition, NOT in separate relation files
+   - **Import Strategy**: Use forward declarations by importing related tables at the end of the file
+   - **Naming Convention**: Use `{tableName}Relations` format (e.g., `systemUserRelations`, `systemPostRelations`)
+   - **Structure**: Place relation definitions after all schema definitions
+
+   **Example Structure**:
+   ```typescript
+   // Table definition
+   export const systemUser = pgTable("system_user", {
+     // ... table fields
+   });
+
+   // Schema definitions (select, insert, patch)
+   export const selectSystemUserSchema = createSelectSchema(systemUser, {
+     // ... field descriptions
+   });
+
+   // Relations definition (at the end of file)
+   import { systemUserRole } from "./user-role";
+   import { systemUserPost } from "./user-post";
+
+   export const systemUserRelations = relations(systemUser, ({ many }) => ({
+     userRoles: many(systemUserRole),
+     userPosts: many(systemUserPost),
+   }));
+   ```
+
+   **Rules**:
+   - ✅ Correct: Each table file contains its own relations
+   - ❌ Wrong: Separate files for relations (creates circular imports)
+   - ✅ Correct: Import related tables at the end to avoid circular dependencies
+   - ❌ Wrong: Import related tables at the top of the file
+
 #### Drizzle ORM 约束和索引定义规范
 
 基于 Drizzle ORM 最新版本（0.31.0+）的约束和索引定义最佳实践：
