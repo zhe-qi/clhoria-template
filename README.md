@@ -193,6 +193,8 @@ docker build -t hono-template .
 docker run -p 9999:9999 --env-file .env hono-template
 ```
 
+为了更好的服务隔离、独立扩缩容和维护便利性，建议将数据库、缓存和应用服务分别部署
+
 ### 生产构建
 
 ```bash
@@ -204,7 +206,7 @@ pnpm start
 
 项目包含 Kubernetes 部署配置文件：
 
-剪切 scripts/k8s/Dockerfile.k8s 到根目录，查看部署文档 scripts/k8s/KUBERNETES.md
+剪切 scripts/k8s/Dockerfile.k8s 到根目录，查看部署文档 docs/KUBERNETES.md
 
 **移除 K8s 配置**：如不需要 Kubernetes 部署，可删除 `k8s/` 和 `script/k8s` 目录
 

@@ -96,7 +96,7 @@ email: text("email").unique()
 ### Authentication & Authorization
 
 - **JWT**: Separate secrets for client (`CLIENT_JWT_SECRET`) and admin (`ADMIN_JWT_SECRET`) routes
-- **Casbin**: Role-based access control for admin routes  
+- **Casbin**: Role-based access control for admin routes
 - **Context Extraction**: Use `c.get("userDomain")` or `pickContext(c, ["userDomain", "userId"])`
 - **Middleware**: Applied at route group level in `src/app.ts:32-45`
 
@@ -159,7 +159,7 @@ src/db/schema/
 
 1. **Import Order**: Framework imports → schemas → utils
 2. **Tags**: Use `["/resource (中文描述)"]` format
-3. **Request Bodies**: `jsonContentRequired(insertSchema, "描述")` 
+3. **Request Bodies**: `jsonContentRequired(insertSchema, "描述")`
 4. **Params**: Use `IdUUIDParamsSchema` for UUID params
 5. **Responses**: Include ALL possible status codes from handlers
 6. **Error Schemas**: `createErrorSchema(requestSchema)` for validation errors
@@ -167,7 +167,7 @@ src/db/schema/
 
 ### Standard HTTP Status Codes
 - 400 BAD_REQUEST, 401 UNAUTHORIZED, 403 FORBIDDEN
-- 404 NOT_FOUND, 409 CONFLICT, 422 UNPROCESSABLE_ENTITY  
+- 404 NOT_FOUND, 409 CONFLICT, 422 UNPROCESSABLE_ENTITY
 - 500 INTERNAL_SERVER_ERROR
 
 ### Error Patterns
@@ -202,7 +202,7 @@ if (!resource) {
 4. **Function Prefixes**: `create*`, `get*`, `update*`, `delete*`, `assign*`, `clear*`
 5. **Transactions**: Use `db.transaction()` for complex multi-step operations
 
-**Exception Handling**: 
+**Exception Handling**:
 - Research error behavior before adding try-catch
 - Drizzle queries return `[]` or `undefined`, don't throw (except inserts on constraint violations)
 - Only catch known exception scenarios, let unknown errors bubble up

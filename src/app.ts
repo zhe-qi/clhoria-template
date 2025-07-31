@@ -14,10 +14,6 @@ import createApp from "./lib/create-app";
 import { casbin } from "./middlewares/jwt-auth";
 import { operationLog } from "./middlewares/operation-log";
 
-/**
- * byd 这个页面 ts 服务巨 tm 卡，等一手 ts-go 吧
- */
-
 // 获取OpenAPIHono实例
 const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
 
