@@ -4,7 +4,9 @@ import { logger } from "@/lib/logger";
 
 import type { JobHandler } from "../types";
 
-/** Hello World 定时任务 */
+/**
+ * @description Hello World 定时任务
+ */
 export const helloWorldJob: JobHandler = async (job: Job) => {
   logger.debug("Hello World 任务开始执行", { jobId: job.id });
 
@@ -32,7 +34,9 @@ export const helloWorldJob: JobHandler = async (job: Job) => {
   return result;
 };
 
-/** 系统清理任务 */
+/**
+ * @description 系统清理任务
+ */
 export const systemCleanupJob: JobHandler = async (job: Job) => {
   logger.info("系统清理任务开始执行", {
     jobId: job.id,
@@ -73,7 +77,9 @@ export const systemCleanupJob: JobHandler = async (job: Job) => {
   return result;
 };
 
-/** 数据备份任务 */
+/**
+ * @description 数据备份任务
+ */
 export const dataBackupJob: JobHandler = async (job: Job) => {
   logger.info("数据备份任务开始执行", {
     jobId: job.id,
@@ -115,7 +121,9 @@ export const dataBackupJob: JobHandler = async (job: Job) => {
   return result;
 };
 
-/** 报表生成任务 */
+/**
+ * @description 报表生成任务
+ */
 export const reportGenerationJob: JobHandler = async (job: Job) => {
   logger.info("报表生成任务开始执行", {
     jobId: job.id,
@@ -154,7 +162,9 @@ export const reportGenerationJob: JobHandler = async (job: Job) => {
   return result;
 };
 
-/** 邮件发送任务 */
+/**
+ * @description 邮件发送任务
+ */
 export const emailSendJob: JobHandler = async (job: Job) => {
   logger.info("邮件发送任务开始执行", {
     jobId: job.id,

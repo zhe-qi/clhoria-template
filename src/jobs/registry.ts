@@ -1,4 +1,6 @@
 import { eq } from "drizzle-orm";
+import fs from "node:fs";
+import path from "node:path";
 
 import db from "@/db";
 import { systemJobHandlers } from "@/db/schema";
@@ -7,6 +9,90 @@ import { logger } from "@/lib/logger";
 import type { JobHandlerMeta } from "./types";
 
 import * as handlers from "./handlers";
+
+/** 缓存文件路径和描述映射 */
+let handlerCache: Record<string, { filePath: string; description: string }> | null = null;
+
+/** 扫描处理器文件并建立映射 */
+function scanHandlerFiles(): Record<string, { filePath: string; description: string }> {
+  if (handlerCache) {
+    return handlerCache;
+  }
+
+  const handlerMap: Record<string, { filePath: string; description: string }> = {};
+  const handlersDir = path.join(process.cwd(), "src/jobs/handlers");
+
+  try {
+    // 递归扫描处理器目录
+    const scanDirectory = (dir: string, relativePath: string = "") => {
+      const files = fs.readdirSync(dir);
+
+      for (const file of files) {
+        const fullPath = path.join(dir, file);
+        const relativeFilePath = path.join(relativePath, file);
+
+        if (fs.statSync(fullPath).isDirectory()) {
+          scanDirectory(fullPath, relativeFilePath);
+        }
+        else if (file.endsWith(".ts") || file.endsWith(".js")) {
+          // 读取文件内容
+          const content = fs.readFileSync(fullPath, "utf-8");
+
+          // 匹配导出的处理器函数和它们的注释
+          const functionPattern = /(?:\/\*\*([\s\S]*?)\*\/\s*)?export\s+(?:async\s+)?(?:const|function)\s+(\w+Job)/g;
+          let match;
+
+          // eslint-disable-next-line no-cond-assign
+          while ((match = functionPattern.exec(content)) !== null) {
+            const [, comment, handlerName] = match;
+            let description = `${handlerName} 任务处理器`;
+
+            if (comment) {
+              // 提取 JSDoc 注释中的描述
+              const descMatch = comment.match(/@description\s+(.+)/i)
+                || comment.match(/^\s*(?:\*\s*)?(.+)/m);
+              if (descMatch) {
+                description = descMatch[1].trim().replace(/^\*\s*/, "");
+              }
+            }
+
+            handlerMap[handlerName] = {
+              filePath: `src/jobs/handlers/${relativeFilePath}`,
+              description,
+            };
+          }
+        }
+      }
+    };
+
+    if (fs.existsSync(handlersDir)) {
+      scanDirectory(handlersDir);
+    }
+  }
+  catch (error) {
+    logger.error("扫描处理器文件失败", { error });
+  }
+
+  handlerCache = handlerMap;
+  return handlerMap;
+}
+
+/** 根据处理器名称获取文件路径 */
+function getHandlerFilePath(name: string): string {
+  const handlerMap = scanHandlerFiles();
+  return handlerMap[name]?.filePath || "src/jobs/handlers/index.ts";
+}
+
+/** 根据处理器名称获取描述 */
+function getHandlerDescription(name: string): string {
+  const handlerMap = scanHandlerFiles();
+  return handlerMap[name]?.description || `${name} 任务处理器`;
+}
+
+/** 清除处理器缓存（开发时使用） */
+export function clearHandlerCache(): void {
+  handlerCache = null;
+}
 
 /** 获取所有注册的处理器 */
 export function getRegisteredHandlers(): JobHandlerMeta[] {
@@ -18,30 +104,6 @@ export function getRegisteredHandlers(): JobHandlerMeta[] {
     handler,
     filePath: getHandlerFilePath(name),
   }));
-}
-
-/** 根据处理器名称获取描述 */
-function getHandlerDescription(name: string): string {
-  const descriptions: Record<string, string> = {
-    helloWorldJob: "Hello World 示例任务，用于测试定时任务功能",
-    systemCleanupJob: "系统清理任务，清理临时文件、过期日志和缓存数据",
-    dataBackupJob: "数据备份任务，执行数据库和文件系统的备份操作",
-    reportGenerationJob: "报表生成任务，生成各类业务报表",
-    emailSendJob: "邮件发送任务，批量发送邮件通知",
-  };
-
-  return descriptions[name] || `${name} 任务处理器`;
-}
-
-/** 根据处理器名称获取文件路径 */
-function getHandlerFilePath(name: string): string {
-  // 这里可以通过更复杂的逻辑来确定文件路径
-  // 目前简化处理，都指向 example-jobs.ts
-  if (["helloWorldJob", "systemCleanupJob", "dataBackupJob", "reportGenerationJob", "emailSendJob"].includes(name)) {
-    return "src/jobs/handlers/example-jobs.ts";
-  }
-
-  return "src/jobs/handlers/index.ts";
 }
 
 /** 同步处理器到数据库 */

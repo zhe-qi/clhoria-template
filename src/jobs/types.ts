@@ -174,3 +174,53 @@ export interface WorkerOptions {
   /** 连接配置 */
   connection: ConnectionOptions;
 }
+
+/** 任务优先级枚举 */
+export enum JobPriority {
+  LOW = 1,
+  NORMAL = 5,
+  HIGH = 10,
+  CRITICAL = 20,
+}
+
+/** 队列性能指标 */
+export interface QueueMetrics {
+  /** 总任务数 */
+  totalJobs: number;
+  /** 已完成任务数 */
+  completedJobs: number;
+  /** 失败任务数 */
+  failedJobs: number;
+  /** 平均处理时间 */
+  averageProcessingTime: number;
+  /** 成功率 */
+  successRate: number;
+  /** 最近的处理时间列表 */
+  processingTimes: number[];
+}
+
+/** 健康检查结果 */
+export interface HealthCheckResult {
+  /** 状态 */
+  status: "healthy" | "unhealthy";
+  /** 详细信息 */
+  details: {
+    initialized?: boolean;
+    shuttingDown?: boolean;
+    queueStatus?: any;
+    metrics?: QueueMetrics;
+    error?: string;
+  };
+}
+
+/** 添加任务选项 */
+export interface AddJobOptions {
+  /** 优先级 */
+  priority?: JobPriority;
+  /** 延迟执行时间 */
+  delay?: number;
+  /** 任务分类 */
+  category?: string;
+  /** 超时时间 */
+  timeout?: number;
+}
