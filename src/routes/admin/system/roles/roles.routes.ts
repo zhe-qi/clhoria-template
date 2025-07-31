@@ -6,7 +6,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 import { insertSystemRoleSchema, patchSystemRoleSchema, selectSystemRoleSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
-import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
+import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];

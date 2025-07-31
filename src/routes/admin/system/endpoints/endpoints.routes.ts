@@ -6,7 +6,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 import { insertSysEndpointSchema, patchSysEndpointSchema, selectSysEndpointSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
-import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
+import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/endpoints";
 const tags = [`${routePrefix}（API端点）`];

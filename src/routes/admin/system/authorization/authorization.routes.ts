@@ -14,7 +14,7 @@ import {
   userRoutesResponseSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
+import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/authorization";
 const tags = [`${routePrefix}（系统授权）`];

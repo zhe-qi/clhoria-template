@@ -3,5 +3,5 @@ export * from "./tools";
 // #endregion
 
 // #region zod
-export * from "./zod/error";
+export * from "./zod";
 // #endregion
