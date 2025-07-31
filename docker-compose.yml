@@ -1,25 +1,3 @@
-# Docker Compose Profiles:
-#   - (default)        : PostgreSQL + Redis (基础服务)
-#   - services         : 基础服务 + PgBouncer (适合本地开发)
-#   - app              : 所有服务 + Hono应用 (完整应用)
-#   - monitoring       : 所有服务 + 监控组件 (Prometheus + Grafana)
-#   - full             : 所有服务 (app + monitoring)
-#
-# 使用示例:
-#   docker-compose up                          # PostgreSQL + Redis
-#   docker-compose --profile services up      # 基础服务 + PgBouncer
-#   docker-compose --profile app up           # 完整应用 (含Hono app)
-#   docker-compose --profile monitoring up    # 监控服务 (推荐用于数据库连接池监控)
-#   docker-compose --profile full up          # 所有服务
-#
-# 监控服务访问地址 (profile: monitoring 或 full):
-#   - Grafana:             http://localhost:3000 (admin/admin123)
-#   - Prometheus:          http://localhost:9090
-#   - PgBouncer Exporter:  http://localhost:9127/metrics
-#   - 应用指标:            http://localhost:9999/metrics
-#
-# 监控架构: PgBouncer → pgbouncer_exporter → Prometheus → Grafana
-
 services:
   # PostgreSQL 数据库
   postgres:

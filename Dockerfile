@@ -7,7 +7,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 # 启用 corepack 以使用 pnpm
 RUN corepack enable
 
-# 依赖安装阶段
+# 生产依赖安装阶段
 FROM base AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
@@ -15,28 +15,31 @@ WORKDIR /app
 # 复制 package 文件
 COPY package.json pnpm-lock.yaml ./
 
-# 获取依赖包到 pnpm store（优化 Docker 缓存）
-RUN pnpm fetch --frozen-lockfile
-
-# 安装所有依赖
-RUN pnpm install --offline --frozen-lockfile
+# 只安装生产依赖，减少镜像大小
+RUN pnpm fetch --prod --frozen-lockfile && \
+    pnpm install --prod --offline --frozen-lockfile --reporter=silent && \
+    pnpm store prune
 
 # 构建阶段
 FROM base AS builder
 WORKDIR /app
 
-# 设置构建时环境变量
+# 设置构建时环境变量和优化选项
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV CI=true
 
-# 从 deps 阶段复制 node_modules
-COPY --from=deps /app/node_modules ./node_modules
+# 安装所有依赖用于构建
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm fetch --frozen-lockfile && \
+    pnpm install --offline --frozen-lockfile --reporter=silent
 
 # 复制源码
 COPY . .
 
-# 构建应用
-RUN pnpm build
+# 构建应用（增加超时和静默输出）
+RUN timeout 300 pnpm build --silent || (echo "Build timeout, retrying with verbose output..." && pnpm build)
 
 # 生产阶段
 FROM base AS runner
@@ -46,49 +49,41 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV LOG_LEVEL=info
 
-# 安装 OpenSSL（数据库连接需要）
-RUN apk add --no-cache openssl
+# 安装运行时依赖并清理缓存
+RUN apk add --no-cache openssl && \
+    rm -rf /var/cache/apk/*
 
 # 创建非 root 用户
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 hono
 
-# 复制 package 文件用于生产依赖安装
-COPY package.json pnpm-lock.yaml ./
-
-# 安装生产依赖
-RUN pnpm fetch --frozen-lockfile && \
-    pnpm install --prod --offline --frozen-lockfile && \
-    pnpm store prune
+# 从 deps 阶段复制生产依赖（避免重复安装）
+COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
+COPY --chown=hono:nodejs package.json ./
 
 # 从构建阶段复制构建产物
-COPY --from=builder /app/dist ./dist
+COPY --from=builder --chown=hono:nodejs /app/dist ./dist
 
 # 复制数据库迁移文件和种子数据
-COPY --from=builder /app/migrations ./migrations
-COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
+COPY --from=builder --chown=hono:nodejs /app/migrations ./migrations
+COPY --from=builder --chown=hono:nodejs /app/drizzle.config.ts ./drizzle.config.ts
 
 # 复制脚本目录
-COPY --from=builder /app/scripts ./scripts
+COPY --from=builder --chown=hono:nodejs /app/scripts ./scripts
 RUN chmod +x ./scripts/run.sh
 
-# 安装迁移脚本的依赖
-COPY --from=builder /app/migrations/migrate ./migrate
-COPY --from=builder /app/tsconfig.json ./migrate/tsconfig.json
+# 安装迁移脚本的依赖（简化版本）
+COPY --from=builder --chown=hono:nodejs /app/migrations/migrate ./migrate
+COPY --from=builder --chown=hono:nodejs /app/tsconfig.json ./migrate/tsconfig.json
 
-# 备份应用的node_modules
-RUN mv node_modules _node_modules
-
-# 安装迁移所需的依赖
+# 临时安装迁移依赖并立即清理
 WORKDIR /app/migrate
 COPY --from=builder /app/migrations/migrate/package.json ./package.json
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile --reporter=silent && \
+    pnpm store prune
 
-# 恢复应用的node_modules
+# 返回主目录并设置权限
 WORKDIR /app
-RUN mv _node_modules node_modules
-
-# 设置文件权限
 RUN chown -R hono:nodejs /app
 
 # 切换到非 root 用户

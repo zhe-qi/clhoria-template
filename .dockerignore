@@ -85,9 +85,22 @@ LICENSE
 CHANGELOG.md
 *.md
 
-# Serena
+# Development files
 .serena
 .claude
+src/**/*.test.ts
+src/**/*.spec.ts
+**/__tests__/**
+**/__mocks__/**
 
 # TypeScript
 *.tsbuildinfo
+
+# Docker optimization files
+Dockerfile.optimized
+Dockerfile.distroless
+
+# Development tools
+.eslintrc*
+.prettierrc*
+vitest.config.ts
