@@ -109,8 +109,6 @@ export function getRegisteredHandlers(): JobHandlerMeta[] {
 /** 同步处理器到数据库 */
 export async function syncHandlersToDatabase(): Promise<void> {
   try {
-    logger.debug("开始同步任务处理器到数据库");
-
     const registeredHandlers = getRegisteredHandlers();
     const systemUserId = "system"; // 系统用户ID
 

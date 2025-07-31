@@ -33,8 +33,6 @@ export class TaskScheduler {
     }
 
     try {
-      logger.info("初始化任务调度器");
-
       // 同步任务处理器到数据库
       await syncHandlersToDatabase();
 
@@ -177,9 +175,7 @@ export class TaskScheduler {
       catch (error) {
         logger.error("定期检查任务状态失败", { error });
       }
-    }, 60000); // 60秒
-
-    logger.info("定期检查机制已启动");
+    }, 60000);
   }
 
   /** 检查任务状态变更 */
@@ -355,7 +351,6 @@ export async function initializeScheduler(): Promise<void> {
   // 在初始化时清理所有残留的重复任务
   try {
     await scheduler.clearAllRepeatableJobs();
-    logger.info("已清理所有残留的重复任务");
   }
   catch (error) {
     logger.warn("清理残留重复任务时出错", { error });

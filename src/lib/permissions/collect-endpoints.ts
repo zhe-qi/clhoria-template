@@ -155,13 +155,11 @@ export async function collectAndSyncEndpointPermissions(apps: { name: string; ap
     logger.info(`开始收集应用 ${name} 的端点权限...`);
     const endpoints = collectEndpointPermissions(app, prefix);
     allEndpoints.push(...endpoints);
-    logger.info(`应用 ${name} 收集到 ${endpoints.length} 个端点`);
   }
 
   if (allEndpoints.length > 0) {
     const result = await syncEndpointPermissionsToDatabase(allEndpoints);
     logger.info(`端点权限同步完成: 新增 ${result.inserted}, 更新 ${result.updated}`);
-    logger.info(`权限管理器缓存统计:`, permissionManager.getStats());
     return result;
   }
 

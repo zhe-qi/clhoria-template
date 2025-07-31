@@ -616,39 +616,17 @@ export class JobQueueManager {
     try {
       // 1. 清理所有重复任务调度器
       const jobSchedulers = await this.queue.getJobSchedulers();
-      logger.info(`发现 ${jobSchedulers.length} 个定时任务调度器，开始清理`, {
-        schedulers: jobSchedulers.map(scheduler => ({
-          id: scheduler.id,
-          name: scheduler.name,
-          pattern: scheduler.pattern,
-          tz: scheduler.tz,
-        })),
-      });
 
       for (const scheduler of jobSchedulers) {
         if (scheduler.id) {
           await this.queue.removeJobScheduler(scheduler.id);
-          logger.debug("已清理定时任务调度器", {
-            id: scheduler.id,
-            name: scheduler.name,
-            pattern: scheduler.pattern,
-          });
         }
       }
 
       // 2. 清理所有待处理的任务
       await this.queue.obliterate({ force: true });
-      logger.debug("已清理所有队列中的待处理任务");
 
-      // 3. 验证清理结果
-      const remainingSchedulers = await this.queue.getJobSchedulers();
-      if (remainingSchedulers.length > 0) {
-        logger.warn(`仍有 ${remainingSchedulers.length} 个调度器未清理完成`, {
-          remaining: remainingSchedulers.map(s => ({ id: s.id, name: s.name })),
-        });
-      }
-
-      logger.info("所有定时任务调度器已清理完成");
+      logger.info("定时任务调度器已清理完成");
     }
     catch (error) {
       logger.error("清理定时任务调度器失败", { error });

@@ -20,8 +20,6 @@ function setupBullBoard(): void {
     // 添加 JWT 认证中间件到队列管理界面
     app.use("/admin/ui/queues", jwtWithQuery(env.ADMIN_JWT_SECRET));
     app.route("/admin/ui/queues", bullBoardAdapter.registerPlugin());
-
-    logger.info("Bull Board UI 已成功集成到管理后台");
   }
   catch (error) {
     logger.error("Bull Board UI 集成失败:", error);
