@@ -49,6 +49,7 @@ export const create: SystemNoticesRouteHandlerType<"create"> = async (c) => {
       {
         ...body,
         domain: userDomain,
+        createdBy: userId,
       },
       userId,
     );

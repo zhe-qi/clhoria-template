@@ -1,6 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { integer, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { integer, jsonb, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+import { defaultColumns } from "@/db/common/default-columns";
 
 /**
  * 字典项接口定义
@@ -28,28 +30,19 @@ export interface DictionaryItem {
  * 系统字典表
  */
 export const systemDictionaries = pgTable("system_dictionaries", {
-  /** 主键ID */
-  id: uuid("id").primaryKey().defaultRandom(),
+  ...defaultColumns,
   /** 字典编码，唯一标识 */
-  code: varchar("code", { length: 100 }).notNull(),
+  code: varchar({ length: 100 }).notNull(),
   /** 字典名称 */
-  name: varchar("name", { length: 200 }).notNull(),
+  name: varchar({ length: 200 }).notNull(),
   /** 字典描述 */
-  description: varchar("description", { length: 500 }),
+  description: varchar({ length: 500 }),
   /** 字典项数组 */
-  items: jsonb("items").$type<DictionaryItem[]>().default([]).notNull(),
+  items: jsonb().$type<DictionaryItem[]>().default([]).notNull(),
   /** 状态: 1=启用 0=禁用 */
-  status: integer("status").default(1).notNull(),
+  status: integer().default(1).notNull(),
   /** 排序 */
-  sortOrder: integer("sort_order").default(0).notNull(),
-  /** 创建时间 */
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  /** 更新时间 */
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  /** 创建人 */
-  createdBy: varchar("created_by", { length: 50 }),
-  /** 更新人 */
-  updatedBy: varchar("updated_by", { length: 50 }),
+  sortOrder: integer().default(0).notNull(),
 });
 
 /**

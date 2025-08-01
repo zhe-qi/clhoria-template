@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import db from "@/db";
 import { systemDictionaries } from "@/db/schema";
 import type { DictionaryItem } from "@/db/schema";
+import { formatDate } from "@/utils";
 
 /**
  * 初始化系统字典数据
@@ -238,7 +239,7 @@ export async function initSysDictionaries() {
             description: dict.description,
             // 不更新 items，避免覆盖用户修改
             updatedBy: seedUserId,
-            updatedAt: new Date(),
+            updatedAt: formatDate(new Date()),
           })
           .where(eq(systemDictionaries.code, dict.code));
       }

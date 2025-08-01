@@ -1,6 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { index, integer, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { index, integer, pgEnum, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+import { defaultColumns } from "@/db/common/default-columns";
 
 /**
  * 通知公告类型枚举
@@ -11,28 +13,19 @@ export const noticeTypeEnum = pgEnum("notice_type", ["NOTIFICATION", "ANNOUNCEME
  * 系统通知公告表
  */
 export const systemNotices = pgTable("system_notices", {
-  /** 主键ID */
-  id: uuid("id").primaryKey().defaultRandom(),
+  ...defaultColumns,
   /** 公告标题 */
-  title: varchar("title", { length: 200 }).notNull(),
+  title: varchar({ length: 200 }).notNull(),
   /** 公告类型：通知或公告 */
-  type: noticeTypeEnum("type").notNull().default("NOTIFICATION"),
+  type: noticeTypeEnum().notNull().default("NOTIFICATION"),
   /** 公告内容 */
-  content: text("content"),
+  content: text(),
   /** 状态: 1=启用 0=禁用 */
-  status: integer("status").default(1).notNull(),
+  status: integer().default(1).notNull(),
   /** 多租户域 */
-  domain: varchar("domain", { length: 100 }).notNull(),
+  domain: varchar({ length: 100 }).notNull(),
   /** 排序 */
-  sortOrder: integer("sort_order").default(0).notNull(),
-  /** 创建时间 */
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  /** 更新时间 */
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  /** 创建人 */
-  createdBy: varchar("created_by", { length: 50 }),
-  /** 更新人 */
-  updatedBy: varchar("updated_by", { length: 50 }),
+  sortOrder: integer().default(0).notNull(),
 }, table => [
   index("notices_domain_idx").on(table.domain),
   index("notices_type_idx").on(table.type),

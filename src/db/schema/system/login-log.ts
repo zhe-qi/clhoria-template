@@ -2,13 +2,14 @@ import { integer, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
+import { formatDate } from "@/utils/tools/formatter";
 
 export const systemLoginLog = pgTable("system_login_log", {
   id: defaultColumns.id,
   userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
-  loginTime: timestamp({ mode: "date" }).notNull().defaultNow(),
+  loginTime: timestamp({ mode: "string" }).notNull().$defaultFn(() => formatDate(new Date())),
   ip: varchar({ length: 64 }).notNull(),
   port: integer(),
   address: varchar({ length: 255 }).notNull(),

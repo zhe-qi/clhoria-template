@@ -1,5 +1,6 @@
 import type { Job } from "bullmq";
 
+import { subDays } from "date-fns";
 import { and, count, eq, lt, or } from "drizzle-orm";
 
 import db from "@/db";
@@ -20,8 +21,7 @@ export const tokenCleanupJob: JobHandler = async (job: Job) => {
   });
 
   const { retentionDays = 7 } = job.data || {}; // 默认保留7天
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+  const cutoffDate = subDays(new Date(), retentionDays);
 
   try {
     await job.updateProgress(25);
@@ -31,11 +31,11 @@ export const tokenCleanupJob: JobHandler = async (job: Job) => {
       .where(
         or(
           // 过期的token
-          lt(systemTokens.expiresAt, new Date()),
+          lt(systemTokens.expiresAt, formatDate(new Date())),
           // 已撤销且超过保留期的token
           and(
             eq(systemTokens.status, TokenStatus.REVOKED),
-            lt(systemTokens.createdAt, cutoffDate.toISOString()),
+            lt(systemTokens.createdAt, formatDate(cutoffDate)),
           ),
         ),
       );
@@ -220,7 +220,7 @@ export const reportGenerationJob: JobHandler = async (job: Job) => {
     jobId: job.id,
     reportType,
     dateRange,
-    reportUrl: `/reports/${reportType}-${Date.now()}.pdf`,
+    reportUrl: `/reports/${reportType}-${formatDate(new Date(), "yyyyMMddHHmmss")}.pdf`,
     recordCount: Math.floor(Math.random() * 10000 + 1000),
   };
 

@@ -1,5 +1,5 @@
 {
-  "id": "fb9e7ae2-3536-4f16-aceb-aacb5cbb6663",
+  "id": "872431f3-3597-4441-8e88-fb5e06b15a0a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -121,29 +121,8 @@
         }
       },
       "indexes": {
-        "idx_ptype_v0": {
-          "name": "idx_ptype_v0",
-          "columns": [
-            {
-              "expression": "ptype",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "v0",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_ptype_v0_v1_v2": {
-          "name": "idx_ptype_v0_v1_v2",
+        "idx_ptype_v0_v1_v2_v3": {
+          "name": "idx_ptype_v0_v1_v2_v3",
           "columns": [
             {
               "expression": "ptype",
@@ -165,6 +144,33 @@
             },
             {
               "expression": "v2",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "v3",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_ptype_v0": {
+          "name": "idx_ptype_v0",
+          "columns": [
+            {
+              "expression": "ptype",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "v0",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -195,6 +201,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "idx_ptype_v1": {
+          "name": "idx_ptype_v1",
+          "columns": [
+            {
+              "expression": "ptype",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "v1",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -212,8 +239,31 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
         },
         "code": {
           "name": "code",
@@ -253,32 +303,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -732,8 +756,7 @@
           "name": "login_time",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "ip": {
           "name": "ip",
@@ -965,8 +988,31 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
         },
         "title": {
           "name": "title",
@@ -1007,32 +1053,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -1705,8 +1725,7 @@
           "name": "login_time",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "expires_at": {
           "name": "expires_at",
@@ -1763,50 +1782,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "system_tokens_user_status_idx": {
-          "name": "system_tokens_user_status_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "system_tokens_cleanup_idx": {
-          "name": "system_tokens_cleanup_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -1920,6 +1896,21 @@
             },
             {
               "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "system_user_username_idx": {
+          "name": "system_user_username_idx",
+          "columns": [
+            {
+              "expression": "username",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

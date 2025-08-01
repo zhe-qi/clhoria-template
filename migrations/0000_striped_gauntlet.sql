@@ -23,17 +23,17 @@ CREATE TABLE "casbin_rule" (
 );
 --> statement-breakpoint
 CREATE TABLE "system_dictionaries" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
+	"created_at" timestamp,
+	"created_by" varchar(64) NOT NULL,
+	"updated_at" timestamp,
+	"updated_by" varchar(64),
 	"code" varchar(100) NOT NULL,
 	"name" varchar(200) NOT NULL,
 	"description" varchar(500),
 	"items" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"status" integer DEFAULT 1 NOT NULL,
-	"sort_order" integer DEFAULT 0 NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"created_by" varchar(50),
-	"updated_by" varchar(50)
+	"sort_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "system_domain" (
@@ -112,7 +112,7 @@ CREATE TABLE "system_login_log" (
 	"user_id" uuid NOT NULL,
 	"username" varchar(64) NOT NULL,
 	"domain" varchar(64) NOT NULL,
-	"login_time" timestamp DEFAULT now() NOT NULL,
+	"login_time" timestamp NOT NULL,
 	"ip" varchar(64) NOT NULL,
 	"port" integer,
 	"address" varchar(255) NOT NULL,
@@ -151,17 +151,17 @@ CREATE TABLE "system_menu" (
 );
 --> statement-breakpoint
 CREATE TABLE "system_notices" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
+	"created_at" timestamp,
+	"created_by" varchar(64) NOT NULL,
+	"updated_at" timestamp,
+	"updated_by" varchar(64),
 	"title" varchar(200) NOT NULL,
 	"type" "notice_type" DEFAULT 'NOTIFICATION' NOT NULL,
 	"content" text,
 	"status" integer DEFAULT 1 NOT NULL,
 	"domain" varchar(100) NOT NULL,
-	"sort_order" integer DEFAULT 0 NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"created_by" varchar(50),
-	"updated_by" varchar(50)
+	"sort_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "system_operation_log" (
@@ -265,7 +265,7 @@ CREATE TABLE "system_tokens" (
 	"user_id" uuid NOT NULL,
 	"username" varchar(64) NOT NULL,
 	"domain" varchar(64) NOT NULL,
-	"login_time" timestamp DEFAULT now() NOT NULL,
+	"login_time" timestamp NOT NULL,
 	"expires_at" timestamp NOT NULL,
 	"ip" varchar(64) NOT NULL,
 	"port" integer,
@@ -317,13 +317,13 @@ CREATE TABLE "tasks" (
 	"done" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
+CREATE INDEX "idx_ptype_v0_v1_v2_v3" ON "casbin_rule" USING btree ("ptype","v0","v1","v2","v3");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v0" ON "casbin_rule" USING btree ("ptype","v0");--> statement-breakpoint
-CREATE INDEX "idx_ptype_v0_v1_v2" ON "casbin_rule" USING btree ("ptype","v0","v1","v2");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v3" ON "casbin_rule" USING btree ("ptype","v3");--> statement-breakpoint
+CREATE INDEX "idx_ptype_v1" ON "casbin_rule" USING btree ("ptype","v1");--> statement-breakpoint
 CREATE INDEX "notices_domain_idx" ON "system_notices" USING btree ("domain");--> statement-breakpoint
 CREATE INDEX "notices_type_idx" ON "system_notices" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "notices_status_idx" ON "system_notices" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "notices_created_at_idx" ON "system_notices" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
-CREATE INDEX "system_tokens_user_status_idx" ON "system_tokens" USING btree ("user_id","status");--> statement-breakpoint
-CREATE INDEX "system_tokens_cleanup_idx" ON "system_tokens" USING btree ("expires_at","status");--> statement-breakpoint
-CREATE INDEX "system_user_domain_status_idx" ON "system_user" USING btree ("domain","status");
+CREATE INDEX "system_user_domain_status_idx" ON "system_user" USING btree ("domain","status");--> statement-breakpoint
+CREATE INDEX "system_user_username_idx" ON "system_user" USING btree ("username");

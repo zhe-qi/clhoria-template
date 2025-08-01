@@ -13,115 +13,134 @@ import { AuthType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { getIPAddress } from "@/services/ip";
 import { setUserRolesToCache } from "@/services/system/user";
 import { omit } from "@/utils";
+import { formatDate } from "@/utils/tools/formatter";
 
 import type { AuthRouteHandlerType } from "./auth.index";
 
 export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
-  const body = c.req.valid("json");
-  const { username, password, domain } = body;
+  try {
+    const body = c.req.valid("json");
+    const { username, password, domain } = body;
 
-  const user = await db.query.systemUser.findFirst({
-    with: {
-      userRoles: {
-        with: {
-          role: true,
+    const user = await db.query.systemUser.findFirst({
+      with: {
+        userRoles: {
+          with: {
+            role: true,
+          },
         },
       },
-    },
-    where: and(
-      eq(systemUser.username, username),
-      eq(systemUser.domain, domain),
-    ),
-  });
+      where: and(
+        eq(systemUser.username, username),
+        eq(systemUser.domain, domain),
+      ),
+    });
 
-  if (!user) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    if (!user) {
+      return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    }
+
+    if (user.status !== Status.ENABLED) {
+      return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
+    }
+
+    const isPasswordValid = await verify(user.password, password);
+
+    if (!isPasswordValid) {
+      return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
+    }
+
+    // 生成 tokens
+    const roles = user.userRoles.map(ur => ur.roleId);
+
+    const now = getUnixTime(new Date());
+    const accessTokenExp = getUnixTime(addDays(new Date(), 7)); // 7天过期
+    const refreshTokenExp = getUnixTime(addDays(new Date(), 30)); // 30天过期
+    const jti = crypto.randomUUID(); // JWT ID 确保唯一性
+
+    // JWT payload 只包含核心用户信息
+    const tokenPayload = {
+      uid: user.id,
+      username: user.username,
+      domain: user.domain,
+      iat: now,
+      exp: accessTokenExp,
+      jti,
+    };
+
+    // 将用户角色存储到 Redis
+    await setUserRolesToCache(user.id, user.domain, roles);
+
+    const accessToken = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
+    const refreshToken = await sign({
+      ...tokenPayload,
+      type: "refresh",
+      exp: refreshTokenExp,
+      jti: crypto.randomUUID(),
+    }, env.ADMIN_JWT_SECRET, "HS256");
+
+    // 保存 token 记录
+    const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    const userAgent = c.req.header("user-agent") || "unknown";
+    const address = await getIPAddress(clientIP);
+
+    // 先撤销该用户的所有活跃 token
+    await db.update(systemTokens)
+      .set({ status: TokenStatus.REVOKED })
+      .where(and(
+        eq(systemTokens.userId, user.id),
+        eq(systemTokens.status, TokenStatus.ACTIVE),
+      ));
+
+    await db.insert(systemTokens).values({
+      accessToken,
+      refreshToken,
+      status: TokenStatus.ACTIVE,
+      userId: user.id,
+      username: user.username,
+      domain: user.domain,
+      expiresAt: formatDate(new Date(refreshTokenExp * 1000)), // 使用refresh token的过期时间
+      ip: clientIP,
+      address,
+      userAgent,
+      requestId: uuidV7(),
+      type: TokenType.WEB,
+      createdBy: "system",
+    });
+
+    // 记录登录日志
+    await db.insert(systemLoginLog).values({
+      userId: user.id,
+      username: user.username,
+      domain: user.domain,
+      ip: clientIP,
+      address,
+      userAgent,
+      requestId: uuidV7(),
+      type: AuthType.PASSWORD,
+      createdBy: "system",
+    });
+
+    const responseUser = omit(user, ["password"]);
+
+    return c.json({ token: accessToken, refreshToken, user: responseUser }, HttpStatusCodes.OK);
   }
+  catch (error: any) {
+    console.error("adminLogin error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      cause: error.cause,
+      code: error.code,
+      constraint: error.constraint,
+      detail: error.detail,
+      table: error.table,
+      column: error.column,
+    });
 
-  if (user.status !== Status.ENABLED) {
-    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
+    // 根据路由定义，只能返回 401 Unauthorized
+    return c.json({ message: "登录失败" }, HttpStatusCodes.UNAUTHORIZED);
   }
-
-  const isPasswordValid = await verify(user.password, password);
-
-  if (!isPasswordValid) {
-    return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
-  }
-
-  // 生成 tokens
-  const roles = user.userRoles.map(ur => ur.roleId);
-
-  const now = getUnixTime(new Date());
-  const accessTokenExp = getUnixTime(addDays(new Date(), 7)); // 7天过期
-  const refreshTokenExp = getUnixTime(addDays(new Date(), 30)); // 30天过期
-  const jti = crypto.randomUUID(); // JWT ID 确保唯一性
-
-  // JWT payload 只包含核心用户信息
-  const tokenPayload = {
-    uid: user.id,
-    username: user.username,
-    domain: user.domain,
-    iat: now,
-    exp: accessTokenExp,
-    jti,
-  };
-
-  // 将用户角色存储到 Redis
-  await setUserRolesToCache(user.id, user.domain, roles);
-
-  const accessToken = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
-  const refreshToken = await sign({
-    ...tokenPayload,
-    type: "refresh",
-    exp: refreshTokenExp,
-    jti: crypto.randomUUID(),
-  }, env.ADMIN_JWT_SECRET, "HS256");
-
-  // 保存 token 记录
-  const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
-  const userAgent = c.req.header("user-agent") || "unknown";
-  const address = await getIPAddress(clientIP);
-
-  // 先撤销该用户的所有活跃 token
-  await db.update(systemTokens)
-    .set({ status: TokenStatus.REVOKED })
-    .where(and(
-      eq(systemTokens.userId, user.id),
-      eq(systemTokens.status, TokenStatus.ACTIVE),
-    ));
-
-  await db.insert(systemTokens).values({
-    accessToken,
-    refreshToken,
-    status: TokenStatus.ACTIVE,
-    userId: user.id,
-    username: user.username,
-    domain: user.domain,
-    expiresAt: new Date(refreshTokenExp * 1000), // 使用refresh token的过期时间
-    ip: clientIP,
-    address,
-    userAgent,
-    requestId: uuidV7(),
-    type: TokenType.WEB,
-    createdBy: "system",
-  });
-
-  // 记录登录日志
-  await db.insert(systemLoginLog).values({
-    userId: user.id,
-    username: user.username,
-    domain: user.domain,
-    ip: clientIP,
-    address,
-    userAgent,
-    requestId: uuidV7(),
-    type: AuthType.PASSWORD,
-    createdBy: "system",
-  });
-
-  const responseUser = omit(user, ["password"]);
-
-  return c.json({ token: accessToken, refreshToken, user: responseUser }, HttpStatusCodes.OK);
 };
 
 /** 后台注册 */
@@ -216,7 +235,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
         status: TokenStatus.ACTIVE,
-        expiresAt: new Date(refreshTokenExp * 1000), // 更新过期时间
+        expiresAt: formatDate(new Date(refreshTokenExp * 1000)), // 更新过期时间
       })
       .where(eq(systemTokens.id, tokenRecord.id));
 

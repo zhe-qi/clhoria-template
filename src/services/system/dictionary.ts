@@ -1,4 +1,4 @@
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import type z from "zod/v4";
 
 import { and, eq, ilike, or } from "drizzle-orm";
@@ -13,6 +13,7 @@ import { CacheConfig, getDictionariesAllKey, getDictionaryKey } from "@/lib/enum
 import { logger } from "@/lib/logger";
 import { pagination } from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
+import { formatDate } from "@/utils";
 
 export interface DictionariesListOptions {
   search?: string;
@@ -244,7 +245,7 @@ export async function getAdminDictionary(code: string) {
 /**
  * 创建字典
  */
-export async function createDictionary(data: InferInsertModel<typeof systemDictionaries>, userId: string) {
+export async function createDictionary(data: InsertDictionaryData, userId: string) {
   const [created] = await db
     .insert(systemDictionaries)
     .values({
@@ -268,7 +269,7 @@ export async function updateDictionary(code: string, data: UpdateDictionaryData,
     .set({
       ...data,
       updatedBy: userId,
-      updatedAt: new Date(),
+      updatedAt: formatDate(new Date()),
     })
     .where(eq(systemDictionaries.code, code))
     .returning();

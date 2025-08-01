@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 /* eslint-disable no-console */
 
+import { differenceInMilliseconds } from "date-fns";
 import { eq } from "drizzle-orm";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -10,6 +11,7 @@ import type { DictionaryItem } from "@/db/schema";
 import db from "@/db";
 import { systemDictionaries } from "@/db/schema";
 import { clearAllDictionaryCache } from "@/services/system/dictionary";
+import { formatDate } from "@/utils";
 
 /**
  * 枚举定义接口
@@ -215,7 +217,7 @@ async function syncEnumToDatabase(enumDef: EnumDefinition): Promise<{
           description: enumDef.description,
           items: mergedItems,
           updatedBy: syncUserId,
-          updatedAt: new Date(),
+          updatedAt: formatDate(new Date()),
         })
         .where(eq(systemDictionaries.code, enumDef.name));
 
@@ -250,7 +252,7 @@ async function syncEnumToDatabase(enumDef: EnumDefinition): Promise<{
 async function syncDictionaries(): Promise<SyncResult> {
   console.log("开始同步枚举到字典...");
 
-  const startTime = Date.now();
+  const startTime = new Date();
   const result: SyncResult = {
     scanned: 0,
     created: 0,
@@ -307,8 +309,8 @@ async function syncDictionaries(): Promise<SyncResult> {
     await clearAllDictionaryCache();
     console.log("缓存清除完成");
 
-    const endTime = Date.now();
-    const duration = endTime - startTime;
+    const endTime = new Date();
+    const duration = differenceInMilliseconds(endTime, startTime);
 
     // 输出总结
     console.log("\n同步完成！");

@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1754053205755,
-      "tag": "0000_spotty_avengers",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1754053311967,
-      "tag": "0001_redundant_ulik",
+      "when": 1754060679575,
+      "tag": "0000_striped_gauntlet",
       "breakpoints": true
     }
   ]

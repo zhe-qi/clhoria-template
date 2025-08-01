@@ -1,5 +1,6 @@
 import type { Job } from "bullmq";
 
+import { format, subDays } from "date-fns";
 import { and, desc, eq, gte, lt } from "drizzle-orm";
 
 import db from "@/db";
@@ -136,11 +137,11 @@ export class JobMonitor {
 
       // 添加日期范围过滤
       if (startDate) {
-        conditions.push(gte(systemJobExecutionLogs.startedAt, startDate.toISOString()));
+        conditions.push(gte(systemJobExecutionLogs.startedAt, formatDate(startDate)));
       }
 
       if (endDate) {
-        conditions.push(lt(systemJobExecutionLogs.startedAt, endDate.toISOString()));
+        conditions.push(lt(systemJobExecutionLogs.startedAt, formatDate(endDate)));
       }
 
       const query = db
@@ -167,15 +168,14 @@ export class JobMonitor {
   /** 获取任务执行统计 */
   async getJobExecutionStats(jobId: string, days: number = 30) {
     try {
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
+      const startDate = subDays(new Date(), days);
 
       const logs = await db
         .select()
         .from(systemJobExecutionLogs)
         .where(and(
           eq(systemJobExecutionLogs.jobId, jobId),
-          gte(systemJobExecutionLogs.startedAt, startDate.toISOString()),
+          gte(systemJobExecutionLogs.startedAt, formatDate(startDate)),
         ));
 
       const stats = {
@@ -218,12 +218,11 @@ export class JobMonitor {
   /** 清理过期的执行日志 */
   async cleanupOldLogs(retentionDays: number = 90): Promise<number> {
     try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+      const cutoffDate = subDays(new Date(), retentionDays);
 
       const deletedRows = await db
         .delete(systemJobExecutionLogs)
-        .where(lt(systemJobExecutionLogs.createdAt, cutoffDate.toISOString()));
+        .where(lt(systemJobExecutionLogs.createdAt, formatDate(cutoffDate)));
 
       const deletedCount = deletedRows.length;
 
@@ -246,13 +245,12 @@ export class JobMonitor {
   /** 获取系统级别的任务执行概览 */
   async getSystemExecutionOverview(days: number = 7) {
     try {
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
+      const startDate = subDays(new Date(), days);
 
       const logs = await db
         .select()
         .from(systemJobExecutionLogs)
-        .where(gte(systemJobExecutionLogs.startedAt, startDate.toISOString()));
+        .where(gte(systemJobExecutionLogs.startedAt, formatDate(startDate)));
 
       // 按任务ID分组统计
       const jobStats = new Map<string, {
@@ -287,7 +285,7 @@ export class JobMonitor {
       const dailyStats = new Map<string, { total: number; successful: number; failed: number }>();
 
       logs.forEach((log) => {
-        const date = new Date(log.startedAt!).toISOString().split("T")[0];
+        const date = format(new Date(log.startedAt!), "yyyy-MM-dd");
         if (!dailyStats.has(date)) {
           dailyStats.set(date, { total: 0, successful: 0, failed: 0 });
         }

@@ -17,6 +17,7 @@ import { CacheConfig, getNoticeKey, getNoticesAllKey } from "@/lib/enums/cache";
 import { logger } from "@/lib/logger";
 import { pagination } from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
+import { formatDate } from "@/utils";
 
 export interface NoticesListOptions {
   search?: string;
@@ -311,7 +312,7 @@ export async function updateNotice(id: string, domain: string, data: UpdateNotic
     .set({
       ...data,
       updatedBy: userId,
-      updatedAt: new Date(),
+      updatedAt: formatDate(new Date()),
     })
     .where(and(
       eq(systemNotices.id, id),

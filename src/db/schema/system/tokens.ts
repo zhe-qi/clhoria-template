@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 import { TokenType } from "@/lib/enums";
+import { formatDate } from "@/utils/tools/formatter";
 
 import { tokenStatusEnum } from "../../common/enums";
 
@@ -15,8 +16,8 @@ export const systemTokens = pgTable("system_tokens", {
   userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
-  loginTime: timestamp({ mode: "date" }).notNull().defaultNow(),
-  expiresAt: timestamp({ mode: "date" }).notNull(),
+  loginTime: timestamp({ mode: "string" }).notNull().$defaultFn(() => formatDate(new Date())),
+  expiresAt: timestamp({ mode: "string" }).notNull(),
   ip: varchar({ length: 64 }).notNull(),
   port: integer(),
   address: varchar({ length: 255 }).notNull(),

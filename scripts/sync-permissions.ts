@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 
+import { differenceInMilliseconds } from "date-fns";
 import { eq } from "drizzle-orm";
 
 import { adminApp, clientApp, publicApp } from "@/app";
@@ -214,7 +215,7 @@ async function main() {
   logger.info("开始现代化权限同步...");
 
   try {
-    const startTime = Date.now();
+    const startTime = new Date();
 
     // 执行四个步骤
     const syncResult = await syncEndpointsWithNewSystem();
@@ -222,8 +223,8 @@ async function main() {
     const validateResult = await validatePermissionIntegrity();
     const reportResult = await generatePermissionReport();
 
-    const endTime = Date.now();
-    const duration = endTime - startTime;
+    const endTime = new Date();
+    const duration = differenceInMilliseconds(endTime, startTime);
 
     // 最终总结
     logger.info("权限同步完成!");

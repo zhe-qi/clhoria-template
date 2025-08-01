@@ -18,13 +18,28 @@ This is a backend template based on hono. It uses TypeScript, Drizzle ORM and Po
 
 ## Code Style Standards
 
-- **NO EMOJIS**: Never use emojis in console output or code comments
+### Console Output Guidelines
+- **NO EMOJIS**: Never use emojis in console.log, console.warn, or console.error statements
+- **Clean Output**: All console output should be plain text without decorative icons or symbols
+
+### Route Comment Standards
 - **Route Comments**: ALWAYS add `/** 中文描述 */` above route definitions, no JSDoc tags
+- **Comment Format**: Use single line `/** 描述 */` for simple routes, multi-line for complex ones
+- **No JSDoc Tags**: Focus on business purpose, avoid @param, @returns, etc.
+
+### Core Standards
 - **Status Codes**: Always use `HttpStatusCodes` constants, never magic numbers
 - **Return Format**: Single line `return c.json(data, HttpStatusCodes.OK)` format
 - **Error Handling**: No console.log in handlers, return appropriate HTTP status codes
 - **Import Order**: Framework imports first, then schemas, then utils
 - **Date Handling**: ALWAYS use `formatDate()` from `@/utils/tools/formatter` instead of `new Date().toISOString()` for consistent date formatting
+- **Date Calculations**: ALWAYS use `date-fns` for date calculations and operations:
+  - Use `subDays(date, days)` instead of `date.setDate(date.getDate() - days)`
+  - Use `addDays(date, days)` for adding days
+  - Use `differenceInMilliseconds(endDate, startDate)` instead of `endDate - startDate`
+  - Use `format(date, "yyyy-MM-dd")` instead of `date.toISOString().split("T")[0]`
+  - For timezone operations, use `date-fns-tz`
+- **Database Timestamps**: Use `timestamp({ mode: "string" })` instead of `timestamp({ mode: "date" })` for consistency with formatDate output
 
 ## Database Commands
 
@@ -58,12 +73,14 @@ Route execution order is critical as it affects middleware execution. Public rou
 
 1. **Three Schema Pattern**: Create `selectXxxSchema`, `insertXxxSchema`, `patchXxxSchema` for each table
 2. **Field Descriptions**: Use `.describe("中文描述")` for all schema fields
-3. **Column Naming**: Use auto snake_case conversion: `handlerName: varchar({ length: 128 })`
-4. **JSON Fields**: Use `jsonb().$type<Interface>().default([])` with proper TypeScript interfaces
-5. **Relations**: Define in same file at the end, use forward imports to avoid circular dependencies
-6. **Status Fields**: Use `integer().default(1)` (1=enabled, 0=disabled)
-7. **Constraints**: Return arrays `table => [unique().on(table.col)]`, NOT objects
-8. **Indexes**: Use `index("name_idx").on(table.col)` for performance, `uniqueIndex()` for unique+performance
+3. **Modern Drizzle Syntax**: Use modern syntax without column name aliases: `varchar({ length: 128 })` instead of `varchar("handler_name", { length: 128 })`
+4. **Default Columns**: Use `...defaultColumns` spread from `@/db/common/default-columns` instead of manually defining id, createdAt, updatedAt, createdBy, updatedBy
+5. **VARCHAR Length**: Always specify length for varchar fields: `varchar({ length: 128 })`
+6. **JSON Fields**: Use `jsonb().$type<Interface>().default([])` with proper TypeScript interfaces
+7. **Relations**: Define in same file at the end, use forward imports to avoid circular dependencies
+8. **Status Fields**: Use `integer().default(1)` (1=enabled, 0=disabled)
+9. **Constraints**: Return arrays `table => [unique().on(table.col)]`, NOT objects
+10. **Indexes**: Use `index("name_idx").on(table.col)` for performance, `uniqueIndex()` for unique+performance
 
 **Database Import**: ALWAYS `import db from "@/db"` (default import)
 
@@ -96,21 +113,40 @@ email: text("email").unique()
 
 #### Index Usage Guidelines
 
-**CRITICAL RULE**: 非必要不要滥用索引，只在以下情况才添加索引：
-1. **高频查询表**: 表的查询频率确实很高
-2. **高频查询字段**: 查询中频繁使用的字段（WHERE/ORDER BY）
-3. **无Redis缓存**: 该查询结果没有必要或无法使用Redis缓存
-4. **性能瓶颈**: 确实存在查询性能问题
+**CRITICAL RULE**: Don't overuse indexes unless necessary. Only add indexes in these cases:
+1. **High-frequency query tables**: Tables with genuinely high query frequency
+2. **High-frequency query fields**: Fields frequently used in queries (WHERE/ORDER BY)
+3. **No Redis caching**: Query results that cannot or should not use Redis caching
+4. **Performance bottlenecks**: Actual query performance issues exist
 
-**默认情况**: 大多数表不需要额外索引，Drizzle的unique约束和主键已足够。其他索引需求由开发者根据实际性能测试后决定添加。
+**Default case**: Most tables don't need additional indexes. Drizzle's unique constraints and primary keys are sufficient. Other index needs should be decided by developers after actual performance testing.
 
 ### Authentication & Authorization
 
 - **JWT**: Separate secrets for client (`CLIENT_JWT_SECRET`) and admin (`ADMIN_JWT_SECRET`) routes
 - **Casbin**: Role-based access control for admin routes
-- **Context Extraction**: Use `c.get("userDomain")` for single parameter, or `pickContext(c, ["userDomain", "userId"])` for multiple parameters
-- **Single Parameter Rule**: Use `const domain = c.get("userDomain")` instead of `const [domain] = pickContext(c, ["userDomain"])`
 - **Middleware**: Applied at route group level in `src/app.ts:32-45`
+
+#### Context Value Extraction Standards
+**CRITICAL**: Always use correct pattern for context values:
+
+```typescript
+// ✅ Correct - Single context value
+const domain = c.get("userDomain");
+
+// ✅ Correct - Multiple context values
+const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
+
+// ❌ Wrong - Manual JWT extraction when context available
+const payload: JWTPayload = c.get("jwtPayload");
+const userId = payload.uid as string;
+```
+
+**Rules**:
+1. Use `c.get("contextKey")` for single values
+2. Use `pickContext(c, ["key1", "key2"])` for multiple values
+3. Context values are pre-processed by middleware
+4. Only extract from JWT payload when context unavailable
 
 ### Application Structure
 
@@ -168,32 +204,46 @@ src/db/schema/
 
 ## Route Architecture Standards
 
-### Route Structure Checklist
-
+### Route Definition Structure
 1. **Import Order**: Framework imports → schemas → utils
-2. **Tags**: Use `["/resource (中文描述)"]` format
+2. **Tags Convention**: Use `["/resource (中文描述)"]` format, define as constant
 3. **Request Bodies**: `jsonContentRequired(insertSchema, "描述")`
-4. **Params**: Use `IdUUIDParamsSchema` for UUID params
+4. **Params**: Use `IdUUIDParamsSchema` for UUID params (NOT `IdParamsSchema`)
 5. **Responses**: Include ALL possible status codes from handlers
 6. **Error Schemas**: `createErrorSchema(requestSchema)` for validation errors
 7. **Router Export**: Named export + `RouteTypes` + `FeatureRouteHandlerType`
 
-### Standard HTTP Status Codes
-- 400 BAD_REQUEST, 401 UNAUTHORIZED, 403 FORBIDDEN
-- 404 NOT_FOUND, 409 CONFLICT, 422 UNPROCESSABLE_ENTITY
-- 500 INTERNAL_SERVER_ERROR
-
-### Error Patterns
+### Status Code Standards
+**CRITICAL**: All status codes MUST use constants and single-line format:
 ```typescript
-// Validation error
-catch (error: any) {
-  return c.json({ message: error.message || "操作失败" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
-}
+// ✅ Correct
+return c.json(data, HttpStatusCodes.OK);
+return c.json({ message: "资源不存在" }, HttpStatusCodes.NOT_FOUND);
 
-// Resource not found
-if (!resource) {
-  return c.json({ message: "资源不存在" }, HttpStatusCodes.NOT_FOUND);
-}
+// ❌ Wrong
+return c.json(data, 200);
+```
+
+### Error Handling Standards
+1. **Never Use console.log in Handlers**: Return appropriate HTTP responses instead
+2. **All Status Codes in Routes**: If handler returns 500, route MUST define it
+3. **Error Response Pattern**:
+   - Validation: `HttpStatusCodes.UNPROCESSABLE_ENTITY`
+   - Not Found: `HttpStatusCodes.NOT_FOUND`
+   - Conflicts: `HttpStatusCodes.CONFLICT`
+
+### Router Index Structure
+```typescript
+import type { AppRouteHandler } from "@/types/lib";
+import { createRouter } from "@/lib/create-app";
+import * as handlers from "./feature.handlers";
+import * as routes from "./feature.routes";
+
+export const featureName = createRouter()
+  .openapi(routes.routeName, handlers.routeName);
+
+type RouteTypes = { [K in keyof typeof routes]: typeof routes[K]; };
+export type FeatureRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
 ```
 
 ## Domain/Tenant Management
@@ -208,49 +258,50 @@ if (!resource) {
 
 ## Service Layer Architecture
 
-**Core Rules**:
+### Service Organization Rules
 1. **Service Creation**: Only create when logic is reused 2+ times, otherwise keep in handler
-2. **Structure**: Pure/async functions with named exports, kebab-case filenames
+2. **Functional Approach**: Pure/async functions with named exports, kebab-case filenames
 3. **Domain Context**: Always include domain parameter for multi-tenant operations
 4. **Function Prefixes**: `create*`, `get*`, `update*`, `delete*`, `assign*`, `clear*`
 5. **Transactions**: Use `db.transaction()` for complex multi-step operations
 
-**Exception Handling**:
-- Research error behavior before adding try-catch
-- Drizzle queries return `[]` or `undefined`, don't throw (except inserts on constraint violations)
-- Only catch known exception scenarios, let unknown errors bubble up
+### Exception Handling Standards
+**CRITICAL**: Do NOT use try-catch blindly. Research error behavior first:
 
-## Monitoring and Observability
+**Drizzle Exception Behavior**:
+- Database queries: Return `[]` or `undefined`, do NOT throw
+- Insert operations: Throw on constraint violations (unique, foreign key)
+- Update/Delete: Return affected count, do NOT throw for no matches
+- Connection errors: Throw for network issues
 
-### Built-in Metrics
+**When to Use Try-Catch**:
+```typescript
+// ✅ Correct - Known exception scenarios
+try {
+  const user = await createUser(userData); // Can throw on duplicate key
+} catch (error: any) {
+  if (error.message?.includes("duplicate key")) {
+    return c.json(getDuplicateKeyError("username", "用户名已存在"), HttpStatusCodes.CONFLICT);
+  }
+  throw error; // Re-throw unknown errors
+}
 
-- **Prometheus Metrics**: `/metrics` endpoint for application performance metrics
-- **OpenAPI Documentation**: Auto-generated API documentation
-
-### External Monitoring Stack (Recommended)
-
-Use professional monitoring tools for comprehensive observability:
-
-- **PgBouncer Exporter**: Collects connection pool metrics from PgBouncer
-- **Prometheus**: Time-series database for metrics storage
-- **Grafana**: Visualization dashboards and alerting
-
-### Quick Setup
-
-```bash
-# Start monitoring services (recommended for database monitoring)
-docker-compose --profile monitoring up -d
-
-# Start complete application with monitoring
-docker-compose --profile full up -d
-
-# Access services:
-# - Grafana: http://localhost:3000 (admin/admin123)
-# - Prometheus: http://localhost:9090
-# - PgBouncer Metrics: http://localhost:9127/metrics
+// ✅ Correct - Check return values instead
+const [user] = await db.select().from(sysUser).where(eq(sysUser.id, id));
+if (!user) {
+  return c.json({ message: "用户不存在" }, HttpStatusCodes.NOT_FOUND);
+}
 ```
 
-**Architecture**: `PgBouncer → pgbouncer_exporter → Prometheus → Grafana`
+**When NOT to Use Try-Catch**:
+```typescript
+// ❌ Wrong - Unnecessary for operations that don't throw
+try {
+  const users = await db.select().from(sysUser); // Never throws, returns []
+} catch (error) {
+  // This will never execute
+}
+```
 
 ## Environment
 
@@ -260,4 +311,3 @@ docker-compose --profile full up -d
 - `CLIENT_JWT_SECRET` - JWT secret for client authentication
 - `ADMIN_JWT_SECRET` - JWT secret for admin authentication
 - `PORT` - Server port
-- `PGBOUNCER_ADMIN_URL` - (Optional) PgBouncer admin connection for monitoring

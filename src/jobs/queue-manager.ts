@@ -1,4 +1,5 @@
 import { Queue, QueueEvents, Worker } from "bullmq";
+import { formatDate } from "date-fns";
 
 import { logger } from "@/lib/logger";
 import { redisClient } from "@/lib/redis";
@@ -293,7 +294,7 @@ export class JobQueueManager {
       priority: options?.priority || 5, // 默认普通优先级
       delay: options?.delay,
       // 添加任务分类标签
-      jobId: options?.category ? `${options.category}:${Date.now()}` : undefined,
+      jobId: options?.category ? `${options.category}:${formatDate(new Date(), "yyyyMMddHHmmssSSS")}` : undefined,
       // 添加超时保护
       removeOnComplete: this.getRetentionCount(options?.priority),
       removeOnFail: Math.ceil(this.getRetentionCount(options?.priority) / 2),

@@ -324,8 +324,8 @@ describe("public notices routes", () => {
 
           if (current.sortOrder === next.sortOrder) {
             // 如果 sortOrder 相同，则应该按 createdAt 降序
-            expect(new Date(current.createdAt).getTime()).toBeGreaterThanOrEqual(
-              new Date(next.createdAt).getTime(),
+            expect(new Date(current.createdAt!).getTime()).toBeGreaterThanOrEqual(
+              new Date(next.createdAt!).getTime(),
             );
           }
           else {
