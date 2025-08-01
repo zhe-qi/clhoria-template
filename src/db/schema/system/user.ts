@@ -19,7 +19,13 @@ export const systemUser = pgTable("system_user", {
   status: statusEnum().notNull(),
 }, table => [
   index("system_user_domain_status_idx").on(table.domain, table.status),
+  index("system_user_username_idx").on(table.username),
 ]);
+
+export const systemUserRelations = relations(systemUser, ({ many }) => ({
+  userRoles: many(systemUserRole),
+  userPosts: many(systemUserPost),
+}));
 
 export const selectSystemUserSchema = createSelectSchema(systemUser, {
   id: schema => schema.describe("用户ID"),
@@ -56,9 +62,3 @@ export const loginSystemUserSchema = insertSystemUserSchema.pick({
   password: true,
   domain: true,
 });
-
-// 用户关系定义，包含用户角色和用户岗位关系
-export const systemUserRelations = relations(systemUser, ({ many }) => ({
-  userRoles: many(systemUserRole),
-  userPosts: many(systemUserPost),
-}));

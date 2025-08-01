@@ -20,9 +20,14 @@ export const casbinRule = pgTable("casbin_rule", {
   /** 保留字段 */
   v5: varchar({ length: 64 }),
 }, table => [
+  // 权限检查的核心索引（最高频查询）
+  index("idx_ptype_v0_v1_v2_v3").on(table.ptype, table.v0, table.v1, table.v2, table.v3),
+  // 角色管理查询索引
   index("idx_ptype_v0").on(table.ptype, table.v0),
-  index("idx_ptype_v0_v1_v2").on(table.ptype, table.v0, table.v1, table.v2),
+  // 域级别查询索引
   index("idx_ptype_v3").on(table.ptype, table.v3),
+  // 资源级别查询索引（用于按资源过滤策略）
+  index("idx_ptype_v1").on(table.ptype, table.v1),
 ]);
 
 export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {

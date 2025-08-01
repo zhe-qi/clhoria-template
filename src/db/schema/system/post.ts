@@ -5,7 +5,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { defaultColumns } from "@/db/common/default-columns";
 
 import { statusEnum } from "../../common/enums";
-// 导入 systemUserPost 后定义关系
 import { systemUserPost } from "./user-post";
 
 export const systemPost = pgTable("system_post", {
@@ -20,6 +19,10 @@ export const systemPost = pgTable("system_post", {
   // 域内岗位编码唯一
   unique().on(table.domain, table.postCode),
 ]);
+
+export const systemPostRelations = relations(systemPost, ({ many }) => ({
+  userPosts: many(systemUserPost),
+}));
 
 export const selectSystemPostSchema = createSelectSchema(systemPost, {
   id: schema => schema.describe("岗位ID"),
@@ -58,7 +61,3 @@ export const simpleSystemPostSchema = selectSystemPostSchema.pick({
   postSort: true,
   status: true,
 });
-
-export const systemPostRelations = relations(systemPost, ({ many }) => ({
-  userPosts: many(systemUserPost),
-}));

@@ -5,11 +5,6 @@ import { defaultColumns } from "@/db/common/default-columns";
 
 import { jobStatusEnum } from "../../common/enums";
 
-/** 任务参数接口 */
-interface JobPayload {
-  [key: string]: unknown;
-}
-
 /** 定时任务配置表 */
 export const systemScheduledJobs = pgTable("system_scheduled_jobs", {
   ...defaultColumns,
@@ -28,7 +23,7 @@ export const systemScheduledJobs = pgTable("system_scheduled_jobs", {
   /** 状态: 1=启用 0=禁用 2=暂停 */
   status: jobStatusEnum().notNull(),
   /** 任务参数 */
-  payload: jsonb().$type<JobPayload>().default({}).notNull(),
+  payload: jsonb().$type<ParamsType>().default({}).notNull(),
   /** 重试次数 */
   retryAttempts: integer().default(3).notNull(),
   /** 重试延迟(毫秒) */

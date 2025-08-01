@@ -70,29 +70,29 @@ export const dictionaryItemSchema = z.object({
  * 查询字典Schema
  */
 export const selectSystemDictionariesSchema = createSelectSchema(systemDictionaries, {
-  id: _schema => _schema.describe("字典ID"),
-  code: _schema => _schema.describe("字典编码"),
-  name: _schema => _schema.describe("字典名称"),
-  description: _schema => _schema.describe("字典描述"),
+  id: schema => schema.describe("字典ID"),
+  code: schema => schema.describe("字典编码"),
+  name: schema => schema.describe("字典名称"),
+  description: schema => schema.describe("字典描述"),
   items: _schema => z.array(dictionaryItemSchema).describe("字典项列表"),
-  status: _schema => _schema.describe("状态: 1=启用 0=禁用"),
-  sortOrder: _schema => _schema.describe("排序"),
-  createdAt: _schema => _schema.describe("创建时间"),
-  updatedAt: _schema => _schema.describe("更新时间"),
-  createdBy: _schema => _schema.describe("创建人"),
-  updatedBy: _schema => _schema.describe("更新人"),
+  status: schema => schema.describe("状态: 1=启用 0=禁用"),
+  sortOrder: schema => schema.describe("排序"),
+  createdAt: schema => schema.describe("创建时间"),
+  updatedAt: schema => schema.describe("更新时间"),
+  createdBy: schema => schema.describe("创建人"),
+  updatedBy: schema => schema.describe("更新人"),
 });
 
 /**
  * 创建字典Schema
  */
 export const insertSystemDictionariesSchema = createInsertSchema(systemDictionaries, {
-  code: _schema => _schema.min(1, "字典编码不能为空").describe("字典编码"),
-  name: _schema => _schema.min(1, "字典名称不能为空").describe("字典名称"),
-  description: _schema => _schema.optional().describe("字典描述"),
+  code: schema => schema.min(1, "字典编码不能为空").describe("字典编码"),
+  name: schema => schema.min(1, "字典名称不能为空").describe("字典名称"),
+  description: schema => schema.optional().describe("字典描述"),
   items: _schema => z.array(dictionaryItemSchema).default([]).describe("字典项列表"),
-  status: _schema => _schema.default(1).describe("状态: 1=启用 0=禁用"),
-  sortOrder: _schema => _schema.default(0).describe("排序"),
+  status: schema => schema.default(1).describe("状态: 1=启用 0=禁用"),
+  sortOrder: schema => schema.default(0).describe("排序"),
 }).omit({
   id: true,
   createdAt: true,

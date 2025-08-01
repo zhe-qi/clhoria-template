@@ -81,8 +81,8 @@ export const patchSystemMenuSchema = insertSystemMenuSchema.partial();
 
 // 菜单树Schema - 与服务层 TreeNode<T> 类型匹配
 export const menuTreeSchema = selectSystemMenuSchema.extend({
-  children: z.unknown().optional(),
-}).passthrough();
+  children: z.any().optional(),
+}).catchall(z.unknown());
 
 // 用户路由响应Schema（适用于 sys-menus 模块）
 export const userRoutesSchema = z.object({
