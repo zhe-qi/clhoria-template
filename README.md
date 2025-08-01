@@ -273,14 +273,6 @@ pnpm build
 pnpm start
 ```
 
-### Kubernetes 部署
-
-项目包含 Kubernetes 部署配置文件：
-
-剪切 scripts/k8s/Dockerfile.k8s 到根目录，查看部署文档 docs/KUBERNETES.md
-
-**移除 K8s 配置**：如不需要 Kubernetes 部署，可删除 `k8s/` 和 `script/k8s` 目录
-
 ## 部署特性
 
 **可选 SaaS 依赖**: sentry、Cloudflare R2 对象存储等第三方服务均为可选，可完全部署在内网环境。技术栈符合信创要求，支持迁移至国产数据库（如达梦、人大金仓等）。

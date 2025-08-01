@@ -94,15 +94,12 @@ async function validateUserStatus(userId: string, domain: string): Promise<{ val
     where: and(
       eq(systemUser.id, userId),
       eq(systemUser.domain, domain),
+      eq(systemUser.status, Status.ENABLED),
     ),
   });
 
   if (!user) {
     return { valid: false, message: "User not found" };
-  }
-
-  if (user.status !== Status.ENABLED) {
-    return { valid: false, message: "User is disabled" };
   }
 
   return { valid: true };

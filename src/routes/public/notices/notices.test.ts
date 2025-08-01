@@ -148,7 +148,7 @@ describe("public notices routes", () => {
         domain: "default",
       },
     });
-    expect([HttpStatusCodes.OK, HttpStatusCodes.BAD_REQUEST].includes(response1.status)).toBe(true);
+    expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response1.status)).toBe(true);
 
     // 测试每页数量为0
     const response2 = await publicNoticesClient.notices.$get({
@@ -158,7 +158,7 @@ describe("public notices routes", () => {
         domain: "default",
       },
     });
-    expect([HttpStatusCodes.OK, HttpStatusCodes.BAD_REQUEST].includes(response2.status)).toBe(true);
+    expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response2.status)).toBe(true);
 
     // 测试超大分页数量
     const response3 = await publicNoticesClient.notices.$get({
@@ -168,7 +168,7 @@ describe("public notices routes", () => {
         domain: "default",
       },
     });
-    expect([HttpStatusCodes.OK, HttpStatusCodes.BAD_REQUEST].includes(response3.status)).toBe(true);
+    expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response3.status)).toBe(true);
   });
 
   /** 无效类型参数 */
@@ -183,7 +183,7 @@ describe("public notices routes", () => {
       },
     });
 
-    expect([HttpStatusCodes.OK, HttpStatusCodes.BAD_REQUEST].includes(response.status)).toBe(true);
+    expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response.status)).toBe(true);
   });
 
   /** 大分页测试 */
@@ -297,7 +297,7 @@ describe("public notices routes", () => {
       },
     });
 
-    expect([HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.NOT_FOUND].includes(response.status)).toBe(true);
+    expect([HttpStatusCodes.UNPROCESSABLE_ENTITY, HttpStatusCodes.NOT_FOUND].includes(response.status)).toBe(true);
   });
 
   /** 默认排序测试 */

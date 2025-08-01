@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
@@ -17,7 +17,9 @@ export const systemUser = pgTable("system_user", {
   avatar: text(),
   nickName: varchar({ length: 64 }).notNull(),
   status: statusEnum().notNull(),
-});
+}, tx => [
+  index("system_user_domain_status_idx").on(tx.domain, tx.status),
+]);
 
 export const selectSystemUserSchema = createSelectSchema(systemUser, {
   id: schema => schema.describe("用户ID"),
