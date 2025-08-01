@@ -10,7 +10,7 @@ import db from "@/db";
 import { systemUser } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { enforcerLaunchedPromise, PermissionConfigManager } from "@/lib/permissions";
-import { cachePermissionResult, getPermissionResult, getUserRolesFromCache } from "@/services/system/user";
+import { cachePermissionResult, getPermissionResult, getUserRolesFromCache, getUserStatusFromCache, setUserStatusToCache } from "@/services/system/user";
 import { setContextData } from "@/utils";
 
 /**
@@ -90,6 +90,14 @@ export function casbin(): MiddlewareHandler {
 }
 
 async function validateUserStatus(userId: string, domain: string): Promise<{ valid: boolean; message?: string }> {
+  // 先从缓存获取用户状态
+  const cachedStatus = await getUserStatusFromCache(userId, domain);
+
+  if (cachedStatus !== null) {
+    return cachedStatus ? { valid: true } : { valid: false, message: "User not found or disabled" };
+  }
+
+  // 缓存未命中，从数据库查询
   const user = await db.query.systemUser.findFirst({
     where: and(
       eq(systemUser.id, userId),
@@ -98,8 +106,13 @@ async function validateUserStatus(userId: string, domain: string): Promise<{ val
     ),
   });
 
-  if (!user) {
-    return { valid: false, message: "User not found" };
+  const isValid = !!user;
+
+  // 更新缓存
+  await setUserStatusToCache(userId, domain, isValid);
+
+  if (!isValid) {
+    return { valid: false, message: "User not found or disabled" };
   }
 
   return { valid: true };

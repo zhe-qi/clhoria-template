@@ -9,6 +9,9 @@ export const CacheConfig = {
   /** 空值缓存过期时间(秒) - 5分钟，用于防止缓存穿透 */
   NULL_CACHE_TTL: 300,
 
+  /** 用户状态缓存过期时间(秒) - 15分钟，平衡实时性和性能 */
+  USER_STATUS_TTL: 900,
+
   /** 空值缓存标记，用于区分真正的空值和缓存未命中 */
   NULL_CACHE_VALUE: "__NULL__",
 } as const;
@@ -47,6 +50,9 @@ export const CacheConstant = {
 
   /** 权限验证结果前缀 */
   PERMISSION_RESULT_PREFIX: "perm:result:",
+
+  /** 用户状态前缀 */
+  USER_STATUS_PREFIX: "user:status:",
 } as const;
 
 /** 缓存常量类型 */
@@ -127,4 +133,11 @@ export function getNoticesAllKey(domain: string): string {
  */
 export function getPermissionResultKey(userId: string, domain: string, method: string, path: string): string {
   return `${CacheConstant.PERMISSION_RESULT_PREFIX}${domain}:${userId}:${method}:${path}`;
+}
+
+/**
+ * 生成用户状态缓存Key
+ */
+export function getUserStatusKey(userId: string, domain: string): string {
+  return `${CacheConstant.USER_STATUS_PREFIX}${domain}:${userId}`;
 }

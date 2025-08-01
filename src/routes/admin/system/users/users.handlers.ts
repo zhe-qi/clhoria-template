@@ -8,7 +8,7 @@ import db from "@/db";
 import { systemUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
-import { assignRolesToUser, createUser } from "@/services/system/user";
+import { assignRolesToUser, clearUserPermissionCache, createUser } from "@/services/system/user";
 import { omit, pickContext } from "@/utils";
 
 import type { SystemUsersRouteHandlerType } from "./users.index";
@@ -108,6 +108,11 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
 
+  // 如果状态字段发生变化，清理用户缓存
+  if ("status" in updateData) {
+    await clearUserPermissionCache(id, domain);
+  }
+
   const userWithoutPassword = omit(updated, ["password"]);
   return c.json(userWithoutPassword, HttpStatusCodes.OK);
 };
@@ -127,6 +132,9 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   if (!deleted) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
   }
+
+  // 清理用户相关缓存
+  await clearUserPermissionCache(id, domain);
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);
 };

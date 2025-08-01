@@ -5,7 +5,7 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import db from "@/db";
 import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
-import { CacheConfig, getPermissionResultKey, getUserRolesKey, TokenStatus } from "@/lib/enums";
+import { CacheConfig, getPermissionResultKey, getUserRolesKey, getUserStatusKey, TokenStatus } from "@/lib/enums";
 import { clearUserCache } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
@@ -187,6 +187,9 @@ export async function clearUserPermissionCache(userId: string, domain: string): 
   // 清理用户基础缓存
   await clearUserCache(userId, domain);
 
+  // 清理用户状态缓存
+  await clearUserStatusCache(userId, domain);
+
   // 清理权限验证结果缓存
   const pattern = getPermissionResultKey(userId, domain, "*", "*");
   const keys = await redisClient.keys(pattern);
@@ -226,4 +229,34 @@ export async function getPermissionResult(
   }
 
   return result === "1";
+}
+
+/**
+ * 从缓存获取用户状态
+ */
+export async function getUserStatusFromCache(userId: string, domain: string): Promise<boolean | null> {
+  const key = getUserStatusKey(userId, domain);
+  const result = await redisClient.get(key);
+
+  if (result === null) {
+    return null;
+  }
+
+  return result === "1";
+}
+
+/**
+ * 设置用户状态到缓存
+ */
+export async function setUserStatusToCache(userId: string, domain: string, isValid: boolean): Promise<void> {
+  const key = getUserStatusKey(userId, domain);
+  await redisClient.setex(key, CacheConfig.USER_STATUS_TTL, isValid ? "1" : "0");
+}
+
+/**
+ * 清理用户状态缓存
+ */
+export async function clearUserStatusCache(userId: string, domain: string): Promise<void> {
+  const key = getUserStatusKey(userId, domain);
+  await redisClient.del(key);
 }
