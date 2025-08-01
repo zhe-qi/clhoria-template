@@ -16,6 +16,7 @@ export const systemTokens = pgTable("system_tokens", {
   username: varchar({ length: 64 }).notNull(),
   domain: varchar({ length: 64 }).notNull(),
   loginTime: timestamp({ mode: "date" }).notNull().defaultNow(),
+  expiresAt: timestamp({ mode: "date" }).notNull(),
   ip: varchar({ length: 64 }).notNull(),
   port: integer(),
   address: varchar({ length: 255 }).notNull(),
@@ -35,6 +36,7 @@ export const selectSystemTokensSchema = createSelectSchema(systemTokens, {
   username: schema => schema.describe("用户名"),
   domain: schema => schema.describe("域"),
   loginTime: schema => schema.describe("登录时间"),
+  expiresAt: schema => schema.describe("过期时间"),
   ip: schema => schema.describe("IP地址"),
   port: schema => schema.describe("端口"),
   address: schema => schema.describe("地址"),
@@ -58,6 +60,7 @@ export const insertSystemTokensSchema = createInsertSchema(systemTokens, {
 }).omit({
   id: true,
   loginTime: true,
+  expiresAt: true,
   createdAt: true,
 });
 

@@ -93,6 +93,16 @@ email: text("email").unique()
 - `uniqueIndex()`: Unique + query performance
 - `index()`: Query performance
 
+#### Index Usage Guidelines
+
+**CRITICAL RULE**: 非必要不要滥用索引，只在以下情况才添加索引：
+1. **高频查询表**: 表的查询频率确实很高
+2. **高频查询字段**: 查询中频繁使用的字段（WHERE/ORDER BY）
+3. **无Redis缓存**: 该查询结果没有必要或无法使用Redis缓存
+4. **性能瓶颈**: 确实存在查询性能问题
+
+**默认情况**: 大多数表不需要额外索引，Drizzle的unique约束和主键已足够。其他索引需求由开发者根据实际性能测试后决定添加。
+
 ### Authentication & Authorization
 
 - **JWT**: Separate secrets for client (`CLIENT_JWT_SECRET`) and admin (`ADMIN_JWT_SECRET`) routes

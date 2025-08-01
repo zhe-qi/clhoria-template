@@ -1,6 +1,6 @@
 {
-  "id": "fb9e7ae2-3536-4f16-aceb-aacb5cbb6663",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "10b5dc42-a56d-4415-b520-ad4c7bfb2c66",
+  "prevId": "fb9e7ae2-3536-4f16-aceb-aacb5cbb6663",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1763,50 +1763,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "system_tokens_user_status_idx": {
-          "name": "system_tokens_user_status_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "system_tokens_cleanup_idx": {
-          "name": "system_tokens_cleanup_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {

@@ -17,8 +17,8 @@ export const systemUser = pgTable("system_user", {
   avatar: text(),
   nickName: varchar({ length: 64 }).notNull(),
   status: statusEnum().notNull(),
-}, tx => [
-  index("system_user_domain_status_idx").on(tx.domain, tx.status),
+}, table => [
+  index("system_user_domain_status_idx").on(table.domain, table.status),
 ]);
 
 export const selectSystemUserSchema = createSelectSchema(systemUser, {

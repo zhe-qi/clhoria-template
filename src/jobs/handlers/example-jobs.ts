@@ -1,8 +1,74 @@
 import type { Job } from "bullmq";
 
+import { and, count, eq, lt, or } from "drizzle-orm";
+
+import db from "@/db";
+import { systemTokens } from "@/db/schema";
+import { TokenStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 
 import type { JobHandler } from "../types";
+
+/**
+ * @description Token清理任务
+ */
+export const tokenCleanupJob: JobHandler = async (job: Job) => {
+  logger.info("Token清理任务开始执行", {
+    jobId: job.id,
+    timestamp: new Date().toISOString(),
+  });
+
+  const { retentionDays = 7 } = job.data || {}; // 默认保留7天
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+
+  try {
+    await job.updateProgress(25);
+
+    // 删除过期的或已撤销的token记录
+    const deleteResult = await db.delete(systemTokens)
+      .where(
+        or(
+          // 过期的token
+          lt(systemTokens.expiresAt, new Date()),
+          // 已撤销且超过保留期的token
+          and(
+            eq(systemTokens.status, TokenStatus.REVOKED),
+            lt(systemTokens.createdAt, cutoffDate.toISOString()),
+          ),
+        ),
+      );
+
+    await job.updateProgress(75);
+
+    // 统计活跃token数量
+    const [{ value: activeTokensCount }] = await db
+      .select({ value: count() })
+      .from(systemTokens)
+      .where(eq(systemTokens.status, TokenStatus.ACTIVE));
+
+    await job.updateProgress(100);
+
+    const result = {
+      message: "Token清理完成",
+      timestamp: new Date().toISOString(),
+      jobId: job.id,
+      retentionDays,
+      deletedTokens: deleteResult.length,
+      activeTokens: activeTokensCount,
+    };
+
+    logger.info("Token清理任务执行完成", result);
+    return result;
+  }
+  catch (error) {
+    logger.error("Token清理任务执行失败", {
+      jobId: job.id,
+      error: error instanceof Error ? error.message : "未知错误",
+    });
+    throw error;
+  }
+};
 
 /**
  * @description Hello World 定时任务

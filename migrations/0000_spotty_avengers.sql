@@ -266,6 +266,7 @@ CREATE TABLE "system_tokens" (
 	"username" varchar(64) NOT NULL,
 	"domain" varchar(64) NOT NULL,
 	"login_time" timestamp DEFAULT now() NOT NULL,
+	"expires_at" timestamp NOT NULL,
 	"ip" varchar(64) NOT NULL,
 	"port" integer,
 	"address" varchar(255) NOT NULL,
@@ -322,4 +323,7 @@ CREATE INDEX "idx_ptype_v3" ON "casbin_rule" USING btree ("ptype","v3");--> stat
 CREATE INDEX "notices_domain_idx" ON "system_notices" USING btree ("domain");--> statement-breakpoint
 CREATE INDEX "notices_type_idx" ON "system_notices" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "notices_status_idx" ON "system_notices" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "notices_created_at_idx" ON "system_notices" USING btree ("created_at" DESC NULLS LAST);
+CREATE INDEX "notices_created_at_idx" ON "system_notices" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "system_tokens_user_status_idx" ON "system_tokens" USING btree ("user_id","status");--> statement-breakpoint
+CREATE INDEX "system_tokens_cleanup_idx" ON "system_tokens" USING btree ("expires_at","status");--> statement-breakpoint
+CREATE INDEX "system_user_domain_status_idx" ON "system_user" USING btree ("domain","status");

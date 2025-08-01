@@ -97,6 +97,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     userId: user.id,
     username: user.username,
     domain: user.domain,
+    expiresAt: new Date(refreshTokenExp * 1000), // 使用refresh token的过期时间
     ip: clientIP,
     address,
     userAgent,
@@ -215,6 +216,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
         status: TokenStatus.ACTIVE,
+        expiresAt: new Date(refreshTokenExp * 1000), // 更新过期时间
       })
       .where(eq(systemTokens.id, tokenRecord.id));
 
