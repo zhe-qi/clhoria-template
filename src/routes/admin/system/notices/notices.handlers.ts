@@ -14,7 +14,7 @@ import type { SystemNoticesRouteHandlerType } from "./notices.index";
 export const list: SystemNoticesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
   const { search, type, status, page, limit } = query;
-  const [userDomain] = pickContext(c, ["userDomain"]);
+  const userDomain = c.get("userDomain");
 
   const result = await getAdminNotices({
     domain: userDomain,
@@ -29,7 +29,7 @@ export const list: SystemNoticesRouteHandlerType<"list"> = async (c) => {
 
 export const get: SystemNoticesRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
-  const [userDomain] = pickContext(c, ["userDomain"]);
+  const userDomain = c.get("userDomain");
 
   const notice = await getAdminNotice(id, userDomain);
 
@@ -86,7 +86,7 @@ export const update: SystemNoticesRouteHandlerType<"update"> = async (c) => {
 
 export const remove: SystemNoticesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
-  const [userDomain] = pickContext(c, ["userDomain"]);
+  const userDomain = c.get("userDomain");
 
   try {
     const deleted = await deleteNotice(id, userDomain);

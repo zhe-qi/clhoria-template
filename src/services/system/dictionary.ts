@@ -333,7 +333,7 @@ export async function batchGetDictionaries(codes: string[], options: Dictionarie
 
   // 从数据库获取未缓存的字典
   if (missingCodes.length > 0) {
-    const whereCondition = enabledOnly ? eq(systemDictionaries.status, 1) : undefined;
+    const whereCondition = enabledOnly ? eq(systemDictionaries.status, Status.ENABLED) : undefined;
 
     const dbDictionaries = await db
       .select()

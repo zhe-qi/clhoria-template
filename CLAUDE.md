@@ -97,7 +97,8 @@ email: text("email").unique()
 
 - **JWT**: Separate secrets for client (`CLIENT_JWT_SECRET`) and admin (`ADMIN_JWT_SECRET`) routes
 - **Casbin**: Role-based access control for admin routes
-- **Context Extraction**: Use `c.get("userDomain")` or `pickContext(c, ["userDomain", "userId"])`
+- **Context Extraction**: Use `c.get("userDomain")` for single parameter, or `pickContext(c, ["userDomain", "userId"])` for multiple parameters
+- **Single Parameter Rule**: Use `const domain = c.get("userDomain")` instead of `const [domain] = pickContext(c, ["userDomain"])`
 - **Middleware**: Applied at route group level in `src/app.ts:32-45`
 
 ### Application Structure
@@ -152,6 +153,7 @@ src/db/schema/
 3. **Naming**: PascalCase names, UPPER_SNAKE_CASE values, kebab-case strings
 4. **File Organization**: Place in `src/lib/enums/` with barrel exports
 5. **Magic Number Elimination**: ALWAYS use enums instead of magic numbers in queries
+6. **Enum Usage in Queries**: Use `eq(table.status, Status.ENABLED)` instead of `eq(table.status, 1)`
 
 ## Route Architecture Standards
 

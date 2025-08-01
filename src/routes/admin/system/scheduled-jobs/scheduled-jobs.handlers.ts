@@ -25,7 +25,7 @@ export const list: SystemScheduledJobsRouteHandlerType<"list"> = async (c) => {
 
 /** 获取单个定时任务 */
 export const getById: SystemScheduledJobsRouteHandlerType<"getById"> = async (c) => {
-  const [domain] = pickContext(c, ["userDomain"]);
+  const domain = c.get("userDomain");
   const { id } = c.req.valid("param");
 
   try {
@@ -84,7 +84,7 @@ export const update: SystemScheduledJobsRouteHandlerType<"update"> = async (c) =
 
 /** 删除定时任务 */
 export const remove: SystemScheduledJobsRouteHandlerType<"remove"> = async (c) => {
-  const [domain] = pickContext(c, ["userDomain"]);
+  const domain = c.get("userDomain");
   const { id } = c.req.valid("param");
 
   try {
@@ -121,7 +121,7 @@ export const toggleStatus: SystemScheduledJobsRouteHandlerType<"toggleStatus"> =
 
 /** 立即执行任务 */
 export const executeNow: SystemScheduledJobsRouteHandlerType<"executeNow"> = async (c) => {
-  const [domain] = pickContext(c, ["userDomain"]);
+  const domain = c.get("userDomain");
   const { id } = c.req.valid("param");
 
   await scheduledJobsService.executeJobNow(id, domain);
@@ -130,7 +130,7 @@ export const executeNow: SystemScheduledJobsRouteHandlerType<"executeNow"> = asy
 
 /** 获取任务执行历史 */
 export const getExecutionHistory: SystemScheduledJobsRouteHandlerType<"getExecutionHistory"> = async (c) => {
-  const [domain] = pickContext(c, ["userDomain"]);
+  const domain = c.get("userDomain");
   const { id } = c.req.valid("param");
   const query = c.req.valid("query");
 
@@ -147,7 +147,7 @@ export const getExecutionHistory: SystemScheduledJobsRouteHandlerType<"getExecut
 
 /** 获取任务执行统计 */
 export const getExecutionStats: SystemScheduledJobsRouteHandlerType<"getExecutionStats"> = async (c) => {
-  const [domain] = pickContext(c, ["userDomain"]);
+  const domain = c.get("userDomain");
   const { id } = c.req.valid("param");
   const { days } = c.req.valid("query");
 
@@ -157,7 +157,7 @@ export const getExecutionStats: SystemScheduledJobsRouteHandlerType<"getExecutio
 
 /** 获取可用的任务处理器 */
 export const getAvailableHandlers: SystemScheduledJobsRouteHandlerType<"getAvailableHandlers"> = async (c) => {
-  const [domain] = pickContext(c, ["userDomain"]);
+  const domain = c.get("userDomain");
 
   try {
     const handlers = await scheduledJobsService.getAvailableHandlers(domain);
@@ -170,7 +170,7 @@ export const getAvailableHandlers: SystemScheduledJobsRouteHandlerType<"getAvail
 
 /** 获取系统任务概览 */
 export const getSystemOverview: SystemScheduledJobsRouteHandlerType<"getSystemOverview"> = async (c) => {
-  const [domain] = pickContext(c, ["userDomain"]);
+  const domain = c.get("userDomain");
   const { days } = c.req.valid("query");
 
   try {

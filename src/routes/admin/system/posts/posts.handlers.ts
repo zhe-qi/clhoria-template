@@ -6,7 +6,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { systemPost, systemUserPost } from "@/db/schema";
-import { getDuplicateKeyError } from "@/lib/enums";
+import { getDuplicateKeyError, Status } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 import { pickContext } from "@/utils";
 
@@ -50,7 +50,7 @@ export const simpleList: SystemPostsRouteHandlerType<"simpleList"> = async (c) =
     .from(systemPost)
     .where(and(
       eq(systemPost.domain, domain),
-      eq(systemPost.status, 1), // 只返回启用的岗位
+      eq(systemPost.status, Status.ENABLED), // 只返回启用的岗位
     ))
     .orderBy(systemPost.postSort, systemPost.postName);
 

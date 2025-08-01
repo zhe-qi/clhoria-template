@@ -6,7 +6,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { systemOrganization } from "@/db/schema";
-import { getDuplicateKeyError } from "@/lib/enums";
+import { getDuplicateKeyError, Status } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 import { pickContext } from "@/utils/tools/hono-helpers";
 
@@ -291,7 +291,7 @@ export const create: SystemOrganizationRouteHandlerType<"create"> = async (c) =>
       domain,
       createdBy: userId,
       // 确保 status 有默认值
-      status: body.status ?? 1,
+      status: body.status ?? Status.ENABLED,
     });
 
     return c.json(organization, HttpStatusCodes.CREATED);

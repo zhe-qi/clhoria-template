@@ -95,7 +95,7 @@ export const authEndpoints: SystemEndpointsRouteHandlerType<"authEndpoints"> = a
       ),
     );
 
-  if (roleRules.length === 0) {
+  if (roleRules.length < 1) {
     return c.json([], HttpStatusCodes.OK);
   }
 
