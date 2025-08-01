@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。集成 Drizzle ORM + PostgreSQL 数据层，实现完整的 RBAC 权限体系、多租户架构和 OpenAPI 规范。支持多层路由分离、JWT 认证、Redis 缓存、限流中间件等企业级功能，提供开箱即用的后端解决方案。
+现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式，结合 Hono + OpenAPI + Zod 完整技术体系，实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层，完整的 RBAC 权限体系、多租户架构，提供比传统后台管理系统更稳定、更高效的开发体验。
 
 ## 功能特性
 
@@ -37,12 +37,13 @@
 - **对象存储**: 集成 Cloudflare R2 对象存储服务
 - **连接池监控**: 数据库连接池状态监控和性能分析
 
-### 🛠️ 开发工具
+### 🛠️ 智能开发体验
 
-- **AI Agent 集成**: 智能代码生成和业务逻辑推理，替代传统低效工具
-- **Claude Code 优化**: 专为 Claude Code 优化，包含完整的 CLAUDE.md 配置和 MCP 插件支持
-- **测试友好**: Vitest 测试框架，完整的测试环境配置
-- **生产就绪**: 优化构建 + Docker 支持
+- **AI 原生开发**: Claude Code + OpenAPI 自动生成，告别手工维护接口文档的痛苦
+- **类型安全体系**: Hono + Zod + TypeScript 全链路类型推导，编译时发现问题
+- **智能测试覆盖**: Vitest + AI 辅助，自动生成测试用例，确保接口稳定性
+- **即时反馈开发**: 热重载开发环境，代码变更实时生效，无需重启服务
+- **Claude Code 深度优化**: 完整 CLAUDE.md 配置，MCP 插件生态，AI 理解项目架构
 
 ### 📈 监控运维
 
@@ -51,12 +52,46 @@
 - **缓存监控**: Redis 缓存状态查询和管理
 - **性能指标**: Prometheus + Grafana 监控方案
 
+## 开发体验对比
+
+### 🚀 AI 驱动 vs 传统工具
+
+| 对比维度     | 本项目 (AI + Modern Stack)                            | 传统代码生成器                                 |
+| ------------ | ----------------------------------------------------- | ---------------------------------------------- |
+| **开发效率** | Claude Code 智能理解需求，秒级生成符合规范的代码      | 手动配置模板，生成僵化代码，需大量修改         |
+| **接口管理** | OpenAPI + Zod 自动同步，类型安全，文档永不过期        | 手工维护接口文档，容易不同步，运行时才发现错误 |
+| **代码质量** | TypeScript 全链路类型检查，编译时发现问题             | 生成代码缺乏类型约束，运行时错误频发           |
+| **测试保障** | AI 辅助生成测试用例，自动化测试覆盖，接口稳定性有保障 | 依赖手动测试，需要频繁点击后台验证功能         |
+| **维护成本** | 代码规范统一，AI 理解项目架构，维护简单               | 生成代码风格不一致，后期维护困难               |
+| **扩展性**   | 函数式架构，模块化设计，易于扩展和重构                | 耦合严重，扩展困难，牵一发动全身               |
+
+### 💡 核心优势
+
+**🎯 告别重复劳动**
+
+- 传统方式：点击后台 → 配置表单 → 生成代码 → 手动调试 → 反复修改
+- AI 驱动：描述需求 → AI 理解架构 → 生成符合规范代码 → 自动测试通过
+
+**🔒 类型安全保障**
+
+- 编译时类型检查，杜绝运行时类型错误
+- API 请求/响应自动类型推导
+- 数据库 Schema 变更自动同步到代码类型
+
+**⚡ 开发效率提升**
+
+- 热重载开发，代码变更实时生效
+- AI 智能补全，理解项目上下文
+- 自动化测试，确保每次变更的稳定性
+
 ## 项目预览
 
 <div align="center">
-  <img src="https://r2.promptez.cn/drizzle-studio.webp" width="30%" alt="Drizzle Studio">
-  <img src="https://r2.promptez.cn/swagger.webp" width="30%" alt="Swagger API 文档">
-  <img src="https://r2.promptez.cn/test.webp" width="30%" alt="测试覆盖率">
+  <img src="https://r2.promptez.cn/drizzle-studio.webp" width="45%" alt="Drizzle Studio">
+  <img src="https://r2.promptez.cn/swagger.webp" width="45%" alt="Swagger API 文档">
+</div>
+<div align="center">
+<img src="https://r2.promptez.cn/test.webp" width="50%" alt="测试覆盖率">
 </div>
 
 ## 快速开始
@@ -261,14 +296,33 @@ pnpm start
 
 详细基准测试：[bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
 
-## Claude Code 支持
+## Claude Code 深度集成（可选）
 
-专为 Claude Code 开发体验优化，包含完整的 CLAUDE.md 配置文件和详细代码注释。
+本项目专为 AI 驱动开发而设计，提供业界领先的 Claude Code 开发体验。开发者从传统"代码工程师"升级为**"上下文工程师"**，通过精准的需求描述和架构理解，让 AI 承担繁重的编码工作。
 
-### 推荐 MCP 插件
+### 上下文工程师
 
-- **Serena**: 智能代码分析和编辑
-- **Context7**: 实时技术文档查询
+**上下文工程师**是 AI 时代的新型开发角色，不再专注于编写具体代码，而是通过精准的需求描述和架构理解，让 AI 承担繁重的编码工作。开发者的核心价值转向业务逻辑设计、系统架构规划和用户需求理解。
+
+**核心技能转变**
+
+- ❌ 不再需要：记忆语法细节、重复编写样板代码、手动维护文档
+- ✅ 重点关注：业务逻辑设计、系统架构规划、用户需求理解
+
+**上下文驱动开发模式**
+
+- 🧠 **完整项目上下文**: CLAUDE.md 配置让 AI 深度理解代码架构
+- 🎯 **精准需求描述**: 通过结构化的需求描述，获得准确的代码实现
+- 🔍 **智能模式识别**: AI 自动分析现有代码模式，生成风格一致的新代码
+- 🛠️ **自动规范遵循**: 自动遵循项目规范：路由结构、命名约定、错误处理
+
+### 📚 推荐 MCP 插件生态
+
+增强 Claude Code 开发能力的专业插件：
+
+- **[Serena](https://github.com/SerenaAI/serena-mcp)**: 智能代码分析和重构建议
+- **[Context7](https://github.com/context7/mcp-plugin)**: 实时技术文档查询和代码示例
+- **Database Explorer**: 数据库架构可视化和查询优化
 
 ## 监控
 
@@ -289,7 +343,8 @@ pnpm start
 - [ ] **工作流自动化**: 集成 n8n 工作流引擎
 - [ ] **性能测试**: 集成 k6 压力测试框架
 - [ ] **日志分析**: 集成 Kafka + Elasticsearch 日志收集和分析系统
-- [ ] **AI 智能化**: 自然语言代码生成和业务逻辑推理
+- [ ] **上下文工程师工具链**: 扩展 AI 辅助开发工具，支持更复杂的业务场景
+- [ ] **智能重构助手**: AI 驱动的代码重构和性能优化建议
 - [ ] **前端集成**: Vue3 管理界面和低代码平台
 
 ## 测试
