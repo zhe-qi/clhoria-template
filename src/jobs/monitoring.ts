@@ -5,6 +5,7 @@ import { and, desc, eq, gte, lt } from "drizzle-orm";
 import db from "@/db";
 import { systemJobExecutionLogs } from "@/db/schema";
 import { logger } from "@/lib/logger";
+import { formatDate } from "@/utils/tools/formatter";
 
 import type { JobResult } from "./types";
 
@@ -17,7 +18,7 @@ export class JobMonitor {
         jobId: this.extractJobConfigId(job),
         executionId: job.id || "unknown",
         status: "active",
-        startedAt: new Date().toISOString(),
+        startedAt: formatDate(new Date()),
         createdBy: "system",
         updatedBy: "system",
       });
@@ -46,10 +47,10 @@ export class JobMonitor {
         .update(systemJobExecutionLogs)
         .set({
           status: "completed",
-          finishedAt: new Date().toISOString(),
+          finishedAt: formatDate(new Date()),
           durationMs: duration,
           result,
-          updatedAt: new Date().toISOString(),
+          updatedAt: formatDate(new Date()),
           updatedBy: "system",
         })
         .where(and(
@@ -83,11 +84,11 @@ export class JobMonitor {
         .update(systemJobExecutionLogs)
         .set({
           status: "failed",
-          finishedAt: new Date().toISOString(),
+          finishedAt: formatDate(new Date()),
           durationMs: duration,
           errorMessage: error.message,
           retryCount: job.attemptsMade,
-          updatedAt: new Date().toISOString(),
+          updatedAt: formatDate(new Date()),
           updatedBy: "system",
         })
         .where(and(

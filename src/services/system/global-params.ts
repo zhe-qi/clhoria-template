@@ -12,6 +12,7 @@ import { CacheConfig, getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enu
 import { logger } from "@/lib/logger";
 import { pagination } from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
+import { formatDate } from "@/utils/tools/formatter";
 
 export interface GlobalParamsListOptions {
   search?: string;
@@ -273,7 +274,7 @@ export async function updateParam(key: string, data: UpdateGlobalParamsData, use
     .set({
       ...data,
       updatedBy: userId,
-      updatedAt: new Date().toISOString(),
+      updatedAt: formatDate(new Date()),
     })
     .where(eq(globalParams.key, key))
     .returning();

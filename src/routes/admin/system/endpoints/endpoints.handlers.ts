@@ -7,6 +7,7 @@ import db from "@/db";
 import { casbinRule, systemEndpoint } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
+import { formatDate } from "@/utils/tools/formatter";
 
 import type { SystemEndpointsRouteHandlerType } from "./endpoints.index";
 
@@ -70,7 +71,7 @@ export const tree: SystemEndpointsRouteHandlerType<"tree"> = async (c) => {
     resource,
     controller: "ResourceGroup",
     summary: `${resource}资源组`,
-    createdAt: new Date().toISOString(),
+    createdAt: formatDate(new Date()),
     createdBy: "system",
     updatedAt: null,
     updatedBy: null,
@@ -151,7 +152,7 @@ export const update: SystemEndpointsRouteHandlerType<"update"> = async (c) => {
   try {
     const [updated] = await db
       .update(systemEndpoint)
-      .set({ ...body, updatedAt: new Date().toISOString() })
+      .set({ ...body, updatedAt: formatDate(new Date()) })
       .where(eq(systemEndpoint.id, id))
       .returning();
 

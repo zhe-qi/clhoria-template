@@ -6,6 +6,7 @@ import db from "@/db";
 import { systemTokens } from "@/db/schema";
 import { TokenStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
+import { formatDate } from "@/utils/tools/formatter";
 
 import type { JobHandler } from "../types";
 
@@ -15,7 +16,7 @@ import type { JobHandler } from "../types";
 export const tokenCleanupJob: JobHandler = async (job: Job) => {
   logger.info("Token清理任务开始执行", {
     jobId: job.id,
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
   });
 
   const { retentionDays = 7 } = job.data || {}; // 默认保留7天
@@ -51,7 +52,7 @@ export const tokenCleanupJob: JobHandler = async (job: Job) => {
 
     const result = {
       message: "Token清理完成",
-      timestamp: new Date().toISOString(),
+      timestamp: formatDate(new Date()),
       jobId: job.id,
       retentionDays,
       deletedTokens: deleteResult.length,
@@ -90,7 +91,7 @@ export const helloWorldJob: JobHandler = async (job: Job) => {
 
   const result = {
     message: "Hello World!",
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
     jobId: job.id,
     data: job.data,
   };
@@ -106,7 +107,7 @@ export const helloWorldJob: JobHandler = async (job: Job) => {
 export const systemCleanupJob: JobHandler = async (job: Job) => {
   logger.info("系统清理任务开始执行", {
     jobId: job.id,
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
   });
 
   const { retentionDays = 30 } = job.data || {};
@@ -128,7 +129,7 @@ export const systemCleanupJob: JobHandler = async (job: Job) => {
 
   const result = {
     message: "系统清理完成",
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
     jobId: job.id,
     retentionDays,
     cleanedItems: {
@@ -149,7 +150,7 @@ export const systemCleanupJob: JobHandler = async (job: Job) => {
 export const dataBackupJob: JobHandler = async (job: Job) => {
   logger.info("数据备份任务开始执行", {
     jobId: job.id,
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
   });
 
   const { backupType = "incremental" } = job.data || {};
@@ -175,11 +176,11 @@ export const dataBackupJob: JobHandler = async (job: Job) => {
 
   const result = {
     message: "数据备份完成",
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
     jobId: job.id,
     backupType,
     backupSize: `${Math.floor(Math.random() * 1000 + 100)}MB`,
-    backupLocation: `/backups/${new Date().toISOString().split("T")[0]}/`,
+    backupLocation: `/backups/${formatDate(new Date(), "yyyy-MM-dd")}/`,
   };
 
   logger.info("数据备份任务执行完成", result);
@@ -193,7 +194,7 @@ export const dataBackupJob: JobHandler = async (job: Job) => {
 export const reportGenerationJob: JobHandler = async (job: Job) => {
   logger.info("报表生成任务开始执行", {
     jobId: job.id,
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
   });
 
   const { reportType = "daily", dateRange } = job.data || {};
@@ -215,7 +216,7 @@ export const reportGenerationJob: JobHandler = async (job: Job) => {
 
   const result = {
     message: "报表生成完成",
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
     jobId: job.id,
     reportType,
     dateRange,
@@ -234,7 +235,7 @@ export const reportGenerationJob: JobHandler = async (job: Job) => {
 export const emailSendJob: JobHandler = async (job: Job) => {
   logger.info("邮件发送任务开始执行", {
     jobId: job.id,
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
   });
 
   const { recipients = [], subject, content: _content } = job.data || {};
@@ -252,7 +253,7 @@ export const emailSendJob: JobHandler = async (job: Job) => {
 
   const result = {
     message: "邮件发送完成",
-    timestamp: new Date().toISOString(),
+    timestamp: formatDate(new Date()),
     jobId: job.id,
     subject,
     recipientCount: totalRecipients,

@@ -12,6 +12,7 @@ import { getAvailableHandlerNames, validateHandlerName } from "@/jobs/registry";
 import { getScheduler } from "@/jobs/scheduler";
 import { JobStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
+import { formatDate } from "@/utils/tools/formatter";
 
 // 类型定义
 type ScheduledJob = InferSelectModel<typeof systemScheduledJobs>;
@@ -202,7 +203,7 @@ export async function updateScheduledJob(
       .update(systemScheduledJobs)
       .set({
         ...updateData,
-        updatedAt: new Date().toISOString(),
+        updatedAt: formatDate(new Date()),
         updatedBy,
       })
       .where(and(
@@ -341,7 +342,7 @@ export async function toggleJobStatus(
       .update(systemScheduledJobs)
       .set({
         status: newStatus,
-        updatedAt: new Date().toISOString(),
+        updatedAt: formatDate(new Date()),
         updatedBy,
       })
       .where(and(

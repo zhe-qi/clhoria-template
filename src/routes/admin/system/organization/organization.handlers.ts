@@ -8,6 +8,7 @@ import db from "@/db";
 import { systemOrganization } from "@/db/schema";
 import { getDuplicateKeyError, Status } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
+import { formatDate } from "@/utils/tools/formatter";
 import { pickContext } from "@/utils/tools/hono-helpers";
 
 import type { SystemOrganizationRouteHandlerType } from "./organization.index";
@@ -166,7 +167,7 @@ async function updateOrganization(
     .update(systemOrganization)
     .set({
       ...params,
-      updatedAt: new Date().toISOString(),
+      updatedAt: formatDate(new Date()),
     })
     .where(and(
       eq(systemOrganization.id, id),

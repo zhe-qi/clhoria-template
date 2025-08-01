@@ -5,6 +5,7 @@ import path from "node:path";
 import db from "@/db";
 import { systemJobHandlers } from "@/db/schema";
 import { logger } from "@/lib/logger";
+import { formatDate } from "@/utils/tools/formatter";
 
 import type { JobHandlerMeta } from "./types";
 
@@ -130,7 +131,7 @@ export async function syncHandlersToDatabase(): Promise<void> {
             description: handler.description,
             filePath: handler.filePath,
             isActive: true,
-            updatedAt: new Date().toISOString(),
+            updatedAt: formatDate(new Date()),
             updatedBy: systemUserId,
           })
           .where(eq(systemJobHandlers.name, handler.name));
@@ -160,7 +161,7 @@ export async function syncHandlersToDatabase(): Promise<void> {
           .update(systemJobHandlers)
           .set({
             isActive: false,
-            updatedAt: new Date().toISOString(),
+            updatedAt: formatDate(new Date()),
             updatedBy: systemUserId,
           })
           .where(eq(systemJobHandlers.name, existingHandler.name));

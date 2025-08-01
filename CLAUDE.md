@@ -24,6 +24,7 @@ This is a backend template based on hono. It uses TypeScript, Drizzle ORM and Po
 - **Return Format**: Single line `return c.json(data, HttpStatusCodes.OK)` format
 - **Error Handling**: No console.log in handlers, return appropriate HTTP status codes
 - **Import Order**: Framework imports first, then schemas, then utils
+- **Date Handling**: ALWAYS use `formatDate()` from `@/utils/tools/formatter` instead of `new Date().toISOString()` for consistent date formatting
 
 ## Database Commands
 
