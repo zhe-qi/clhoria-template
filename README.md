@@ -1,35 +1,63 @@
 # Hono Template
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)
+![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
+
 现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。集成 Drizzle ORM + PostgreSQL 数据层，实现完整的 RBAC 权限体系、多租户架构和 OpenAPI 规范。支持多层路由分离、JWT 认证、Redis 缓存、限流中间件等企业级功能，提供开箱即用的后端解决方案。
 
-## 项目特性
+## 功能特性
 
-- 🚀 **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
-- 🔐 **多层认证授权**: JWT + Casbin 基于角色的访问控制
-- �📚 **自动化文档**: OpenAPI 规范，自动生成 API 文档
-- 🏗️ **严格架构**: 函数式开发规范、多层路由结构（公共/客户端/管理端）
-- 🔄 **完整 RBAC**: 用户、角色、权限、菜单管理
-- 🌐 **多租户支持**: 域管理和数据隔离
-- ⚡ **高性能缓存**: Redis 缓存 + 多层限流策略
-- 🧪 **测试友好**: Vitest 测试框架，完整的测试环境配置
-- 📦 **生产就绪**: 优化构建 + Docker 支持
-- ☁️ **对象存储**: 集成 Cloudflare R2 对象存储服务
-- ⏰ **任务队列**: 基于 BullMQ 的定时任务和后台任务队列管理
-- 🤖 **Claude Code 优化**: 专为 Claude Code 优化，包含完整的 CLAUDE.md 配置和 MCP 插件支持
+### 🏗️ 核心架构
+
+- **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
+- **严格架构**: 函数式开发规范、多层路由结构（公共/客户端/管理端）
+- **多租户支持**: 域管理和数据隔离
+- **自动化文档**: OpenAPI 规范，自动生成 API 文档
+
+### 🔐 认证授权
+
+- **多层认证授权**: JWT + Casbin 基于角色的访问控制
+- **完整 RBAC**: 用户、角色、权限、菜单管理
+- **部门管理**: 树形组织架构，支持数据权限
+- **岗位管理**: 用户职务配置和权限分配
+
+### 📊 数据管理
+
+- **字典管理**: 系统常用固定数据维护
+- **参数管理**: 动态配置系统参数
+- **操作日志**: 系统操作记录和异常日志追踪
+- **登录日志**: 用户登录状态和异常监控
+
+### 🚀 性能优化
+
+- **高性能缓存**: Redis 缓存 + 多层限流策略
+- **任务队列**: 基于 BullMQ 的定时任务和后台任务队列管理
+- **对象存储**: 集成 Cloudflare R2 对象存储服务
+- **连接池监控**: 数据库连接池状态监控和性能分析
+
+### 🛠️ 开发工具
+
+- **AI Agent 集成**: 智能代码生成和业务逻辑推理，替代传统低效工具
+- **Claude Code 优化**: 专为 Claude Code 优化，包含完整的 CLAUDE.md 配置和 MCP 插件支持
+- **测试友好**: Vitest 测试框架，完整的测试环境配置
+- **生产就绪**: 优化构建 + Docker 支持
+
+### 📈 监控运维
+
+- **实时监控**: 在线用户状态监控和系统资源监控
+- **通知公告**: 系统消息发布和维护通知
+- **缓存监控**: Redis 缓存状态查询和管理
+- **性能指标**: Prometheus + Grafana 监控方案
 
 ## 项目预览
 
-### Drizzle Studio 数据库管理
-
-![Drizzle Studio](https://r2.promptez.cn/drizzle-studio.webp)
-
-### Swagger API 文档
-
-![Swagger API 文档](https://r2.promptez.cn/swagger.webp)
-
-### 测试覆盖率报告
-
-![测试覆盖率](https://r2.promptez.cn/test.webp)
+<div align="center">
+  <img src="https://r2.promptez.cn/drizzle-studio.webp" width="30%" alt="Drizzle Studio">
+  <img src="https://r2.promptez.cn/swagger.webp" width="30%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/test.webp" width="30%" alt="测试覆盖率">
+</div>
 
 ## 快速开始
 
@@ -46,14 +74,31 @@
 2. **启动服务**
 
    ```bash
+   # 启动完整应用（数据库 + 应用）
    docker-compose up --build
+
+   # 仅启动数据库服务（用于本地开发）
+   docker-compose --profile services up -d
+
+   # 启动应用 + 监控服务
+   docker-compose --profile monitoring up -d
+
+   # 启动所有服务（应用 + 数据库 + 监控）
+   docker-compose --profile full up -d
+
+   # 后台运行
+   docker-compose up -d
+
+   # 停止服务
+   docker-compose down
+
+   # 删除数据卷（重置数据库）
+   docker-compose down -v
    ```
 
-   这将自动启动 PostgreSQL、Redis 和应用服务。应用启动时会自动执行数据库迁移和数据初始化。访问 <http://localhost:9999> 查看 API 文档。
+   应用启动时会自动执行数据库迁移和数据初始化。访问 <http://localhost:9999> 查看 API 文档。
 
 ### 本地开发环境
-
-如需本地开发，请按以下步骤配置：
 
 #### 环境要求
 
@@ -79,8 +124,6 @@
 
 3. **配置环境变量**
 
-   复制环境变量模板文件并根据需要进行配置：
-
    ```bash
    cp .env.example .env
    ```
@@ -98,21 +141,14 @@
    pnpm sync:permissions
    ```
 
-   **注意**：
-
-   - 应用启动时会自动执行数据库迁移和数据初始化（如果数据库为空）
-   - 生产环境部署时，需要先验证迁移：
+   **生产环境部署**需要先验证迁移：
 
    ```bash
-   # 生成迁移文件
-   pnpm generate
-
-   # 执行迁移（生产环境）
-   pnpm migrate
+   pnpm generate  # 生成迁移文件
+   pnpm migrate   # 执行迁移
    ```
 
 5. **启动开发服务器**
-
    ```bash
    pnpm dev
    ```
@@ -238,16 +274,6 @@ pnpm start
 
 提供完整的监控解决方案，包含 Grafana、Prometheus、数据库连接池监控等。
 
-### 快速启动
-
-```bash
-# 启动监控服务
-docker-compose --profile monitoring up -d
-
-# 启动完整应用 + 监控
-docker-compose --profile full up -d
-```
-
 ### 访问地址
 
 | 服务       | 地址                            | 默认账号       |
@@ -262,6 +288,7 @@ docker-compose --profile full up -d
 
 - [ ] **工作流自动化**: 集成 n8n 工作流引擎
 - [ ] **性能测试**: 集成 k6 压力测试框架
+- [ ] **日志分析**: 集成 Kafka + Elasticsearch 日志收集和分析系统
 - [ ] **AI 智能化**: 自然语言代码生成和业务逻辑推理
 - [ ] **前端集成**: Vue3 管理界面和低代码平台
 
@@ -283,24 +310,14 @@ pnpm test:coverage
 
 ## 贡献指南
 
-欢迎贡献！请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范。
-
-```bash
-# 示例提交
-git commit -m "feat: 添加用户权限管理功能"
-git commit -m "fix: 修复登录状态验证问题"
-```
-
-提交 PR 前请确保测试通过：`pnpm test` 和 `pnpm lint`。
+欢迎贡献！请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范，提交 PR 前确保 `pnpm test` 和 `pnpm lint` 通过。
 
 ## 项目引用
 
-本项目参考了优秀的开源项目，在此表示感谢：
+感谢以下优秀开源项目的启发：
 
-- **启动模板**: 基于 [hono-open-api-starter](https://github.com/w3cj/hono-open-api-starter) 进行魔改和扩展
-- **后台参考**: 参考了 [soybean-admin-nestjs](https://github.com/soybeanjs/soybean-admin-nestjs) 的大量后台管理代码实现
-
-这些项目为本模板的架构设计和功能实现提供了宝贵的参考和灵感。
+- [hono-open-api-starter](https://github.com/w3cj/hono-open-api-starter) - 启动模板基础参考
+- [soybean-admin-nestjs](https://github.com/soybeanjs/soybean-admin-nestjs) - 后台管理功能参考
 
 ## 许可证
 

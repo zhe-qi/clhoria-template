@@ -27,9 +27,6 @@ const EnvSchema = z.object({
   CLIENT_JWT_SECRET: z.string(),
   ADMIN_JWT_SECRET: z.string(),
 
-  // pgbouncer (管理连接，用于监控)
-  PGBOUNCER_ADMIN_URL: z.string().optional(),
-
   // cloudflare r2
   ACCESS_KEY_ID: z.string(),
   SECRET_ACCESS_KEY: z.string(),
@@ -38,10 +35,6 @@ const EnvSchema = z.object({
 
   // sentry
   SENTRY_DSN: z.string().optional(),
-
-  // arcjet
-  ARCJET_ENV: z.enum(["development", "production"]).default("development"),
-  ARCJET_KEY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

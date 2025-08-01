@@ -26,8 +26,6 @@ configureMainDoc?.(app);
 const { printMetrics, registerMetrics } = prometheus();
 
 app.use("*", registerMetrics);
-
-// 配置 Sentry
 app.use("*", sentry({ dsn: env.SENTRY_DSN }));
 
 // #region 公共路由
@@ -48,8 +46,6 @@ clientRoutes.forEach((route) => {
 // #region 后管路由
 // ps: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
 const adminRoutes = Object.values<AppOpenAPI>(allAdminExports);
-
-// admin 路由使用标准认证
 adminApp.use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
 adminApp.use("/*", casbin());
 adminApp.use("/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }));
