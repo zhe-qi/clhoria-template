@@ -42,6 +42,9 @@ export const CacheConstant = {
   /** 字典前缀 */
   DICTIONARIES_PREFIX: "dict:",
 
+  /** 通知公告前缀 */
+  NOTICES_PREFIX: "notice:",
+
   /** 权限验证结果前缀 */
   PERMISSION_RESULT_PREFIX: "perm:result:",
 } as const;
@@ -103,6 +106,20 @@ export function getDictionaryKey(code: string): string {
  */
 export function getDictionariesAllKey(): string {
   return `${CacheConstant.DICTIONARIES_PREFIX}all`;
+}
+
+/**
+ * 生成通知公告缓存Key
+ */
+export function getNoticeKey(id: string): string {
+  return `${CacheConstant.NOTICES_PREFIX}${id}`;
+}
+
+/**
+ * 生成通知公告列表缓存Key
+ */
+export function getNoticesAllKey(domain: string): string {
+  return `${CacheConstant.NOTICES_PREFIX}all:${domain}`;
 }
 
 /**

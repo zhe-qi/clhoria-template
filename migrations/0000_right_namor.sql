@@ -1,4 +1,5 @@
 CREATE TYPE "public"."menu_type" AS ENUM('directory', 'menu');--> statement-breakpoint
+CREATE TYPE "public"."notice_type" AS ENUM('NOTIFICATION', 'ANNOUNCEMENT');--> statement-breakpoint
 CREATE TABLE "client_users" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
@@ -147,6 +148,20 @@ CREATE TABLE "system_menu" (
 	"href" varchar(64),
 	"multi_tab" boolean DEFAULT false,
 	"domain" varchar(64) DEFAULT 'default' NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "system_notices" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" varchar(200) NOT NULL,
+	"type" "notice_type" DEFAULT 'NOTIFICATION' NOT NULL,
+	"content" text,
+	"status" integer DEFAULT 1 NOT NULL,
+	"domain" varchar(100) NOT NULL,
+	"sort_order" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_by" varchar(50),
+	"updated_by" varchar(50)
 );
 --> statement-breakpoint
 CREATE TABLE "system_operation_log" (
@@ -303,4 +318,8 @@ CREATE TABLE "tasks" (
 --> statement-breakpoint
 CREATE INDEX "idx_ptype_v0" ON "casbin_rule" USING btree ("ptype","v0");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v0_v1_v2" ON "casbin_rule" USING btree ("ptype","v0","v1","v2");--> statement-breakpoint
-CREATE INDEX "idx_ptype_v3" ON "casbin_rule" USING btree ("ptype","v3");
+CREATE INDEX "idx_ptype_v3" ON "casbin_rule" USING btree ("ptype","v3");--> statement-breakpoint
+CREATE INDEX "notices_domain_idx" ON "system_notices" USING btree ("domain");--> statement-breakpoint
+CREATE INDEX "notices_type_idx" ON "system_notices" USING btree ("type");--> statement-breakpoint
+CREATE INDEX "notices_status_idx" ON "system_notices" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "notices_created_at_idx" ON "system_notices" USING btree ("created_at" DESC NULLS LAST);

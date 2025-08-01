@@ -36,6 +36,9 @@ export const PermissionResource = {
   /** 字典管理 */
   SYSTEM_DICTIONARIES: "system-dictionaries",
 
+  /** 通知公告管理 */
+  SYSTEM_NOTICES: "system-notices",
+
   /** 定时任务管理 */
   SYSTEM_SCHEDULED_JOBS: "system-scheduled-jobs",
 } as const;

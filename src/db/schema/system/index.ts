@@ -7,6 +7,7 @@ export * from "./job-execution-logs";
 export * from "./job-handlers";
 export * from "./login-log";
 export * from "./menu";
+export * from "./notices";
 export * from "./operation-log";
 export * from "./organization";
 export * from "./post";
