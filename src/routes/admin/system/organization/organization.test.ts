@@ -8,7 +8,6 @@ import env from "@/env";
 import createApp from "@/lib/create-app";
 import { Status } from "@/lib/enums";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemOrganization } from "./organization.index";
@@ -27,7 +26,6 @@ function createOrganizationApp() {
   return createApp()
     .use("/system/organization/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/organization/*", casbin())
-    .use("/system/organization/*", operationLog({ moduleName: "组织管理", description: "组织管理操作" }))
     .route("/", systemOrganization);
 }
 

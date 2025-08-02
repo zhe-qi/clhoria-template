@@ -7,7 +7,6 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemPosts } from "./posts.index";
@@ -26,7 +25,6 @@ function createPostsApp() {
   return createApp()
     .use("/system/posts/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/posts/*", casbin())
-    .use("/system/posts/*", operationLog({ moduleName: "岗位管理", description: "岗位管理操作" }))
     .route("/", systemPosts);
 }
 

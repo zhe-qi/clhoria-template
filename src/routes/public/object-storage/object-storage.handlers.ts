@@ -5,6 +5,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import type { AppRouteHandler } from "@/types/lib";
 
 import { generateDownloadUrl, generateUploadUrl } from "@/services/object-storage";
+import { pickContext } from "@/utils";
 
 import type * as routes from "./object-storage.routes";
 
@@ -13,9 +14,7 @@ type ObjectStorageRouteHandlerType<T extends keyof typeof routes> = AppRouteHand
 export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = async (c) => {
   const { fileName, fileType } = c.req.valid("json");
 
-  // 可选：基于用户身份添加文件路径前缀
-  const userId = c.get("userId");
-  const userDomain = c.get("userDomain");
+  const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
 
   let finalFileName = fileName;
   if (userId && userDomain) {
@@ -38,9 +37,7 @@ export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = a
 export const getDownloadToken: ObjectStorageRouteHandlerType<"getDownloadToken"> = async (c) => {
   const { fileName } = c.req.valid("json");
 
-  // 可选：基于用户身份添加文件路径前缀
-  const userId = c.get("userId");
-  const userDomain = c.get("userDomain");
+  const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
 
   let finalFileName = fileName;
   if (userId && userDomain) {

@@ -19,7 +19,11 @@
     "studio": "drizzle-kit studio --config drizzle.config.ts",
     "seed": "tsx migrations/seed/index.ts",
     "sync:permissions": "test -f dist/scripts/sync-permissions.js && node dist/scripts/sync-permissions.js || tsx scripts/sync-permissions.ts",
-    "migrate": "drizzle-kit migrate"
+    "migrate": "drizzle-kit migrate",
+    "timescale:init": "tsx scripts/init-timescale.ts",
+    "timescale:migrate": "tsx scripts/migrate-to-timescale.ts full",
+    "timescale:optimize": "tsx scripts/optimize-database.ts",
+    "timescale:test": "tsx scripts/test-timescale.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",

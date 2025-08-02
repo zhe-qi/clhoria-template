@@ -8,7 +8,6 @@ import env from "@/env";
 import createApp from "@/lib/create-app";
 import { Status } from "@/lib/enums";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemDomains } from "./domains.index";
@@ -27,7 +26,6 @@ function createSysDomainsApp() {
   return createApp()
     .use("/system/domains/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/domains/*", casbin())
-    .use("/system/domains/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }))
     .route("/", systemDomains);
 }
 

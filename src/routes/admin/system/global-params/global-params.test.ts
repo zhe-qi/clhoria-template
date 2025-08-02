@@ -7,7 +7,6 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemGlobalParams } from "./global-params.index";
@@ -26,7 +25,6 @@ function createSysGlobalParamsApp() {
   return createApp()
     .use("/system/global-params/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/global-params/*", casbin())
-    .use("/system/global-params/*", operationLog({ moduleName: "全局参数管理", description: "全局参数管理操作" }))
     .route("/", systemGlobalParams);
 }
 

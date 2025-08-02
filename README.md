@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)
+![TypeScript](https://img.shields.io/badge/typescript-5.9+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
 现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式，结合 Hono + OpenAPI + Zod 完整技术体系，实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层，完整的 RBAC 权限体系、多租户架构，提供比传统后台管理系统更稳定、更高效的开发体验。
@@ -11,7 +11,7 @@
 
 ### 🏗️ 核心架构
 
-- **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
+- **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL + TimescaleDB
 - **严格架构**: 函数式开发规范、多层路由结构（公共/客户端/管理端）
 - **多租户支持**: 域管理和数据隔离
 - **自动化文档**: OpenAPI 规范，自动生成 API 文档
@@ -27,8 +27,8 @@
 
 - **字典管理**: 系统常用固定数据维护
 - **参数管理**: 动态配置系统参数
-- **操作日志**: 系统操作记录和异常日志追踪
-- **登录日志**: 用户登录状态和异常监控
+- **操作日志**: 基于 TimescaleDB 的高性能时序日志存储和分析
+- **登录日志**: 用户登录状态和异常监控，支持时序数据查询，时序高性能插入，低成本日志存储
 
 ### 🚀 性能优化
 
@@ -139,7 +139,7 @@
 
 - Node.js >= 24
 - pnpm >= 10
-- PostgreSQL >= 17
+- PostgreSQL >= 17 + TimescaleDB
 - Redis >= 7
 
 #### 安装步骤
@@ -334,7 +334,6 @@ pnpm start
 
 - [ ] **工作流自动化**: 集成 n8n 工作流引擎
 - [ ] **性能测试**: 集成 k6 压力测试框架
-- [ ] **日志分析**: 集成 Kafka + Elasticsearch 日志收集和分析系统，移除现有日志记录体系
 - [ ] **上下文工程师工具链**: 扩展 AI 辅助开发工具，支持更复杂的业务场景
 - [ ] **智能重构助手**: AI 驱动的代码重构和性能优化建议
 - [ ] **前端集成**: Vue3 管理界面和低代码平台

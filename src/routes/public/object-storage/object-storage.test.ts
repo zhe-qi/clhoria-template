@@ -9,7 +9,6 @@ import createApp from "@/lib/create-app";
 import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
 import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { objectStorage } from "./object-storage.index";
@@ -33,7 +32,6 @@ function createAdminObjectStorageApp() {
   return createApp()
     .use("/sts-token/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/sts-token/*", casbin())
-    .use("/sts-token/*", operationLog({ moduleName: "对象存储", description: "对象存储操作" }))
     .route("/", objectStorage);
 }
 

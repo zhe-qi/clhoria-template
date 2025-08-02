@@ -130,7 +130,7 @@ export class DrizzleCasbinAdapter implements Adapter {
 
   private loadPolicyLine(rule: TCasinTable, model: Model): void {
     Helper.loadPolicyLine([rule.ptype, rule.v0, rule.v1, rule.v2, rule.v3, rule.v4, rule.v5]
-      .filter(v => v !== null)
+      .filter(v => v != null)
       .join(", "), model);
   }
 

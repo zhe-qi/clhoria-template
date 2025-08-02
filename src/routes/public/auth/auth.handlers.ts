@@ -7,10 +7,11 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
-import { systemLoginLog, systemTokens, systemUser } from "@/db/schema";
+import { systemTokens, systemUser } from "@/db/schema";
 import env from "@/env";
-import { AuthType, Status, TokenStatus, TokenType } from "@/lib/enums";
+import { Status, TokenStatus, TokenType } from "@/lib/enums";
 import { getIPAddress } from "@/services/ip";
+import { TimescaleLogService } from "@/services/logging";
 import { setUserRolesToCache } from "@/services/system/user";
 import { omit } from "@/utils";
 import { formatDate } from "@/utils/tools/formatter";
@@ -18,10 +19,15 @@ import { formatDate } from "@/utils/tools/formatter";
 import type { AuthRouteHandlerType } from "./auth.index";
 
 export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
-  try {
-    const body = c.req.valid("json");
-    const { username, password, domain } = body;
+  const body = c.req.valid("json");
+  const { username, password, domain } = body;
 
+  // 获取客户端信息
+  const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const userAgent = c.req.header("user-agent") || "unknown";
+  const address = await getIPAddress(clientIP);
+
+  try {
     const user = await db.query.systemUser.findFirst({
       with: {
         userRoles: {
@@ -37,16 +43,61 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     });
 
     if (!user) {
+      // 记录登录失败日志
+      await TimescaleLogService.addLoginLog({
+        id: uuidV7(),
+        userId: "00000000-0000-0000-0000-000000000000",
+        username,
+        domain,
+        loginTime: formatDate(new Date()),
+        ip: clientIP,
+        address,
+        userAgent,
+        requestId: uuidV7(),
+        type: "FAILURE",
+        createdBy: "system",
+        createdAt: formatDate(new Date()),
+      });
       return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
     }
 
     if (user.status !== Status.ENABLED) {
+      // 记录登录失败日志
+      await TimescaleLogService.addLoginLog({
+        id: uuidV7(),
+        userId: user.id,
+        username,
+        domain,
+        loginTime: formatDate(new Date()),
+        ip: clientIP,
+        address,
+        userAgent,
+        requestId: uuidV7(),
+        type: "FAILURE",
+        createdBy: "system",
+        createdAt: formatDate(new Date()),
+      });
       return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
     }
 
     const isPasswordValid = await verify(user.password, password);
 
     if (!isPasswordValid) {
+      // 记录登录失败日志
+      await TimescaleLogService.addLoginLog({
+        id: uuidV7(),
+        userId: user.id,
+        username,
+        domain,
+        loginTime: formatDate(new Date()),
+        ip: clientIP,
+        address,
+        userAgent,
+        requestId: uuidV7(),
+        type: "FAILURE",
+        createdBy: "system",
+        createdAt: formatDate(new Date()),
+      });
       return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
@@ -80,9 +131,6 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     }, env.ADMIN_JWT_SECRET, "HS256");
 
     // 保存 token 记录
-    const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
-    const userAgent = c.req.header("user-agent") || "unknown";
-    const address = await getIPAddress(clientIP);
 
     // 先撤销该用户的所有活跃 token
     await db.update(systemTokens)
@@ -108,17 +156,20 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       createdBy: "system",
     });
 
-    // 记录登录日志
-    await db.insert(systemLoginLog).values({
+    // 记录登录日志到 TimescaleDB
+    await TimescaleLogService.addLoginLog({
+      id: uuidV7(),
       userId: user.id,
       username: user.username,
       domain: user.domain,
+      loginTime: formatDate(new Date()),
       ip: clientIP,
       address,
       userAgent,
       requestId: uuidV7(),
-      type: AuthType.PASSWORD,
+      type: "SUCCESS",
       createdBy: "system",
+      createdAt: formatDate(new Date()),
     });
 
     const responseUser = omit(user, ["password"]);

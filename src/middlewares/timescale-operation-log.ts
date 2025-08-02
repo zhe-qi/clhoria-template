@@ -1,13 +1,11 @@
 import type { Context, MiddlewareHandler } from "hono";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { differenceInMilliseconds } from "date-fns";
+import { differenceInMilliseconds, formatISO } from "date-fns";
 import { v7 as uuidV7 } from "uuid";
 
-import db from "@/db";
-import { systemOperationLog } from "@/db/schema";
 import { logger } from "@/lib/logger";
-import { formatDate } from "@/utils";
+import { TimescaleLogService } from "@/services/logging";
 
 interface OperationLogOptions {
   moduleName: string;
@@ -15,10 +13,9 @@ interface OperationLogOptions {
 }
 
 /**
- * 操作日志中间件
- * 记录用户的操作行为
+ * TimescaleDB 操作日志中间件
  */
-export function operationLog(options: OperationLogOptions): MiddlewareHandler {
+export function timescaleOperationLog(options: OperationLogOptions): MiddlewareHandler {
   return async (c: Context, next) => {
     const startTime = new Date();
 
@@ -68,8 +65,8 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       logger.warn({ error }, "响应体解析失败");
     }
 
-    // 异步记录日志，不阻塞响应
-    void db.insert(systemOperationLog).values({
+    // 异步写入，不阻塞响应
+    void TimescaleLogService.addOperationLog({
       userId,
       username,
       domain,
@@ -83,13 +80,10 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       params: params || null,
       body: body || null,
       response: response || null,
-      startTime: formatDate(startTime),
-      endTime: formatDate(endTime),
+      startTime: formatISO(startTime),
+      endTime: formatISO(endTime),
       duration,
       createdBy: userId,
-      createdAt: formatDate(new Date()),
-    }).catch((error) => {
-      console.error("Failed to save operation log:", error);
     });
   };
 }

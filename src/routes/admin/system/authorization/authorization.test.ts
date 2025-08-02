@@ -7,7 +7,6 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemAuthorization } from "./authorization.index";
@@ -26,7 +25,6 @@ function createAuthorizationApp() {
   return createApp()
     .use("/system/authorization/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/authorization/*", casbin())
-    .use("/system/authorization/*", operationLog({ moduleName: "授权管理", description: "授权管理操作" }))
     .route("/", systemAuthorization);
 }
 

@@ -114,11 +114,35 @@ async function startServer(): Promise<void> {
 
     // 打印启动成功消息
     await logServerStart();
+
+    // 设置优雅关闭处理
+    setupGracefulShutdown();
   }
   catch (error) {
     logger.error("服务启动失败:", error);
     process.exit(1);
   }
+}
+
+/**
+ * 设置优雅关闭处理
+ */
+function setupGracefulShutdown(): void {
+  const handleShutdown = async (signal: string) => {
+    logger.info(`收到 ${signal} 信号，开始优雅关闭...`);
+
+    try {
+      logger.info("应用已优雅关闭");
+      process.exit(0);
+    }
+    catch (error) {
+      logger.error("优雅关闭失败:", error);
+      process.exit(1);
+    }
+  };
+
+  process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+  process.on("SIGINT", () => handleShutdown("SIGINT"));
 }
 
 // 启动应用

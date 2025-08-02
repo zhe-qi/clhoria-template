@@ -107,22 +107,6 @@ CREATE TABLE "system_job_handlers" (
 	"is_active" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "system_login_log" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"user_id" uuid NOT NULL,
-	"username" varchar(64) NOT NULL,
-	"domain" varchar(64) NOT NULL,
-	"login_time" timestamp NOT NULL,
-	"ip" varchar(64) NOT NULL,
-	"port" integer,
-	"address" varchar(255) NOT NULL,
-	"user_agent" varchar(512) NOT NULL,
-	"request_id" varchar(64) NOT NULL,
-	"type" varchar(32) NOT NULL,
-	"created_by" varchar(64) NOT NULL,
-	"created_at" timestamp
-);
---> statement-breakpoint
 CREATE TABLE "system_menu" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
@@ -162,28 +146,6 @@ CREATE TABLE "system_notices" (
 	"status" integer DEFAULT 1 NOT NULL,
 	"domain" varchar(100) NOT NULL,
 	"sort_order" integer DEFAULT 0 NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "system_operation_log" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"user_id" uuid NOT NULL,
-	"username" varchar(64) NOT NULL,
-	"domain" varchar(64) NOT NULL,
-	"module_name" varchar(128) NOT NULL,
-	"description" varchar(512) NOT NULL,
-	"request_id" varchar(64) NOT NULL,
-	"method" varchar(16) NOT NULL,
-	"url" varchar(512) NOT NULL,
-	"ip" varchar(64) NOT NULL,
-	"user_agent" varchar(512),
-	"params" jsonb,
-	"body" jsonb,
-	"response" jsonb,
-	"start_time" timestamp NOT NULL,
-	"end_time" timestamp NOT NULL,
-	"duration" integer NOT NULL,
-	"created_by" varchar(64) NOT NULL,
-	"created_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE "system_organization" (
@@ -317,6 +279,46 @@ CREATE TABLE "tasks" (
 	"done" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "ts_login_log" (
+	"id" uuid,
+	"user_id" uuid NOT NULL,
+	"username" text NOT NULL,
+	"domain" text NOT NULL,
+	"login_time" timestamp with time zone NOT NULL,
+	"ip" text NOT NULL,
+	"port" integer,
+	"address" text NOT NULL,
+	"user_agent" text NOT NULL,
+	"request_id" text NOT NULL,
+	"type" text NOT NULL,
+	"created_by" text NOT NULL,
+	"created_at" timestamp with time zone,
+	CONSTRAINT "ts_login_log_id_login_time_pk" PRIMARY KEY("id","login_time")
+);
+--> statement-breakpoint
+CREATE TABLE "ts_operation_log" (
+	"id" uuid,
+	"user_id" uuid NOT NULL,
+	"username" text NOT NULL,
+	"domain" text NOT NULL,
+	"module_name" text NOT NULL,
+	"description" text NOT NULL,
+	"request_id" text NOT NULL,
+	"method" text NOT NULL,
+	"url" text NOT NULL,
+	"ip" text NOT NULL,
+	"user_agent" text,
+	"params" jsonb,
+	"body" jsonb,
+	"response" jsonb,
+	"start_time" timestamp with time zone NOT NULL,
+	"end_time" timestamp with time zone NOT NULL,
+	"duration" integer NOT NULL,
+	"created_by" text NOT NULL,
+	"created_at" timestamp with time zone,
+	CONSTRAINT "ts_operation_log_id_start_time_pk" PRIMARY KEY("id","start_time")
+);
+--> statement-breakpoint
 CREATE INDEX "idx_ptype_v0_v1_v2_v3" ON "casbin_rule" USING btree ("ptype","v0","v1","v2","v3");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v0" ON "casbin_rule" USING btree ("ptype","v0");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v3" ON "casbin_rule" USING btree ("ptype","v3");--> statement-breakpoint
@@ -326,4 +328,11 @@ CREATE INDEX "notices_type_idx" ON "system_notices" USING btree ("type");--> sta
 CREATE INDEX "notices_status_idx" ON "system_notices" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "notices_created_at_idx" ON "system_notices" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "system_user_domain_status_idx" ON "system_user" USING btree ("domain","status");--> statement-breakpoint
-CREATE INDEX "system_user_username_idx" ON "system_user" USING btree ("username");
+CREATE INDEX "system_user_username_idx" ON "system_user" USING btree ("username");--> statement-breakpoint
+CREATE INDEX "ts_login_log_time_idx" ON "ts_login_log" USING btree ("login_time" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "ts_login_log_user_time_idx" ON "ts_login_log" USING btree ("user_id","login_time" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "ts_login_log_domain_time_idx" ON "ts_login_log" USING btree ("domain","login_time" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "ts_operation_log_time_idx" ON "ts_operation_log" USING btree ("start_time" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "ts_operation_log_user_time_idx" ON "ts_operation_log" USING btree ("user_id","start_time" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "ts_operation_log_domain_time_idx" ON "ts_operation_log" USING btree ("domain","start_time" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "ts_operation_log_module_time_idx" ON "ts_operation_log" USING btree ("module_name","start_time" DESC NULLS LAST);

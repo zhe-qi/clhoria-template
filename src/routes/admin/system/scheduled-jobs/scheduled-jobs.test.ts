@@ -11,7 +11,6 @@ import env from "@/env";
 import { getScheduler } from "@/jobs/scheduler";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemScheduledJobs as systemScheduledJobsRoutes } from "./scheduled-jobs.index";
@@ -30,7 +29,6 @@ function createScheduledJobsApp() {
   return createApp()
     .use("/system/scheduled-jobs/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/scheduled-jobs/*", casbin())
-    .use("/system/scheduled-jobs/*", operationLog({ moduleName: "定时任务管理", description: "定时任务管理操作" }))
     .route("/", systemScheduledJobsRoutes);
 }
 

@@ -7,7 +7,6 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemMenus } from "./menus.index";
@@ -26,7 +25,6 @@ function createSysMenusApp() {
   return createApp()
     .use("/system/menus/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/menus/*", casbin())
-    .use("/system/menus/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }))
     .route("/", systemMenus);
 }
 

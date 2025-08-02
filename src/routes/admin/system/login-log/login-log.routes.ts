@@ -4,7 +4,7 @@ import { jsonContent } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 import { z } from "zod";
 
-import { selectSystemLoginLogSchema } from "@/db/schema";
+import { selectTsLoginLogSchema } from "@/db/schema";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
@@ -30,7 +30,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(selectSystemLoginLogSchema),
+      createPaginatedResultSchema(selectTsLoginLogSchema),
       "登录日志列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

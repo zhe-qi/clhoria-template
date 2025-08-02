@@ -7,7 +7,6 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog as operationLogMiddleware } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemOperationLog } from "./operation-log.index";
@@ -26,7 +25,6 @@ function createOperationLogApp() {
   return createApp()
     .use("/system/operation-log/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/operation-log/*", casbin())
-    .use("/system/operation-log/*", operationLogMiddleware({ moduleName: "后台管理", description: "后台管理操作" }))
     .route("/", systemOperationLog);
 }
 

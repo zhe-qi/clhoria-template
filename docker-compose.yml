@@ -1,15 +1,20 @@
 services:
-  # PostgreSQL 数据库
+  # TimescaleDB 数据库（基于 PostgreSQL）
   postgres:
-    image: postgres:16-alpine
+    image: timescale/timescaledb:latest-pg17
     container_name: hono-postgres
     environment:
       POSTGRES_DB: ${DB_NAME:-postgres}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_INITDB_ARGS: --encoding=UTF-8 --locale=C
+      # TimescaleDB 自动调优配置
+      TS_TUNE_MEMORY: 4GB
+      TS_TUNE_NUM_CPUS: 4
+      TS_TUNE_MAX_CONNS: 100
+      TS_TUNE_MAX_BG_WORKERS: 8
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d

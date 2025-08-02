@@ -7,7 +7,6 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { operationLog } from "@/middlewares/operation-log";
 import { auth } from "@/routes/public/public.index";
 
 import { systemNotices } from "./notices.index";
@@ -26,7 +25,6 @@ function createNoticesApp() {
   return createApp()
     .use("/system/notices/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/notices/*", casbin())
-    .use("/system/notices/*", operationLog({ moduleName: "通知公告管理", description: "通知公告管理操作" }))
     .route("/", systemNotices);
 }
 
