@@ -65,7 +65,7 @@ export function casbin(): MiddlewareHandler {
     const cachedResult = await getPermissionResult(userId, userDomain, method.toUpperCase(), path);
     let hasPermission: boolean;
 
-    if (cachedResult !== null) {
+    if (cachedResult != null) {
       hasPermission = cachedResult;
     }
     else {
@@ -93,7 +93,7 @@ async function validateUserStatus(userId: string, domain: string): Promise<{ val
   // 先从缓存获取用户状态
   const cachedStatus = await getUserStatusFromCache(userId, domain);
 
-  if (cachedStatus !== null) {
+  if (cachedStatus != null) {
     return cachedStatus ? { valid: true } : { valid: false, message: "User not found or disabled" };
   }
 

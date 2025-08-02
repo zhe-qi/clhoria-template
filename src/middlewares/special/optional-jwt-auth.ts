@@ -18,8 +18,6 @@ export function optionalJwtAuth(): MiddlewareHandler {
       return await next();
     }
 
-    const _token = authorization.substring(7);
-
     // 尝试使用客户端 JWT 密钥验证
     try {
       const clientJwtMiddleware = jwt({

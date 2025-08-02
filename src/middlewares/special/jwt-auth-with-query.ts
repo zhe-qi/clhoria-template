@@ -53,16 +53,8 @@ export function bullBoardStaticAuth(secret: string) {
     if (path.includes("/static/")) {
       const referer = c.req.header("Referer");
 
-      console.error("Static resource request:", {
-        path,
-        referer,
-        hasReferer: !!referer,
-        refererIncludes: referer?.includes("/admin/ui/queues"),
-      });
-
       // 检查 Referer 是否来自合法的 Bull Board 页面
       if (!referer || !referer.includes("/admin/ui/queues")) {
-        console.error("Access denied: Invalid referer");
         return c.json({ message: "Access denied" }, 403);
       }
 
@@ -71,15 +63,11 @@ export function bullBoardStaticAuth(secret: string) {
         const url = new URL(referer);
         const token = url.searchParams.get("token");
 
-        console.error("Token from referer:", token ? "found" : "not found");
-
         if (!token) {
-          console.error("Access denied: No token in referer");
           return c.json({ message: "Access denied" }, 403);
         }
 
         await verify(token, secret, "HS256");
-        console.error("Token verified successfully");
         await next();
       }
       catch (error) {

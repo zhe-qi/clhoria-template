@@ -859,6 +859,9 @@ describe("scheduledJobs routes with real authentication", () => {
 
     expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
 
+    // 等待100ms确保数据库事务完全提交
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // 3. 验证删除后访问返回404
     const response = await scheduledJobsClient.system["scheduled-jobs"][":id"].$get(
       {

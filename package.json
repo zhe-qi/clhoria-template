@@ -2,7 +2,7 @@
   "name": "hono-template",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.14.0",
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -22,14 +22,12 @@
     "migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "@arcjet/inspect": "1.0.0-beta.9",
-    "@arcjet/node": "1.0.0-beta.9",
-    "@asteasolutions/zod-to-openapi": "^8.0.0",
-    "@aws-sdk/client-s3": "^3.857.0",
-    "@aws-sdk/s3-request-presigner": "^3.857.0",
+    "@asteasolutions/zod-to-openapi": "^8.1.0",
+    "@aws-sdk/client-s3": "^3.859.0",
+    "@aws-sdk/s3-request-presigner": "^3.859.0",
     "@bull-board/api": "^6.12.0",
     "@bull-board/hono": "^6.12.0",
-    "@hono/node-server": "1.18.0",
+    "@hono/node-server": "1.18.1",
     "@hono/node-ws": "^1.2.0",
     "@hono/prometheus": "^1.0.2",
     "@hono/sentry": "^1.2.2",
@@ -44,7 +42,7 @@
     "dotenv-expand": "^12.0.2",
     "drizzle-orm": "^0.44.4",
     "drizzle-zod": "^0.8.2",
-    "hono": "^4.8.10",
+    "hono": "^4.8.12",
     "hono-pino": "^0.10.1",
     "hono-rate-limiter": "^0.4.2",
     "iconv-lite": "^0.6.3",
@@ -59,7 +57,7 @@
     "zod": "4.0.14"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^5.0.0",
+    "@antfu/eslint-config": "^5.1.0",
     "@types/node": "^24.1.0",
     "chalk": "^5.4.1",
     "cross-env": "^10.0.0",
@@ -69,10 +67,10 @@
     "gradient-string": "^3.0.0",
     "lint-staged": "^16.1.2",
     "rolldown": "1.0.0-beta.30",
-    "simple-git-hooks": "^2.13.0",
-    "tsdown": "^0.13.0",
+    "simple-git-hooks": "^2.13.1",
+    "tsdown": "^0.13.1",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.1-rc",
+    "typescript": "5.9.2",
     "vitest": "^3.2.4"
   },
   "pnpm": {

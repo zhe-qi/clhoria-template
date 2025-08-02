@@ -173,7 +173,7 @@ export async function getAdminDictionaries(options: DictionariesListOptions = {}
     )!;
   }
 
-  if (status !== undefined) {
+  if (status != null) {
     whereCondition = and(
       whereCondition,
       eq(systemDictionaries.status, status),
@@ -193,7 +193,7 @@ export async function getAdminDictionaries(options: DictionariesListOptions = {}
 export async function getPublicDictionary(code: string) {
   // 尝试从缓存获取
   const cached = await getCachedDictionary(code);
-  if (cached !== null) {
+  if (cached != null) {
     return cached; // 如果是undefined表示空值缓存命中
   }
 
@@ -222,7 +222,7 @@ export async function getPublicDictionary(code: string) {
  */
 export async function getAdminDictionary(code: string) {
   const cached = await getCachedDictionary(code);
-  if (cached !== null) {
+  if (cached != null) {
     return cached; // 如果是undefined表示空值缓存命中
   }
 
