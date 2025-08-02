@@ -109,20 +109,14 @@
 2. **启动服务**
 
    ```bash
-   # 启动完整应用（数据库 + 应用）
-   docker-compose up --build
+   # 启动所有服务（应用 + 数据库 + 监控）
+   docker-compose --profile full up
 
    # 仅启动数据库服务（用于本地开发）
    docker-compose --profile services up -d
 
    # 启动应用 + 监控服务
    docker-compose --profile monitoring up -d
-
-   # 启动所有服务（应用 + 数据库 + 监控）
-   docker-compose --profile full up -d
-
-   # 后台运行
-   docker-compose up -d
 
    # 停止服务
    docker-compose down
@@ -205,15 +199,6 @@
    ```
 
 访问 <http://localhost:9999> 查看 API 文档。
-
-## **TimescaleDB 环境变量**（可选）：
-
-| 变量名                     | 描述                  | 默认值   |
-| -------------------------- | --------------------- | -------- |
-| `IGNORE_TIMESCALE_ERRORS`  | 忽略 TimescaleDB 错误 | `false`  |
-| `TIMESCALE_CHUNK_INTERVAL` | TimescaleDB 分块间隔  | `7 days` |
-
-详细配置请参考 `.env.example` 文件。
 
 ### 目录结构
 
