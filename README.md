@@ -169,11 +169,27 @@
    # 推送数据库架构到开发环境
    pnpm push
 
+   # 初始化 TimescaleDB（如果使用 TimescaleDB）
+   pnpm timescale:init
+
    # 填充初始数据（可选，应用启动时会自动检查并初始化）
    pnpm seed
 
    # 同步权限数据
    pnpm sync:permissions
+   ```
+
+   **TimescaleDB 相关命令**：
+
+   ```bash
+   # 完整迁移到 TimescaleDB
+   pnpm timescale:migrate
+
+   # 优化 TimescaleDB 配置
+   pnpm timescale:optimize
+
+   # 测试 TimescaleDB 连接
+   pnpm timescale:test
    ```
 
    **生产环境部署**需要先验证迁移：
@@ -189,6 +205,15 @@
    ```
 
 访问 <http://localhost:9999> 查看 API 文档。
+
+## **TimescaleDB 环境变量**（可选）：
+
+| 变量名                     | 描述                  | 默认值   |
+| -------------------------- | --------------------- | -------- |
+| `IGNORE_TIMESCALE_ERRORS`  | 忽略 TimescaleDB 错误 | `false`  |
+| `TIMESCALE_CHUNK_INTERVAL` | TimescaleDB 分块间隔  | `7 days` |
+
+详细配置请参考 `.env.example` 文件。
 
 ### 目录结构
 

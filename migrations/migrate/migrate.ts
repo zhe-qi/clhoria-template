@@ -88,10 +88,57 @@ const seedDatabase = async () => {
   }
 };
 
+// 初始化 TimescaleDB 扩展和配置
+const initTimescaleDB = async () => {
+  try {
+    console.log('正在初始化 TimescaleDB 扩展...');
+    
+    // 创建 TimescaleDB 扩展（如果不存在）
+    await sql`CREATE EXTENSION IF NOT EXISTS timescaledb;`;
+    console.log('-> TimescaleDB 扩展初始化完成');
+    
+    // 检查是否有时序表需要转换
+    const tables = ['login_log', 'operation_log'];
+    for (const table of tables) {
+      try {
+        // 检查表是否存在且未被转换为 hypertable
+        const result = await sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = ${table}
+          ) as table_exists,
+          EXISTS (
+            SELECT FROM _timescaledb_catalog.hypertable 
+            WHERE table_name = ${table}
+          ) as is_hypertable;
+        `;
+        
+        if (result[0]?.table_exists && !result[0]?.is_hypertable) {
+          await sql`SELECT create_hypertable(${table}, 'created_at', if_not_exists => TRUE);`;
+          console.log(`-> 表 ${table} 已转换为 TimescaleDB hypertable`);
+        }
+      } catch (error) {
+        // 忽略表不存在的错误，因为这些表可能在迁移中创建
+        console.log(`-> 跳过表 ${table} 的 hypertable 转换 (可能尚未创建)`);
+      }
+    }
+    
+    console.log('TimescaleDB 初始化完成！');
+  } catch (error) {
+    console.error('TimescaleDB 初始化失败:', error);
+    // 不强制退出，因为可能在非 TimescaleDB 环境中运行
+    console.log('继续执行常规迁移...');
+  }
+};
+
 const migrateDatabase = async () => {
   console.log(`开始数据库迁移... 迁移文件夹: ${migrationsFolder}`);
 
   try {
+    // 先尝试初始化 TimescaleDB
+    await initTimescaleDB();
+    
     // 执行迁移
     await migrate(db, { migrationsFolder });
     console.log('数据库迁移成功完成！');
