@@ -72,7 +72,7 @@
     "lint-staged": "^16.1.2",
     "rolldown": "1.0.0-beta.30",
     "simple-git-hooks": "^2.13.1",
-    "tsdown": "^0.13.1",
+    "tsdown": "^0.13.2",
     "tsx": "^4.20.3",
     "typescript": "5.9.2",
     "vitest": "^3.2.4"

@@ -105,12 +105,7 @@ export class DrizzleCasbinAdapter implements Adapter {
     await Promise.all(processes);
   }
 
-  async removeFilteredPolicy(
-    _sec: string,
-    ptype: string,
-    fieldIndex: number,
-    ...fieldValues: string[]
-  ): Promise<void> {
+  async removeFilteredPolicy(_sec: string, ptype: string, fieldIndex: number, ...fieldValues: string[]): Promise<void> {
     const conditions = [];
 
     for (let i = 0; i < fieldValues.length; i++) {
