@@ -174,14 +174,14 @@ async function main() {
         // 完整迁移流程
         await backupOriginalTables();
         await migrateToTimescale();
-        logger.info("完整迁移流程完成，如需清理原始表请运行: tsx scripts/migrate-to-timescale.ts cleanup");
+        logger.info("完整迁移流程完成，如需清理原始表请运行: tsx scripts/timescale/migrate-to-timescale.ts cleanup");
         break;
       default:
         logger.info("使用方法:");
-        logger.info("tsx scripts/migrate-to-timescale.ts migrate  # 仅迁移数据");
-        logger.info("tsx scripts/migrate-to-timescale.ts backup   # 仅创建备份");
-        logger.info("tsx scripts/migrate-to-timescale.ts cleanup  # 清理原始表（重命名）");
-        logger.info("tsx scripts/migrate-to-timescale.ts full     # 完整流程（备份+迁移）");
+        logger.info("tsx scripts/timescale/migrate-to-timescale.ts migrate  # 仅迁移数据");
+        logger.info("tsx scripts/timescale/migrate-to-timescale.ts backup   # 仅创建备份");
+        logger.info("tsx scripts/timescale/migrate-to-timescale.ts cleanup  # 清理原始表（重命名）");
+        logger.info("tsx scripts/timescale/migrate-to-timescale.ts full     # 完整流程（备份+迁移）");
         process.exit(1);
     }
 

@@ -37,9 +37,9 @@ pnpm timescale:init
 pnpm timescale:migrate
 
 # 或分步执行
-tsx scripts/migrate-to-timescale.ts backup   # 创建备份
-tsx scripts/migrate-to-timescale.ts migrate  # 迁移数据
-tsx scripts/migrate-to-timescale.ts cleanup  # 清理原表
+tsx scripts/timescale/migrate-to-timescale.ts backup   # 创建备份
+tsx scripts/timescale/migrate-to-timescale.ts migrate  # 迁移数据
+tsx scripts/timescale/migrate-to-timescale.ts cleanup  # 清理原表
 ```
 
 ### 3. 数据库优化
@@ -157,10 +157,10 @@ pnpm timescale:migrate     # 数据迁移
 pnpm timescale:optimize    # 性能优化
 
 # 数据迁移细分命令
-tsx scripts/migrate-to-timescale.ts backup   # 仅备份
-tsx scripts/migrate-to-timescale.ts migrate  # 仅迁移
-tsx scripts/migrate-to-timescale.ts cleanup  # 清理原表
-tsx scripts/migrate-to-timescale.ts full     # 完整流程
+tsx scripts/timescale/migrate-to-timescale.ts backup   # 仅备份
+tsx scripts/timescale/migrate-to-timescale.ts migrate  # 仅迁移
+tsx scripts/timescale/migrate-to-timescale.ts cleanup  # 清理原表
+tsx scripts/timescale/migrate-to-timescale.ts full     # 完整流程
 ```
 
 ### 管理功能
@@ -250,7 +250,7 @@ await TimescaleLogService.flushBatch();
 1. **TimescaleDB 扩展未安装**
    ```bash
    # 检查扩展
-   tsx scripts/init-timescale.ts
+   tsx scripts/timescale/init-timescale.ts
    ```
 
 2. **批量写入性能问题**
