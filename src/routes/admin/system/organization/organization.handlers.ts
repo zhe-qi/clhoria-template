@@ -63,10 +63,7 @@ async function createOrganization(params: CreateOrganizationParams): Promise<Org
 }
 
 /** 获取组织树形结构 */
-async function getOrganizationTree(
-  domain: string,
-  status?: number,
-): Promise<OrganizationTreeNode[]> {
+async function getOrganizationTree(domain: string, status?: number): Promise<OrganizationTreeNode[]> {
   let whereCondition = eq(systemOrganization.domain, domain);
 
   if (status !== undefined) {
@@ -118,10 +115,7 @@ function buildOrganizationTree(organizations: OrganizationRecord[]): Organizatio
 }
 
 /** 根据ID获取组织 */
-async function getOrganizationById(
-  id: string,
-  domain: string,
-): Promise<OrganizationRecord | null> {
+async function getOrganizationById(id: string, domain: string): Promise<OrganizationRecord | null> {
   const [organization] = await db
     .select()
     .from(systemOrganization)
@@ -134,13 +128,9 @@ async function getOrganizationById(
 }
 
 /** 更新组织 */
-async function updateOrganization(
-  id: string,
-  domain: string,
-  params: UpdateOrganizationParams,
-): Promise<OrganizationRecord | null> {
+async function updateOrganization(id: string, domain: string, params: UpdateOrganizationParams): Promise<OrganizationRecord | null> {
   // 如果要更新父组织，需要验证
-  if (params.pid !== undefined) {
+  if (params.pid != null) {
     if (params.pid) {
       // 验证父组织存在且在同一域中
       const [parentOrg] = await db
@@ -179,11 +169,7 @@ async function updateOrganization(
 }
 
 /** 检查循环引用 */
-async function checkCircularReference(
-  orgId: string,
-  targetPid: string,
-  domain: string,
-): Promise<boolean> {
+async function checkCircularReference(orgId: string, targetPid: string, domain: string): Promise<boolean> {
   if (orgId === targetPid) {
     return true;
   }
@@ -218,10 +204,7 @@ async function checkCircularReference(
 }
 
 /** 删除组织 */
-async function deleteOrganization(
-  id: string,
-  domain: string,
-): Promise<boolean> {
+async function deleteOrganization(id: string, domain: string): Promise<boolean> {
   // 检查是否有子组织
   const [childCount] = await db
     .select({ count: count() })
@@ -298,13 +281,15 @@ export const create: SystemOrganizationRouteHandlerType<"create"> = async (c) =>
     return c.json(organization, HttpStatusCodes.CREATED);
   }
   catch (error: any) {
-    // PostgreSQL 唯一约束错误代码 23505 或包含相关错误文本
-    if (error.code === "23505"
+    const isHandlerExists = error.code === "23505"
       || error.cause?.code === "23505"
       || error.original?.code === "23505"
       || error.message?.includes("duplicate key")
       || error.message?.includes("unique constraint")
-      || error.message?.includes("violates unique constraint")) {
+      || error.message?.includes("violates unique constraint");
+
+    // PostgreSQL 唯一约束错误代码 23505 或包含相关错误文本
+    if (isHandlerExists) {
       return c.json(
         getDuplicateKeyError("code", "组织代码已存在"),
         HttpStatusCodes.CONFLICT,
@@ -355,8 +340,7 @@ export const update: SystemOrganizationRouteHandlerType<"update"> = async (c) =>
   }
   catch (error: any) {
     // 业务逻辑错误
-    if (error.message?.includes("父组织不存在")
-      || error.message?.includes("循环引用")) {
+    if (error.message?.includes("父组织不存在") || error.message?.includes("循环引用")) {
       return c.json(
         { message: error.message },
         HttpStatusCodes.BAD_REQUEST,

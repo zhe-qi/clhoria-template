@@ -1,16 +1,85 @@
 import type { InferInsertModel } from "drizzle-orm";
+import type { Context } from "hono";
 
 import { hash, verify } from "@node-rs/argon2";
 import { and, eq, inArray } from "drizzle-orm";
+import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
 import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
-import { CacheConfig, getPermissionResultKey, getUserRolesKey, getUserStatusKey, TokenStatus } from "@/lib/enums";
+import { CacheConfig, getPermissionResultKey, getUserRolesKey, getUserStatusKey, LoginLogType, TokenStatus } from "@/lib/enums";
 import { clearUserCache } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
+import { getIPAddress } from "@/services/ip";
+import { TimescaleLogService } from "@/services/logging";
+import { formatDate } from "@/utils/tools/formatter";
 
 type CreateUserParams = InferInsertModel<typeof systemUser>;
+
+/**
+ * 日志收集工具接口
+ */
+interface LogContext {
+  logFailure: (userId?: string) => Promise<void>;
+  logSuccess: (userId: string) => Promise<void>;
+  getTokenData: () => {
+    ip: string;
+    address: string;
+    userAgent: string;
+    requestId: string;
+  };
+}
+
+/**
+ * 创建登录日志收集上下文
+ */
+export async function createLoginLogContext(c: Context, username: string, domain: string): Promise<LogContext> {
+  const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const userAgent = c.req.header("user-agent") || "unknown";
+  const address = await getIPAddress(clientIP);
+  const requestId = c.get("requestId") || uuidV7();
+  const currentTime = formatDate(new Date());
+
+  const baseLogData = {
+    id: uuidV7(),
+    username,
+    domain,
+    loginTime: currentTime,
+    ip: clientIP,
+    address,
+    userAgent,
+    requestId,
+    createdBy: "system" as const,
+    createdAt: currentTime,
+  };
+
+  return {
+    // 记录失败日志
+    logFailure: (userId: string = "00000000-0000-0000-0000-000000000000") =>
+      TimescaleLogService.addLoginLog({
+        ...baseLogData,
+        userId,
+        type: LoginLogType.FAILURE,
+      }),
+
+    // 记录成功日志
+    logSuccess: (userId: string) =>
+      TimescaleLogService.addLoginLog({
+        ...baseLogData,
+        userId,
+        type: LoginLogType.SUCCESS,
+      }),
+
+    // 获取 token 数据
+    getTokenData: () => ({
+      ip: clientIP,
+      address,
+      userAgent,
+      requestId,
+    }),
+  };
+}
 
 /**
  * 创建用户
@@ -239,7 +308,7 @@ export async function getUserStatusFromCache(userId: string, domain: string): Pr
   const result = await redisClient.get(key);
 
   if (result === null) {
-    return null;
+    return result;
   }
 
   return result === "1";

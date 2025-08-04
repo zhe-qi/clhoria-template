@@ -110,10 +110,11 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
 
   // 如果状态字段发生变化，清理用户缓存
   if ("status" in updateData) {
-    await clearUserPermissionCache(id, domain);
+    void await clearUserPermissionCache(id, domain);
   }
 
   const userWithoutPassword = omit(updated, ["password"]);
+
   return c.json(userWithoutPassword, HttpStatusCodes.OK);
 };
 
@@ -134,7 +135,7 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   }
 
   // 清理用户相关缓存
-  await clearUserPermissionCache(id, domain);
+  void await clearUserPermissionCache(id, domain);
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);
 };
@@ -158,5 +159,6 @@ export const assignRoles: SystemUsersRouteHandlerType<"assignRoles"> = async (c)
   }
 
   const result = await assignRolesToUser(id, roleIds, domain, userId);
+
   return c.json(result, HttpStatusCodes.OK);
 };

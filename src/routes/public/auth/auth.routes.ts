@@ -54,7 +54,7 @@ export const adminRegister = createRoute({
   summary: "后台注册 限时开放",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ id: z.string().uuid() }),
+      z.object({ id: z.uuid() }),
       "注册成功",
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(

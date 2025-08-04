@@ -30,3 +30,27 @@ export const TokenType = {
 
 /** Token 类型 */
 export type TokenTypeType = (typeof TokenType)[keyof typeof TokenType];
+
+/** JWT 令牌类型枚举 */
+export const JwtTokenType = {
+  /** 访问令牌 */
+  ACCESS: "access",
+
+  /** 刷新令牌 */
+  REFRESH: "refresh",
+} as const;
+
+/** JWT 令牌类型 */
+export type JwtTokenTypeType = (typeof JwtTokenType)[keyof typeof JwtTokenType];
+
+/** 登录日志类型枚举 */
+export const LoginLogType = {
+  /** 登录成功 */
+  SUCCESS: "SUCCESS",
+
+  /** 登录失败 */
+  FAILURE: "FAILURE",
+} as const;
+
+/** 登录日志类型 */
+export type LoginLogTypeType = (typeof LoginLogType)[keyof typeof LoginLogType];

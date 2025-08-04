@@ -13,8 +13,7 @@ import {
 import type { SystemDictionariesRouteHandlerType } from "./dictionaries.index";
 
 export const list: SystemDictionariesRouteHandlerType<"list"> = async (c) => {
-  const query = c.req.valid("query");
-  const { search, status, page, limit } = query;
+  const { search, status, page, limit } = c.req.valid("query");
 
   const result = await getAdminDictionaries({
     search,
@@ -39,7 +38,6 @@ export const get: SystemDictionariesRouteHandlerType<"get"> = async (c) => {
 
 export const create: SystemDictionariesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-
   const userId = c.get("userId");
 
   // 检查字典编码是否已存在
@@ -49,6 +47,7 @@ export const create: SystemDictionariesRouteHandlerType<"create"> = async (c) =>
   }
 
   const dictionary = await createDictionary(body, userId);
+
   return c.json(dictionary, HttpStatusCodes.CREATED);
 };
 

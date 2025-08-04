@@ -42,6 +42,59 @@ This is a backend template based on hono. It uses TypeScript, Drizzle ORM and Po
   - Use `format(date, "yyyy-MM-dd")` instead of `date.toISOString().split("T")[0]`
   - For timezone operations, use `date-fns-tz`
 - **Database Timestamps**: Use `timestamp({ mode: "string" })` instead of `timestamp({ mode: "date" })` for consistency with formatDate output
+- **Redis Type Safety**: ALWAYS specify return types for Redis operations instead of using `any`
+- **Unused Return Values**: When function has return value but not used, prefix with `void` to explicitly ignore
+
+### Redis Type Safety Standards
+**CRITICAL**: Always specify explicit types for Redis cached data instead of using `any`:
+
+```typescript
+// ✅ Correct - Explicit type annotation
+export async function getCachedParam(key: string): Promise<SelectGlobalParamsData | null | undefined> {
+  try {
+    const cached = await redisClient.get(getGlobalParamKey(key));
+    if (!cached) {
+      return null;
+    }
+    const parsed = JSON.parse(cached);
+    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed as SelectGlobalParamsData;
+  }
+  catch (error) {
+    logger.warn({ error, key }, "全局参数缓存获取失败");
+    return null;
+  }
+}
+
+// ❌ Wrong - Using any type
+const parsed = JSON.parse(cached); // Returns any
+return parsed; // Returns any
+```
+
+### Function Return Value Standards
+**CRITICAL**: When calling functions with return values that are not used, explicitly void them:
+
+```typescript
+// ✅ Correct - Explicitly void unused return values (sync functions)
+void updateUserPreferences(userId, preferences);
+void logActivity("user_action");
+
+// ✅ Correct - Explicitly void unused return values (async functions)
+void await clearUserPermissionCache(userId, domain);
+void await sendNotification(userId, message);
+void await updateUserLastLogin(userId);
+
+// ❌ Wrong - Ignoring return values without void
+clearUserPermissionCache(userId, domain); // Missing void await
+updateUserLastLogin(userId); // Missing void (or void await if async)
+sendNotification(userId, message); // Missing void await
+```
+
+**Rules**:
+1. Use `void functionCall()` for sync functions when return value is intentionally ignored
+2. Use `void await functionCall()` for async functions when return value is intentionally ignored
+3. **NEVER remove `await` from async functions** - always keep the await for proper error handling
+4. This makes intent explicit and satisfies ESLint rules
+5. Applies to all functions with return values that are not being used
 
 ## Database Commands
 

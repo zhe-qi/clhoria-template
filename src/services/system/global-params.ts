@@ -43,7 +43,7 @@ export async function getCachedParam(key: string) {
     }
     const parsed = JSON.parse(cached);
     // 检查是否为空值缓存标记
-    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed;
+    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed as SelectGlobalParamsData;
   }
   catch (error) {
     logger.warn({ error, key }, "全局参数缓存获取失败");
@@ -124,7 +124,7 @@ export async function getPublicList(options: GlobalParamsListOptions = {}) {
     const cacheKey = getGlobalParamsAllKey();
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      return JSON.parse(cached);
+      return JSON.parse(cached) as SelectGlobalParamsData[];
     }
   }
 

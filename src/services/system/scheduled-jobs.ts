@@ -293,7 +293,7 @@ export async function getScheduledJobs(params: QueryScheduledJobsParams): Promis
     );
   }
 
-  if (status !== undefined) {
+  if (status != null) {
     whereConditions.push(eq(systemScheduledJobs.status, status));
   }
 

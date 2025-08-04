@@ -44,7 +44,7 @@ export async function getCachedDictionary(code: string) {
     }
     const parsed = JSON.parse(cached);
     // 检查是否为空值缓存标记
-    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed;
+    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed as SelectDictionaryData;
   }
   catch (error) {
     logger.warn({ error, code }, "字典缓存获取失败");
@@ -125,7 +125,7 @@ export async function getPublicDictionaries(options: DictionariesListOptions = {
     const cacheKey = getDictionariesAllKey();
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      return JSON.parse(cached);
+      return JSON.parse(cached) as SelectDictionaryData[];
     }
   }
 

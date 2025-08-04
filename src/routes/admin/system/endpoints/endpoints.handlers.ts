@@ -176,7 +176,7 @@ export const remove: SystemEndpointsRouteHandlerType<"remove"> = async (c) => {
 
   const deleted = await db.delete(systemEndpoint).where(eq(systemEndpoint.id, id)).returning();
 
-  if (deleted.length === 0) {
+  if (deleted.length < 1) {
     return c.json({ message: "API端点不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 

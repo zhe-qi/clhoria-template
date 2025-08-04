@@ -30,7 +30,10 @@ const ErrorResponseSchema = z.object({
 export const getUploadToken = createRoute({
   path: "/sts-token/upload",
   method: "post",
-  middleware: [optionalJwtAuth(), timescaleOperationLog({ moduleName: "对象存储", description: "对象存储获取上传token" })],
+  middleware: [
+    optionalJwtAuth(),
+    timescaleOperationLog({ moduleName: "对象存储", description: "对象存储获取上传token" }),
+  ],
   request: {
     body: jsonContentRequired(
       UploadTokenRequestSchema,
@@ -59,7 +62,10 @@ export const getUploadToken = createRoute({
 export const getDownloadToken = createRoute({
   path: "/sts-token/download",
   method: "post",
-  middleware: [optionalJwtAuth(), timescaleOperationLog({ moduleName: "对象存储", description: "对象存储获取下载token" })],
+  middleware: [
+    optionalJwtAuth(),
+    timescaleOperationLog({ moduleName: "对象存储", description: "对象存储获取下载token" }),
+  ],
   request: {
     body: jsonContentRequired(
       DownloadTokenRequestSchema,

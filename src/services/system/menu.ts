@@ -109,7 +109,7 @@ function getHomeRoute(routes: MenuRoute[]): string {
         continue;
       }
 
-      if (!route.children || route.children.length === 0) {
+      if (!route.children || route.children.length < 1) {
         return route.name;
       }
 
@@ -196,7 +196,7 @@ export async function getUserRoutes(userId: string, domain: string): Promise<Use
   const cachedRoutes = await redisClient.get(cacheKey);
 
   if (cachedRoutes) {
-    return JSON.parse(cachedRoutes);
+    return JSON.parse(cachedRoutes) as UserRoute;
   }
 
   // 获取用户的所有角色（包括隐式角色）
@@ -295,15 +295,18 @@ export async function clearAllMenuCache(domain: string): Promise<void> {
 /**
  * 为角色分配菜单
  */
-export async function assignMenusToRole(roleId: string, menuIds: string[], domain: string): Promise<{ success: boolean; count: number }> {
+export async function assignMenusToRole(roleId: string, menuIds: string[], domain: string): Promise<{ success: boolean; added: number; removed: number }> {
   const result = await db.transaction(async (tx) => {
-    // 删除现有的菜单分配
-    await tx
+    // 删除现有的菜单分配并获取删除数量
+    const deletedItems = await tx
       .delete(systemRoleMenu)
       .where(and(
         eq(systemRoleMenu.roleId, roleId),
         eq(systemRoleMenu.domain, domain),
-      ));
+      ))
+      .returning({ id: systemRoleMenu.roleId });
+
+    const removedCount = deletedItems.length;
 
     // 添加新的菜单分配
     if (menuIds.length > 0) {
@@ -316,7 +319,7 @@ export async function assignMenusToRole(roleId: string, menuIds: string[], domai
       );
     }
 
-    return { success: true, count: menuIds.length };
+    return { success: true, added: menuIds.length, removed: removedCount };
   });
 
   // 清除相关缓存
@@ -535,7 +538,7 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
   // 获取用户的所有角色（包括隐式角色）
   const roles = await rbac.getImplicitRolesForUser(userId, domain);
 
-  if (roles.length === 0) {
+  if (roles.length < 1) {
     return { routes: [], home: "/dashboard" };
   }
 
@@ -553,11 +556,13 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
   // 提取去重的菜单数据并过滤
   const menusMap = new Map();
   roleMenus.forEach((rm) => {
-    if (rm.menu
+    const isHandlerExists = rm.menu
       && rm.menu.status === Status.ENABLED
-      && rm.menu.constant === false // 排除常量菜单
+      && !rm.menu.constant
       && rm.menu.domain === domain
-      && !menusMap.has(rm.menu.id)) {
+      && !menusMap.has(rm.menu.id);
+
+    if (isHandlerExists) {
       menusMap.set(rm.menu.id, rm.menu);
     }
   });

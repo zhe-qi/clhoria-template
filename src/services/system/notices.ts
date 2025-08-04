@@ -45,7 +45,7 @@ export async function getCachedNotice(id: string) {
     }
     const parsed = JSON.parse(cached);
     // 检查是否为空值缓存标记
-    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed;
+    return parsed === CacheConfig.NULL_CACHE_VALUE ? undefined : parsed as SelectNoticeData;
   }
   catch (error) {
     logger.warn({ error, id }, "通知公告缓存获取失败");
@@ -126,7 +126,7 @@ export async function getPublicNotices(options: NoticesListOptions) {
     const cacheKey = getNoticesAllKey(domain);
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      return JSON.parse(cached);
+      return JSON.parse(cached) as SelectNoticeData[];
     }
   }
 

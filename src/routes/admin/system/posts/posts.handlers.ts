@@ -50,7 +50,7 @@ export const simpleList: SystemPostsRouteHandlerType<"simpleList"> = async (c) =
     .from(systemPost)
     .where(and(
       eq(systemPost.domain, domain),
-      eq(systemPost.status, Status.ENABLED), // 只返回启用的岗位
+      eq(systemPost.status, Status.ENABLED),
     ))
     .orderBy(systemPost.postSort, systemPost.postName);
 
@@ -73,11 +73,13 @@ export const create: SystemPostsRouteHandlerType<"create"> = async (c) => {
   catch (error: any) {
     // PostgreSQL unique constraint violation error code is 23505
     // The error structure from postgres-js has the actual PostgreSQL error in error.cause
-    if (error.cause?.code === "23505"
+    const isHandlerExists = error.cause?.code === "23505"
       || error.message?.includes("duplicate key")
       || error.message?.includes("unique constraint")
       || error.cause?.detail?.includes("already exists")
-      || error.message?.includes("已存在")) {
+      || error.message?.includes("已存在");
+
+    if (isHandlerExists) {
       return c.json(getDuplicateKeyError("postCode", "岗位编码已存在"), HttpStatusCodes.CONFLICT);
     }
     throw error;
@@ -128,11 +130,13 @@ export const update: SystemPostsRouteHandlerType<"update"> = async (c) => {
     return c.json(updated, HttpStatusCodes.OK);
   }
   catch (error: any) {
-    if (error.cause?.code === "23505"
+    const isHandlerExists = error.cause?.code === "23505"
       || error.message?.includes("duplicate key")
       || error.message?.includes("unique constraint")
       || error.cause?.detail?.includes("already exists")
-      || error.message?.includes("已存在")) {
+      || error.message?.includes("已存在");
+
+    if (isHandlerExists) {
       return c.json(getDuplicateKeyError("postCode", "岗位编码已存在"), HttpStatusCodes.CONFLICT);
     }
     throw error;

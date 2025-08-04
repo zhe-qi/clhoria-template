@@ -51,17 +51,16 @@ export const create: SystemDomainsRouteHandlerType<"create"> = async (c) => {
     return c.json(domain, HttpStatusCodes.CREATED);
   }
   catch (error: any) {
-    // PostgreSQL 唯一约束错误代码 23505 或包含相关错误文本
-    if (error.code === "23505"
+    const isHandlerExists = error.code === "23505"
       || error.cause?.code === "23505"
       || error.original?.code === "23505"
       || error.message?.includes("duplicate key")
       || error.message?.includes("unique constraint")
-      || error.message?.includes("violates unique constraint")) {
-      return c.json(
-        getDuplicateKeyError("code", "域代码已存在"),
-        HttpStatusCodes.CONFLICT,
-      );
+      || error.message?.includes("violates unique constraint");
+
+    // PostgreSQL 唯一约束错误代码 23505 或包含相关错误文本
+    if (isHandlerExists) {
+      return c.json(getDuplicateKeyError("code", "域代码已存在"), HttpStatusCodes.CONFLICT);
     }
     throw error;
   }

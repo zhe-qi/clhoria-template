@@ -29,6 +29,7 @@ export const tree: RouteHandlerType<"tree"> = async (c) => {
     status,
     domain,
   });
+
   return c.json(tree, HttpStatusCodes.OK);
 };
 
@@ -37,7 +38,8 @@ export const getMenusByRole: RouteHandlerType<"getMenusByRole"> = async (c) => {
   const { id: roleId } = c.req.valid("param");
   const domain = c.get("userDomain");
 
-  const menus = await menuService.getMenusByRole(roleId, domain as string || "default");
+  const menus = await menuService.getMenusByRole(roleId, domain);
+
   return c.json(menus, HttpStatusCodes.OK);
 };
 
@@ -53,6 +55,7 @@ export const create: RouteHandlerType<"create"> = async (c) => {
   };
 
   const newMenu = await menuService.createMenu(menuData);
+
   return c.json(newMenu, HttpStatusCodes.OK);
 };
 
@@ -88,6 +91,7 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
   };
 
   const updatedMenu = await menuService.updateMenu(id, menuData, domain);
+
   return c.json(updatedMenu, HttpStatusCodes.OK);
 };
 
@@ -96,6 +100,7 @@ export const getConstantRoutes: RouteHandlerType<"getConstantRoutes"> = async (c
   const domain = c.get("userDomain");
 
   const routes = await menuService.getConstantRoutes(domain);
+
   return c.json(routes, HttpStatusCodes.OK);
 };
 
@@ -104,6 +109,7 @@ export const getUserRoutes: RouteHandlerType<"getUserRoutes"> = async (c) => {
   const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   const result = await menuService.getUserRoutesSimple(userId, domain);
+
   return c.json(result, HttpStatusCodes.OK);
 };
 
@@ -126,5 +132,6 @@ export const remove: RouteHandlerType<"remove"> = async (c) => {
   }
 
   await menuService.deleteMenu(id, domain);
+
   return c.body(null, HttpStatusCodes.NO_CONTENT);
 };

@@ -4,6 +4,8 @@ import { expand } from "dotenv-expand";
 import path from "node:path";
 import { z } from "zod/v4";
 
+import { parseEnvOrExit } from "@/utils/zod";
+
 expand(config({
   path: path.resolve(
     process.cwd(),
@@ -39,38 +41,4 @@ const EnvSchema = z.object({
 
 export type Env = z.infer<typeof EnvSchema>;
 
-const result = EnvSchema.safeParse(process.env);
-
-if (!result.success) {
-  console.error("❌ Invalid env:");
-
-  const fieldErrors: Record<string, string[]> = {};
-
-  result.error.issues.forEach((issue) => {
-    // 确保路径元素是字符串 (Symbol 不能作为索引类型)
-    const field = issue.path
-      .filter((p): p is string => typeof p === "string")
-      .join("."); // 处理嵌套路径，尽管环境变量是扁平的
-
-    if (field) {
-      // 将错误添加到对应字段
-      if (!fieldErrors[field]) {
-        fieldErrors[field] = [];
-      }
-      fieldErrors[field].push(issue.message);
-    }
-    else {
-      // 处理无字段关联的错误（如根级错误）
-      const rootKey = "_";
-      if (!fieldErrors[rootKey]) {
-        fieldErrors[rootKey] = [];
-      }
-      fieldErrors[rootKey].push(issue.message);
-    }
-  });
-
-  console.error(JSON.stringify(fieldErrors, null, 2));
-  process.exit(1);
-}
-
-export default result.data;
+export default parseEnvOrExit(EnvSchema);

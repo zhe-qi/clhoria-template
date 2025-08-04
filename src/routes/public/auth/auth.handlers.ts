@@ -1,18 +1,16 @@
 import { hash, verify } from "@node-rs/argon2";
-import { addDays, getUnixTime } from "date-fns";
+import { addDays, fromUnixTime, getUnixTime } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { sign, verify as verifyJwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
-import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
 import { systemTokens, systemUser } from "@/db/schema";
 import env from "@/env";
-import { Status, TokenStatus, TokenType } from "@/lib/enums";
-import { getIPAddress } from "@/services/ip";
-import { TimescaleLogService } from "@/services/logging";
-import { setUserRolesToCache } from "@/services/system/user";
+import { JwtTokenType, Status, TokenStatus, TokenType } from "@/lib/enums";
+import { logger } from "@/lib/logger";
+import { createLoginLogContext, setUserRolesToCache } from "@/services/system/user";
 import { omit } from "@/utils";
 import { formatDate } from "@/utils/tools/formatter";
 
@@ -22,10 +20,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
   const { username, password, domain } = body;
 
-  // 获取客户端信息
-  const clientIP = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
-  const userAgent = c.req.header("user-agent") || "unknown";
-  const address = await getIPAddress(clientIP);
+  const logContext = await createLoginLogContext(c, username, domain);
 
   try {
     const user = await db.query.systemUser.findFirst({
@@ -43,61 +38,19 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     });
 
     if (!user) {
-      // 记录登录失败日志
-      await TimescaleLogService.addLoginLog({
-        id: uuidV7(),
-        userId: "00000000-0000-0000-0000-000000000000",
-        username,
-        domain,
-        loginTime: formatDate(new Date()),
-        ip: clientIP,
-        address,
-        userAgent,
-        requestId: uuidV7(),
-        type: "FAILURE",
-        createdBy: "system",
-        createdAt: formatDate(new Date()),
-      });
+      await logContext.logFailure();
       return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
     }
 
     if (user.status !== Status.ENABLED) {
-      // 记录登录失败日志
-      await TimescaleLogService.addLoginLog({
-        id: uuidV7(),
-        userId: user.id,
-        username,
-        domain,
-        loginTime: formatDate(new Date()),
-        ip: clientIP,
-        address,
-        userAgent,
-        requestId: uuidV7(),
-        type: "FAILURE",
-        createdBy: "system",
-        createdAt: formatDate(new Date()),
-      });
+      await logContext.logFailure(user.id);
       return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
     }
 
     const isPasswordValid = await verify(user.password, password);
 
     if (!isPasswordValid) {
-      // 记录登录失败日志
-      await TimescaleLogService.addLoginLog({
-        id: uuidV7(),
-        userId: user.id,
-        username,
-        domain,
-        loginTime: formatDate(new Date()),
-        ip: clientIP,
-        address,
-        userAgent,
-        requestId: uuidV7(),
-        type: "FAILURE",
-        createdBy: "system",
-        createdAt: formatDate(new Date()),
-      });
+      await logContext.logFailure(user.id);
       return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
@@ -122,15 +75,13 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     // 将用户角色存储到 Redis
     await setUserRolesToCache(user.id, user.domain, roles);
 
-    const accessToken = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
+    const accessToken = await sign({ ...tokenPayload, type: JwtTokenType.ACCESS }, env.ADMIN_JWT_SECRET, "HS256");
     const refreshToken = await sign({
       ...tokenPayload,
-      type: "refresh",
+      type: JwtTokenType.REFRESH,
       exp: refreshTokenExp,
       jti: crypto.randomUUID(),
     }, env.ADMIN_JWT_SECRET, "HS256");
-
-    // 保存 token 记录
 
     // 先撤销该用户的所有活跃 token
     await db.update(systemTokens)
@@ -147,37 +98,21 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       userId: user.id,
       username: user.username,
       domain: user.domain,
-      expiresAt: formatDate(new Date(refreshTokenExp * 1000)), // 使用refresh token的过期时间
-      ip: clientIP,
-      address,
-      userAgent,
-      requestId: uuidV7(),
+      expiresAt: formatDate(fromUnixTime(refreshTokenExp)),
+      ...logContext.getTokenData(),
       type: TokenType.WEB,
       createdBy: "system",
     });
 
-    // 记录登录日志到 TimescaleDB
-    await TimescaleLogService.addLoginLog({
-      id: uuidV7(),
-      userId: user.id,
-      username: user.username,
-      domain: user.domain,
-      loginTime: formatDate(new Date()),
-      ip: clientIP,
-      address,
-      userAgent,
-      requestId: uuidV7(),
-      type: "SUCCESS",
-      createdBy: "system",
-      createdAt: formatDate(new Date()),
-    });
+    // 记录登录成功日志
+    await logContext.logSuccess(user.id);
 
     const responseUser = omit(user, ["password"]);
 
     return c.json({ token: accessToken, refreshToken, user: responseUser }, HttpStatusCodes.OK);
   }
   catch (error: any) {
-    console.error("adminLogin error details:", {
+    logger.error("adminLogin error details:", {
       message: error.message,
       stack: error.stack,
       name: error.name,
@@ -189,6 +124,9 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       column: error.column,
     });
 
+    // 记录异常情况下的失败日志，忽略日志失败避免影响主要逻辑
+    await logContext.logFailure().catch(() => {});
+
     // 根据路由定义，只能返回 401 Unauthorized
     return c.json({ message: "登录失败" }, HttpStatusCodes.UNAUTHORIZED);
   }
@@ -196,8 +134,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
 
 /** 后台注册 */
 export const adminRegister: AuthRouteHandlerType<"adminRegister"> = async (c) => {
-  const body = c.req.valid("json");
-  const { password, confirmPassword, ...userData } = body;
+  const { password, confirmPassword, ...userData } = c.req.valid("json");
 
   if (password !== confirmPassword) {
     return c.json({ message: "密码不一致" }, HttpStatusCodes.BAD_REQUEST);
@@ -233,7 +170,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
     // 验证 refresh token
     const payload = await verifyJwt(oldRefreshToken, env.ADMIN_JWT_SECRET);
 
-    if (payload.type !== "refresh") {
+    if (payload.type !== JwtTokenType.REFRESH) {
       return c.json({ message: "无效的刷新令牌" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
@@ -264,10 +201,10 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
       jti,
     };
 
-    const newAccessToken = await sign({ ...newTokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
+    const newAccessToken = await sign({ ...newTokenPayload, type: JwtTokenType.ACCESS }, env.ADMIN_JWT_SECRET, "HS256");
     const newRefreshToken = await sign({
       ...newTokenPayload,
-      type: "refresh",
+      type: JwtTokenType.REFRESH,
       exp: refreshTokenExp,
       jti: crypto.randomUUID(),
     }, env.ADMIN_JWT_SECRET, "HS256");
@@ -286,7 +223,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
         status: TokenStatus.ACTIVE,
-        expiresAt: formatDate(new Date(refreshTokenExp * 1000)), // 更新过期时间
+        expiresAt: formatDate(fromUnixTime(refreshTokenExp)), // 更新过期时间
       })
       .where(eq(systemTokens.id, tokenRecord.id));
 
@@ -299,8 +236,6 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
 
 /** 获取用户信息 */
 export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
-  // 这里需要从 JWT token 中获取用户信息
-  // 在实际实现中，这里应该由 JWT 中间件提供用户信息
   const authHeader = c.req.header("authorization");
 
   if (!authHeader?.startsWith("Bearer ")) {
