@@ -66,7 +66,6 @@ describe("object-storage routes with real authentication", () => {
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       expect(json.token).toBeDefined();
-      expect(json.user.username).toBe("admin");
       adminToken = json.token;
     }
   });

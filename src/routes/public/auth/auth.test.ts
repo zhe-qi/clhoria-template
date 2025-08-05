@@ -23,90 +23,11 @@ describe("auth routes", () => {
   let adminToken: string;
   let refreshTokenValue: string;
 
-  // 使用随机数生成唯一且符合验证规则的用户名避免冲突
-  const testUsername = `test${Math.floor(Math.random() * 10000)}`;
-
-  /** 后台注册测试 */
-  it("should register new admin user", async () => {
-    const response = await authClient.auth.register.$post({
-      json: {
-        username: testUsername,
-        password: "123456",
-        confirmPassword: "123456",
-        domain: "default",
-        nickName: "测试管理员",
-        status: 1,
-      },
-    });
-
-    expect(response.status).toBe(HttpStatusCodes.OK);
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.id).toBeDefined();
-      expectTypeOf(json.id).toBeString();
-    }
-  });
-
-  /** 重复注册测试 */
-  it("should prevent duplicate user registration", async () => {
-    const response = await authClient.auth.register.$post({
-      json: {
-        username: testUsername, // 使用相同的用户名
-        password: "123456",
-        confirmPassword: "123456",
-        domain: "default",
-        nickName: "测试管理员",
-        status: 1,
-      },
-    });
-
-    expect(response.status).toBe(HttpStatusCodes.CONFLICT);
-    if (response.status === HttpStatusCodes.CONFLICT) {
-      const json = await response.json();
-      expect(json.message).toBeDefined();
-    }
-  });
-
-  /** 密码不一致注册测试 */
-  it("should reject registration with mismatched passwords", async () => {
-    const response = await authClient.auth.register.$post({
-      json: {
-        username: "testadmin2",
-        password: "123456",
-        confirmPassword: "654321", // 不一致的密码
-        domain: "default",
-        nickName: "测试管理员2",
-        status: 1,
-      },
-    });
-
-    expect(response.status).toBe(HttpStatusCodes.BAD_REQUEST);
-    if (response.status === HttpStatusCodes.BAD_REQUEST) {
-      const json = await response.json();
-      expect(json.message).toBeDefined();
-    }
-  });
-
-  /** 参数验证测试 */
-  it("should validate registration parameters", async () => {
-    const response = await authClient.auth.register.$post({
-      // @ts-ignore
-      json: {
-        username: "", // 空用户名
-        password: "123456",
-        confirmPassword: "123456",
-        domain: "default",
-      },
-    });
-
-    expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
-  });
-
-  /** 登录成功测试 */
-  it("should login with valid credentials", async () => {
+  /** admin 登录成功测试 */
+  it("should login with admin credentials", async () => {
     const response = await authClient.auth.login.$post({
       json: {
-        username: testUsername,
+        username: "admin",
         password: "123456",
         domain: "default",
       },
@@ -117,13 +38,30 @@ describe("auth routes", () => {
       const json = await response.json();
       expect(json.token).toBeDefined();
       expect(json.refreshToken).toBeDefined();
-      expect(json.user).toBeDefined();
-      expect(json.user.username).toBe(testUsername);
       expectTypeOf(json.token).toBeString();
       expectTypeOf(json.refreshToken).toBeString();
-      expectTypeOf(json.user).toBeObject();
       adminToken = json.token;
       refreshTokenValue = json.refreshToken;
+    }
+  });
+
+  /** user 登录成功测试 */
+  it("should login with user credentials", async () => {
+    const response = await authClient.auth.login.$post({
+      json: {
+        username: "user",
+        password: "123456",
+        domain: "default",
+      },
+    });
+
+    expect(response.status).toBe(HttpStatusCodes.OK);
+    if (response.status === HttpStatusCodes.OK) {
+      const json = await response.json();
+      expect(json.token).toBeDefined();
+      expect(json.refreshToken).toBeDefined();
+      expectTypeOf(json.token).toBeString();
+      expectTypeOf(json.refreshToken).toBeString();
     }
   });
 
@@ -148,7 +86,7 @@ describe("auth routes", () => {
   it("should return 401 for wrong password", async () => {
     const response = await authClient.auth.login.$post({
       json: {
-        username: testUsername,
+        username: "admin",
         password: "wrongpass",
         domain: "default",
       },
@@ -268,7 +206,7 @@ describe("auth routes", () => {
     expect(response.status).toBe(HttpStatusCodes.OK);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expect(json.username).toBe(testUsername);
+      expect(json.username).toBe("admin");
       expect(json.id).toBeDefined();
       expect(json.domain).toBe("default");
       expectTypeOf(json).toBeObject();

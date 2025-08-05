@@ -1,4 +1,4 @@
-import { hash, verify } from "@node-rs/argon2";
+import { verify } from "@node-rs/argon2";
 import { addDays, fromUnixTime, getUnixTime } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { sign, verify as verifyJwt } from "hono/jwt";
@@ -6,7 +6,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
-import { systemTokens, systemUser } from "@/db/schema";
+import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
 import env from "@/env";
 import { JwtTokenType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { logger } from "@/lib/logger";
@@ -23,18 +23,19 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const logContext = await createLoginLogContext(c, username, domain);
 
   try {
+    // 第一步：查询用户基本信息
     const user = await db.query.systemUser.findFirst({
-      with: {
-        userRoles: {
-          with: {
-            role: true,
-          },
-        },
-      },
       where: and(
         eq(systemUser.username, username),
         eq(systemUser.domain, domain),
       ),
+      columns: {
+        id: true,
+        username: true,
+        password: true,
+        status: true,
+        domain: true,
+      },
     });
 
     if (!user) {
@@ -47,6 +48,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
     }
 
+    // 第二步：验证密码
     const isPasswordValid = await verify(user.password, password);
 
     if (!isPasswordValid) {
@@ -54,8 +56,12 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    // 生成 tokens
-    const roles = user.userRoles.map(ur => ur.roleId);
+    // 第三步：密码验证通过后查询用户角色
+    const userRoles = await db.query.systemUserRole.findMany({
+      where: eq(systemUserRole.userId, user.id),
+    });
+
+    const roles = userRoles.map(ur => ur.roleId);
 
     const now = getUnixTime(new Date());
     const accessTokenExp = getUnixTime(addDays(new Date(), 7)); // 7天过期
@@ -107,9 +113,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     // 记录登录成功日志
     await logContext.logSuccess(user.id);
 
-    const responseUser = omit(user, ["password"]);
-
-    return c.json({ token: accessToken, refreshToken, user: responseUser }, HttpStatusCodes.OK);
+    return c.json({ token: accessToken, refreshToken }, HttpStatusCodes.OK);
   }
   catch (error: any) {
     logger.error("adminLogin error details:", {
@@ -130,35 +134,6 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     // 根据路由定义，只能返回 401 Unauthorized
     return c.json({ message: "登录失败" }, HttpStatusCodes.UNAUTHORIZED);
   }
-};
-
-/** 后台注册 */
-export const adminRegister: AuthRouteHandlerType<"adminRegister"> = async (c) => {
-  const { password, confirmPassword, ...userData } = c.req.valid("json");
-
-  if (password !== confirmPassword) {
-    return c.json({ message: "密码不一致" }, HttpStatusCodes.BAD_REQUEST);
-  }
-
-  // 检查用户名是否已存在
-  const existingUser = await db.query.systemUser.findFirst({
-    where: and(
-      eq(systemUser.username, userData.username),
-      eq(systemUser.domain, userData.domain),
-    ),
-  });
-
-  if (existingUser) {
-    return c.json({ message: "用户已存在" }, HttpStatusCodes.CONFLICT);
-  }
-
-  const [{ id }] = await db.insert(systemUser).values({
-    ...userData,
-    password: await hash(password),
-    createdBy: "system",
-  }).returning({ id: systemUser.id });
-
-  return c.json({ id }, HttpStatusCodes.OK);
 };
 
 /** 刷新 Token */
