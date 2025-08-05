@@ -12,6 +12,8 @@ import { pagination } from "@/lib/pagination";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
 
+import { getUserRolesFromCache } from "./user";
+
 // 菜单相关类型定义
 type InsertSysMenuData = z.infer<typeof insertSystemMenuSchema>;
 type UpdateSysMenuData = z.infer<typeof patchSystemMenuSchema>;
@@ -262,6 +264,78 @@ export async function getUserRoutes(userId: string, domain: string): Promise<Use
   await redisClient.setex(cacheKey, 1800, JSON.stringify(result)); // 30分钟过期
 
   return result;
+}
+
+/**
+ * 获取用户菜单原始数据
+ */
+export async function getUserMenus(userId: string, domain: string) {
+  // 尝试从缓存获取菜单数据
+  const cacheKey = `${getUserMenusKey(userId, domain)}:raw`;
+  const cachedMenus = await redisClient.get(cacheKey);
+
+  if (cachedMenus) {
+    return JSON.parse(cachedMenus);
+  }
+
+  // 从缓存获取用户角色
+  const roles = await getUserRolesFromCache(userId, domain);
+
+  if (roles.length === 0) {
+    const emptyResult: any[] = [];
+    // 缓存空结果，避免重复查询
+    await redisClient.setex(cacheKey, 300, JSON.stringify(emptyResult)); // 5分钟过期
+    return emptyResult;
+  }
+
+  // 使用关联查询一次性获取角色菜单数据
+  const roleMenus = await db.query.systemRoleMenu.findMany({
+    where: and(
+      inArray(systemRoleMenu.roleId, roles),
+      eq(systemRoleMenu.domain, domain),
+    ),
+    with: {
+      menu: true,
+    },
+  });
+
+  // 提取去重的菜单数据并过滤状态
+  const menusMap = new Map();
+  roleMenus.forEach((rm) => {
+    if (rm.menu
+      && rm.menu.status === Status.ENABLED
+      && rm.menu.domain === domain
+      && !menusMap.has(rm.menu.id)) {
+      menusMap.set(rm.menu.id, {
+        id: rm.menu.id,
+        menuType: rm.menu.menuType,
+        menuName: rm.menu.menuName,
+        iconType: rm.menu.iconType,
+        icon: rm.menu.icon,
+        routeName: rm.menu.routeName,
+        routePath: rm.menu.routePath,
+        component: rm.menu.component,
+        pathParam: rm.menu.pathParam,
+        status: rm.menu.status,
+        activeMenu: rm.menu.activeMenu,
+        hideInMenu: rm.menu.hideInMenu,
+        pid: rm.menu.pid,
+        order: rm.menu.order,
+        i18nKey: rm.menu.i18nKey,
+        keepAlive: rm.menu.keepAlive,
+        constant: rm.menu.constant,
+        href: rm.menu.href,
+        multiTab: rm.menu.multiTab,
+      });
+    }
+  });
+
+  const menus = Array.from(menusMap.values()).sort((a, b) => a.order - b.order);
+
+  // 缓存结果
+  await redisClient.setex(cacheKey, 1800, JSON.stringify(menus)); // 30分钟过期
+
+  return menus;
 }
 
 /**

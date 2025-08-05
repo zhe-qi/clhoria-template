@@ -128,3 +128,41 @@ export const getUserPermissions = createRoute({
     ),
   },
 });
+/** 获取用户菜单 */
+export const getUserMenus = createRoute({
+  path: "/auth/menus",
+  method: "get",
+  tags,
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
+  summary: "获取当前用户菜单",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.array(z.object({
+        id: z.string().describe("菜单ID"),
+        menuType: z.string().describe("菜单类型"),
+        menuName: z.string().describe("菜单名称"),
+        iconType: z.number().nullable().describe("图标类型"),
+        icon: z.string().nullable().describe("图标"),
+        routeName: z.string().describe("路由名称"),
+        routePath: z.string().describe("路由路径"),
+        component: z.string().describe("组件路径"),
+        pathParam: z.string().nullable().describe("路径参数"),
+        status: z.number().describe("状态"),
+        activeMenu: z.string().nullable().describe("激活的菜单"),
+        hideInMenu: z.boolean().nullable().describe("是否在菜单中隐藏"),
+        pid: z.string().nullable().describe("父级菜单ID"),
+        order: z.number().describe("排序"),
+        i18nKey: z.string().nullable().describe("国际化键"),
+        keepAlive: z.boolean().nullable().describe("是否缓存"),
+        constant: z.boolean().describe("是否常量菜单"),
+        href: z.string().nullable().describe("外链地址"),
+        multiTab: z.boolean().nullable().describe("是否多标签"),
+      })),
+      "获取成功",
+    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+      z.object({ message: z.string() }),
+      "未授权",
+    ),
+  },
+});

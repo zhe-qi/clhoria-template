@@ -12,6 +12,7 @@ import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
 import env from "@/env";
 import { JwtTokenType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { logger } from "@/lib/logger";
+import { getUserMenus as getUserMenusService } from "@/services/system/menu";
 import { clearUserPermissionCache, createLoginLogContext, getUserRolesAndPermissionsFromCache, setUserRolesToCache } from "@/services/system/user";
 import { omit } from "@/utils";
 import { formatDate } from "@/utils/tools/formatter";
@@ -269,6 +270,21 @@ export const getUserPermissions: AuthRouteHandlerType<"getUserPermissions"> = as
     const { roles, permissions } = await getUserRolesAndPermissionsFromCache(userId, domain);
 
     return c.json({ roles, permissions }, HttpStatusCodes.OK);
+  }
+  catch {
+    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
+  }
+};
+
+/** 获取用户菜单 */
+export const getUserMenus: AuthRouteHandlerType<"getUserMenus"> = async (c) => {
+  const payload: JWTPayload = c.get("jwtPayload");
+  const userId = payload.uid as string;
+  const domain = payload.domain as string;
+
+  try {
+    const menus = await getUserMenusService(userId, domain);
+    return c.json(menus, HttpStatusCodes.OK);
   }
   catch {
     return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
