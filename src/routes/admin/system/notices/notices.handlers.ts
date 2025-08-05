@@ -44,20 +44,16 @@ export const create: SystemNoticesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
 
-  try {
-    const notice = await createNotice(
-      {
-        ...body,
-        domain: userDomain,
-        createdBy: userId,
-      },
-      userId,
-    );
-    return c.json(notice, HttpStatusCodes.CREATED);
-  }
-  catch (error: any) {
-    return c.json({ message: error.message || "创建通知公告失败" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
-  }
+  const notice = await createNotice(
+    {
+      ...body,
+      domain: userDomain,
+      createdBy: userId,
+    },
+    userId,
+  );
+
+  return c.json(notice, HttpStatusCodes.CREATED);
 };
 
 export const update: SystemNoticesRouteHandlerType<"update"> = async (c) => {
@@ -65,25 +61,16 @@ export const update: SystemNoticesRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
 
-  try {
-    // 检查通知公告是否存在
-    const existing = await getAdminNotice(id, userDomain);
-    if (!existing) {
-      return c.json({ message: "通知公告不存在" }, HttpStatusCodes.NOT_FOUND);
-    }
-
-    const notice = await updateNotice(id, userDomain, body, userId);
-
-    if (!notice) {
-      return c.json({ message: "更新通知公告失败" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
-    }
-
-    return c.json(notice, HttpStatusCodes.OK);
+  // 检查通知公告是否存在
+  const existing = await getAdminNotice(id, userDomain);
+  if (!existing) {
+    return c.json({ message: "通知公告不存在" }, HttpStatusCodes.NOT_FOUND);
   }
-  catch (error: any) {
-    return c.json({ message: error.message || "更新通知公告失败" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
-  }
-};
+
+  const notice = await updateNotice(id, userDomain, body, userId);
+
+  return c.json(notice, HttpStatusCodes.OK);
+}; ; ;
 
 export const remove: SystemNoticesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");

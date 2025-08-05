@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema } from "stoker/openapi/schemas";
+import { createErrorSchema, createMessageObjectSchema } from "stoker/openapi/schemas";
 
 import { insertSystemOrganizationSchema, patchSystemOrganizationSchema, selectSystemOrganizationSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
@@ -151,7 +151,7 @@ export const update = createRoute({
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(patchSystemOrganizationSchema).or(createErrorSchema(IdUUIDParamsSchema)),
+      createMessageObjectSchema("Bad Request"),
       "请求参数错误或循环引用",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

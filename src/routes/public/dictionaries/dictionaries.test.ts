@@ -21,7 +21,7 @@ const dictionariesClient = testClient(createDictionariesApp());
 describe("dictionaries routes", () => {
   /** 获取字典列表 */
   it("should get dictionaries list", async () => {
-    const response = await dictionariesClient.dictionaries.$get();
+    const response = await dictionariesClient["public-dictionaries"].$get();
 
     expect(response.status).toBe(HttpStatusCodes.OK);
     if (response.status === HttpStatusCodes.OK) {
@@ -40,14 +40,14 @@ describe("dictionaries routes", () => {
   /** 根据编码获取单个字典 - 成功 */
   it("should get dictionary by valid code", async () => {
     // 首先获取字典列表找到一个有效的编码
-    const listResponse = await dictionariesClient.dictionaries.$get();
+    const listResponse = await dictionariesClient["public-dictionaries"].$get();
 
     if (listResponse.status === HttpStatusCodes.OK) {
       const dictionaries = await listResponse.json();
 
       if (dictionaries.length > 0) {
         const firstDict = dictionaries[0];
-        const response = await dictionariesClient.dictionaries[":code"].$get({
+        const response = await dictionariesClient["public-dictionaries"][":code"].$get({
           param: {
             code: firstDict.code,
           },
@@ -72,7 +72,7 @@ describe("dictionaries routes", () => {
 
   /** 根据编码获取单个字典 - 不存在 */
   it("should return 404 for non-existent dictionary code", async () => {
-    const response = await dictionariesClient.dictionaries[":code"].$get({
+    const response = await dictionariesClient["public-dictionaries"][":code"].$get({
       param: {
         code: "non-existent-code",
       },
@@ -87,7 +87,7 @@ describe("dictionaries routes", () => {
 
   /** 参数验证 - 空编码 */
   it("should validate dictionary code parameter", async () => {
-    const response = await dictionariesClient.dictionaries[":code"].$get({
+    const response = await dictionariesClient["public-dictionaries"][":code"].$get({
       param: {
         code: "", // 空编码
       },
@@ -104,14 +104,14 @@ describe("dictionaries routes", () => {
   /** 批量获取字典 - 成功 */
   it("should batch get dictionaries", async () => {
     // 首先获取字典列表找到一些有效的编码
-    const listResponse = await dictionariesClient.dictionaries.$get();
+    const listResponse = await dictionariesClient["public-dictionaries"].$get();
 
     if (listResponse.status === HttpStatusCodes.OK) {
       const dictionaries = await listResponse.json();
 
       if (dictionaries.length > 0) {
         const codes = dictionaries.slice(0, 2).map(d => d.code); // 取前两个
-        const response = await dictionariesClient.dictionaries.batch.$post({
+        const response = await dictionariesClient["public-dictionaries"].batch.$post({
           json: {
             codes,
           },
@@ -134,7 +134,7 @@ describe("dictionaries routes", () => {
       }
       else {
         // 如果没有字典数据，测试空数组
-        const response = await dictionariesClient.dictionaries.batch.$post({
+        const response = await dictionariesClient["public-dictionaries"].batch.$post({
           json: {
             codes: [],
           },
@@ -151,7 +151,7 @@ describe("dictionaries routes", () => {
 
   /** 批量获取字典 - 包含不存在的编码 */
   it("should handle non-existent codes in batch request", async () => {
-    const response = await dictionariesClient.dictionaries.batch.$post({
+    const response = await dictionariesClient["public-dictionaries"].batch.$post({
       json: {
         codes: ["non-existent-1", "non-existent-2"],
       },
@@ -168,7 +168,7 @@ describe("dictionaries routes", () => {
 
   /** 批量获取字典 - 参数验证 */
   it("should validate batch request parameters", async () => {
-    const response = await dictionariesClient.dictionaries.batch.$post({
+    const response = await dictionariesClient["public-dictionaries"].batch.$post({
       json: {
         codes: "invalid" as any, // 故意传递错误类型进行验证测试
       },
@@ -184,7 +184,7 @@ describe("dictionaries routes", () => {
 
   /** 批量获取字典 - 空数组验证 */
   it("should validate empty codes array in batch request", async () => {
-    const response = await dictionariesClient.dictionaries.batch.$post({
+    const response = await dictionariesClient["public-dictionaries"].batch.$post({
       json: {
         codes: [],
       },
@@ -201,7 +201,7 @@ describe("dictionaries routes", () => {
 
   /** 批量获取字典 - 重复编码 */
   it("should handle duplicate codes in batch request", async () => {
-    const response = await dictionariesClient.dictionaries.batch.$post({
+    const response = await dictionariesClient["public-dictionaries"].batch.$post({
       json: {
         codes: ["test-code", "test-code", "another-code"],
       },

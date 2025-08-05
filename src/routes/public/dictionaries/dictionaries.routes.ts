@@ -9,7 +9,8 @@ import {
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/enums";
 
-const tags = ["/dictionaries (字典)"];
+const prefix = "/public-dictionaries";
+const tags = [`${prefix} (字典)`];
 
 const CodeParamsSchema = z.object({
   code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
@@ -20,7 +21,7 @@ export const list = createRoute({
   tags,
   summary: "获取字典列表",
   method: "get",
-  path: "/dictionaries",
+  path: prefix,
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.array(responseSystemDictionariesSchema),
@@ -34,7 +35,7 @@ export const get = createRoute({
   tags,
   summary: "获取单个字典",
   method: "get",
-  path: "/dictionaries/{code}",
+  path: `${prefix}/{code}`,
   request: {
     params: CodeParamsSchema,
   },
@@ -59,7 +60,7 @@ export const batch = createRoute({
   tags,
   summary: "批量获取字典",
   method: "post",
-  path: "/dictionaries/batch",
+  path: `${prefix}/batch`,
   request: {
     body: jsonContentRequired(
       batchGetDictionariesSchema,

@@ -21,7 +21,7 @@ const publicNoticesClient = testClient(createPublicNoticesApp());
 describe("public notices routes", () => {
   /** 公开获取通知公告列表 */
   it("should be able to get public notices list", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -63,7 +63,7 @@ describe("public notices routes", () => {
 
   /** 按类型筛选公开通知公告 */
   it("should be able to filter public notices by type", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -88,7 +88,7 @@ describe("public notices routes", () => {
 
   /** 按类型筛选公开公告 */
   it("should be able to filter public announcements by type", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -113,7 +113,7 @@ describe("public notices routes", () => {
 
   /** 搜索公开通知公告 */
   it("should be able to search public notices", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -141,7 +141,7 @@ describe("public notices routes", () => {
   /** 分页参数验证 */
   it("should validate pagination parameters", async () => {
     // 测试页码为0
-    const response1 = await publicNoticesClient.notices.$get({
+    const response1 = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "0",
         limit: "10",
@@ -151,7 +151,7 @@ describe("public notices routes", () => {
     expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response1.status)).toBe(true);
 
     // 测试每页数量为0
-    const response2 = await publicNoticesClient.notices.$get({
+    const response2 = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "0",
@@ -161,7 +161,7 @@ describe("public notices routes", () => {
     expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response2.status)).toBe(true);
 
     // 测试超大分页数量
-    const response3 = await publicNoticesClient.notices.$get({
+    const response3 = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "1000",
@@ -173,7 +173,7 @@ describe("public notices routes", () => {
 
   /** 无效类型参数 */
   it("should handle invalid type parameter", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -188,7 +188,7 @@ describe("public notices routes", () => {
 
   /** 大分页测试 */
   it("should handle large page numbers gracefully", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "999999",
         limit: "10",
@@ -210,7 +210,7 @@ describe("public notices routes", () => {
 
   /** 空搜索条件测试 */
   it("should handle empty search gracefully", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "10",
@@ -232,7 +232,7 @@ describe("public notices routes", () => {
   /** 获取单个公开通知公告 - 有效ID */
   it("should be able to get single public notice with valid id", async () => {
     // 先获取列表中的第一条记录
-    const listResponse = await publicNoticesClient.notices.$get({
+    const listResponse = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "1",
@@ -251,7 +251,7 @@ describe("public notices routes", () => {
         const firstNotice = notices[0];
 
         // 测试获取单个通知
-        const response = await publicNoticesClient.notices[":id"].$get({
+        const response = await publicNoticesClient["public-notices"][":id"].$get({
           param: {
             id: firstNotice.id,
           },
@@ -274,7 +274,7 @@ describe("public notices routes", () => {
 
   /** 获取单个公开通知公告 - 无效ID */
   it("should return 404 for non-existent notice", async () => {
-    const response = await publicNoticesClient.notices[":id"].$get({
+    const response = await publicNoticesClient["public-notices"][":id"].$get({
       param: {
         id: "550e8400-e29b-41d4-a716-446655440000", // 有效UUID格式但不存在
       },
@@ -288,7 +288,7 @@ describe("public notices routes", () => {
 
   /** 获取单个公开通知公告 - 格式错误的ID */
   it("should handle invalid uuid format", async () => {
-    const response = await publicNoticesClient.notices[":id"].$get({
+    const response = await publicNoticesClient["public-notices"][":id"].$get({
       param: {
         id: "invalid-uuid-format",
       },
@@ -302,7 +302,7 @@ describe("public notices routes", () => {
 
   /** 默认排序测试 */
   it("should return notices in correct order (by sortOrder desc, then createdAt desc)", async () => {
-    const response = await publicNoticesClient.notices.$get({
+    const response = await publicNoticesClient["public-notices"].$get({
       query: {
         page: "1",
         limit: "5",

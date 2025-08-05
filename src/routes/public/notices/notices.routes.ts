@@ -11,7 +11,8 @@ import { notFoundSchema } from "@/lib/enums";
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
-const tags = ["/notices (通知公告)"];
+const prefix = "/public-notices";
+const tags = [`${prefix} (通知公告)`];
 
 const ListQuerySchema = PaginationParamsSchema.extend({
   type: noticeTypeSchema.optional().describe("公告类型"),
@@ -26,7 +27,7 @@ export const list = createRoute({
   tags,
   summary: "获取通知公告列表",
   method: "get",
-  path: "/notices",
+  path: `${prefix}`,
   request: {
     query: ListQuerySchema,
   },
@@ -47,7 +48,7 @@ export const get = createRoute({
   tags,
   summary: "获取单个通知公告",
   method: "get",
-  path: "/notices/{id}",
+  path: `${prefix}/{id}`,
   request: {
     params: IdUUIDParamsSchema,
     query: z.object({

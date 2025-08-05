@@ -37,10 +37,10 @@ interface CreateScheduledJobParams {
 /** 更新定时任务参数 */
 interface UpdateScheduledJobParams {
   name?: string;
-  description?: string;
+  description?: string | null;
   handlerName?: string;
   cronExpression?: string;
-  timezone?: string;
+  timezone?: string | null;
   status?: number;
   payload?: Record<string, unknown>;
   retryAttempts?: number;

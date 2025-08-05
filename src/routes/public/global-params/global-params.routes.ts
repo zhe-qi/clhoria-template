@@ -9,7 +9,8 @@ import {
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/enums";
 
-const tags = ["/global-params (全局参数)"];
+const prefix = "/public-global-params";
+const tags = [`${prefix} (全局参数)`];
 
 /** 参数键路径模式 */
 const KeyParamsSchema = z.object({
@@ -21,7 +22,7 @@ export const list = createRoute({
   tags,
   summary: "获取全局参数列表",
   method: "get",
-  path: "/global-params",
+  path: `${prefix}`,
   request: {
     query: z.object({
       publicOnly: z.enum(["true", "false"]).optional().default("true").describe("是否只获取公开参数"),
@@ -40,7 +41,7 @@ export const get = createRoute({
   tags,
   summary: "获取单个全局参数",
   method: "get",
-  path: "/global-params/{key}",
+  path: `${prefix}/{key}`,
   request: {
     params: KeyParamsSchema,
   },
@@ -65,7 +66,7 @@ export const batch = createRoute({
   tags,
   summary: "批量获取全局参数",
   method: "post",
-  path: "/global-params/batch",
+  path: `${prefix}/batch`,
   request: {
     query: z.object({
       publicOnly: z.enum(["true", "false"]).optional().default("true").describe("是否只获取公开参数"),

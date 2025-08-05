@@ -274,7 +274,7 @@ export const create: SystemOrganizationRouteHandlerType<"create"> = async (c) =>
       ...body,
       domain,
       createdBy: userId,
-      // 确保 status 有默认值
+      // 确保status 有默认值
       status: body.status ?? Status.ENABLED,
     });
 
@@ -296,17 +296,9 @@ export const create: SystemOrganizationRouteHandlerType<"create"> = async (c) =>
       );
     }
 
-    // 业务逻辑错误
-    if (error.message?.includes("父组织不存在")) {
-      return c.json(
-        { message: error.message },
-        HttpStatusCodes.BAD_REQUEST,
-      );
-    }
-
     throw error;
   }
-};
+}; ;
 
 export const get: SystemOrganizationRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
@@ -339,17 +331,12 @@ export const update: SystemOrganizationRouteHandlerType<"update"> = async (c) =>
     return c.json(updated, HttpStatusCodes.OK);
   }
   catch (error: any) {
-    // 业务逻辑错误
-    if (error.message?.includes("父组织不存在") || error.message?.includes("循环引用")) {
-      return c.json(
-        { message: error.message },
-        HttpStatusCodes.BAD_REQUEST,
-      );
+    if (error.message?.includes("循环引用") || error.message?.includes("父组织不存在")) {
+      return c.json({ message: error.message }, HttpStatusCodes.BAD_REQUEST);
     }
-
     throw error;
   }
-};
+}; ; ;
 
 export const remove: SystemOrganizationRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");

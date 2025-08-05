@@ -171,7 +171,7 @@ describe("sysRoles routes with real authentication", () => {
       expect(json.success).toBe(false);
       expect(json.error).toBeDefined();
       expect(json.error.name).toBe("ZodError");
-      expect(json.error.message).toBeDefined();
+      expect(json.error.issues).toBeDefined();
     }
   });
 

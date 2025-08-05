@@ -1,12 +1,12 @@
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
+import { getDuplicateKeyError } from "@/lib/enums";
 import {
   batchGetDictionaries,
   createDictionary,
   deleteDictionary,
   getAdminDictionaries,
   getAdminDictionary,
-  isDictionaryCodeExists,
   updateDictionary,
 } from "@/services/system/dictionary";
 
@@ -40,16 +40,17 @@ export const create: SystemDictionariesRouteHandlerType<"create"> = async (c) =>
   const body = c.req.valid("json");
   const userId = c.get("userId");
 
-  // 检查字典编码是否已存在
-  const exists = await isDictionaryCodeExists(body.code);
-  if (exists) {
-    return c.json({ message: "字典编码已存在" }, HttpStatusCodes.CONFLICT);
+  try {
+    const dictionary = await createDictionary(body, userId);
+    return c.json(dictionary, HttpStatusCodes.CREATED);
   }
-
-  const dictionary = await createDictionary(body, userId);
-
-  return c.json(dictionary, HttpStatusCodes.CREATED);
-};
+  catch (error: any) {
+    if (error.message?.includes("duplicate key")) {
+      return c.json(getDuplicateKeyError("code", "字典编码已存在"), HttpStatusCodes.CONFLICT);
+    }
+    throw error;
+  }
+}; ;
 
 export const update: SystemDictionariesRouteHandlerType<"update"> = async (c) => {
   const { code } = c.req.valid("param");
@@ -62,18 +63,17 @@ export const update: SystemDictionariesRouteHandlerType<"update"> = async (c) =>
     return c.json({ message: "字典不存在" }, HttpStatusCodes.NOT_FOUND);
   }
 
-  // 如果更新了编码，检查新编码是否已存在
-  if (body.code && body.code !== code) {
-    const codeExists = await isDictionaryCodeExists(body.code, existing.id);
-    if (codeExists) {
-      return c.json({ message: "字典编码已存在" }, HttpStatusCodes.CONFLICT);
-    }
+  try {
+    const dictionary = await updateDictionary(code, body, userId);
+    return c.json(dictionary, HttpStatusCodes.OK);
   }
-
-  const dictionary = await updateDictionary(code, body, userId);
-
-  return c.json(dictionary, HttpStatusCodes.OK);
-};
+  catch (error: any) {
+    if (error.message?.includes("duplicate key")) {
+      return c.json(getDuplicateKeyError("code", "字典编码已存在"), HttpStatusCodes.CONFLICT);
+    }
+    throw error;
+  }
+}; ;
 
 export const remove: SystemDictionariesRouteHandlerType<"remove"> = async (c) => {
   const { code } = c.req.valid("param");

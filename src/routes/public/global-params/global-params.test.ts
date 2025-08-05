@@ -21,7 +21,7 @@ const globalParamsClient = testClient(createGlobalParamsApp());
 describe("global-params routes", () => {
   /** 获取全局参数列表 - 默认只获取公开参数 */
   it("should get public global params list by default", async () => {
-    const response = await globalParamsClient["global-params"].$get({
+    const response = await globalParamsClient["public-global-params"].$get({
       query: {},
     });
 
@@ -43,7 +43,7 @@ describe("global-params routes", () => {
 
   /** 获取全局参数列表 - 明确指定只获取公开参数 */
   it("should get public global params when publicOnly=true", async () => {
-    const response = await globalParamsClient["global-params"].$get({
+    const response = await globalParamsClient["public-global-params"].$get({
       query: {
         publicOnly: "true",
       },
@@ -62,7 +62,7 @@ describe("global-params routes", () => {
 
   /** 获取全局参数列表 - 获取所有参数（包括非公开） */
   it("should get all global params when publicOnly=false", async () => {
-    const response = await globalParamsClient["global-params"].$get({
+    const response = await globalParamsClient["public-global-params"].$get({
       query: {
         publicOnly: "false",
       },
@@ -85,7 +85,7 @@ describe("global-params routes", () => {
   /** 根据键获取单个全局参数 - 成功 */
   it("should get global param by valid key", async () => {
     // 首先获取公开参数列表找到一个有效的键
-    const listResponse = await globalParamsClient["global-params"].$get({
+    const listResponse = await globalParamsClient["public-global-params"].$get({
       query: {
         publicOnly: "true",
       },
@@ -96,7 +96,7 @@ describe("global-params routes", () => {
 
       if (params.length > 0) {
         const firstParam = params[0];
-        const response = await globalParamsClient["global-params"][":key"].$get({
+        const response = await globalParamsClient["public-global-params"][":key"].$get({
           param: {
             key: firstParam.key,
           },
@@ -122,7 +122,7 @@ describe("global-params routes", () => {
 
   /** 根据键获取单个全局参数 - 不存在 */
   it("should return 404 for non-existent parameter key", async () => {
-    const response = await globalParamsClient["global-params"][":key"].$get({
+    const response = await globalParamsClient["public-global-params"][":key"].$get({
       param: {
         key: "nonexistentkey",
       },
@@ -137,7 +137,7 @@ describe("global-params routes", () => {
 
   /** 参数验证 - 空键 */
   it("should validate parameter key", async () => {
-    const response = await globalParamsClient["global-params"][":key"].$get({
+    const response = await globalParamsClient["public-global-params"][":key"].$get({
       param: {
         key: "", // 空键
       },
@@ -154,7 +154,7 @@ describe("global-params routes", () => {
   /** 批量获取全局参数 - 成功（公开参数） */
   it("should batch get public global params", async () => {
     // 使用固定的测试键值
-    const response = await globalParamsClient["global-params"].batch.$post({
+    const response = await globalParamsClient["public-global-params"].batch.$post({
       query: {
         publicOnly: "true",
       },
@@ -178,7 +178,7 @@ describe("global-params routes", () => {
 
   /** 批量获取全局参数 - 所有参数（包括非公开） */
   it("should batch get all global params when publicOnly=false", async () => {
-    const response = await globalParamsClient["global-params"].batch.$post({
+    const response = await globalParamsClient["public-global-params"].batch.$post({
       query: {
         publicOnly: "false",
       },
@@ -198,7 +198,7 @@ describe("global-params routes", () => {
 
   /** 批量获取全局参数 - 包含不存在的键 */
   it("should handle non-existent keys in batch request", async () => {
-    const response = await globalParamsClient["global-params"].batch.$post({
+    const response = await globalParamsClient["public-global-params"].batch.$post({
       query: {
         publicOnly: "true",
       },
@@ -218,7 +218,7 @@ describe("global-params routes", () => {
 
   /** 批量获取全局参数 - 参数验证 */
   it("should validate batch request parameters", async () => {
-    const response = await globalParamsClient["global-params"].batch.$post({
+    const response = await globalParamsClient["public-global-params"].batch.$post({
       query: {
         publicOnly: "true",
       },
@@ -237,7 +237,7 @@ describe("global-params routes", () => {
 
   /** 批量获取全局参数 - 空数组验证 */
   it("should validate empty keys array in batch request", async () => {
-    const response = await globalParamsClient["global-params"].batch.$post({
+    const response = await globalParamsClient["public-global-params"].batch.$post({
       query: {
         publicOnly: "true",
       },
@@ -257,7 +257,7 @@ describe("global-params routes", () => {
 
   /** 批量获取全局参数 - 重复键 */
   it("should handle duplicate keys in batch request", async () => {
-    const response = await globalParamsClient["global-params"].batch.$post({
+    const response = await globalParamsClient["public-global-params"].batch.$post({
       query: {
         publicOnly: "true",
       },
@@ -278,7 +278,7 @@ describe("global-params routes", () => {
 
   /** 查询参数验证 - 无效的 publicOnly 值 */
   it("should validate publicOnly query parameter", async () => {
-    const response = await globalParamsClient["global-params"].$get({
+    const response = await globalParamsClient["public-global-params"].$get({
       query: {
         publicOnly: "invalid" as any, // 故意传递错误类型进行验证测试
       },

@@ -36,17 +36,15 @@ export const create: SystemGlobalParamsRouteHandlerType<"create"> = async (c) =>
 
   try {
     const created = await globalParamsService.createParam(body, userId);
-
     return c.json(created, HttpStatusCodes.CREATED);
   }
   catch (error: any) {
     if (error.code === "23505") {
       return c.json(getDuplicateKeyError("key", "参数键已存在"), HttpStatusCodes.CONFLICT);
     }
-
-    return c.json({ message: error.message || "创建参数失败" }, HttpStatusCodes.BAD_REQUEST);
+    throw error;
   }
-};
+}; ;
 
 export const update: SystemGlobalParamsRouteHandlerType<"update"> = async (c) => {
   const { key } = c.req.valid("param");
