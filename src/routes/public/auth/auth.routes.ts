@@ -43,7 +43,6 @@ export const adminLogin = createRoute({
 export const refreshToken = createRoute({
   path: "/auth/refresh",
   method: "post",
-  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
   request: {
     body: jsonContentRequired(
       z.object({
