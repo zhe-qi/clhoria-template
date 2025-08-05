@@ -2,7 +2,7 @@
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import env from "@/env";
 import createApp from "@/lib/create-app";
@@ -274,7 +274,7 @@ describe("authorization routes with real authentication", () => {
 
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expectTypeOf(json.routes).toBeArray();
+      expect(Array.isArray(json.routes)).toBe(true);
       expect(json.home).toBeDefined();
     }
   });
@@ -331,7 +331,7 @@ describe("authorization routes with real authentication", () => {
 
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expectTypeOf(json.permissions).toBeArray();
+      expect(Array.isArray(json.permissions)).toBe(true);
     }
   });
 
@@ -362,7 +362,7 @@ describe("authorization routes with real authentication", () => {
 
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expectTypeOf(json.menuIds).toBeArray();
+      expect(Array.isArray(json.menuIds)).toBe(true);
     }
   });
 

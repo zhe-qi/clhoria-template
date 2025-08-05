@@ -18,27 +18,8 @@ import { getUserRolesFromCache } from "./user";
 type InsertSysMenuData = z.infer<typeof insertSystemMenuSchema>;
 type UpdateSysMenuData = z.infer<typeof patchSystemMenuSchema>;
 
-// 用于构建路由树的菜单数据类型
-interface MenuDataForRoute {
-  id: string;
-  menuName: string;
-  routeName: string;
-  routePath: string;
-  component: string;
-  icon: string | null;
-  menuType: "directory" | "menu";
-  pid: string | null;
-  order: number;
-  hideInMenu: boolean | null;
-  keepAlive: boolean | null;
-  constant: boolean;
-  activeMenu: string | null;
-}
-
-/**
- * 菜单路由接口
- */
-export interface MenuRoute {
+// 直接定义 MenuRoute 类型避免循环引用
+interface MenuRoute {
   name: string;
   path: string;
   component?: string;
@@ -53,15 +34,28 @@ export interface MenuRoute {
   };
   children?: MenuRoute[];
 }
-
-/**
- * 用户路由响应接口
- */
-export interface UserRoute {
+// 直接定义 UserRoute 类型
+interface UserRoute {
   home: string;
   routes: MenuRoute[];
 }
 
+// 修复 MenuDataForRoute 类型，包含所有必要属性
+interface MenuDataForRoute {
+  id: string;
+  pid: string | null;
+  menuName: string;
+  routeName: string;
+  routePath: string;
+  component?: string;
+  icon?: string | null;
+  menuType: string;
+  order: number;
+  hideInMenu?: boolean | null;
+  keepAlive?: boolean | null;
+  activeMenu?: string | null;
+  constant?: boolean;
+}
 /**
  * 构建菜单路由树
  */

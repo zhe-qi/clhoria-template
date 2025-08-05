@@ -295,7 +295,7 @@ import * as handlers from "./feature.handlers";
 import * as routes from "./feature.routes";
 
 export const featureName = createRouter()
-  .openapi(routes.routeName, handlers.routeName);
+  .meta(routes.routeName, handlers.routeName);
 
 type RouteTypes = { [K in keyof typeof routes]: typeof routes[K]; };
 export type FeatureRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

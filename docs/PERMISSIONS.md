@@ -184,7 +184,7 @@ export const PermissionAction = {
 在路由定义中使用 OpenAPI 标签配置权限：
 
 ```typescript
-app.openapi(createRoute({
+app.meta(createRoute({
   method: "post",
   path: "/resource",
   tags: ["/resource (资源管理)"],
