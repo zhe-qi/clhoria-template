@@ -329,3 +329,35 @@ export async function clearUserStatusCache(userId: string, domain: string): Prom
   const key = getUserStatusKey(userId, domain);
   await redisClient.del(key);
 }
+
+/**
+ * 从缓存获取用户角色和权限
+ */
+export async function getUserRolesAndPermissionsFromCache(userId: string, domain: string): Promise<{
+  roles: string[];
+  permissions: string[];
+}> {
+  // 先从缓存获取用户角色
+  const roles = await getUserRolesFromCache(userId, domain);
+
+  if (roles.length === 0) {
+    return { roles: [], permissions: [] };
+  }
+
+  // 并行获取所有角色的权限
+  const rolePermissionPromises = roles.map(roleId => rbac.getImplicitPermissionsForUser(roleId, domain));
+  const rolePermissionsArrays = await Promise.all(rolePermissionPromises);
+
+  // 收集和去重所有权限
+  const permissionSet = new Set<string>();
+
+  for (const rolePermissions of rolePermissionsArrays) {
+    // 将权限格式化为 "resource:action" 格式并添加到集合中
+    for (const perm of rolePermissions) {
+      const permissionString = `${perm[1]}:${perm[2]}`;
+      permissionSet.add(permissionString);
+    }
+  }
+
+  return { roles, permissions: Array.from(permissionSet) };
+}

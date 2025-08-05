@@ -1,3 +1,5 @@
+import type { JWTPayload } from "hono/utils/jwt/types";
+
 import { verify } from "@node-rs/argon2";
 import { addDays, fromUnixTime, getUnixTime } from "date-fns";
 import { and, eq } from "drizzle-orm";
@@ -10,7 +12,7 @@ import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
 import env from "@/env";
 import { JwtTokenType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { logger } from "@/lib/logger";
-import { createLoginLogContext, setUserRolesToCache } from "@/services/system/user";
+import { clearUserPermissionCache, createLoginLogContext, getUserRolesAndPermissionsFromCache, setUserRolesToCache } from "@/services/system/user";
 import { omit } from "@/utils";
 import { formatDate } from "@/utils/tools/formatter";
 
@@ -142,7 +144,6 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
   const { refreshToken: oldRefreshToken } = body;
 
   try {
-    // 验证 refresh token
     const payload = await verifyJwt(oldRefreshToken, env.ADMIN_JWT_SECRET);
 
     if (payload.type !== JwtTokenType.REFRESH) {
@@ -211,17 +212,9 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
 
 /** 获取用户信息 */
 export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
-  const authHeader = c.req.header("authorization");
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
-  }
-
-  const token = authHeader.slice(7);
+  const payload: JWTPayload = c.get("jwtPayload");
 
   try {
-    const payload = await verifyJwt(token, env.ADMIN_JWT_SECRET);
-
     const user = await db.query.systemUser.findFirst({
       where: and(
         eq(systemUser.id, payload.uid as string),
@@ -236,6 +229,46 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
     const responseUser = omit(user, ["password"]);
 
     return c.json(responseUser, HttpStatusCodes.OK);
+  }
+  catch {
+    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
+  }
+};
+
+/** 退出登录 */
+export const logout: AuthRouteHandlerType<"logout"> = async (c) => {
+  const payload: JWTPayload = c.get("jwtPayload");
+
+  try {
+    // 撤销该用户的所有活跃 token
+    await db.update(systemTokens)
+      .set({ status: TokenStatus.REVOKED })
+      .where(and(
+        eq(systemTokens.userId, payload.uid as string),
+        eq(systemTokens.status, TokenStatus.ACTIVE),
+      ));
+
+    // 清除用户权限缓存
+    void await clearUserPermissionCache(payload.uid as string, payload.domain as string);
+
+    return c.json({ message: "退出成功" }, HttpStatusCodes.OK);
+  }
+  catch {
+    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
+  }
+};
+
+/** 获取用户权限 */
+export const getUserPermissions: AuthRouteHandlerType<"getUserPermissions"> = async (c) => {
+  const payload: JWTPayload = c.get("jwtPayload");
+  const userId = payload.uid as string;
+  const domain = payload.domain as string;
+
+  try {
+    // 从缓存获取用户角色和权限
+    const { roles, permissions } = await getUserRolesAndPermissionsFromCache(userId, domain);
+
+    return c.json({ roles, permissions }, HttpStatusCodes.OK);
   }
   catch {
     return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);

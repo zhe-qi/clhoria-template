@@ -1,8 +1,10 @@
 import { createRoute, z } from "@hono/zod-openapi";
+import { jwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 import { loginSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
+import env from "@/env";
 
 const tags = ["/auth (身份认证)"];
 
@@ -41,6 +43,7 @@ export const adminLogin = createRoute({
 export const refreshToken = createRoute({
   path: "/auth/refresh",
   method: "post",
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
   request: {
     body: jsonContentRequired(
       z.object({
@@ -71,10 +74,52 @@ export const getUserInfo = createRoute({
   path: "/auth/userinfo",
   method: "get",
   tags,
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
   summary: "后台获取当前用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       responseSystemUserSchema,
+      "获取成功",
+    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+      z.object({ message: z.string() }),
+      "未授权",
+    ),
+  },
+});
+
+/** 退出登录 */
+export const logout = createRoute({
+  path: "/auth/logout",
+  method: "post",
+  tags,
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
+  summary: "后台退出登录",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ message: z.string() }),
+      "退出成功",
+    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+      z.object({ message: z.string() }),
+      "未授权",
+    ),
+  },
+});
+
+/** 获取用户权限 */
+export const getUserPermissions = createRoute({
+  path: "/auth/permissions",
+  method: "get",
+  tags,
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
+  summary: "获取当前用户权限",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        roles: z.array(z.string()).describe("用户角色列表"),
+        permissions: z.array(z.string()).describe("用户权限列表"),
+      }),
       "获取成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(

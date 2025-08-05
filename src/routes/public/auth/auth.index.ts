@@ -10,7 +10,9 @@ import * as routes from "./auth.routes";
 export const auth = createRouter()
   .openapi(routes.adminLogin, handlers.adminLogin)
   .openapi(routes.refreshToken, handlers.refreshToken)
-  .openapi(routes.getUserInfo, handlers.getUserInfo);
+  .openapi(routes.getUserInfo, handlers.getUserInfo)
+  .openapi(routes.logout, handlers.logout)
+  .openapi(routes.getUserPermissions, handlers.getUserPermissions);
 
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
