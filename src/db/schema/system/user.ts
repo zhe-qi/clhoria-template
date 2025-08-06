@@ -39,10 +39,10 @@ export const selectSystemUserSchema = createSelectSchema(systemUser, {
 });
 
 export const insertSystemUserSchema = createInsertSchema(systemUser, {
-  username: schema => schema.min(4).max(15).regex(/^\w+$/),
-  password: schema => schema.min(6).max(20),
-  domain: schema => schema.min(1).default("default"),
-  nickName: schema => schema.min(1),
+  username: schema => schema.min(4).max(15).regex(/^\w+$/).describe("用户名"),
+  password: schema => schema.min(6).max(20).describe("密码"),
+  domain: schema => schema.min(1).default("default").describe("域/租户"),
+  nickName: schema => schema.min(1).describe("昵称"),
 }).omit({
   id: true,
   createdAt: true,

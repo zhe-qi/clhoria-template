@@ -8,7 +8,7 @@ import env from "@/env";
 import createApp from "@/lib/create-app";
 import { Status } from "@/lib/enums";
 import { casbin } from "@/middlewares/jwt-auth";
-import { auth } from "@/routes/public/public.index";
+import { auth } from "@/routes/admin/admin.index";
 
 import { systemDomains } from "./domains.index";
 

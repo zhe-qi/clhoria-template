@@ -1,4 +1,5 @@
 /* eslint-disable ts/ban-ts-comment */
+import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { describe, expect, expectTypeOf, it } from "vitest";
@@ -12,9 +13,13 @@ if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
 }
 
-// 创建认证应用
+// 创建认证应用 - 简化版本，模拟admin路由的行为
 function createAuthApp() {
-  return createApp().route("/", auth);
+  const app = createApp()
+    .route("/", auth)
+    .use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .route("/", auth);
+  return app;
 }
 
 const authClient = testClient(createAuthApp());

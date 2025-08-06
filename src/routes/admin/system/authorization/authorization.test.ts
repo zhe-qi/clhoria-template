@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { auth } from "@/routes/public/public.index";
+import { auth } from "@/routes/admin/admin.index";
 
 import { systemAuthorization } from "./authorization.index";
 

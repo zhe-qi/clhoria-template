@@ -211,6 +211,29 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
   }
 };
 
+/** 退出登录 */
+export const logout: AuthRouteHandlerType<"logout"> = async (c) => {
+  const payload: JWTPayload = c.get("jwtPayload");
+
+  try {
+    // 撤销该用户的所有活跃 token
+    await db.update(systemTokens)
+      .set({ status: TokenStatus.REVOKED })
+      .where(and(
+        eq(systemTokens.userId, payload.uid as string),
+        eq(systemTokens.status, TokenStatus.ACTIVE),
+      ));
+
+    // 清除用户权限缓存
+    void await clearUserPermissionCache(payload.uid as string, payload.domain as string);
+
+    return c.json({ message: "退出成功" }, HttpStatusCodes.OK);
+  }
+  catch {
+    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
+  }
+};
+
 /** 获取用户信息 */
 export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
   const payload: JWTPayload = c.get("jwtPayload");
@@ -230,29 +253,6 @@ export const getUserInfo: AuthRouteHandlerType<"getUserInfo"> = async (c) => {
     const responseUser = omit(user, ["password"]);
 
     return c.json(responseUser, HttpStatusCodes.OK);
-  }
-  catch {
-    return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
-  }
-};
-
-/** 退出登录 */
-export const logout: AuthRouteHandlerType<"logout"> = async (c) => {
-  const payload: JWTPayload = c.get("jwtPayload");
-
-  try {
-    // 撤销该用户的所有活跃 token
-    await db.update(systemTokens)
-      .set({ status: TokenStatus.REVOKED })
-      .where(and(
-        eq(systemTokens.userId, payload.uid as string),
-        eq(systemTokens.status, TokenStatus.ACTIVE),
-      ));
-
-    // 清除用户权限缓存
-    void await clearUserPermissionCache(payload.uid as string, payload.domain as string);
-
-    return c.json({ message: "退出成功" }, HttpStatusCodes.OK);
   }
   catch {
     return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);

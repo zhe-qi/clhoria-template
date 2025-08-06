@@ -11,7 +11,7 @@ import env from "@/env";
 import { getScheduler } from "@/jobs/scheduler";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { auth } from "@/routes/public/public.index";
+import { auth } from "@/routes/admin/admin.index";
 
 import { systemScheduledJobs as systemScheduledJobsRoutes } from "./scheduled-jobs.index";
 

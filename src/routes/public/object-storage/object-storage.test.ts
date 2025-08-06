@@ -9,7 +9,7 @@ import createApp from "@/lib/create-app";
 import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
 import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
-import { auth } from "@/routes/public/public.index";
+import { auth } from "@/routes/admin/admin.index";
 
 import { objectStorage } from "./object-storage.index";
 

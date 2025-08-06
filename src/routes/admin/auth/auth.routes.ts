@@ -23,8 +23,8 @@ export const adminLogin = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        token: z.string(),
-        refreshToken: z.string(),
+        token: z.string().describe("访问令牌"),
+        refreshToken: z.string().describe("刷新令牌"),
       }),
       "登录成功",
     ),
@@ -68,25 +68,6 @@ export const refreshToken = createRoute({
   },
 });
 
-/** 获取用户信息 */
-export const getUserInfo = createRoute({
-  path: "/auth/userinfo",
-  method: "get",
-  tags,
-  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
-  summary: "后台获取当前用户信息",
-  responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      responseSystemUserSchema,
-      "获取成功",
-    ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({ message: z.string() }),
-      "未授权",
-    ),
-  },
-});
-
 /** 退出登录 */
 export const logout = createRoute({
   path: "/auth/logout",
@@ -98,6 +79,25 @@ export const logout = createRoute({
     [HttpStatusCodes.OK]: jsonContent(
       z.object({ message: z.string() }),
       "退出成功",
+    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+      z.object({ message: z.string() }),
+      "未授权",
+    ),
+  },
+});
+
+/** 获取用户信息 */
+export const getUserInfo = createRoute({
+  path: "/auth/userinfo",
+  method: "get",
+  tags,
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
+  summary: "后台获取当前用户信息",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      responseSystemUserSchema,
+      "获取成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
       z.object({ message: z.string() }),

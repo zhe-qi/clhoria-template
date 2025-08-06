@@ -10,8 +10,8 @@ import * as routes from "./auth.routes";
 export const auth = createRouter()
   .openapi(routes.adminLogin, handlers.adminLogin)
   .openapi(routes.refreshToken, handlers.refreshToken)
-  .openapi(routes.getUserInfo, handlers.getUserInfo)
   .openapi(routes.logout, handlers.logout)
+  .openapi(routes.getUserInfo, handlers.getUserInfo)
   .openapi(routes.getUserPermissions, handlers.getUserPermissions)
   .openapi(routes.getUserMenus, handlers.getUserMenus);
 
