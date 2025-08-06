@@ -1,19 +1,12 @@
-import type { RouteConfig } from "@hono/zod-openapi";
-
 import * as HttpStatusCodes from "stoker/http-status-codes";
-
-import type { AppRouteHandler } from "@/types/lib";
 
 import { generateDownloadUrl, generateUploadUrl } from "@/services/object-storage";
 import { pickContext } from "@/utils";
 
-import type * as routes from "./object-storage.routes";
-
-type ObjectStorageRouteHandlerType<T extends keyof typeof routes> = AppRouteHandler<(typeof routes)[T] & RouteConfig>;
+import type { ObjectStorageRouteHandlerType } from "./object-storage.index";
 
 export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = async (c) => {
   const { fileName, fileType } = c.req.valid("json");
-
   const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
 
   let finalFileName = fileName;
@@ -36,7 +29,6 @@ export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = a
 
 export const getDownloadToken: ObjectStorageRouteHandlerType<"getDownloadToken"> = async (c) => {
   const { fileName } = c.req.valid("json");
-
   const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
 
   let finalFileName = fileName;

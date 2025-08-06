@@ -182,7 +182,7 @@ export class JobQueueManager {
   /** 绑定工作进程事件 */
   private bindWorkerEvents() {
     this.worker.on("completed", (job) => {
-      const duration = job.finishedOn ? job.finishedOn - job.processedOn! : 0;
+      const duration = job.finishedOn ? Math.max(0, job.finishedOn - job.processedOn!) : 0;
 
       // 更新指标
       this.metrics.completedJobs++;
