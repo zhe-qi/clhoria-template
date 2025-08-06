@@ -127,6 +127,7 @@ export const getUserPermissions = createRoute({
     ),
   },
 });
+
 /** 获取用户菜单 */
 export const getUserMenus = createRoute({
   path: "/auth/menus",
@@ -136,6 +137,7 @@ export const getUserMenus = createRoute({
   summary: "获取当前用户菜单",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
+      // TODO: 密码的这个地方使用递归报错，只能暂时先这样解决一下
       z.array(z.object({
         name: z.string().meta({ description: "路由名称" }),
         path: z.string().meta({ description: "路由路径" }),

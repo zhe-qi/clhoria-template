@@ -42,79 +42,28 @@ function transformToMenuItem(menu: SelectMenuData): MenuItem {
 }
 
 /**
- * 直接构建 MenuItem 树，避免多次数据转换
- */
-function buildMenuTreeDirect(menus: SelectMenuData[]): MenuItem[] {
-  // 预排序，避免后续递归排序
-  const sortedMenus = [...menus].sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0));
-
-  const map = new Map<string, MenuItem & { children: MenuItem[] }>();
-  const roots: MenuItem[] = [];
-
-  // 单次遍历：创建映射并构建树
-  for (const menu of sortedMenus) {
-    const menuItem: MenuItem & { children: MenuItem[] } = {
-      ...transformToMenuItem(menu),
-      children: [],
-    };
-
-    map.set(menu.id, menuItem);
-
-    if (menu.pid === null) {
-      roots.push(menuItem);
-    }
-    else {
-      const parent = map.get(menu.pid);
-      if (parent) {
-        parent.children = parent.children || [];
-        parent.children.push(menuItem);
-      }
-      else {
-        // 父节点不存在，当作根节点处理
-        roots.push(menuItem);
-      }
-    }
-  }
-
-  // 清理空的 children 数组
-  const cleanupChildren = (items: MenuItem[]): MenuItem[] => {
-    return items.map((item) => {
-      const cleaned = { ...item };
-      if (item.children && item.children.length > 0) {
-        cleaned.children = cleanupChildren(item.children);
-      }
-      else {
-        delete cleaned.children;
-      }
-      return cleaned;
-    });
-  };
-
-  return cleanupChildren(roots);
-}
-
-/**
- * 构建通用菜单树（优化版）
+ * 构建菜单树
  */
 interface TreeNode<T> {
   children?: TreeNode<T>[];
 }
 
-interface HasOrder {
-  order?: number;
-}
-
-function buildMenuTreeOptimized<T extends { id: string; pid: string | null; meta?: { order?: number } | null }>(items: T[]): Array<T & TreeNode<T>> {
+function buildMenuTree<T extends { id: string; pid: string | null; meta?: { order?: number } | null }>(items: T[]): Array<T & TreeNode<T>> {
   // 预排序，避免后续递归排序
   const sortedItems = [...items].sort((a, b) => ((a.meta?.order ?? 0) - (b.meta?.order ?? 0)));
 
   const map = new Map<string, T & TreeNode<T>>();
   const roots: Array<T & TreeNode<T>> = [];
 
-  // 单次遍历：创建映射并构建树
+  // 第一次遍历：创建所有节点的映射
   for (const item of sortedItems) {
     const node = { ...item, children: [] } as T & TreeNode<T>;
     map.set(item.id, node);
+  }
+
+  // 第二次遍历：构建父子关系
+  for (const item of sortedItems) {
+    const node = map.get(item.id)!;
 
     if (item.pid === null) {
       roots.push(node);
@@ -133,11 +82,6 @@ function buildMenuTreeOptimized<T extends { id: string; pid: string | null; meta
   }
 
   return roots;
-}
-
-// 保留原函数以兼容现有代码
-function _buildMenuTree<T extends { id: string; pid: string | null } & HasOrder>(items: T[]): Array<T & TreeNode<T>> {
-  return buildMenuTreeOptimized(items as Array<T & { meta?: { order?: number } }>);
 }
 
 /**
@@ -217,7 +161,17 @@ export async function getUserMenus(userId: string, domain: string): Promise<Menu
   const menus = await getMenusByRoles(roles, domain, true);
 
   // 直接构建菜单树，避免多次转换
-  const menuTree = buildMenuTreeDirect(menus);
+  const menuTreeData = buildMenuTree(menus);
+
+  // 递归转换为MenuItem格式
+  const transformTree = (nodes: Array<SelectMenuData & TreeNode<SelectMenuData>>): MenuItem[] => {
+    return nodes.map(node => ({
+      ...transformToMenuItem(node),
+      children: node.children ? transformTree(node.children as Array<SelectMenuData & TreeNode<SelectMenuData>>) : undefined,
+    }));
+  };
+
+  const menuTree = transformTree(menuTreeData);
 
   // 缓存结果
   void await redisClient.setex(cacheKey, 1800, JSON.stringify(menuTree)); // 30分钟过期
@@ -357,7 +311,7 @@ export async function getMenuTree(options: { status?: number; domain: string }) 
     orderBy: [systemMenu.id],
   });
 
-  return buildMenuTreeOptimized(menus);
+  return buildMenuTree(menus);
 }
 
 /**
@@ -489,7 +443,7 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
   const menus = await getMenusByRoles(roles, domain, false);
 
   // 直接返回优化后的菜单树结构
-  const menuTree = buildMenuTreeOptimized(menus);
+  const menuTree = buildMenuTree(menus);
 
   return {
     routes: menuTree,
