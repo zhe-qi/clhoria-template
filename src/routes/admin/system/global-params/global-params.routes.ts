@@ -13,11 +13,11 @@ import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enum
 import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const KeyParamsSchema = z.object({
-  key: z.string().min(1, "参数键不能为空").meta({ describe: "参数键名" }),
+  key: z.string().min(1, "参数键不能为空").meta({ description: "参数键名" }),
 });
 
 const ListQuerySchema = PaginationParamsSchema.extend({
-  isPublic: z.enum(["0", "1"]).optional().meta({ describe: "是否公开参数: 1=是 0=否" }),
+  isPublic: z.enum(["0", "1"]).optional().meta({ description: "是否公开参数: 1=是 0=否" }),
 });
 
 const routePrefix = "/system/global-params";
@@ -182,7 +182,7 @@ export const batch = createRoute({
   path: `${routePrefix}/batch`,
   request: {
     query: z.object({
-      publicOnly: z.enum(["true", "false"]).optional().default("false").meta({ describe: "是否只获取公开参数" }),
+      publicOnly: z.enum(["true", "false"]).optional().default("false").meta({ description: "是否只获取公开参数" }),
     }),
     body: jsonContentRequired(
       batchGetGlobalParamsSchema,

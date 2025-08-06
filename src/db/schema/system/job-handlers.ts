@@ -17,18 +17,18 @@ export const systemJobHandlers = pgTable("system_job_handlers", {
 });
 
 export const selectSystemJobHandlersSchema = createSelectSchema(systemJobHandlers, {
-  id: schema => schema.meta({ describe: "处理器ID" }),
-  name: schema => schema.meta({ describe: "处理函数名" }),
-  description: schema => schema.meta({ describe: "函数描述" }),
-  filePath: schema => schema.meta({ describe: "文件路径" }),
-  isActive: schema => schema.meta({ describe: "是否激活" }),
+  id: schema => schema.meta({ description: "处理器ID" }),
+  name: schema => schema.meta({ description: "处理函数名" }),
+  description: schema => schema.meta({ description: "函数描述" }),
+  filePath: schema => schema.meta({ description: "文件路径" }),
+  isActive: schema => schema.meta({ description: "是否激活" }),
 });
 
 export const insertSystemJobHandlersSchema = createInsertSchema(systemJobHandlers, {
-  name: schema => schema.meta({ describe: "处理函数名" }),
-  description: schema => schema.meta({ describe: "函数描述" }).optional(),
-  filePath: schema => schema.meta({ describe: "文件路径" }).optional(),
-  isActive: schema => schema.meta({ describe: "是否激活" }).optional(),
+  name: schema => schema.meta({ description: "处理函数名" }),
+  description: schema => schema.meta({ description: "函数描述" }).optional(),
+  filePath: schema => schema.meta({ description: "文件路径" }).optional(),
+  isActive: schema => schema.meta({ description: "是否激活" }).optional(),
 }).omit({
   id: true,
   createdAt: true,

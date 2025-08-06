@@ -26,7 +26,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const logContext = await createLoginLogContext(c, username, domain);
 
   try {
-    // 第一步：查询用户基本信息
+    // 1. 查询用户基本信息
     const user = await db.query.systemUser.findFirst({
       where: and(
         eq(systemUser.username, username),
@@ -51,7 +51,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    // 第二步：验证密码
+    // 2. 验证密码
     const isPasswordValid = await verify(user.password, password);
 
     if (!isPasswordValid) {
@@ -59,7 +59,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    // 第三步：密码验证通过后查询用户角色
+    // 3. 密码验证通过后查询用户角色
     const userRoles = await db.query.systemUserRole.findMany({
       where: eq(systemUserRole.userId, user.id),
     });

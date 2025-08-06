@@ -101,7 +101,7 @@ export const getUserRoutes: SystemAuthorizationRouteHandlerType<"getUserRoutes">
   }
 
   // 获取用户路由
-  const userRoutes = await menuService.getUserRoutes(userId, domain);
+  const userRoutes = await menuService.getUserRoutesSimple(userId, domain);
 
   return c.json(userRoutes, HttpStatusCodes.OK);
 };

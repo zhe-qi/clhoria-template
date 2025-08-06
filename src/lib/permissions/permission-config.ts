@@ -188,16 +188,6 @@ export class PermissionConfigManager {
 }
 
 /**
- * 创建权限配置的工具函数
- */
-export function createPermissionConfig(
-  resource: PermissionResourceType,
-  action: PermissionActionType,
-): PermissionConfig {
-  return { resource, action };
-}
-
-/**
  * 检查权限配置是否匹配
  */
 export function isPermissionMatch(

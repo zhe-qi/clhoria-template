@@ -2,13 +2,13 @@ import { z } from "@hono/zod-openapi";
 
 // 用于处理默认所不兼容的情况
 export const IdUUIDParamsSchema = z.object({
-  id: z.uuid().meta({ describe: "UUID格式的ID" }),
+  id: z.uuid().meta({ description: "UUID格式的ID" }),
 });
 
 export const PaginationQuerySchema = z.object({
-  skip: z.number().int().min(0).default(0).meta({ describe: "跳过的记录数" }),
-  take: z.number().int().min(1).max(100).default(10).meta({ describe: "获取的记录数" }),
-  search: z.string().optional().meta({ describe: "搜索关键词" }),
-  orderBy: z.string().optional().meta({ describe: "排序字段" }),
-  order: z.enum(["asc", "desc"]).optional().default("asc").meta({ describe: "排序方向" }),
+  skip: z.number().int().min(0).default(0).meta({ description: "跳过的记录数" }),
+  take: z.number().int().min(1).max(100).default(10).meta({ description: "获取的记录数" }),
+  search: z.string().optional().meta({ description: "搜索关键词" }),
+  orderBy: z.string().optional().meta({ description: "排序字段" }),
+  order: z.enum(["asc", "desc"]).optional().default("asc").meta({ description: "排序方向" }),
 });

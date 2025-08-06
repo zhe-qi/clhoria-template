@@ -20,9 +20,9 @@ const tags = [`${routePrefix}（通知公告管理）`];
 const adminCreateNoticeSchema = insertSystemNoticesSchema.omit({ domain: true });
 
 const ListQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().optional().meta({ describe: "搜索关键词（标题、内容）" }),
-  type: noticeTypeSchema.optional().meta({ describe: "公告类型" }),
-  status: z.enum(["0", "1"]).optional().meta({ describe: "公告状态: 1=启用 0=禁用" }),
+  search: z.string().optional().meta({ description: "搜索关键词（标题、内容）" }),
+  type: noticeTypeSchema.optional().meta({ description: "公告类型" }),
+  status: z.enum(["0", "1"]).optional().meta({ description: "公告状态: 1=启用 0=禁用" }),
 });
 
 /** 获取通知公告列表 */

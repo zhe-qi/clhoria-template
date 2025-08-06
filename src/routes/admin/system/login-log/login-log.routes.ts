@@ -12,7 +12,7 @@ const routePrefix = "/system/login-log";
 const tags = [`${routePrefix}（登录日志）`];
 
 const loginLogQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().optional().meta({ describe: "搜索关键词" }),
+  search: z.string().optional().meta({ description: "搜索关键词" }),
 });
 
 /** 获取登录日志列表 */

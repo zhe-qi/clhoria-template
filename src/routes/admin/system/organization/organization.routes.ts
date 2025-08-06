@@ -23,7 +23,7 @@ export const list = createRoute({
   path: routePrefix,
   request: {
     query: PaginationParamsSchema.extend({
-      search: z.string().optional().meta({ describe: "搜索关键词" }),
+      search: z.string().optional().meta({ description: "搜索关键词" }),
     }),
   },
   responses: {
@@ -46,7 +46,7 @@ export const tree = createRoute({
   path: `${routePrefix}/tree`,
   request: {
     query: z.object({
-      status: z.coerce.number().int().optional().meta({ describe: "组织状态: 1=启用 0=禁用" }),
+      status: z.coerce.number().int().optional().meta({ description: "组织状态: 1=启用 0=禁用" }),
     }),
   },
   responses: {

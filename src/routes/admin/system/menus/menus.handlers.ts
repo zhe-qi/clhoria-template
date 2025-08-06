@@ -95,24 +95,6 @@ export const patch: RouteHandlerType<"patch"> = async (c) => {
   return c.json(updatedMenu, HttpStatusCodes.OK);
 };
 
-/** 获取常量路由 */
-export const getConstantRoutes: RouteHandlerType<"getConstantRoutes"> = async (c) => {
-  const domain = c.get("userDomain");
-
-  const routes = await menuService.getConstantRoutes(domain);
-
-  return c.json(routes, HttpStatusCodes.OK);
-};
-
-/** 获取用户路由 */
-export const getUserRoutes: RouteHandlerType<"getUserRoutes"> = async (c) => {
-  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
-
-  const result = await menuService.getUserRoutesSimple(userId, domain);
-
-  return c.json(result, HttpStatusCodes.OK);
-};
-
 /** 删除菜单 */
 export const remove: RouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");

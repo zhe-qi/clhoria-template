@@ -3,7 +3,7 @@ import { jwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
-import { loginSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
+import { loginSystemUserSchema, responseSystemUserSchema, routeMetaSchema } from "@/db/schema";
 import env from "@/env";
 
 const tags = ["/auth (身份认证)"];
@@ -23,8 +23,8 @@ export const adminLogin = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        token: z.string().meta({ describe: "访问令牌" }),
-        refreshToken: z.string().meta({ describe: "刷新令牌" }),
+        token: z.string().meta({ description: "访问令牌" }),
+        refreshToken: z.string().meta({ description: "刷新令牌" }),
       }),
       "登录成功",
     ),
@@ -46,7 +46,7 @@ export const refreshToken = createRoute({
   request: {
     body: jsonContentRequired(
       z.object({
-        refreshToken: z.string().meta({ describe: "刷新令牌" }),
+        refreshToken: z.string().meta({ description: "刷新令牌" }),
       }),
       "刷新请求",
     ),
@@ -116,8 +116,8 @@ export const getUserPermissions = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        roles: z.array(z.string()).meta({ describe: "用户角色列表" }),
-        permissions: z.array(z.string()).meta({ describe: "用户权限列表" }),
+        roles: z.array(z.string()).meta({ description: "用户角色列表" }),
+        permissions: z.array(z.string()).meta({ description: "用户权限列表" }),
       }),
       "获取成功",
     ),
@@ -137,25 +137,14 @@ export const getUserMenus = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.array(z.object({
-        id: z.string().meta({ describe: "菜单ID" }),
-        menuType: z.string().meta({ describe: "菜单类型" }),
-        menuName: z.string().meta({ describe: "菜单名称" }),
-        iconType: z.number().nullable().meta({ describe: "图标类型" }),
-        icon: z.string().nullable().meta({ describe: "图标" }),
-        routeName: z.string().meta({ describe: "路由名称" }),
-        routePath: z.string().meta({ describe: "路由路径" }),
-        component: z.string().meta({ describe: "组件路径" }),
-        pathParam: z.string().nullable().meta({ describe: "路径参数" }),
-        status: z.number().meta({ describe: "状态" }),
-        activeMenu: z.string().nullable().meta({ describe: "激活的菜单" }),
-        hideInMenu: z.boolean().nullable().meta({ describe: "是否在菜单中隐藏" }),
-        pid: z.string().nullable().meta({ describe: "父级菜单ID" }),
-        order: z.number().meta({ describe: "排序" }),
-        i18nKey: z.string().nullable().meta({ describe: "国际化键" }),
-        keepAlive: z.boolean().nullable().meta({ describe: "是否缓存" }),
-        constant: z.boolean().meta({ describe: "是否常量菜单" }),
-        href: z.string().nullable().meta({ describe: "外链地址" }),
-        multiTab: z.boolean().nullable().meta({ describe: "是否多标签" }),
+        name: z.string().meta({ description: "路由名称" }),
+        path: z.string().meta({ description: "路由路径" }),
+        redirect: z.string().optional().meta({ description: "重定向路径" }),
+        component: z.string().optional().meta({ description: "组件路径" }),
+        meta: routeMetaSchema,
+        children: z.array(z.any()).optional().meta({
+          describe: "子菜单",
+        }),
       })),
       "获取成功",
     ),

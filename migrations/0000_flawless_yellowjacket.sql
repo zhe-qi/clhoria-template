@@ -1,4 +1,3 @@
-CREATE TYPE "public"."menu_type" AS ENUM('directory', 'menu');--> statement-breakpoint
 CREATE TYPE "public"."notice_type" AS ENUM('NOTIFICATION', 'ANNOUNCEMENT');--> statement-breakpoint
 CREATE TABLE "client_users" (
 	"id" uuid PRIMARY KEY NOT NULL,
@@ -113,24 +112,13 @@ CREATE TABLE "system_menu" (
 	"created_by" varchar(64) NOT NULL,
 	"updated_at" timestamp,
 	"updated_by" varchar(64),
-	"menu_type" "menu_type" NOT NULL,
-	"menu_name" varchar(64) NOT NULL,
-	"icon_type" integer DEFAULT 1,
-	"icon" varchar(64),
-	"route_name" varchar(64) NOT NULL,
-	"route_path" varchar(128) NOT NULL,
-	"component" varchar(64) NOT NULL,
-	"path_param" varchar(64),
+	"name" varchar(64) NOT NULL,
+	"path" varchar(128) NOT NULL,
+	"component" varchar(128),
+	"redirect" varchar(500),
 	"status" integer DEFAULT 1 NOT NULL,
-	"active_menu" varchar(64),
-	"hide_in_menu" boolean DEFAULT false,
 	"pid" uuid,
-	"order" integer NOT NULL,
-	"i18n_key" varchar(64),
-	"keep_alive" boolean DEFAULT false,
-	"constant" boolean DEFAULT false NOT NULL,
-	"href" varchar(64),
-	"multi_tab" boolean DEFAULT false,
+	"meta" jsonb DEFAULT '{"title":"","order":0}'::jsonb,
 	"domain" varchar(64) DEFAULT 'default' NOT NULL
 );
 --> statement-breakpoint
@@ -280,7 +268,7 @@ CREATE TABLE "tasks" (
 );
 --> statement-breakpoint
 CREATE TABLE "ts_login_log" (
-	"id" uuid,
+	"id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"username" text NOT NULL,
 	"domain" text NOT NULL,
@@ -297,7 +285,7 @@ CREATE TABLE "ts_login_log" (
 );
 --> statement-breakpoint
 CREATE TABLE "ts_operation_log" (
-	"id" uuid,
+	"id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"username" text NOT NULL,
 	"domain" text NOT NULL,

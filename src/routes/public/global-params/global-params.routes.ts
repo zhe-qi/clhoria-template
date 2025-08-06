@@ -14,7 +14,7 @@ const tags = [`${prefix} (全局参数)`];
 
 /** 参数键路径模式 */
 const KeyParamsSchema = z.object({
-  key: z.string().min(1, "参数键不能为空").meta({ describe: "参数键名" }),
+  key: z.string().min(1, "参数键不能为空").meta({ description: "参数键名" }),
 });
 
 /** 获取全局参数列表 */
@@ -25,7 +25,7 @@ export const list = createRoute({
   path: `${prefix}`,
   request: {
     query: z.object({
-      publicOnly: z.enum(["true", "false"]).optional().default("true").meta({ describe: "是否只获取公开参数" }),
+      publicOnly: z.enum(["true", "false"]).optional().default("true").meta({ description: "是否只获取公开参数" }),
     }),
   },
   responses: {
@@ -69,7 +69,7 @@ export const batch = createRoute({
   path: `${prefix}/batch`,
   request: {
     query: z.object({
-      publicOnly: z.enum(["true", "false"]).optional().default("true").meta({ describe: "是否只获取公开参数" }),
+      publicOnly: z.enum(["true", "false"]).optional().default("true").meta({ description: "是否只获取公开参数" }),
     }),
     body: jsonContentRequired(
       batchGetGlobalParamsSchema,

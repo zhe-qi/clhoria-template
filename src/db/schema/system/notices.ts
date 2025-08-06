@@ -37,29 +37,29 @@ export const systemNotices = pgTable("system_notices", {
  * 查询通知公告Schema
  */
 export const selectSystemNoticesSchema = createSelectSchema(systemNotices, {
-  id: _schema => _schema.meta({ describe: "公告ID" }),
-  title: _schema => _schema.meta({ describe: "公告标题" }),
-  type: _schema => _schema.meta({ describe: "公告类型: NOTIFICATION=通知 ANNOUNCEMENT=公告" }),
-  content: _schema => _schema.meta({ describe: "公告内容" }),
-  status: _schema => _schema.meta({ describe: "状态: 1=启用 0=禁用" }),
-  domain: _schema => _schema.meta({ describe: "所属域" }),
-  sortOrder: _schema => _schema.meta({ describe: "排序" }),
-  createdAt: _schema => _schema.meta({ describe: "创建时间" }),
-  updatedAt: _schema => _schema.meta({ describe: "更新时间" }),
-  createdBy: _schema => _schema.meta({ describe: "创建人" }),
-  updatedBy: _schema => _schema.meta({ describe: "更新人" }),
+  id: _schema => _schema.meta({ description: "公告ID" }),
+  title: _schema => _schema.meta({ description: "公告标题" }),
+  type: _schema => _schema.meta({ description: "公告类型: NOTIFICATION=通知 ANNOUNCEMENT=公告" }),
+  content: _schema => _schema.meta({ description: "公告内容" }),
+  status: _schema => _schema.meta({ description: "状态: 1=启用 0=禁用" }),
+  domain: _schema => _schema.meta({ description: "所属域" }),
+  sortOrder: _schema => _schema.meta({ description: "排序" }),
+  createdAt: _schema => _schema.meta({ description: "创建时间" }),
+  updatedAt: _schema => _schema.meta({ description: "更新时间" }),
+  createdBy: _schema => _schema.meta({ description: "创建人" }),
+  updatedBy: _schema => _schema.meta({ description: "更新人" }),
 });
 
 /**
  * 创建通知公告Schema
  */
 export const insertSystemNoticesSchema = createInsertSchema(systemNotices, {
-  title: _schema => _schema.min(1, "公告标题不能为空").max(200, "公告标题不能超过200字符").meta({ describe: "公告标题" }),
-  type: _schema => _schema.meta({ describe: "公告类型: NOTIFICATION=通知 ANNOUNCEMENT=公告" }),
-  content: _schema => _schema.optional().meta({ describe: "公告内容" }),
-  status: _schema => _schema.default(1).meta({ describe: "状态: 1=启用 0=禁用" }),
-  domain: _schema => _schema.min(1, "域不能为空").meta({ describe: "所属域" }),
-  sortOrder: _schema => _schema.default(0).meta({ describe: "排序" }),
+  title: _schema => _schema.min(1, "公告标题不能为空").max(200, "公告标题不能超过200字符").meta({ description: "公告标题" }),
+  type: _schema => _schema.meta({ description: "公告类型: NOTIFICATION=通知 ANNOUNCEMENT=公告" }),
+  content: _schema => _schema.optional().meta({ description: "公告内容" }),
+  status: _schema => _schema.default(1).meta({ description: "状态: 1=启用 0=禁用" }),
+  domain: _schema => _schema.min(1, "域不能为空").meta({ description: "所属域" }),
+  sortOrder: _schema => _schema.default(0).meta({ description: "排序" }),
 }).omit({
   id: true,
   createdAt: true,
@@ -93,4 +93,4 @@ export type NoticeTypeValue = typeof NoticeType[keyof typeof NoticeType];
 /**
  * 通知公告类型Schema
  */
-export const noticeTypeSchema = z.enum(["NOTIFICATION", "ANNOUNCEMENT"]).meta({ describe: "公告类型" });
+export const noticeTypeSchema = z.enum(["NOTIFICATION", "ANNOUNCEMENT"]).meta({ description: "公告类型" });

@@ -173,9 +173,9 @@ export const assignPermissions = createRoute({
     body: jsonContentRequired(
       z.object({
         permissions: z.array(z.object({
-          resource: z.enum(Object.values(PermissionResource)).meta({ describe: "资源" }),
-          action: z.enum(Object.values(PermissionAction)).meta({ describe: "动作" }),
-        })).meta({ describe: "权限列表" }),
+          resource: z.enum(Object.values(PermissionResource)).meta({ description: "资源" }),
+          action: z.enum(Object.values(PermissionAction)).meta({ description: "动作" }),
+        })).meta({ description: "权限列表" }),
       }),
       "分配权限参数",
     ),
@@ -214,7 +214,7 @@ export const assignMenus = createRoute({
     params: IdUUIDParamsSchema,
     body: jsonContentRequired(
       z.object({
-        menuIds: z.array(z.string()).meta({ describe: "菜单ID列表" }),
+        menuIds: z.array(z.string()).meta({ description: "菜单ID列表" }),
       }),
       "分配菜单参数",
     ),
@@ -252,7 +252,7 @@ export const assignUsers = createRoute({
     params: IdUUIDParamsSchema,
     body: jsonContentRequired(
       z.object({
-        userIds: z.array(z.string()).meta({ describe: "用户ID列表" }),
+        userIds: z.array(z.string()).meta({ description: "用户ID列表" }),
       }),
       "分配用户参数",
     ),

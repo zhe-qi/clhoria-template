@@ -1,36 +1,29 @@
-import { z } from "@hono/zod-openapi";
+import type { z } from "@hono/zod-openapi";
+
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgEnum, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
+
+import type { routeMetaSchema } from "./authorization";
 
 import { statusEnum } from "../../common/enums";
 import { systemDomain } from "./domain";
 import { systemRoleMenu } from "./role-menu";
 
-export const menuTypeEnum = pgEnum("menu_type", ["directory", "menu"]);
+type RouteMeta = z.infer<typeof routeMetaSchema>;
 
 export const systemMenu = pgTable("system_menu", {
   ...defaultColumns,
-  menuType: menuTypeEnum().notNull(),
-  menuName: varchar({ length: 64 }).notNull(),
-  iconType: integer().default(1),
-  icon: varchar({ length: 64 }),
-  routeName: varchar({ length: 64 }).notNull(),
-  routePath: varchar({ length: 128 }).notNull(),
-  component: varchar({ length: 64 }).notNull(),
-  pathParam: varchar({ length: 64 }),
+  // 菜单类型通过 component 字段判断：component 为 null 表示目录，非 null 表示菜单页面
+  name: varchar({ length: 64 }).notNull(),
+  path: varchar({ length: 128 }).notNull(),
+  component: varchar({ length: 128 }),
+  redirect: varchar({ length: 500 }),
   status: statusEnum().notNull(),
-  activeMenu: varchar({ length: 64 }),
-  hideInMenu: boolean().default(false),
   pid: uuid(),
-  order: integer().notNull(),
-  i18nKey: varchar({ length: 64 }),
-  keepAlive: boolean().default(false),
-  constant: boolean().notNull().default(false),
-  href: varchar({ length: 64 }),
-  multiTab: boolean().default(false),
+  meta: jsonb().$type<RouteMeta>().default({ title: "", order: 0 } as RouteMeta),
   domain: varchar({ length: 64 }).notNull().default("default"),
 });
 
@@ -43,49 +36,35 @@ export const systemMenuRelations = relations(systemMenu, ({ many, one }) => ({
 }));
 
 export const selectSystemMenuSchema = createSelectSchema(systemMenu, {
-  id: schema => schema.meta({ describe: "菜单ID" }),
-  menuType: schema => schema.meta({ describe: "菜单类型: directory=目录 menu=菜单" }),
-  menuName: schema => schema.meta({ describe: "菜单名称" }),
-  iconType: schema => schema.meta({ describe: "图标类型" }),
-  icon: schema => schema.meta({ describe: "图标" }),
-  routeName: schema => schema.meta({ describe: "路由名称" }),
-  routePath: schema => schema.meta({ describe: "路由路径" }),
-  component: schema => schema.meta({ describe: "组件路径" }),
-  pathParam: schema => schema.meta({ describe: "路径参数" }),
-  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用" }),
-  activeMenu: schema => schema.meta({ describe: "激活的菜单" }),
-  hideInMenu: schema => schema.meta({ describe: "是否在菜单中隐藏" }),
-  pid: schema => schema.meta({ describe: "父级菜单ID" }),
-  order: schema => schema.meta({ describe: "排序" }),
-  i18nKey: schema => schema.meta({ describe: "国际化键" }),
-  keepAlive: schema => schema.meta({ describe: "是否缓存" }),
-  constant: schema => schema.meta({ describe: "是否常量菜单" }),
-  href: schema => schema.meta({ describe: "外链地址" }),
-  multiTab: schema => schema.meta({ describe: "是否多标签" }),
-  domain: schema => schema.meta({ describe: "所属域" }),
+  id: schema => schema.meta({ description: "菜单ID" }),
+  name: schema => schema.meta({ description: "路由名称" }),
+  path: schema => schema.meta({ description: "路由路径" }),
+  component: schema => schema.meta({ description: "组件路径" }),
+  redirect: schema => schema.meta({ description: "重定向路径" }),
+  status: schema => schema.meta({ description: "状态: 1=启用 0=禁用" }),
+  pid: schema => schema.meta({ description: "父级菜单ID" }),
+  meta: schema => schema.meta({ description: "路由Meta属性" }),
+  domain: schema => schema.meta({ description: "所属域" }),
 });
 
 export const insertSystemMenuSchema = createInsertSchema(systemMenu, {
-  menuName: schema => schema.min(1),
-  routeName: schema => schema.min(1),
-  routePath: schema => schema.min(1),
-  component: schema => schema.min(1),
-  createdBy: schema => schema.min(1),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+  name: schema => schema.min(1).meta({ description: "路由名称" }),
+  path: schema => schema.min(1).meta({ description: "路由路径" }),
+  component: schema => schema.nullable().optional().meta({ description: "组件路径" }),
+  redirect: schema => schema.nullable().optional().meta({ description: "重定向路径" }),
+  status: schema => schema.meta({ description: "状态: 1=启用 0=禁用" }),
+  pid: schema => schema.nullable().optional().meta({ description: "父级菜单ID" }),
+  meta: schema => schema.meta({ description: "路由Meta属性" }),
+  domain: schema => schema.meta({ description: "所属域" }),
 });
 
-export const patchSystemMenuSchema = insertSystemMenuSchema.partial();
-
-// 菜单树Schema - 与服务层 TreeNode<T> 类型匹配
-export const menuTreeSchema = selectSystemMenuSchema.extend({
-  children: z.any().optional(),
-}).catchall(z.unknown());
-
-// 用户路由响应Schema（适用于 sys-menus 模块）
-export const userRoutesSchema = z.object({
-  routes: z.array(menuTreeSchema),
-  home: z.string().meta({ describe: "首页路由" }),
-});
+export const patchSystemMenuSchema = createInsertSchema(systemMenu, {
+  name: schema => schema.min(1).optional().meta({ description: "路由名称" }),
+  path: schema => schema.min(1).optional().meta({ description: "路由路径" }),
+  component: schema => schema.nullable().optional().meta({ description: "组件路径" }),
+  redirect: schema => schema.nullable().optional().meta({ description: "重定向路径" }),
+  status: schema => schema.optional().meta({ description: "状态: 1=启用 0=禁用" }),
+  pid: schema => schema.nullable().optional().meta({ description: "父级菜单ID" }),
+  meta: schema => schema.optional().meta({ description: "路由Meta属性" }),
+  domain: schema => schema.optional().meta({ description: "所属域" }),
+}).partial();

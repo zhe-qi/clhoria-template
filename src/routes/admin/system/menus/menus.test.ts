@@ -114,25 +114,22 @@ describe("sysMenus routes with real authentication", () => {
     }
 
     testMenu = {
-      menuName: "测试菜单",
-      routeName: "test-menu",
-      routePath: "/test-menu",
+      name: "test-menu",
+      path: "/test-menu",
       component: "views/test-menu/index.vue",
-      icon: "test-icon",
-      iconType: 1,
-      i18nKey: "test.menu",
-      hideInMenu: false,
-      keepAlive: true,
-      href: "",
-      multiTab: false,
-      order: 1,
-      pid: null,
-      pathParam: "",
-      activeMenu: "",
       status: 1,
-      menuType: "menu",
+      pid: null,
+      meta: {
+        title: "测试菜单",
+        order: 1,
+        icon: "test-icon",
+        hideInMenu: false,
+        keepAlive: true,
+        multiTab: false,
+        constant: false,
+        i18nKey: "test.menu",
+      },
       domain: "default",
-      constant: false,
       createdBy: "admin",
     };
 
@@ -150,9 +147,8 @@ describe("sysMenus routes with real authentication", () => {
     expect(response.status).toBe(HttpStatusCodes.OK);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expect(json.menuName).toBe(testMenu.menuName);
-      expect(json.routeName).toBe(testMenu.routeName);
-      expect(json.routePath).toBe(testMenu.routePath);
+      expect(json.name).toBe(testMenu.name);
+      expect(json.path).toBe(testMenu.path);
       expect(json.domain).toBe(testMenu.domain);
       expect(json.id).toBeDefined();
       createdMenuId = json.id;
@@ -171,7 +167,7 @@ describe("sysMenus routes with real authentication", () => {
       {
         // @ts-ignore
         json: {
-          menuName: "", // 菜单名称为空
+          name: "", // 路由名称为空
         },
       },
       {
@@ -253,57 +249,6 @@ describe("sysMenus routes with real authentication", () => {
     }
   });
 
-  /** 管理员获取常量路由 */
-  it("admin should be able to get constant routes", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await sysMenusClient.system.menus.constant.$get(
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
-      },
-    );
-
-    expect(response.status).toBe(HttpStatusCodes.OK);
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expectTypeOf(json).toBeArray();
-    }
-  });
-
-  /** 管理员获取用户路由 */
-  it("admin should be able to get user routes", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await sysMenusClient.system.menus["user-routes"].$get(
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
-      },
-    );
-
-    expect(response.status).toBe(HttpStatusCodes.OK);
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.routes).toBeDefined();
-      expect(json.home).toBeDefined();
-      expectTypeOf(json.routes).toBeArray();
-      expect(typeof json.home).toBe("string");
-    }
-  });
-
   /** 管理员获取单个菜单 */
   it("admin should be able to get single menu", async () => {
     // 跳过测试如果没有管理员 token 或创建的菜单 ID
@@ -329,8 +274,7 @@ describe("sysMenus routes with real authentication", () => {
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       expect(json.id).toBe(createdMenuId);
-      expect(json.menuName).toBe(testMenu.menuName);
-      expect(json.routeName).toBe(testMenu.routeName);
+      expect(json.name).toBe(testMenu.name);
     }
   });
 
@@ -343,9 +287,12 @@ describe("sysMenus routes with real authentication", () => {
     }
 
     const updateData = {
-      menuName: "更新的测试菜单",
-      routeName: "updated-test-menu",
+      name: "updated-test-menu",
       status: 0,
+      meta: {
+        title: "更新的测试菜单",
+        order: 1,
+      },
     };
 
     const response = await sysMenusClient.system.menus[":id"].$patch(
@@ -365,8 +312,7 @@ describe("sysMenus routes with real authentication", () => {
     expect(response.status).toBe(HttpStatusCodes.OK);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expect(json.menuName).toBe(updateData.menuName);
-      expect(json.routeName).toBe(updateData.routeName);
+      expect(json.name).toBe(updateData.name);
       expect(json.status).toBe(updateData.status);
     }
   });

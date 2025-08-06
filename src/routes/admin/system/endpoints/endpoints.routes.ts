@@ -23,10 +23,10 @@ export const list = createRoute({
   path: routePrefix,
   request: {
     query: PaginationParamsSchema.extend({
-      search: z.string().optional().meta({ describe: "搜索关键词" }),
-      method: z.string().optional().meta({ describe: "HTTP方法过滤" }),
-      action: z.string().optional().meta({ describe: "动作过滤" }),
-      resource: z.string().optional().meta({ describe: "资源过滤" }),
+      search: z.string().optional().meta({ description: "搜索关键词" }),
+      method: z.string().optional().meta({ description: "HTTP方法过滤" }),
+      action: z.string().optional().meta({ description: "动作过滤" }),
+      resource: z.string().optional().meta({ description: "资源过滤" }),
     }),
   },
   responses: {
@@ -50,7 +50,7 @@ export const tree = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.array(selectSysEndpointSchema.extend({
-        children: z.array(z.any()).optional().meta({ describe: "子端点" }),
+        children: z.array(z.any()).optional().meta({ description: "子端点" }),
       })),
       "API端点树形结构响应成功",
     ),
@@ -69,7 +69,7 @@ export const authEndpoints = createRoute({
   path: `${routePrefix}/auth/{roleCode}`,
   request: {
     params: z.object({
-      roleCode: z.string().meta({ describe: "角色代码" }),
+      roleCode: z.string().meta({ description: "角色代码" }),
     }),
   },
   responses: {

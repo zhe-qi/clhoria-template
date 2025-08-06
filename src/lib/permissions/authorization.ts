@@ -274,7 +274,7 @@ export async function clearRoleUsersPermissionCache(roleId: string, domain: stri
   // 获取拥有该角色的所有用户
   const users = await rbac.getUsersForRole(roleId, domain);
 
-  if (users.length === 0) {
+  if (users.length < 1) {
     return;
   }
 

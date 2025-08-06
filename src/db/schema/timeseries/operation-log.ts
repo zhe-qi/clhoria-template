@@ -2,7 +2,7 @@ import { index, integer, jsonb, pgTable, primaryKey, text, timestamp, uuid } fro
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const tsOperationLog = pgTable("ts_operation_log", {
-  id: uuid().$defaultFn(() => crypto.randomUUID()),
+  id: uuid().notNull().$defaultFn(() => crypto.randomUUID()),
   userId: uuid().notNull(),
   username: text().notNull(),
   domain: text().notNull(),
@@ -32,23 +32,23 @@ export const tsOperationLog = pgTable("ts_operation_log", {
 ]);
 
 export const selectTsOperationLogSchema = createSelectSchema(tsOperationLog, {
-  id: schema => schema.meta({ describe: "日志ID" }),
-  userId: schema => schema.meta({ describe: "用户ID" }),
-  username: schema => schema.meta({ describe: "用户名" }),
-  domain: schema => schema.meta({ describe: "域" }),
-  moduleName: schema => schema.meta({ describe: "模块名称" }),
-  description: schema => schema.meta({ describe: "操作描述" }),
-  requestId: schema => schema.meta({ describe: "请求ID" }),
-  method: schema => schema.meta({ describe: "HTTP方法" }),
-  url: schema => schema.meta({ describe: "URL" }),
-  ip: schema => schema.meta({ describe: "IP地址" }),
-  userAgent: schema => schema.meta({ describe: "用户代理" }),
-  params: schema => schema.meta({ describe: "查询参数" }),
-  body: schema => schema.meta({ describe: "请求体" }),
-  response: schema => schema.meta({ describe: "响应" }),
-  startTime: schema => schema.meta({ describe: "开始时间" }),
-  endTime: schema => schema.meta({ describe: "结束时间" }),
-  duration: schema => schema.meta({ describe: "持续时间(ms)" }),
+  id: schema => schema.meta({ description: "日志ID" }),
+  userId: schema => schema.meta({ description: "用户ID" }),
+  username: schema => schema.meta({ description: "用户名" }),
+  domain: schema => schema.meta({ description: "域" }),
+  moduleName: schema => schema.meta({ description: "模块名称" }),
+  description: schema => schema.meta({ description: "操作描述" }),
+  requestId: schema => schema.meta({ description: "请求ID" }),
+  method: schema => schema.meta({ description: "HTTP方法" }),
+  url: schema => schema.meta({ description: "URL" }),
+  ip: schema => schema.meta({ description: "IP地址" }),
+  userAgent: schema => schema.meta({ description: "用户代理" }),
+  params: schema => schema.meta({ description: "查询参数" }),
+  body: schema => schema.meta({ description: "请求体" }),
+  response: schema => schema.meta({ description: "响应" }),
+  startTime: schema => schema.meta({ description: "开始时间" }),
+  endTime: schema => schema.meta({ description: "结束时间" }),
+  duration: schema => schema.meta({ description: "持续时间(ms)" }),
 });
 
 export const insertTsOperationLogSchema = createInsertSchema(tsOperationLog, {

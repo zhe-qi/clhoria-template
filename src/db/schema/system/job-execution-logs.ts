@@ -34,14 +34,14 @@ export const systemJobExecutionLogs = pgTable("system_job_execution_logs", {
 });
 
 export const selectSystemJobExecutionLogsSchema = createSelectSchema(systemJobExecutionLogs, {
-  id: schema => schema.meta({ describe: "日志ID" }),
-  jobId: schema => schema.meta({ describe: "关联的任务ID" }),
-  executionId: schema => schema.meta({ describe: "BullMQ执行ID" }),
-  status: schema => schema.meta({ describe: "执行状态" }),
-  startedAt: schema => schema.meta({ describe: "开始时间" }),
-  finishedAt: schema => schema.meta({ describe: "结束时间" }),
-  durationMs: schema => schema.meta({ describe: "执行耗时(毫秒)" }),
-  result: schema => schema.meta({ describe: "执行结果" }),
-  errorMessage: schema => schema.meta({ describe: "错误信息" }),
-  retryCount: schema => schema.meta({ describe: "重试次数" }),
+  id: schema => schema.meta({ description: "日志ID" }),
+  jobId: schema => schema.meta({ description: "关联的任务ID" }),
+  executionId: schema => schema.meta({ description: "BullMQ执行ID" }),
+  status: schema => schema.meta({ description: "执行状态" }),
+  startedAt: schema => schema.meta({ description: "开始时间" }),
+  finishedAt: schema => schema.meta({ description: "结束时间" }),
+  durationMs: schema => schema.meta({ description: "执行耗时(毫秒)" }),
+  result: schema => schema.meta({ description: "执行结果" }),
+  errorMessage: schema => schema.meta({ description: "错误信息" }),
+  retryCount: schema => schema.meta({ description: "重试次数" }),
 });

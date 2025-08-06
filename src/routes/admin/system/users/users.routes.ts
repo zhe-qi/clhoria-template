@@ -168,7 +168,7 @@ export const assignRoles = createRoute({
     params: IdUUIDParamsSchema,
     body: jsonContentRequired(
       z.object({
-        roleIds: z.array(z.string()).meta({ describe: "角色ID列表" }),
+        roleIds: z.array(z.string()).meta({ description: "角色ID列表" }),
       }),
       "分配角色参数",
     ),

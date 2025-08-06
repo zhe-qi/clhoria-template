@@ -7,7 +7,7 @@ import { systemMenu, systemRole, systemRoleMenu } from "@/db/schema";
 export async function initSysRoleMenu() {
   // 获取角色和菜单的 ID
   const roles = await db.select({ id: systemRole.id, code: systemRole.code }).from(systemRole);
-  const menus = await db.select({ id: systemMenu.id, routeName: systemMenu.routeName }).from(systemMenu);
+  const menus = await db.select({ id: systemMenu.id, name: systemMenu.name }).from(systemMenu);
 
   const superRole = roles.find(r => r.code === "ROLE_SUPER");
   const userRole = roles.find(r => r.code === "ROLE_USER");
@@ -27,8 +27,12 @@ export async function initSysRoleMenu() {
     });
   }
 
-  // 普通用户只有首页权限
-  const userMenus = menus.filter(m => m.routeName === "home");
+  // 普通用户拥有仪表盘和部分基础菜单权限
+  const userMenus = menus.filter(m => 
+    ["Dashboard", "Analytics", "Workspace"].includes(m.name) ||
+    m.name === "Login" ||
+    ["403", "404", "500"].includes(m.name)
+  );
 
   for (const menu of userMenus) {
     data.push({

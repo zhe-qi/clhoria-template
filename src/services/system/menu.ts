@@ -3,7 +3,7 @@ import type { InferSelectModel } from "drizzle-orm";
 
 import { and, eq, inArray, like, or } from "drizzle-orm";
 
-import type { insertSystemMenuSchema, patchSystemMenuSchema } from "@/db/schema";
+import type { insertSystemMenuSchema, menuItemSchema, patchSystemMenuSchema, routeMetaSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemMenu, systemRoleMenu } from "@/db/schema";
@@ -17,111 +17,84 @@ import { getUserRolesFromCache } from "./user";
 // 菜单相关类型定义
 type InsertSysMenuData = z.infer<typeof insertSystemMenuSchema>;
 type UpdateSysMenuData = z.infer<typeof patchSystemMenuSchema>;
+type SelectMenuData = InferSelectModel<typeof systemMenu>;
 
-// 直接定义 MenuRoute 类型避免循环引用
-interface MenuRoute {
-  name: string;
-  path: string;
-  component?: string;
-  meta: {
-    title: string;
-    icon?: string | null;
-    order: number;
-    hideInMenu?: boolean | null;
-    keepAlive?: boolean | null;
-    activeMenu?: string | null;
-    constant?: boolean;
-  };
-  children?: MenuRoute[];
-}
-// 直接定义 UserRoute 类型
-interface UserRoute {
-  home: string;
-  routes: MenuRoute[];
-}
+type MenuItem = z.infer<typeof menuItemSchema>;
+type RouteMeta = z.infer<typeof routeMetaSchema>;
 
-// 修复 MenuDataForRoute 类型，包含所有必要属性
-interface MenuDataForRoute {
-  id: string;
-  pid: string | null;
-  menuName: string;
-  routeName: string;
-  routePath: string;
-  component?: string;
-  icon?: string | null;
-  menuType: string;
-  order: number;
-  hideInMenu?: boolean | null;
-  keepAlive?: boolean | null;
-  activeMenu?: string | null;
-  constant?: boolean;
-}
 /**
- * 构建菜单路由树
+ * 将数据库菜单数据转换为菜单项格式
  */
-function buildMenuRouteTree(menus: MenuDataForRoute[], pid: string | null = null): MenuRoute[] {
-  const menuMap = new Map<string | null, MenuDataForRoute[]>();
-
-  // 按父级ID分组
-  for (const menu of menus) {
-    const list = menuMap.get(menu.pid) || [];
-    list.push(menu);
-    menuMap.set(menu.pid, list);
-  }
-
-  // 递归构建树
-  const buildTree = (parentId: string | null): MenuRoute[] => {
-    const children = menuMap.get(parentId) || [];
-    children.sort((a, b) => a.order - b.order);
-
-    return children.map(menu => ({
-      name: menu.routeName,
-      path: menu.routePath,
-      component: menu.component,
-      meta: {
-        title: menu.menuName,
-        icon: menu.icon,
-        order: menu.order,
-        hideInMenu: menu.hideInMenu,
-        keepAlive: menu.keepAlive,
-        activeMenu: menu.activeMenu,
-        constant: menu.constant,
-      },
-      children: buildTree(menu.id),
-    }));
+function transformToMenuItem(menu: SelectMenuData): MenuItem {
+  const meta: RouteMeta = {
+    title: menu.meta?.title || "", // 使用 meta.title，如果没有则为空字符串
+    order: menu.meta?.order ?? 0,
+    ...menu.meta, // 展开 jsonb 中的 meta 属性
   };
 
-  return buildTree(pid);
+  return {
+    name: menu.name,
+    path: menu.path,
+    component: menu.component || undefined,
+    redirect: menu.redirect || undefined,
+    meta,
+  };
 }
 
 /**
- * 获取首页路由
+ * 直接构建 MenuItem 树，避免多次数据转换
  */
-function getHomeRoute(routes: MenuRoute[]): string {
-  // 查找第一个非隐藏的叶子节点作为首页
-  const findFirstLeaf = (routes: MenuRoute[]): string => {
-    for (const route of routes) {
-      if (route.meta.hideInMenu) {
-        continue;
-      }
+function buildMenuTreeDirect(menus: SelectMenuData[]): MenuItem[] {
+  // 预排序，避免后续递归排序
+  const sortedMenus = [...menus].sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0));
 
-      if (!route.children || route.children.length < 1) {
-        return route.name;
-      }
+  const map = new Map<string, MenuItem & { children: MenuItem[] }>();
+  const roots: MenuItem[] = [];
 
-      const childHome = findFirstLeaf(route.children);
-      if (childHome) {
-        return childHome;
+  // 单次遍历：创建映射并构建树
+  for (const menu of sortedMenus) {
+    const menuItem: MenuItem & { children: MenuItem[] } = {
+      ...transformToMenuItem(menu),
+      children: [],
+    };
+
+    map.set(menu.id, menuItem);
+
+    if (menu.pid === null) {
+      roots.push(menuItem);
+    }
+    else {
+      const parent = map.get(menu.pid);
+      if (parent) {
+        parent.children = parent.children || [];
+        parent.children.push(menuItem);
+      }
+      else {
+        // 父节点不存在，当作根节点处理
+        roots.push(menuItem);
       }
     }
-    return "";
+  }
+
+  // 清理空的 children 数组
+  const cleanupChildren = (items: MenuItem[]): MenuItem[] => {
+    return items.map((item) => {
+      const cleaned = { ...item };
+      if (item.children && item.children.length > 0) {
+        cleaned.children = cleanupChildren(item.children);
+      }
+      else {
+        delete cleaned.children;
+      }
+      return cleaned;
+    });
   };
 
-  return findFirstLeaf(routes) || "home";
+  return cleanupChildren(roots);
 }
 
 /**
- * 构建通用菜单树
+ * 构建通用菜单树（优化版）
  */
 interface TreeNode<T> {
   children?: TreeNode<T>[];
@@ -131,78 +104,56 @@ interface HasOrder {
   order?: number;
 }
 
-function buildMenuTree<T extends { id: string; pid: string | null } & HasOrder>(items: T[]): Array<T & TreeNode<T>> {
+function buildMenuTreeOptimized<T extends { id: string; pid: string | null; meta?: { order?: number } | null }>(items: T[]): Array<T & TreeNode<T>> {
+  // 预排序，避免后续递归排序
+  const sortedItems = [...items].sort((a, b) => ((a.meta?.order ?? 0) - (b.meta?.order ?? 0)));
+
   const map = new Map<string, T & TreeNode<T>>();
   const roots: Array<T & TreeNode<T>> = [];
 
-  // 第一次遍历：创建映射
-  for (const item of items) {
-    map.set(item.id, { ...item, children: [] });
-  }
-
-  // 第二次遍历：构建树形结构
-  for (const item of items) {
-    const node = map.get(item.id)!;
+  // 单次遍历：创建映射并构建树
+  for (const item of sortedItems) {
+    const node = { ...item, children: [] } as T & TreeNode<T>;
+    map.set(item.id, node);
 
     if (item.pid === null) {
-      // 根节点
       roots.push(node);
     }
     else {
-      // 子节点
       const parent = map.get(item.pid);
       if (parent) {
-        if (!parent.children) {
-          parent.children = [];
-        }
+        parent.children = parent.children || [];
         parent.children.push(node);
       }
       else {
-        // 找不到父节点，当作根节点处理
+        // 父节点不存在时作为根节点
         roots.push(node);
       }
     }
   }
 
-  // 递归排序所有层级
-  function sortChildren(nodes: Array<T & TreeNode<T>>) {
-    nodes.sort((a, b) => {
-      const aOrder = a.order || 0;
-      const bOrder = b.order || 0;
-      return aOrder - bOrder;
-    });
-    for (const node of nodes) {
-      if (node.children && node.children.length > 0) {
-        sortChildren(node.children as Array<T & TreeNode<T>>);
-      }
-    }
-  }
-
-  sortChildren(roots);
-
   return roots;
 }
 
-/**
- * 获取用户菜单路由
- */
-export async function getUserRoutes(userId: string, domain: string): Promise<UserRoute> {
-  // 尝试从缓存获取
-  const cacheKey = getUserMenusKey(userId, domain);
-  const cachedRoutes = await redisClient.get(cacheKey);
+// 保留原函数以兼容现有代码
+function _buildMenuTree<T extends { id: string; pid: string | null } & HasOrder>(items: T[]): Array<T & TreeNode<T>> {
+  return buildMenuTreeOptimized(items as Array<T & { meta?: { order?: number } }>);
+}
 
-  if (cachedRoutes) {
-    return JSON.parse(cachedRoutes) as UserRoute;
+/**
+ * 公共函数：根据角色获取菜单数据
+ */
+async function getMenusByRoles(roles: string[], domain: string, includeConstant: boolean = true): Promise<SelectMenuData[]> {
+  if (roles.length === 0) {
+    return [];
   }
 
-  // 获取用户的所有角色（包括隐式角色）
-  const roles = await rbac.getImplicitRolesForUser(userId, domain);
+  // 角色级缓存key
+  const rolesCacheKey = `role_menus:${domain}:${roles.sort().join(",")}:${includeConstant ? "all" : "no-constant"}`;
+  const cachedRoleMenus = await redisClient.get(rolesCacheKey);
 
-  if (roles.length === 0) {
-    const emptyResult: UserRoute = { home: "", routes: [] };
-    // 缓存空结果，避免重复查询
-    await redisClient.setex(cacheKey, 300, JSON.stringify(emptyResult)); // 5分钟过期
-    return emptyResult;
+  if (cachedRoleMenus) {
+    return JSON.parse(cachedRoleMenus) as SelectMenuData[];
   }
 
   // 使用关联查询一次性获取角色菜单数据
@@ -217,127 +168,77 @@ export async function getUserRoutes(userId: string, domain: string): Promise<Use
   });
 
   // 提取去重的菜单数据并过滤状态
-  const menusMap = new Map<string, MenuDataForRoute>();
+  const menusMap = new Map<string, SelectMenuData>();
   roleMenus.forEach((rm) => {
     if (rm.menu
       && rm.menu.status === Status.ENABLED
       && rm.menu.domain === domain
       && !menusMap.has(rm.menu.id)) {
-      menusMap.set(rm.menu.id, {
-        id: rm.menu.id,
-        menuName: rm.menu.menuName,
-        routeName: rm.menu.routeName,
-        routePath: rm.menu.routePath,
-        component: rm.menu.component,
-        icon: rm.menu.icon,
-        menuType: rm.menu.menuType,
-        pid: rm.menu.pid,
-        order: rm.menu.order,
-        hideInMenu: rm.menu.hideInMenu,
-        keepAlive: rm.menu.keepAlive,
-        constant: rm.menu.constant,
-        activeMenu: rm.menu.activeMenu,
-      });
+      // 根据需要过滤常量菜单
+      if (!includeConstant && rm.menu.meta?.constant === true) {
+        return;
+      }
+
+      menusMap.set(rm.menu.id, rm.menu);
     }
   });
 
-  const menus = Array.from(menusMap.values()).sort((a, b) => a.order - b.order);
+  const menus = Array.from(menusMap.values()).sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0));
 
-  // 构建菜单路由树
-  const routes = buildMenuRouteTree(menus);
+  // 缓存角色菜单结果（较长缓存时间，因为角色菜单变化频率低）
+  void await redisClient.setex(rolesCacheKey, 3600, JSON.stringify(menus)); // 1小时过期
 
-  // 确定首页路由
-  const homeRoute = getHomeRoute(routes);
-
-  const result: UserRoute = {
-    home: homeRoute,
-    routes,
-  };
-
-  // 缓存结果
-  await redisClient.setex(cacheKey, 1800, JSON.stringify(result)); // 30分钟过期
-
-  return result;
+  return menus;
 }
 
 /**
- * 获取用户菜单原始数据
+ * 获取用户菜单 - 返回树形结构
  */
-export async function getUserMenus(userId: string, domain: string) {
+export async function getUserMenus(userId: string, domain: string): Promise<MenuItem[]> {
   // 尝试从缓存获取菜单数据
-  const cacheKey = `${getUserMenusKey(userId, domain)}:raw`;
+  const cacheKey = `${getUserMenusKey(userId, domain)}:menu`;
   const cachedMenus = await redisClient.get(cacheKey);
 
   if (cachedMenus) {
-    return JSON.parse(cachedMenus);
+    return JSON.parse(cachedMenus) as MenuItem[];
   }
 
   // 从缓存获取用户角色
   const roles = await getUserRolesFromCache(userId, domain);
 
   if (roles.length === 0) {
-    const emptyResult: any[] = [];
+    const emptyResult: MenuItem[] = [];
     // 缓存空结果，避免重复查询
-    await redisClient.setex(cacheKey, 300, JSON.stringify(emptyResult)); // 5分钟过期
+    void await redisClient.setex(cacheKey, 300, JSON.stringify(emptyResult)); // 5分钟过期
     return emptyResult;
   }
 
-  // 使用关联查询一次性获取角色菜单数据
-  const roleMenus = await db.query.systemRoleMenu.findMany({
-    where: and(
-      inArray(systemRoleMenu.roleId, roles),
-      eq(systemRoleMenu.domain, domain),
-    ),
-    with: {
-      menu: true,
-    },
-  });
+  // 使用公共函数获取菜单数据
+  const menus = await getMenusByRoles(roles, domain, true);
 
-  // 提取去重的菜单数据并过滤状态
-  const menusMap = new Map();
-  roleMenus.forEach((rm) => {
-    if (rm.menu
-      && rm.menu.status === Status.ENABLED
-      && rm.menu.domain === domain
-      && !menusMap.has(rm.menu.id)) {
-      menusMap.set(rm.menu.id, {
-        id: rm.menu.id,
-        menuType: rm.menu.menuType,
-        menuName: rm.menu.menuName,
-        iconType: rm.menu.iconType,
-        icon: rm.menu.icon,
-        routeName: rm.menu.routeName,
-        routePath: rm.menu.routePath,
-        component: rm.menu.component,
-        pathParam: rm.menu.pathParam,
-        status: rm.menu.status,
-        activeMenu: rm.menu.activeMenu,
-        hideInMenu: rm.menu.hideInMenu,
-        pid: rm.menu.pid,
-        order: rm.menu.order,
-        i18nKey: rm.menu.i18nKey,
-        keepAlive: rm.menu.keepAlive,
-        constant: rm.menu.constant,
-        href: rm.menu.href,
-        multiTab: rm.menu.multiTab,
-      });
-    }
-  });
-
-  const menus = Array.from(menusMap.values()).sort((a, b) => a.order - b.order);
+  // 直接构建菜单树，避免多次转换
+  const menuTree = buildMenuTreeDirect(menus);
 
   // 缓存结果
-  await redisClient.setex(cacheKey, 1800, JSON.stringify(menus)); // 30分钟过期
+  void await redisClient.setex(cacheKey, 1800, JSON.stringify(menuTree)); // 30分钟过期
 
-  return menus;
+  return menuTree;
 }
 
 /**
  * 清除用户菜单缓存
  */
 export async function clearUserMenuCache(userId: string, domain: string): Promise<void> {
-  const cacheKey = getUserMenusKey(userId, domain);
-  await redisClient.del(cacheKey);
+  const keys = [
+    getUserMenusKey(userId, domain),
+    `${getUserMenusKey(userId, domain)}:menu`,
+    `${getUserMenusKey(userId, domain)}:raw`,
+  ];
+
+  // 批量删除缓存键
+  if (keys.length > 0) {
+    void await redisClient.del(...keys);
+  }
 }
 
 /**
@@ -355,7 +256,7 @@ export async function clearAllMenuCache(domain: string): Promise<void> {
   for (const pattern of patterns) {
     const keys = await redisClient.keys(pattern);
     if (keys.length > 0) {
-      await redisClient.del(...keys);
+      void await redisClient.del(...keys);
     }
   }
 }
@@ -391,7 +292,7 @@ export async function assignMenusToRole(roleId: string, menuIds: string[], domai
   });
 
   // 清除相关缓存
-  await clearAllMenuCache(domain);
+  void await clearAllMenuCache(domain);
 
   return result;
 }
@@ -427,9 +328,8 @@ export async function getMenuList(options: {
     searchCondition = and(
       eq(systemMenu.domain, domain),
       or(
-        like(systemMenu.menuName, `%${search}%`),
-        like(systemMenu.routeName, `%${search}%`),
-        like(systemMenu.routePath, `%${search}%`),
+        like(systemMenu.name, `%${search}%`),
+        like(systemMenu.path, `%${search}%`),
       ),
     )!;
   }
@@ -437,7 +337,7 @@ export async function getMenuList(options: {
   return await pagination<InferSelectModel<typeof systemMenu>>(
     systemMenu,
     searchCondition,
-    { page, limit, orderBy: [systemMenu.order, systemMenu.id] },
+    { page, limit, orderBy: [systemMenu.id] },
   );
 }
 
@@ -454,30 +354,22 @@ export async function getMenuTree(options: { status?: number; domain: string }) 
 
   const menus = await db.query.systemMenu.findMany({
     where: and(...whereConditions),
-    orderBy: [systemMenu.order, systemMenu.id],
+    orderBy: [systemMenu.id],
   });
 
-  return buildMenuTree(menus);
+  return buildMenuTreeOptimized(menus);
 }
 
 /**
  * 根据角色获取菜单
  */
 export async function getMenusByRole(roleId: string, domain: string) {
-  const roleMenus = await db.query.systemRoleMenu.findMany({
-    where: and(
-      eq(systemRoleMenu.roleId, roleId),
-      eq(systemRoleMenu.domain, domain),
-    ),
-    with: {
-      menu: true,
-    },
-  });
+  // 使用公共函数获取单个角色的菜单
+  const menus = await getMenusByRoles([roleId], domain, true);
 
-  return roleMenus
-    .map(rm => rm.menu)
+  return menus
     .filter(menu => menu !== null && menu.status === Status.ENABLED && menu.domain === domain)
-    .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+    .sort((a, b) => (a.meta?.order ?? 0) - (b.meta?.order ?? 0) || a.id.localeCompare(b.id));
 }
 
 /**
@@ -487,7 +379,7 @@ export async function createMenu(menuData: InsertSysMenuData) {
   const [newMenu] = await db.insert(systemMenu).values(menuData).returning();
 
   // 清除相关缓存
-  await clearAllMenuCache(menuData.domain || "default");
+  void await clearAllMenuCache(menuData.domain || "default");
 
   return newMenu;
 }
@@ -525,7 +417,7 @@ export async function updateMenu(id: string, menuData: UpdateSysMenuData, domain
 
   if (updatedMenu) {
     // 清除相关缓存
-    await clearAllMenuCache(updatedMenu.domain || "default");
+    void await clearAllMenuCache(updatedMenu.domain || "default");
   }
 
   return updatedMenu;
@@ -559,7 +451,7 @@ export async function deleteMenu(id: string, domain?: string) {
 
   if (deletedMenu) {
     // 清除相关缓存
-    await clearAllMenuCache(menuToDelete.domain || "default");
+    void await clearAllMenuCache(menuToDelete.domain || "default");
   }
 
   return deletedMenu;
@@ -571,32 +463,15 @@ export async function deleteMenu(id: string, domain?: string) {
 export async function getConstantRoutes(domain: string = "default") {
   const constantMenus = await db.query.systemMenu.findMany({
     where: and(
-      eq(systemMenu.constant, true),
       eq(systemMenu.status, Status.ENABLED),
       eq(systemMenu.domain, domain),
     ),
-    orderBy: [systemMenu.order, systemMenu.id],
+    orderBy: [systemMenu.id],
   });
 
-  return constantMenus.map(menu => ({
-    id: menu.id,
-    menuName: menu.menuName,
-    routeName: menu.routeName,
-    routePath: menu.routePath,
-    component: menu.component,
-    icon: menu.icon,
-    iconType: menu.iconType,
-    i18nKey: menu.i18nKey,
-    hideInMenu: menu.hideInMenu,
-    keepAlive: menu.keepAlive,
-    href: menu.href,
-    multiTab: menu.multiTab,
-    order: menu.order,
-    pid: menu.pid,
-    pathParam: menu.pathParam,
-    activeMenu: menu.activeMenu,
-    domain: menu.domain,
-  }));
+  return constantMenus
+    .filter(menu => menu.meta?.constant === true)
+    .map(menu => transformToMenuItem(menu));
 }
 
 /**
@@ -610,35 +485,11 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
     return { routes: [], home: "/dashboard" };
   }
 
-  // 使用关联查询一次性获取角色菜单数据
-  const roleMenus = await db.query.systemRoleMenu.findMany({
-    where: and(
-      inArray(systemRoleMenu.roleId, roles),
-      eq(systemRoleMenu.domain, domain),
-    ),
-    with: {
-      menu: true,
-    },
-  });
+  // 使用公共函数获取菜单数据（排除常量菜单）
+  const menus = await getMenusByRoles(roles, domain, false);
 
-  // 提取去重的菜单数据并过滤
-  const menusMap = new Map();
-  roleMenus.forEach((rm) => {
-    const isHandlerExists = rm.menu
-      && rm.menu.status === Status.ENABLED
-      && !rm.menu.constant
-      && rm.menu.domain === domain
-      && !menusMap.has(rm.menu.id);
-
-    if (isHandlerExists) {
-      menusMap.set(rm.menu.id, rm.menu);
-    }
-  });
-
-  const menus = Array.from(menusMap.values()).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
-
-  // 直接返回数据库菜单结构而不是 MenuRoute 结构
-  const menuTree = buildMenuTree(menus);
+  // 直接返回优化后的菜单树结构
+  const menuTree = buildMenuTreeOptimized(menus);
 
   return {
     routes: menuTree,

@@ -1,5 +1,5 @@
 {
-  "id": "f5e96bc6-e840-4eb1-b596-c8e9f08395be",
+  "id": "3490dc62-2db0-4be9-8a06-52f04fbc6940",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -758,53 +758,27 @@
           "primaryKey": false,
           "notNull": false
         },
-        "menu_type": {
-          "name": "menu_type",
-          "type": "menu_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "menu_name": {
-          "name": "menu_name",
+        "name": {
+          "name": "name",
           "type": "varchar(64)",
           "primaryKey": false,
           "notNull": true
         },
-        "icon_type": {
-          "name": "icon_type",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 1
-        },
-        "icon": {
-          "name": "icon",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "route_name": {
-          "name": "route_name",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "route_path": {
-          "name": "route_path",
+        "path": {
+          "name": "path",
           "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
         },
         "component": {
           "name": "component",
-          "type": "varchar(64)",
+          "type": "varchar(128)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "path_param": {
-          "name": "path_param",
-          "type": "varchar(64)",
+        "redirect": {
+          "name": "redirect",
+          "type": "varchar(500)",
           "primaryKey": false,
           "notNull": false
         },
@@ -815,63 +789,18 @@
           "notNull": true,
           "default": 1
         },
-        "active_menu": {
-          "name": "active_menu",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hide_in_menu": {
-          "name": "hide_in_menu",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
         "pid": {
           "name": "pid",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "i18n_key": {
-          "name": "i18n_key",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "keep_alive": {
-          "name": "keep_alive",
-          "type": "boolean",
+        "meta": {
+          "name": "meta",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false,
-          "default": false
-        },
-        "constant": {
-          "name": "constant",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "href": {
-          "name": "href",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "multi_tab": {
-          "name": "multi_tab",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
+          "default": "'{\"title\":\"\",\"order\":0}'::jsonb"
         },
         "domain": {
           "name": "domain",
@@ -1849,7 +1778,7 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -2006,7 +1935,7 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -2214,14 +2143,6 @@
     }
   },
   "enums": {
-    "public.menu_type": {
-      "name": "menu_type",
-      "schema": "public",
-      "values": [
-        "directory",
-        "menu"
-      ]
-    },
     "public.notice_type": {
       "name": "notice_type",
       "schema": "public",

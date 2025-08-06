@@ -19,13 +19,13 @@ export const systemOrganization = pgTable("system_organization", {
 ]);
 
 export const selectSystemOrganizationSchema = createSelectSchema(systemOrganization, {
-  id: schema => schema.meta({ describe: "组织ID" }),
-  domain: schema => schema.meta({ describe: "所属域ID" }),
-  code: schema => schema.meta({ describe: "组织代码" }),
-  name: schema => schema.meta({ describe: "组织名称" }),
-  description: schema => schema.meta({ describe: "组织描述" }),
-  pid: schema => schema.meta({ describe: "父组织ID" }),
-  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用" }),
+  id: schema => schema.meta({ description: "组织ID" }),
+  domain: schema => schema.meta({ description: "所属域ID" }),
+  code: schema => schema.meta({ description: "组织代码" }),
+  name: schema => schema.meta({ description: "组织名称" }),
+  description: schema => schema.meta({ description: "组织描述" }),
+  pid: schema => schema.meta({ description: "父组织ID" }),
+  status: schema => schema.meta({ description: "状态: 1=启用 0=禁用" }),
 });
 
 export const insertSystemOrganizationSchema = createInsertSchema(systemOrganization, {

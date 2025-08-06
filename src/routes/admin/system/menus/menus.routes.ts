@@ -22,7 +22,7 @@ export const list = createRoute({
   method: "get",
   request: {
     query: PaginationParamsSchema.extend({
-      search: z.string().optional().meta({ describe: "搜索关键词" }),
+      search: z.string().optional().meta({ description: "搜索关键词" }),
     }),
   },
   tags,
@@ -45,14 +45,16 @@ export const tree = createRoute({
   method: "get",
   request: {
     query: z.object({
-      status: z.number().int().optional().meta({ describe: "菜单状态: 1=启用 0=禁用" }),
+      status: z.number().int().optional().meta({ description: "菜单状态: 1=启用 0=禁用" }),
     }),
   },
   tags,
   summary: "查询菜单树形结构",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSystemMenuSchema.partial()),
+      z.array(selectSystemMenuSchema.extend({
+        children: z.array(z.any()).optional(),
+      }).partial()),
       "查询成功",
     ),
   },
@@ -163,68 +165,6 @@ export const patch = createRoute({
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(patchSystemMenuSchema).or(createErrorSchema(IdUUIDParamsSchema)),
       "参数验证失败",
-    ),
-  },
-});
-
-/** 获取常量路由列表 */
-export const getConstantRoutes = createRoute({
-  permission: {
-    resource: PermissionResource.SYSTEM_MENUS,
-    action: PermissionAction.READ,
-  },
-  path: `${routePrefix}/constant`,
-  method: "get",
-  tags,
-  summary: "获取常量路由",
-  responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSystemMenuSchema.pick({
-        id: true,
-        menuName: true,
-        routeName: true,
-        routePath: true,
-        component: true,
-        icon: true,
-        iconType: true,
-        i18nKey: true,
-        hideInMenu: true,
-        keepAlive: true,
-        href: true,
-        multiTab: true,
-        order: true,
-        pid: true,
-        pathParam: true,
-        activeMenu: true,
-      })),
-      "获取成功",
-    ),
-  },
-});
-
-/** 获取当前用户路由列表 */
-export const getUserRoutes = createRoute({
-  permission: {
-    resource: PermissionResource.SYSTEM_MENUS,
-    action: PermissionAction.READ,
-  },
-  path: `${routePrefix}/user-routes`,
-  method: "get",
-  tags,
-  summary: "获取当前用户路由",
-  responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        routes: z.array(selectSystemMenuSchema.partial()),
-        home: z.string(),
-      }),
-      "获取成功",
-    ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({
-        message: z.string(),
-      }),
-      "未授权",
     ),
   },
 });

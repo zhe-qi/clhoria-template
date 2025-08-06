@@ -125,6 +125,8 @@ describe("auth routes", () => {
       return;
     }
 
+    await new Promise(resolve => setTimeout(resolve, 500)); // 等待500毫秒，确保令牌有效
+
     const response = await authClient.auth.refresh.$post({
       json: {
         refreshToken: refreshTokenValue,

@@ -6,6 +6,7 @@ import type { AppOpenAPI } from "@/types/lib";
 import db from "@/db";
 import { systemEndpoint } from "@/db/schema/system/endpoint";
 import { logger } from "@/lib/logger";
+import { compareObjects } from "@/utils";
 
 import type { EndpointPermission } from "./permission-config";
 
@@ -92,7 +93,7 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
  * 同步端点权限到数据库
  */
 export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermission[]) {
-  if (endpoints.length === 0)
+  if (endpoints.length < 1)
     return { inserted: 0, updated: 0 };
 
   return db.transaction(async (tx) => {
@@ -122,12 +123,11 @@ export async function syncEndpointPermissionsToDatabase(endpoints: EndpointPermi
         });
         inserted++;
       }
-      else if (
-        existingEndpoint.action !== endpoint.action
-        || existingEndpoint.resource !== endpoint.resource
-        || existingEndpoint.controller !== endpoint.controller
-        || existingEndpoint.summary !== endpoint.summary
-      ) {
+      else if (compareObjects(
+        existingEndpoint,
+        endpoint as unknown as Record<string, any>,
+        ["action", "resource", "controller", "summary"],
+      )) {
         // 更新现有端点
         await tx
           .update(systemEndpoint)
