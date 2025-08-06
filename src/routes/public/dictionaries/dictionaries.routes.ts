@@ -13,7 +13,7 @@ const prefix = "/public-dictionaries";
 const tags = [`${prefix} (字典)`];
 
 const CodeParamsSchema = z.object({
-  code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
+  code: z.string().min(1, "字典编码不能为空").meta({ describe: "字典编码" }),
 });
 
 /** 获取字典列表 */

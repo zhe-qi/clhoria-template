@@ -23,7 +23,7 @@ export const list = createRoute({
   path: routePrefix,
   request: {
     query: PaginationParamsSchema.extend({
-      search: z.string().optional().describe("搜索岗位名称或编码"),
+      search: z.string().optional().meta({ describe: "搜索岗位名称或编码" }),
     }),
   },
   responses: {
@@ -196,7 +196,7 @@ export const assignUsers = createRoute({
     params: IdUUIDParamsSchema,
     body: jsonContentRequired(
       z.object({
-        userIds: z.array(z.string()).describe("用户ID列表"),
+        userIds: z.array(z.string()).meta({ describe: "用户ID列表" }),
       }),
       "分配用户参数",
     ),

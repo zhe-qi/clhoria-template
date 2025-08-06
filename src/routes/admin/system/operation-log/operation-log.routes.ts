@@ -12,7 +12,7 @@ const routePrefix = "/system/operation-log";
 const tags = [`${routePrefix}（操作日志）`];
 
 const operationLogQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().optional().describe("搜索关键词"),
+  search: z.string().optional().meta({ describe: "搜索关键词" }),
 });
 
 /** 获取操作日志列表 */

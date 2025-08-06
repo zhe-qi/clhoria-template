@@ -31,14 +31,14 @@ export const casbinRule = pgTable("casbin_rule", {
 ]);
 
 export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
-  id: schema => schema.describe("规则ID"),
-  ptype: schema => schema.describe("策略类型: p=策略 g=角色继承"),
-  v0: schema => schema.describe("主体: 角色或用户"),
-  v1: schema => schema.describe("对象: 业务资源"),
-  v2: schema => schema.describe("动作: 业务动作"),
-  v3: schema => schema.describe("域: 租户/域"),
-  v4: schema => schema.describe("效果: allow/deny"),
-  v5: schema => schema.describe("保留字段"),
+  id: schema => schema.meta({ describe: "规则ID" }),
+  ptype: schema => schema.meta({ describe: "策略类型: p=策略 g=角色继承" }),
+  v0: schema => schema.meta({ describe: "主体: 角色或用户" }),
+  v1: schema => schema.meta({ describe: "对象: 业务资源" }),
+  v2: schema => schema.meta({ describe: "动作: 业务动作" }),
+  v3: schema => schema.meta({ describe: "域: 租户/域" }),
+  v4: schema => schema.meta({ describe: "效果: allow/deny" }),
+  v5: schema => schema.meta({ describe: "保留字段" }),
 });
 
 export const insertCasbinRuleSchema = createInsertSchema(

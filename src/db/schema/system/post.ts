@@ -25,13 +25,13 @@ export const systemPostRelations = relations(systemPost, ({ many }) => ({
 }));
 
 export const selectSystemPostSchema = createSelectSchema(systemPost, {
-  id: schema => schema.describe("岗位ID"),
-  postCode: schema => schema.describe("岗位编码"),
-  postName: schema => schema.describe("岗位名称"),
-  postSort: schema => schema.describe("显示顺序"),
-  status: schema => schema.describe("状态: 1=启用 0=禁用 -1=封禁"),
-  domain: schema => schema.describe("所属域ID"),
-  remark: schema => schema.describe("备注"),
+  id: schema => schema.meta({ describe: "岗位ID" }),
+  postCode: schema => schema.meta({ describe: "岗位编码" }),
+  postName: schema => schema.meta({ describe: "岗位名称" }),
+  postSort: schema => schema.meta({ describe: "显示顺序" }),
+  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用 -1=封禁" }),
+  domain: schema => schema.meta({ describe: "所属域ID" }),
+  remark: schema => schema.meta({ describe: "备注" }),
 });
 
 export const insertSystemPostSchema = createInsertSchema(systemPost, {

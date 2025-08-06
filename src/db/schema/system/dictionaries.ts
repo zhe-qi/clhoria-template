@@ -49,43 +49,43 @@ export const systemDictionaries = pgTable("system_dictionaries", {
  * 字典项Schema定义
  */
 export const dictionaryItemSchema = z.object({
-  code: z.string().min(1).describe("项编码"),
-  label: z.string().min(1).describe("显示标签"),
-  value: z.string().describe("实际值"),
-  description: z.string().optional().describe("项描述"),
-  color: z.string().optional().describe("显示颜色"),
-  icon: z.string().optional().describe("图标"),
-  status: z.number().int().min(0).max(1).describe("状态: 1=启用 0=禁用"),
-  sortOrder: z.number().int().min(0).describe("排序"),
+  code: z.string().min(1).meta({ describe: "项编码" }),
+  label: z.string().min(1).meta({ describe: "显示标签" }),
+  value: z.string().meta({ describe: "实际值" }),
+  description: z.string().optional().meta({ describe: "项描述" }),
+  color: z.string().optional().meta({ describe: "显示颜色" }),
+  icon: z.string().optional().meta({ describe: "图标" }),
+  status: z.number().int().min(0).max(1).meta({ describe: "状态: 1=启用 0=禁用" }),
+  sortOrder: z.number().int().min(0).meta({ describe: "排序" }),
 });
 
 /**
  * 查询字典Schema
  */
 export const selectSystemDictionariesSchema = createSelectSchema(systemDictionaries, {
-  id: schema => schema.describe("字典ID"),
-  code: schema => schema.describe("字典编码"),
-  name: schema => schema.describe("字典名称"),
-  description: schema => schema.describe("字典描述"),
-  items: _schema => z.array(dictionaryItemSchema).describe("字典项列表"),
-  status: schema => schema.describe("状态: 1=启用 0=禁用"),
-  sortOrder: schema => schema.describe("排序"),
-  createdAt: schema => schema.describe("创建时间"),
-  updatedAt: schema => schema.describe("更新时间"),
-  createdBy: schema => schema.describe("创建人"),
-  updatedBy: schema => schema.describe("更新人"),
+  id: schema => schema.meta({ describe: "字典ID" }),
+  code: schema => schema.meta({ describe: "字典编码" }),
+  name: schema => schema.meta({ describe: "字典名称" }),
+  description: schema => schema.meta({ describe: "字典描述" }),
+  items: _schema => z.array(dictionaryItemSchema).meta({ describe: "字典项列表" }),
+  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用" }),
+  sortOrder: schema => schema.meta({ describe: "排序" }),
+  createdAt: schema => schema.meta({ describe: "创建时间" }),
+  updatedAt: schema => schema.meta({ describe: "更新时间" }),
+  createdBy: schema => schema.meta({ describe: "创建人" }),
+  updatedBy: schema => schema.meta({ describe: "更新人" }),
 });
 
 /**
  * 创建字典Schema
  */
 export const insertSystemDictionariesSchema = createInsertSchema(systemDictionaries, {
-  code: schema => schema.min(1, "字典编码不能为空").describe("字典编码"),
-  name: schema => schema.min(1, "字典名称不能为空").describe("字典名称"),
-  description: schema => schema.optional().describe("字典描述"),
-  items: _schema => z.array(dictionaryItemSchema).default([]).describe("字典项列表"),
-  status: schema => schema.default(1).describe("状态: 1=启用 0=禁用"),
-  sortOrder: schema => schema.default(0).describe("排序"),
+  code: schema => schema.min(1, "字典编码不能为空").meta({ describe: "字典编码" }),
+  name: schema => schema.min(1, "字典名称不能为空").meta({ describe: "字典名称" }),
+  description: schema => schema.optional().meta({ describe: "字典描述" }),
+  items: _schema => z.array(dictionaryItemSchema).default([]).meta({ describe: "字典项列表" }),
+  status: schema => schema.default(1).meta({ describe: "状态: 1=启用 0=禁用" }),
+  sortOrder: schema => schema.default(0).meta({ describe: "排序" }),
 }).omit({
   id: true,
   createdAt: true,
@@ -108,5 +108,5 @@ export const responseSystemDictionariesSchema = selectSystemDictionariesSchema;
  * 批量获取字典Schema
  */
 export const batchGetDictionariesSchema = z.object({
-  codes: z.array(z.string().min(1)).min(1).max(50).describe("字典编码列表，最多50个"),
+  codes: z.array(z.string().min(1)).min(1).max(50).meta({ describe: "字典编码列表，最多50个" }),
 });

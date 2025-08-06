@@ -12,7 +12,7 @@ export const list = createRoute({
   method: "get",
   request: {
     query: z.object({
-      search: z.string().optional().describe("搜索关键词"),
+      search: z.string().optional().meta({ describe: "搜索关键词" }),
     }),
   },
   tags,

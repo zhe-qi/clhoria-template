@@ -23,7 +23,7 @@ export const list = createRoute({
   path: routePrefix,
   request: {
     query: PaginationParamsSchema.extend({
-      search: z.string().optional().describe("搜索关键词"),
+      search: z.string().optional().meta({ describe: "搜索关键词" }),
     }),
   },
   responses: {

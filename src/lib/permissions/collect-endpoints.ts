@@ -24,6 +24,8 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
     const registry = app.openAPIRegistry;
     const routes = registry.definitions;
 
+    const loggers: Set<string> = new Set();
+
     for (const definition of routes) {
       if (definition.type === "route") {
         const route = definition.route;
@@ -40,7 +42,7 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
 
         // 如果无法提取权限配置，跳过该端点（可能是公开接口）
         if (!permissionConfig) {
-          logger.debug(`跳过无权限配置的端点: ${method} ${fullPath} (operationId: ${operationId})`);
+          loggers.add(fullPath);
           continue;
         }
 
@@ -73,6 +75,10 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
         // 注册到权限管理器
         permissionManager.registerEndpointPermission(endpointPermission);
       }
+    }
+
+    if (loggers.size > 0) {
+      logger.info(`收集到以下公开端点权限配置: \n${Array.from(loggers).join("、")}`);
     }
   }
   catch (error) {

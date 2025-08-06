@@ -23,12 +23,12 @@ export const systemRoleRelations = relations(systemRole, ({ many }) => ({
 }));
 
 export const selectSystemRoleSchema = createSelectSchema(systemRole, {
-  id: schema => schema.describe("角色ID"),
-  code: schema => schema.describe("角色代码 例如: ROLE_ADMIN"),
-  name: schema => schema.describe("角色名称"),
-  description: schema => schema.describe("角色描述"),
-  pid: schema => schema.describe("父角色ID"),
-  status: schema => schema.describe("状态: 1=启用 0=禁用"),
+  id: schema => schema.meta({ describe: "角色ID" }),
+  code: schema => schema.meta({ describe: "角色代码 例如: ROLE_ADMIN" }),
+  name: schema => schema.meta({ describe: "角色名称" }),
+  description: schema => schema.meta({ describe: "角色描述" }),
+  pid: schema => schema.meta({ describe: "父角色ID" }),
+  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用" }),
 });
 
 export const insertSystemRoleSchema = createInsertSchema(systemRole, {

@@ -7,25 +7,25 @@ import { count } from "drizzle-orm";
 import db from "@/db";
 
 export const PaginationParamsSchema = z.object({
-  page: z.coerce.number().min(1).default(1).describe("页码"),
-  limit: z.coerce.number().min(1).max(100).default(10).describe("每页数量"),
-  search: z.string().optional().describe("搜索关键词"),
+  page: z.coerce.number().min(1).default(1).meta({ describe: "页码" }),
+  limit: z.coerce.number().min(1).max(100).default(10).meta({ describe: "每页数量" }),
+  search: z.string().optional().meta({ describe: "搜索关键词" }),
 });
 
 export type PaginationParams = z.infer<typeof PaginationParamsSchema>;
 
 export const PaginationMetaSchema = z.object({
-  page: z.number().describe("当前页码"),
-  limit: z.number().describe("每页数量"),
-  total: z.number().describe("总数量"),
+  page: z.number().meta({ describe: "当前页码" }),
+  limit: z.number().meta({ describe: "每页数量" }),
+  total: z.number().meta({ describe: "总数量" }),
 });
 
 export type PaginationMeta = z.infer<typeof PaginationMetaSchema>;
 
 export function createPaginatedResultSchema<T extends z.ZodTypeAny>(itemSchema: T) {
   return z.object({
-    data: z.array(itemSchema).describe("数据列表"),
-    meta: PaginationMetaSchema.describe("分页信息"),
+    data: z.array(itemSchema).meta({ describe: "数据列表" }),
+    meta: PaginationMetaSchema.meta({ describe: "分页信息" }),
   });
 }
 

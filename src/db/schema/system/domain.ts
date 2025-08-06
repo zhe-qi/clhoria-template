@@ -14,11 +14,11 @@ export const systemDomain = pgTable("system_domain", {
 });
 
 export const selectSystemDomainSchema = createSelectSchema(systemDomain, {
-  id: schema => schema.describe("域ID"),
-  code: schema => schema.describe("域代码"),
-  name: schema => schema.describe("域名称"),
-  description: schema => schema.describe("域描述"),
-  status: schema => schema.describe("状态: 1=启用 0=禁用"),
+  id: schema => schema.meta({ describe: "域ID" }),
+  code: schema => schema.meta({ describe: "域代码" }),
+  name: schema => schema.meta({ describe: "域名称" }),
+  description: schema => schema.meta({ describe: "域描述" }),
+  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用" }),
 });
 
 export const insertSystemDomainSchema = createInsertSchema(systemDomain, {

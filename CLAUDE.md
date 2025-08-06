@@ -127,7 +127,7 @@ Route execution order is critical as it affects middleware execution. Public rou
 #### Schema Definition Rules
 
 1. **Three Schema Pattern**: Create `selectXxxSchema`, `insertXxxSchema`, `patchXxxSchema` for each table
-2. **Field Descriptions**: Use `.describe("中文描述")` for all schema fields
+2. **Field Descriptions**: Use `.meta({ describe: "中文描述" })` for all schema fields
 3. **Modern Drizzle Syntax**: Use modern syntax without column name aliases: `varchar({ length: 128 })` instead of `varchar("handler_name", { length: 128 })`
 4. **Default Columns**: Use `...defaultColumns` spread from `@/db/common/default-columns` instead of manually defining id, createdAt, updatedAt, createdBy, updatedBy
 5. **VARCHAR Length**: Always specify length for varchar fields: `varchar({ length: 128 })`

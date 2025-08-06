@@ -31,7 +31,7 @@ export const assignPermissionsToRole = createRoute({
   path: `${routePrefix}/roles/{roleId}/permissions`,
   request: {
     params: IdUUIDParamsSchema.extend({
-      roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
+      roleId: IdUUIDParamsSchema.shape.id.meta({ describe: "角色ID" }),
     }).omit({ id: true }),
     body: jsonContentRequired(
       assignPermissionsToRoleSchema.omit({ roleId: true }),
@@ -66,7 +66,7 @@ export const assignRoutesToRole = createRoute({
   path: `${routePrefix}/roles/{roleId}/routes`,
   request: {
     params: IdUUIDParamsSchema.extend({
-      roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
+      roleId: IdUUIDParamsSchema.shape.id.meta({ describe: "角色ID" }),
     }).omit({ id: true }),
     body: jsonContentRequired(
       assignRoutesToRoleSchema.omit({ roleId: true }),
@@ -101,7 +101,7 @@ export const assignUsersToRole = createRoute({
   path: `${routePrefix}/roles/{roleId}/users`,
   request: {
     params: IdUUIDParamsSchema.extend({
-      roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
+      roleId: IdUUIDParamsSchema.shape.id.meta({ describe: "角色ID" }),
     }).omit({ id: true }),
     body: jsonContentRequired(
       assignUsersToRoleSchema.omit({ roleId: true }),
@@ -136,7 +136,7 @@ export const getUserRoutes = createRoute({
   path: `${routePrefix}/users/{userId}/routes`,
   request: {
     params: IdUUIDParamsSchema.extend({
-      userId: IdUUIDParamsSchema.shape.id.describe("用户ID"),
+      userId: IdUUIDParamsSchema.shape.id.meta({ describe: "用户ID" }),
     }).omit({ id: true }),
     query: getUserRoutesSchema.omit({ userId: true }),
   },
@@ -168,7 +168,7 @@ export const getRolePermissions = createRoute({
   path: `${routePrefix}/roles/{roleId}/permissions`,
   request: {
     params: IdUUIDParamsSchema.extend({
-      roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
+      roleId: IdUUIDParamsSchema.shape.id.meta({ describe: "角色ID" }),
     }).omit({ id: true }),
     query: rolePermissionsSchema.omit({ roleId: true, permissions: true }),
   },
@@ -200,7 +200,7 @@ export const getRoleMenus = createRoute({
   path: `${routePrefix}/roles/{roleId}/menus`,
   request: {
     params: IdUUIDParamsSchema.extend({
-      roleId: IdUUIDParamsSchema.shape.id.describe("角色ID"),
+      roleId: IdUUIDParamsSchema.shape.id.meta({ describe: "角色ID" }),
     }).omit({ id: true }),
     query: roleMenusSchema.omit({ roleId: true, menuIds: true }),
   },

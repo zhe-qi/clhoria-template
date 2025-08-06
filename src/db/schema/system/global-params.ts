@@ -17,17 +17,17 @@ export const systemGlobalParams = pgTable("system_global_params", {
 
 /** 系统全局参数选择模式 */
 export const selectSystemGlobalParamsSchema = createSelectSchema(systemGlobalParams, {
-  id: schema => schema.describe("参数ID"),
-  key: schema => schema.describe("参数键名"),
-  value: schema => schema.describe("参数值"),
-  type: schema => schema.describe("参数类型: string|number|boolean|json"),
-  description: schema => schema.describe("参数描述"),
-  isPublic: schema => schema.describe("是否公开: 1=公开 0=私有"),
-  status: schema => schema.describe("状态: 1=启用 0=禁用"),
-  createdAt: schema => schema.describe("创建时间"),
-  updatedAt: schema => schema.describe("更新时间"),
-  createdBy: schema => schema.describe("创建者ID"),
-  updatedBy: schema => schema.describe("更新者ID"),
+  id: schema => schema.meta({ describe: "参数ID" }),
+  key: schema => schema.meta({ describe: "参数键名" }),
+  value: schema => schema.meta({ describe: "参数值" }),
+  type: schema => schema.meta({ describe: "参数类型: string|number|boolean|json" }),
+  description: schema => schema.meta({ describe: "参数描述" }),
+  isPublic: schema => schema.meta({ describe: "是否公开: 1=公开 0=私有" }),
+  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用" }),
+  createdAt: schema => schema.meta({ describe: "创建时间" }),
+  updatedAt: schema => schema.meta({ describe: "更新时间" }),
+  createdBy: schema => schema.meta({ describe: "创建者ID" }),
+  updatedBy: schema => schema.meta({ describe: "更新者ID" }),
 });
 
 /** 系统全局参数创建模式 */

@@ -19,26 +19,26 @@ const errorResponseSchema = z.object({ message: z.string() });
 
 // 查询参数 Schema
 const ScheduledJobsQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().describe("搜索关键词").optional(),
-  status: z.coerce.number().int().min(0).max(2).describe("任务状态: 0=禁用 1=启用 2=暂停").optional(),
-  handlerName: z.string().describe("处理器名称").optional(),
+  search: z.string().meta({ describe: "搜索关键词" }).optional(),
+  status: z.coerce.number().int().min(0).max(2).meta({ describe: "任务状态: 0=禁用 1=启用 2=暂停" }).optional(),
+  handlerName: z.string().meta({ describe: "处理器名称" }).optional(),
 });
 
 // 执行历史查询参数
 const ExecutionHistoryQuerySchema = PaginationParamsSchema.extend({
-  status: z.string().describe("执行状态").optional(),
-  startDate: z.string().datetime().describe("开始日期").optional(),
-  endDate: z.string().datetime().describe("结束日期").optional(),
+  status: z.string().meta({ describe: "执行状态" }).optional(),
+  startDate: z.string().datetime().meta({ describe: "开始日期" }).optional(),
+  endDate: z.string().datetime().meta({ describe: "结束日期" }).optional(),
 });
 
 // 状态切换参数
 const ToggleStatusSchema = z.object({
-  status: z.number().int().min(0).max(2).describe("新状态: 0=禁用 1=启用 2=暂停"),
+  status: z.number().int().min(0).max(2).meta({ describe: "新状态: 0=禁用 1=启用 2=暂停" }),
 });
 
 // 统计查询参数
 const StatsQuerySchema = z.object({
-  days: z.coerce.number().int().min(1).max(365).default(30).describe("统计天数"),
+  days: z.coerce.number().int().min(1).max(365).default(30).meta({ describe: "统计天数" }),
 });
 
 /** 获取定时任务列表 */
@@ -269,12 +269,12 @@ export const getExecutionStats = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        totalExecutions: z.number().describe("总执行次数"),
-        successfulExecutions: z.number().describe("成功执行次数"),
-        failedExecutions: z.number().describe("失败执行次数"),
-        averageDuration: z.number().describe("平均执行时间(毫秒)"),
-        lastExecution: z.date().nullable().describe("最后执行时间"),
-        successRate: z.number().describe("成功率(百分比)"),
+        totalExecutions: z.number().meta({ describe: "总执行次数" }),
+        successfulExecutions: z.number().meta({ describe: "成功执行次数" }),
+        failedExecutions: z.number().meta({ describe: "失败执行次数" }),
+        averageDuration: z.number().meta({ describe: "平均执行时间(毫秒)" }),
+        lastExecution: z.date().nullable().meta({ describe: "最后执行时间" }),
+        successRate: z.number().meta({ describe: "成功率(百分比)" }),
       }),
       "获取成功",
     ),
@@ -300,10 +300,10 @@ export const getAvailableHandlers = createRoute({
     [HttpStatusCodes.OK]: jsonContent(
       z.array(
         z.object({
-          name: z.string().describe("处理器名称"),
-          description: z.string().describe("处理器描述"),
-          filePath: z.string().describe("文件路径"),
-          isActive: z.boolean().describe("是否激活"),
+          name: z.string().meta({ describe: "处理器名称" }),
+          description: z.string().meta({ describe: "处理器描述" }),
+          filePath: z.string().meta({ describe: "文件路径" }),
+          isActive: z.boolean().meta({ describe: "是否激活" }),
         }),
       ),
       "获取成功",
@@ -331,20 +331,20 @@ export const getSystemOverview = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
-        totalExecutions: z.number().describe("总执行次数"),
-        successfulExecutions: z.number().describe("成功执行次数"),
-        failedExecutions: z.number().describe("失败执行次数"),
+        totalExecutions: z.number().meta({ describe: "总执行次数" }),
+        successfulExecutions: z.number().meta({ describe: "成功执行次数" }),
+        failedExecutions: z.number().meta({ describe: "失败执行次数" }),
         jobStats: z.record(z.string(), z.object({
           total: z.number(),
           successful: z.number(),
           failed: z.number(),
           avgDuration: z.number(),
-        })).describe("任务统计"),
+        })).meta({ describe: "任务统计" }),
         dailyStats: z.record(z.string(), z.object({
           total: z.number(),
           successful: z.number(),
           failed: z.number(),
-        })).describe("每日统计"),
+        })).meta({ describe: "每日统计" }),
       }),
       "获取成功",
     ),

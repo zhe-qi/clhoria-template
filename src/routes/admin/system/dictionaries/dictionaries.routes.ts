@@ -16,12 +16,12 @@ const routePrefix = "/system/dictionaries";
 const tags = [`${routePrefix}（字典管理）`];
 
 const CodeParamsSchema = z.object({
-  code: z.string().min(1, "字典编码不能为空").describe("字典编码"),
+  code: z.string().min(1, "字典编码不能为空").meta({ describe: "字典编码" }),
 });
 
 const ListQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().optional().describe("搜索关键词（编码、名称、描述）"),
-  status: z.enum(["0", "1"]).optional().describe("字典状态: 1=启用 0=禁用"),
+  search: z.string().optional().meta({ describe: "搜索关键词（编码、名称、描述）" }),
+  status: z.enum(["0", "1"]).optional().meta({ describe: "字典状态: 1=启用 0=禁用" }),
 });
 
 /** 获取字典列表 */
@@ -187,7 +187,7 @@ export const batch = createRoute({
   path: `${routePrefix}/batch`,
   request: {
     query: z.object({
-      enabledOnly: z.enum(["true", "false"]).optional().default("false").describe("是否只获取启用字典"),
+      enabledOnly: z.enum(["true", "false"]).optional().default("false").meta({ describe: "是否只获取启用字典" }),
     }),
     body: jsonContentRequired(
       batchGetDictionariesSchema,

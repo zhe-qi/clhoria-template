@@ -15,8 +15,8 @@ const prefix = "/public-notices";
 const tags = [`${prefix} (通知公告)`];
 
 const ListQuerySchema = PaginationParamsSchema.extend({
-  type: noticeTypeSchema.optional().describe("公告类型"),
-  domain: z.string().optional().describe("域名，默认为default"),
+  type: noticeTypeSchema.optional().meta({ describe: "公告类型" }),
+  domain: z.string().optional().meta({ describe: "域名，默认为default" }),
 }).partial({
   page: true,
   limit: true,
@@ -52,7 +52,7 @@ export const get = createRoute({
   request: {
     params: IdUUIDParamsSchema,
     query: z.object({
-      domain: z.string().optional().describe("域名，默认为default"),
+      domain: z.string().optional().meta({ describe: "域名，默认为default" }),
     }),
   },
   responses: {

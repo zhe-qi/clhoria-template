@@ -29,21 +29,21 @@ export const systemTokens = pgTable("system_tokens", {
 });
 
 export const selectSystemTokensSchema = createSelectSchema(systemTokens, {
-  id: schema => schema.describe("令牌ID"),
-  accessToken: schema => schema.describe("访问令牌"),
-  refreshToken: schema => schema.describe("刷新令牌"),
-  status: schema => schema.describe("状态: 1=活跃 0=已撤销 -1=已过期"),
-  userId: schema => schema.describe("用户ID"),
-  username: schema => schema.describe("用户名"),
-  domain: schema => schema.describe("域"),
-  loginTime: schema => schema.describe("登录时间"),
-  expiresAt: schema => schema.describe("过期时间"),
-  ip: schema => schema.describe("IP地址"),
-  port: schema => schema.describe("端口"),
-  address: schema => schema.describe("地址"),
-  userAgent: schema => schema.describe("用户代理"),
-  requestId: schema => schema.describe("请求ID"),
-  type: schema => schema.describe("类型: WEB=网页登录 MOBILE=移动端 API=API访问 THIRD_PARTY=第三方"),
+  id: schema => schema.meta({ describe: "令牌ID" }),
+  accessToken: schema => schema.meta({ describe: "访问令牌" }),
+  refreshToken: schema => schema.meta({ describe: "刷新令牌" }),
+  status: schema => schema.meta({ describe: "状态: 1=活跃 0=已撤销 -1=已过期" }),
+  userId: schema => schema.meta({ describe: "用户ID" }),
+  username: schema => schema.meta({ describe: "用户名" }),
+  domain: schema => schema.meta({ describe: "域" }),
+  loginTime: schema => schema.meta({ describe: "登录时间" }),
+  expiresAt: schema => schema.meta({ describe: "过期时间" }),
+  ip: schema => schema.meta({ describe: "IP地址" }),
+  port: schema => schema.meta({ describe: "端口" }),
+  address: schema => schema.meta({ describe: "地址" }),
+  userAgent: schema => schema.meta({ describe: "用户代理" }),
+  requestId: schema => schema.meta({ describe: "请求ID" }),
+  type: schema => schema.meta({ describe: "类型: WEB=网页登录 MOBILE=移动端 API=API访问 THIRD_PARTY=第三方" }),
 });
 
 export const insertSystemTokensSchema = createInsertSchema(systemTokens, {

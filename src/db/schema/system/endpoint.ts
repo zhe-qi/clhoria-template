@@ -14,13 +14,13 @@ export const systemEndpoint = pgTable("system_endpoint", {
 });
 
 export const selectSysEndpointSchema = createSelectSchema(systemEndpoint, {
-  id: schema => schema.describe("端点ID"),
-  path: schema => schema.describe("路径"),
-  method: schema => schema.describe("HTTP方法"),
-  action: schema => schema.describe("动作"),
-  resource: schema => schema.describe("资源"),
-  controller: schema => schema.describe("控制器"),
-  summary: schema => schema.describe("描述"),
+  id: schema => schema.meta({ describe: "端点ID" }),
+  path: schema => schema.meta({ describe: "路径" }),
+  method: schema => schema.meta({ describe: "HTTP方法" }),
+  action: schema => schema.meta({ describe: "动作" }),
+  resource: schema => schema.meta({ describe: "资源" }),
+  controller: schema => schema.meta({ describe: "控制器" }),
+  summary: schema => schema.meta({ describe: "描述" }),
 });
 
 export const insertSysEndpointSchema = createInsertSchema(systemEndpoint, {

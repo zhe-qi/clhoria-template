@@ -22,7 +22,7 @@ export const list = createRoute({
   method: "get",
   request: {
     query: PaginationParamsSchema.extend({
-      search: z.string().optional().describe("搜索关键词"),
+      search: z.string().optional().meta({ describe: "搜索关键词" }),
     }),
   },
   tags,
@@ -45,7 +45,7 @@ export const tree = createRoute({
   method: "get",
   request: {
     query: z.object({
-      status: z.number().int().optional().describe("菜单状态: 1=启用 0=禁用"),
+      status: z.number().int().optional().meta({ describe: "菜单状态: 1=启用 0=禁用" }),
     }),
   },
   tags,

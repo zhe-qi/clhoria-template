@@ -9,17 +9,17 @@ import { timescaleOperationLog } from "@/middlewares/timescale-operation-log";
 const tags = ["/sts-token (对象存储直传)"];
 
 const UploadTokenRequestSchema = z.object({
-  fileName: z.string().describe("文件名"),
-  fileType: z.string().optional().describe("文件类型"),
+  fileName: z.string().meta({ describe: "文件名" }),
+  fileType: z.string().optional().meta({ describe: "文件类型" }),
 }).strict();
 
 const DownloadTokenRequestSchema = z.object({
-  fileName: z.string().describe("文件名"),
+  fileName: z.string().meta({ describe: "文件名" }),
 }).strict();
 
 const TokenResponseSchema = z.object({
-  url: z.string().describe("预签名 URL"),
-  expiresAt: z.string().describe("过期时间"),
+  url: z.string().meta({ describe: "预签名 URL" }),
+  expiresAt: z.string().meta({ describe: "过期时间" }),
 });
 
 const ErrorResponseSchema = z.object({

@@ -43,26 +43,26 @@ export const systemMenuRelations = relations(systemMenu, ({ many, one }) => ({
 }));
 
 export const selectSystemMenuSchema = createSelectSchema(systemMenu, {
-  id: schema => schema.describe("菜单ID"),
-  menuType: schema => schema.describe("菜单类型: directory=目录 menu=菜单"),
-  menuName: schema => schema.describe("菜单名称"),
-  iconType: schema => schema.describe("图标类型"),
-  icon: schema => schema.describe("图标"),
-  routeName: schema => schema.describe("路由名称"),
-  routePath: schema => schema.describe("路由路径"),
-  component: schema => schema.describe("组件路径"),
-  pathParam: schema => schema.describe("路径参数"),
-  status: schema => schema.describe("状态: 1=启用 0=禁用"),
-  activeMenu: schema => schema.describe("激活的菜单"),
-  hideInMenu: schema => schema.describe("是否在菜单中隐藏"),
-  pid: schema => schema.describe("父级菜单ID"),
-  order: schema => schema.describe("排序"),
-  i18nKey: schema => schema.describe("国际化键"),
-  keepAlive: schema => schema.describe("是否缓存"),
-  constant: schema => schema.describe("是否常量菜单"),
-  href: schema => schema.describe("外链地址"),
-  multiTab: schema => schema.describe("是否多标签"),
-  domain: schema => schema.describe("所属域"),
+  id: schema => schema.meta({ describe: "菜单ID" }),
+  menuType: schema => schema.meta({ describe: "菜单类型: directory=目录 menu=菜单" }),
+  menuName: schema => schema.meta({ describe: "菜单名称" }),
+  iconType: schema => schema.meta({ describe: "图标类型" }),
+  icon: schema => schema.meta({ describe: "图标" }),
+  routeName: schema => schema.meta({ describe: "路由名称" }),
+  routePath: schema => schema.meta({ describe: "路由路径" }),
+  component: schema => schema.meta({ describe: "组件路径" }),
+  pathParam: schema => schema.meta({ describe: "路径参数" }),
+  status: schema => schema.meta({ describe: "状态: 1=启用 0=禁用" }),
+  activeMenu: schema => schema.meta({ describe: "激活的菜单" }),
+  hideInMenu: schema => schema.meta({ describe: "是否在菜单中隐藏" }),
+  pid: schema => schema.meta({ describe: "父级菜单ID" }),
+  order: schema => schema.meta({ describe: "排序" }),
+  i18nKey: schema => schema.meta({ describe: "国际化键" }),
+  keepAlive: schema => schema.meta({ describe: "是否缓存" }),
+  constant: schema => schema.meta({ describe: "是否常量菜单" }),
+  href: schema => schema.meta({ describe: "外链地址" }),
+  multiTab: schema => schema.meta({ describe: "是否多标签" }),
+  domain: schema => schema.meta({ describe: "所属域" }),
 });
 
 export const insertSystemMenuSchema = createInsertSchema(systemMenu, {
@@ -87,5 +87,5 @@ export const menuTreeSchema = selectSystemMenuSchema.extend({
 // 用户路由响应Schema（适用于 sys-menus 模块）
 export const userRoutesSchema = z.object({
   routes: z.array(menuTreeSchema),
-  home: z.string().describe("首页路由"),
+  home: z.string().meta({ describe: "首页路由" }),
 });
