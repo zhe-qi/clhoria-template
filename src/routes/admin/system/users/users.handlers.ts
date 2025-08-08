@@ -28,6 +28,10 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
     whereCondition = and(whereCondition, searchCondition)!;
   }
 
+  if (params.status != null) {
+    whereCondition = and(whereCondition, eq(systemUser.status, params.status))!;
+  }
+
   const result = await pagination<InferSelectModel<typeof systemUser>>(
     systemUser,
     whereCondition,

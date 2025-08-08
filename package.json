@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",
-    "@aws-sdk/client-s3": "^3.859.0",
-    "@aws-sdk/s3-request-presigner": "^3.859.0",
+    "@aws-sdk/client-s3": "^3.862.0",
+    "@aws-sdk/s3-request-presigner": "^3.862.0",
     "@bull-board/api": "^6.12.0",
     "@bull-board/hono": "^6.12.0",
     "@hono/node-server": "1.18.1",
@@ -45,7 +45,7 @@
     "dotenv": "^17.2.1",
     "dotenv-expand": "^12.0.2",
     "drizzle-orm": "^0.44.4",
-    "drizzle-zod": "^0.8.2",
+    "drizzle-zod": "^0.8.3",
     "hono": "^4.8.12",
     "hono-pino": "^0.10.1",
     "hono-rate-limiter": "^0.4.2",
@@ -61,9 +61,9 @@
     "zod": "4.0.15"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^5.1.0",
+    "@antfu/eslint-config": "^5.2.0",
     "@types/node": "^24.2.0",
-    "@typescript/native-preview": "7.0.0-dev.20250805.1",
+    "@typescript/native-preview": "7.0.0-dev.20250806.1",
     "chalk": "^5.5.0",
     "cross-env": "^10.0.0",
     "drizzle-kit": "^0.31.4",

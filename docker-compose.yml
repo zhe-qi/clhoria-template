@@ -52,8 +52,8 @@ services:
       test: [CMD-SHELL, "PGPASSWORD=${DB_PASSWORD:-postgres} psql -h localhost -p 6432 -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres} -c 'SELECT 1;' || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 30s
+      retries: 5
+      start_period: 60s
     restart: unless-stopped
     profiles:
       - services

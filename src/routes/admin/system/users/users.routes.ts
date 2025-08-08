@@ -22,7 +22,9 @@ export const list = createRoute({
   method: "get",
   path: routePrefix,
   request: {
-    query: PaginationParamsSchema,
+    query: PaginationParamsSchema.extend({
+      status: z.coerce.number().optional().meta({ description: "用户状态" }),
+    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(

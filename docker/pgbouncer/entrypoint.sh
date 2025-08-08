@@ -39,6 +39,25 @@ chown -R pgbouncer:pgbouncer /etc/pgbouncer
 update_userlist
 update_database_config
 
+# 清理可能存在的旧 PID 文件
+PID_FILE="/var/run/pgbouncer/pgbouncer.pid"
+if [ -f "$PID_FILE" ]; then
+    echo "Found existing PID file, checking if process is running..."
+    if [ -s "$PID_FILE" ]; then
+        OLD_PID=$(cat "$PID_FILE")
+        if ! kill -0 "$OLD_PID" 2>/dev/null; then
+            echo "Removing stale PID file: $PID_FILE"
+            rm -f "$PID_FILE"
+        else
+            echo "PgBouncer is already running with PID $OLD_PID"
+            exit 1
+        fi
+    else
+        echo "Removing empty PID file: $PID_FILE"
+        rm -f "$PID_FILE"
+    fi
+fi
+
 # 验证配置文件
 echo "Validating PgBouncer configuration..."
 su-exec pgbouncer pgbouncer -v /etc/pgbouncer/pgbouncer.ini
