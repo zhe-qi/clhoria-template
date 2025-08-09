@@ -43,10 +43,9 @@ export class TaskScheduler {
       this.startPeriodicCheck();
 
       this.isInitialized = true;
-      logger.info("定时任务调度器初始化完成");
     }
     catch (error) {
-      logger.error("任务调度器初始化失败", { error });
+      logger.error({ error }, "任务调度器初始化失败");
       throw error;
     }
   }
@@ -60,17 +59,13 @@ export class TaskScheduler {
         .from(systemScheduledJobs)
         .where(eq(systemScheduledJobs.status, JobStatus.ENABLED));
 
-      logger.info(`找到 ${enabledJobs.length} 个启用的定时任务`);
-
       for (const jobRow of enabledJobs) {
         const jobConfig = this.convertToJobConfig(jobRow);
         await this.startJob(jobConfig);
       }
-
-      logger.info("所有启用的定时任务已加载并启动");
     }
     catch (error) {
-      logger.error("加载启用的定时任务失败", { error });
+      logger.error({ error }, "加载启用的定时任务失败");
       throw error;
     }
   }
@@ -79,18 +74,18 @@ export class TaskScheduler {
   async startJob(jobConfig: ScheduledJobConfig): Promise<void> {
     try {
       await this.queueManager.addRepeatingJob(jobConfig);
-      logger.info("定时任务启动成功", {
+      logger.info({
         jobId: jobConfig.id,
         name: jobConfig.name,
         cronExpression: jobConfig.cronExpression,
-      });
+      }, "定时任务启动成功");
     }
     catch (error) {
-      logger.error("启动定时任务失败", {
+      logger.error({
         jobId: jobConfig.id,
         name: jobConfig.name,
         error,
-      });
+      }, "启动定时任务失败");
       throw error;
     }
   }
@@ -99,10 +94,10 @@ export class TaskScheduler {
   async stopJob(jobId: string): Promise<void> {
     try {
       await this.queueManager.removeRepeatingJob(jobId);
-      logger.info("定时任务停止成功", { jobId });
+      logger.info({ jobId }, "定时任务停止成功");
     }
     catch (error) {
-      logger.error("停止定时任务失败", { jobId, error });
+      logger.error({ jobId, error }, "停止定时任务失败");
       throw error;
     }
   }
@@ -131,10 +126,10 @@ export class TaskScheduler {
         await this.startJob(jobConfig);
       }
 
-      logger.info("定时任务重启成功", { jobId });
+      logger.info({ jobId }, "定时任务重启成功");
     }
     catch (error) {
-      logger.error("重启定时任务失败", { jobId, error });
+      logger.error({ jobId, error }, "重启定时任务失败");
       throw error;
     }
   }
@@ -157,10 +152,10 @@ export class TaskScheduler {
       const jobConfig = this.convertToJobConfig(jobRow);
       await this.queueManager.executeJobNow(jobConfig);
 
-      logger.info("立即执行任务成功", { jobId });
+      logger.info({ jobId }, "立即执行任务成功");
     }
     catch (error) {
-      logger.error("立即执行任务失败", { jobId, error });
+      logger.error({ jobId, error }, "立即执行任务失败");
       throw error;
     }
   }
@@ -173,7 +168,7 @@ export class TaskScheduler {
         await this.checkJobStatusChanges();
       }
       catch (error) {
-        logger.error("定期检查任务状态失败", { error });
+        logger.error({ error }, "定期检查任务状态失败");
       }
     }, 60000);
   }
@@ -204,7 +199,7 @@ export class TaskScheduler {
       }
     }
     catch (error) {
-      logger.error("检查任务状态变更时出错", { error });
+      logger.error({ error }, "检查任务状态变更时出错");
     }
   }
 
@@ -235,7 +230,7 @@ export class TaskScheduler {
       };
     }
     catch (error) {
-      logger.error("获取调度器状态失败", { error });
+      logger.error({ error }, "获取调度器状态失败");
       throw error;
     }
   }
@@ -253,7 +248,7 @@ export class TaskScheduler {
       logger.info("任务调度器已暂停");
     }
     catch (error) {
-      logger.error("暂停任务调度器失败", { error });
+      logger.error({ error }, "暂停任务调度器失败");
       throw error;
     }
   }
@@ -267,7 +262,7 @@ export class TaskScheduler {
       logger.info("任务调度器已恢复");
     }
     catch (error) {
-      logger.error("恢复任务调度器失败", { error });
+      logger.error({ error }, "恢复任务调度器失败");
       throw error;
     }
   }
@@ -286,7 +281,7 @@ export class TaskScheduler {
       logger.info("任务调度器已关闭");
     }
     catch (error) {
-      logger.error("关闭任务调度器失败", { error });
+      logger.error({ error }, "关闭任务调度器失败");
       throw error;
     }
   }
@@ -298,7 +293,7 @@ export class TaskScheduler {
       logger.info("调度器：所有重复任务已清理");
     }
     catch (error) {
-      logger.error("调度器：清理重复任务失败", { error });
+      logger.error({ error }, "调度器：清理重复任务失败");
       throw error;
     }
   }
@@ -353,7 +348,7 @@ export async function initializeScheduler(): Promise<void> {
     await scheduler.clearAllRepeatableJobs();
   }
   catch (error) {
-    logger.warn("清理残留重复任务时出错", { error });
+    logger.warn({ error }, "清理残留重复任务时出错");
   }
 
   await scheduler.initialize();

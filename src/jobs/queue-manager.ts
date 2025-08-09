@@ -47,11 +47,10 @@ export class JobQueueManager {
       try {
         await this.initialize();
         this.isInitialized = true;
-        logger.info("队列管理器初始化成功", { attempt });
         return;
       }
       catch (error) {
-        logger.error(`队列管理器初始化失败 (尝试 ${attempt}/${maxRetries})`, { error });
+        logger.error({ error }, `队列管理器初始化失败 (尝试 ${attempt}/${maxRetries})`);
         if (attempt === maxRetries)
           throw error;
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
@@ -100,7 +99,7 @@ export class JobQueueManager {
       },
     });
 
-    logger.debug("BullMQ 队列初始化完成", { queueName: this.queueName });
+    logger.debug({ queueName: this.queueName }, "BullMQ 队列初始化完成");
   }
 
   /** 初始化工作进程 */
@@ -120,10 +119,10 @@ export class JobQueueManager {
         const startTime = Date.now();
         const { handlerName } = job.data;
 
-        logger.debug("开始执行任务", {
+        logger.debug({
           jobId: job.id,
           handlerName,
-        });
+        }, "开始执行任务");
 
         try {
           // 获取处理器
@@ -139,11 +138,11 @@ export class JobQueueManager {
           const duration = Date.now() - startTime;
           this.updateMetrics(true, duration);
 
-          logger.debug("任务执行完成", {
+          logger.debug({
             jobId: job.id,
             handlerName,
             duration,
-          });
+          }, "任务执行完成");
 
           return result;
         }
@@ -163,8 +162,6 @@ export class JobQueueManager {
 
     // 绑定工作进程事件
     this.bindWorkerEvents();
-
-    logger.debug("BullMQ Worker 初始化完成", { queueName: this.queueName });
   }
 
   /** 初始化队列事件监听 */
@@ -175,8 +172,6 @@ export class JobQueueManager {
 
     // 绑定队列事件
     this.bindQueueEvents();
-
-    logger.debug("BullMQ QueueEvents 初始化完成", { queueName: this.queueName });
   }
 
   /** 绑定工作进程事件 */
@@ -190,41 +185,41 @@ export class JobQueueManager {
       this.metrics.completedJobs++;
       this.updateProcessingTime(duration);
 
-      logger.debug("任务完成", {
+      logger.debug({
         jobId: job.id,
         jobName: job.name,
         duration,
         totalCompleted: this.metrics.completedJobs,
-      });
+      }, "任务完成");
     });
 
     this.worker.on("failed", (job, error) => {
       this.metrics.failedJobs++;
 
       // 记录失败模式以便分析
-      logger.error("任务失败", {
+      logger.error({
         jobId: job?.id,
         jobName: job?.name,
         error: error.message,
         stack: error.stack,
         attemptsMade: job?.attemptsMade,
         totalFailed: this.metrics.failedJobs,
-      });
+      }, "任务失败");
     });
 
     this.worker.on("active", (job) => {
-      logger.debug("任务开始执行", {
+      logger.debug({
         jobId: job.id,
         jobName: job.name,
-      });
+      }, "任务开始执行");
     });
 
     this.worker.on("stalled", (jobId) => {
-      logger.warn("任务停滞", { jobId });
+      logger.warn({ jobId }, "任务停滞");
     });
 
     this.worker.on("error", (error) => {
-      logger.error("Worker 错误", { error: error.message });
+      logger.error({ error: error.message }, "Worker 错误");
     });
   }
 
@@ -264,23 +259,23 @@ export class JobQueueManager {
   /** 绑定队列事件 */
   private bindQueueEvents() {
     this.queueEvents.on("waiting", ({ jobId }) => {
-      logger.debug("任务等待中", { jobId });
+      logger.debug({ jobId }, "任务等待中");
     });
 
     this.queueEvents.on("active", ({ jobId, prev }) => {
-      logger.debug("任务激活", { jobId, previousStatus: prev });
+      logger.debug({ jobId, previousStatus: prev }, "任务激活");
     });
 
     this.queueEvents.on("completed", ({ jobId, returnvalue }) => {
-      logger.debug("任务完成事件", { jobId, returnValue: returnvalue });
+      logger.debug({ jobId, returnValue: returnvalue }, "任务完成事件");
     });
 
     this.queueEvents.on("failed", ({ jobId, failedReason }) => {
-      logger.debug("任务失败事件", { jobId, reason: failedReason });
+      logger.debug({ jobId, reason: failedReason }, "任务失败事件");
     });
 
     this.queueEvents.on("progress", ({ jobId, data }) => {
-      logger.debug("任务进度更新", { jobId, progress: data });
+      logger.debug({ jobId, progress: data }, "任务进度更新");
     });
   }
 
@@ -333,10 +328,10 @@ export class JobQueueManager {
       const batch = jobs.slice(i, i + batchSize);
       await this.queue.addBulk(batch);
 
-      logger.debug(`批量添加任务进度`, {
+      logger.debug({
         processed: Math.min(i + batchSize, jobs.length),
         total: jobs.length,
-      });
+      }, `批量添加任务进度`);
     }
 
     logger.info(`批量添加 ${jobs.length} 个任务完成`);
@@ -351,7 +346,7 @@ export class JobQueueManager {
     this.ensureInitialized();
 
     const cleaned = await this.queue.clean(grace, limit, type);
-    logger.info(`清理 ${type} 状态任务完成`, { cleaned: cleaned.length });
+    logger.info({ cleaned: cleaned.length }, `清理 ${type} 状态任务完成`);
 
     return cleaned.length;
   }
@@ -425,18 +420,18 @@ export class JobQueueManager {
         },
       );
 
-      logger.info("添加定时任务成功", {
+      logger.info({
         jobId: jobConfig.id,
         name: jobConfig.name,
         cronExpression: jobConfig.cronExpression,
         handlerName: jobConfig.handlerName,
-      });
+      }, "添加定时任务成功");
     }
     catch (error) {
-      logger.error("添加定时任务失败", {
+      logger.error({
         jobId: jobConfig.id,
         error,
-      });
+      }, "添加定时任务失败");
       throw error;
     }
   }
@@ -448,10 +443,10 @@ export class JobQueueManager {
       const scheduledJobId = `scheduled-${jobId}`;
       await this.queue.removeJobScheduler(scheduledJobId);
 
-      logger.info("移除定时任务成功", { jobId, scheduledJobId });
+      logger.info({ jobId, scheduledJobId }, "移除定时任务成功");
     }
     catch (error) {
-      logger.error("移除定时任务失败", { jobId, error });
+      logger.error({ jobId, error }, "移除定时任务失败");
       throw error;
     }
   }
@@ -475,17 +470,17 @@ export class JobQueueManager {
         },
       );
 
-      logger.info("立即执行任务添加成功", {
+      logger.info({
         jobId: jobConfig.id,
         name: jobConfig.name,
         handlerName: jobConfig.handlerName,
-      });
+      }, "立即执行任务添加成功");
     }
     catch (error) {
-      logger.error("立即执行任务失败", {
+      logger.error({
         jobId: jobConfig.id,
         error,
-      });
+      }, "立即执行任务失败");
       throw error;
     }
   }
@@ -515,7 +510,7 @@ export class JobQueueManager {
       };
     }
     catch (error) {
-      logger.error("获取队列状态失败", { error });
+      logger.error({ error }, "获取队列状态失败");
       throw error;
     }
   }
@@ -560,7 +555,7 @@ export class JobQueueManager {
       };
     }
     catch (error) {
-      logger.error("获取详细队列统计失败", { error });
+      logger.error({ error }, "获取详细队列统计失败");
       throw error;
     }
   }
@@ -572,7 +567,7 @@ export class JobQueueManager {
       logger.info("队列已暂停");
     }
     catch (error) {
-      logger.error("暂停队列失败", { error });
+      logger.error({ error }, "暂停队列失败");
       throw error;
     }
   }
@@ -584,7 +579,7 @@ export class JobQueueManager {
       logger.info("队列已恢复");
     }
     catch (error) {
-      logger.error("恢复队列失败", { error });
+      logger.error({ error }, "恢复队列失败");
       throw error;
     }
   }
@@ -596,7 +591,7 @@ export class JobQueueManager {
       logger.info("队列已清空");
     }
     catch (error) {
-      logger.error("清空队列失败", { error });
+      logger.error({ error }, "清空队列失败");
       throw error;
     }
   }
@@ -605,11 +600,11 @@ export class JobQueueManager {
   async getRepeatableJobs() {
     try {
       const jobSchedulers = await this.queue.getJobSchedulers();
-      logger.info("定时任务调度器列表", { count: jobSchedulers.length, schedulers: jobSchedulers });
+      logger.info({ count: jobSchedulers.length, schedulers: jobSchedulers }, "定时任务调度器列表");
       return jobSchedulers;
     }
     catch (error) {
-      logger.error("获取定时任务调度器失败", { error });
+      logger.error({ error }, "获取定时任务调度器失败");
       throw error;
     }
   }
@@ -628,11 +623,9 @@ export class JobQueueManager {
 
       // 2. 清理所有待处理的任务
       await this.queue.obliterate({ force: true });
-
-      logger.info("定时任务调度器已清理完成");
     }
     catch (error) {
-      logger.error("清理定时任务调度器失败", { error });
+      logger.error({ error }, "清理定时任务调度器失败");
       throw error;
     }
   }
@@ -645,7 +638,7 @@ export class JobQueueManager {
     }
 
     this.isShuttingDown = true;
-    logger.info("开始优雅关闭队列管理器", { timeout });
+    logger.info({ timeout }, "开始优雅关闭队列管理器");
 
     try {
       // 1. 停止接收新任务
@@ -672,7 +665,7 @@ export class JobQueueManager {
       logger.info("队列管理器优雅关闭完成");
     }
     catch (error) {
-      logger.error("优雅关闭过程中出现错误", { error });
+      logger.error({ error }, "优雅关闭过程中出现错误");
       throw error;
     }
     finally {
@@ -690,7 +683,7 @@ export class JobQueueManager {
       logger.info("队列管理器已关闭");
     }
     catch (error) {
-      logger.error("关闭队列管理器失败", { error });
+      logger.error({ error }, "关闭队列管理器失败");
       throw error;
     }
   }

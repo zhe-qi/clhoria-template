@@ -108,7 +108,7 @@ async function assignPermissionsToSuperAdmin() {
     return { added: newPermissions.length };
   }
   catch (error) {
-    logger.error("权限分配失败:", error);
+    logger.error({ error }, "权限分配失败");
     throw error;
   }
 }
@@ -172,7 +172,7 @@ async function validatePermissionIntegrity() {
     return { valid: validCount, invalid: invalidCount };
   }
   catch (error) {
-    logger.error("权限验证失败:", error);
+    logger.error({ error }, "权限验证失败");
     throw error;
   }
 }
@@ -246,7 +246,7 @@ async function main() {
     }
   }
   catch (error) {
-    logger.error("权限同步失败:", error);
+    logger.error({ error }, "权限同步失败");
     process.exit(1);
   }
 }

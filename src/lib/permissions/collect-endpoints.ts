@@ -79,11 +79,13 @@ export function collectEndpointPermissions(app: AppOpenAPI, prefix = ""): Endpoi
     }
 
     if (loggers.size > 0) {
-      logger.info(`收集到以下公开端点权限配置: \n${Array.from(loggers).join("、")}`);
+      logger.info({
+        endpoints: Array.from(loggers).join("、"),
+      }, "收集到以下公开端点权限配置:");
     }
   }
   catch (error) {
-    logger.error("Error collecting endpoint permissions:", error);
+    logger.error({ error }, "Error collecting endpoint permissions");
   }
 
   return endpoints;
@@ -157,8 +159,7 @@ export async function collectAndSyncEndpointPermissions(apps: { name: string; ap
   // 清空之前的权限缓存
   permissionManager.clearAll();
 
-  for (const { name, app, prefix } of apps) {
-    logger.info(`开始收集应用 ${name} 的端点权限...`);
+  for (const { app, prefix } of apps) {
     const endpoints = collectEndpointPermissions(app, prefix);
     allEndpoints.push(...endpoints);
   }

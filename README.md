@@ -1,4 +1,4 @@
-# Clhoria（克洛莉亚）- AI 驱动的优雅架构
+# Clhoria（克洛莉亚）基于 Hono 的快速开发模板
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)
@@ -335,11 +335,12 @@ pnpm start
 
 ### 访问地址
 
-| 服务       | 地址                            | 默认账号       |
-| ---------- | ------------------------------- | -------------- |
-| Grafana    | <http://localhost:3000>         | admin/admin123 |
-| Prometheus | <http://localhost:9090>         | 无需认证       |
-| 应用指标   | <http://localhost:9999/metrics> | 无需认证       |
+| 服务       | 地址                                                               | 默认账号       |
+| ---------- | ------------------------------------------------------------------ | -------------- |
+| Grafana    | <http://localhost:3000>                                            | admin/admin123 |
+| Prometheus | <http://localhost:9090>                                            | 无需认证       |
+| Bull Board | <http://localhost:9999/admin/ui/queues?token=YOUR_ADMIN_JWT_TOKEN> | 需要管理员JWT  |
+| 应用指标   | <http://localhost:9999/metrics>                                    | 无需认证       |
 
 ## 开发计划
 

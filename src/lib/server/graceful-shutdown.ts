@@ -12,7 +12,7 @@ export function setupGracefulShutdown(): void {
       process.exit(0);
     }
     catch (error) {
-      logger.error("优雅关闭失败:", error);
+      logger.error({ error }, "优雅关闭失败");
       process.exit(1);
     }
   };

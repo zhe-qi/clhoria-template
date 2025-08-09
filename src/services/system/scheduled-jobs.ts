@@ -129,17 +129,17 @@ export async function createScheduledJob(params: CreateScheduledJobParams): Prom
         const jobConfig = convertToJobConfig(newJob);
         await scheduler.startJob(jobConfig);
 
-        logger.info("新建定时任务已添加到调度器", {
+        logger.info({
           jobId: newJob.id,
           name: newJob.name,
           domain,
-        });
+        }, "新建定时任务已添加到调度器");
       }
       catch (error) {
-        logger.error("添加新建任务到调度器失败", {
+        logger.error({
           jobId: newJob.id,
           error,
-        });
+        }, "添加新建任务到调度器失败");
         // 不抛出错误，避免影响任务创建
       }
     }
@@ -217,16 +217,16 @@ export async function updateScheduledJob(
       const scheduler = getScheduler();
       await scheduler.restartJob(jobId, domain);
 
-      logger.info("定时任务更新后已重启", {
+      logger.info({
         jobId,
         domain,
-      });
+      }, "定时任务更新后已重启");
     }
     catch (error) {
-      logger.error("重启更新的任务失败", {
+      logger.error({
         jobId,
         error,
-      });
+      }, "重启更新的任务失败");
       // 不抛出错误，避免影响任务更新
     }
 
@@ -255,13 +255,13 @@ export async function deleteScheduledJob(jobId: string, domain: string): Promise
       const scheduler = getScheduler();
       await scheduler.stopJob(jobId);
 
-      logger.info("定时任务已从调度器移除", { jobId, domain });
+      logger.info({ jobId, domain }, "定时任务已从调度器移除");
     }
     catch (error) {
-      logger.error("从调度器移除任务失败", {
+      logger.error({
         jobId,
         error,
-      });
+      }, "从调度器移除任务失败");
       // 继续执行删除操作
     }
 
@@ -273,7 +273,7 @@ export async function deleteScheduledJob(jobId: string, domain: string): Promise
         eq(systemScheduledJobs.domain, domain),
       ));
 
-    logger.info("定时任务删除成功", { jobId, domain });
+    logger.info({ jobId, domain }, "定时任务删除成功");
   });
 }
 
@@ -368,18 +368,18 @@ export async function toggleJobStatus(
         await scheduler.stopJob(jobId);
       }
 
-      logger.info("任务状态切换成功", {
+      logger.info({
         jobId,
         domain,
         newStatus,
-      });
+      }, "任务状态切换成功");
     }
     catch (error) {
-      logger.error("切换任务状态时调度器操作失败", {
+      logger.error({
         jobId,
         newStatus,
         error,
-      });
+      }, "切换任务状态时调度器操作失败");
       // 不抛出错误，状态已更新到数据库
     }
 
@@ -392,7 +392,7 @@ export async function executeJobNow(jobId: string, domain: string): Promise<void
   const scheduler = getScheduler();
   await scheduler.executeJobNow(jobId, domain);
 
-  logger.info("任务立即执行请求已提交", { jobId, domain });
+  logger.info({ jobId, domain }, "任务立即执行请求已提交");
 }
 
 /** 清理所有重复任务 */

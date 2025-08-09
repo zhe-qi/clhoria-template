@@ -71,7 +71,7 @@ function scanHandlerFiles(): Record<string, { filePath: string; description: str
     }
   }
   catch (error) {
-    logger.error("扫描处理器文件失败", { error });
+    logger.error({ error }, "扫描处理器文件失败");
   }
 
   handlerCache = handlerMap;
@@ -170,15 +170,12 @@ export async function syncHandlersToDatabase(): Promise<void> {
       }
     }
 
-    logger.info("任务处理器同步完成", {
-      totalRegistered: registeredHandlers.length,
-      added: addedCount,
-      updated: updatedCount,
-      deactivated: deactivatedCount,
-    });
+    logger.info({
+      info: `添加: ${addedCount}, 更新: ${updatedCount}, 停用: ${deactivatedCount}`,
+    }, "任务处理器同步完成");
   }
   catch (error) {
-    logger.error("同步任务处理器到数据库失败", { error });
+    logger.error({ error }, "同步任务处理器到数据库失败");
     throw error;
   }
 }

@@ -15,10 +15,10 @@ import type { JobHandler } from "../types";
  * @description Token清理任务
  */
 export const tokenCleanupJob: JobHandler = async (job: Job) => {
-  logger.info("Token清理任务开始执行", {
+  logger.info({
     jobId: job.id,
     timestamp: formatDate(new Date()),
-  });
+  }, "Token清理任务开始执行");
 
   const { retentionDays = 7 } = job.data || {}; // 默认保留7天
   const cutoffDate = subDays(new Date(), retentionDays);
@@ -59,14 +59,14 @@ export const tokenCleanupJob: JobHandler = async (job: Job) => {
       activeTokens: activeTokensCount,
     };
 
-    logger.info("Token清理任务执行完成", result);
+    logger.info(result, "Token清理任务执行完成");
     return result;
   }
   catch (error) {
-    logger.error("Token清理任务执行失败", {
+    logger.error({
       jobId: job.id,
       error: error instanceof Error ? error.message : "未知错误",
-    });
+    }, "Token清理任务执行失败");
     throw error;
   }
 };
@@ -75,7 +75,7 @@ export const tokenCleanupJob: JobHandler = async (job: Job) => {
  * @description Hello World 定时任务
  */
 export const helloWorldJob: JobHandler = async (job: Job) => {
-  logger.debug("Hello World 任务开始执行", { jobId: job.id });
+  logger.debug({ jobId: job.id }, "Hello World 任务开始执行");
 
   // 模拟一些处理时间
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -96,7 +96,7 @@ export const helloWorldJob: JobHandler = async (job: Job) => {
     data: job.data,
   };
 
-  logger.debug("Hello World 任务执行完成", { jobId: job.id, message: result.message });
+  logger.debug({ jobId: job.id, message: result.message }, "Hello World 任务执行完成");
 
   return result;
 };
@@ -105,10 +105,10 @@ export const helloWorldJob: JobHandler = async (job: Job) => {
  * @description 系统清理任务
  */
 export const systemCleanupJob: JobHandler = async (job: Job) => {
-  logger.info("系统清理任务开始执行", {
+  logger.info({
     jobId: job.id,
     timestamp: formatDate(new Date()),
-  });
+  }, "系统清理任务开始执行");
 
   const { retentionDays = 30 } = job.data || {};
 
@@ -139,7 +139,7 @@ export const systemCleanupJob: JobHandler = async (job: Job) => {
     },
   };
 
-  logger.info("系统清理任务执行完成", result);
+  logger.info(result, "系统清理任务执行完成");
 
   return result;
 };
@@ -148,10 +148,10 @@ export const systemCleanupJob: JobHandler = async (job: Job) => {
  * @description 数据备份任务
  */
 export const dataBackupJob: JobHandler = async (job: Job) => {
-  logger.info("数据备份任务开始执行", {
+  logger.info({
     jobId: job.id,
     timestamp: formatDate(new Date()),
-  });
+  }, "数据备份任务开始执行");
 
   const { backupType = "incremental" } = job.data || {};
 
@@ -183,7 +183,7 @@ export const dataBackupJob: JobHandler = async (job: Job) => {
     backupLocation: `/backups/${formatDate(new Date(), "yyyy-MM-dd")}/`,
   };
 
-  logger.info("数据备份任务执行完成", result);
+  logger.info(result, "数据备份任务执行完成");
 
   return result;
 };
@@ -192,10 +192,10 @@ export const dataBackupJob: JobHandler = async (job: Job) => {
  * @description 报表生成任务
  */
 export const reportGenerationJob: JobHandler = async (job: Job) => {
-  logger.info("报表生成任务开始执行", {
+  logger.info({
     jobId: job.id,
     timestamp: formatDate(new Date()),
-  });
+  }, "报表生成任务开始执行");
 
   const { reportType = "daily", dateRange } = job.data || {};
 
@@ -224,7 +224,7 @@ export const reportGenerationJob: JobHandler = async (job: Job) => {
     recordCount: Math.floor(Math.random() * 10000 + 1000),
   };
 
-  logger.info("报表生成任务执行完成", result);
+  logger.info(result, "报表生成任务执行完成");
 
   return result;
 };
@@ -233,10 +233,10 @@ export const reportGenerationJob: JobHandler = async (job: Job) => {
  * @description 邮件发送任务
  */
 export const emailSendJob: JobHandler = async (job: Job) => {
-  logger.info("邮件发送任务开始执行", {
+  logger.info({
     jobId: job.id,
     timestamp: formatDate(new Date()),
-  });
+  }, "邮件发送任务开始执行");
 
   const { recipients = [], subject, content: _content } = job.data || {};
 
@@ -260,7 +260,7 @@ export const emailSendJob: JobHandler = async (job: Job) => {
     successCount: totalRecipients - Math.floor(Math.random() * 2), // 模拟偶尔失败
   };
 
-  logger.info("邮件发送任务执行完成", result);
+  logger.info(result, "邮件发送任务执行完成");
 
   return result;
 };

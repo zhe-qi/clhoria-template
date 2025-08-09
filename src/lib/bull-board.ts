@@ -46,12 +46,11 @@ export class BullBoardManager {
       this.serverAdapter.setBasePath(basePath);
 
       this.isInitialized = true;
-      logger.info("Bull Board 初始化完成", { basePath });
 
       return this.serverAdapter;
     }
     catch (error) {
-      logger.error("Bull Board 初始化失败", { error });
+      logger.error({ error }, "Bull Board 初始化失败");
       throw error;
     }
   }

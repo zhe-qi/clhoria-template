@@ -24,16 +24,16 @@ export class JobMonitor {
         updatedBy: "system",
       });
 
-      logger.debug("任务开始日志记录成功", {
+      logger.debug({
         jobId: job.id,
         jobName: job.name,
-      });
+      }, "任务开始日志记录成功");
     }
     catch (error) {
-      logger.error("记录任务开始日志失败", {
+      logger.error({
         jobId: job.id,
         error,
-      });
+      }, "记录任务开始日志失败");
     }
   }
 
@@ -59,18 +59,18 @@ export class JobMonitor {
           eq(systemJobExecutionLogs.executionId, job.id || "unknown"),
         ));
 
-      logger.debug("任务完成日志记录成功", {
+      logger.debug({
         jobId: job.id,
         jobName: job.name,
         duration,
         result,
-      });
+      }, "任务完成日志记录成功");
     }
     catch (error) {
-      logger.error("记录任务完成日志失败", {
+      logger.error({
         jobId: job.id,
         error,
-      });
+      }, "记录任务完成日志失败");
     }
   }
 
@@ -97,20 +97,20 @@ export class JobMonitor {
           eq(systemJobExecutionLogs.executionId, job.id || "unknown"),
         ));
 
-      logger.debug("任务失败日志记录成功", {
+      logger.debug({
         jobId: job.id,
         jobName: job.name,
         duration,
         error: error.message,
         retryCount: job.attemptsMade,
-      });
+      }, "任务失败日志记录成功");
     }
     catch (dbError) {
-      logger.error("记录任务失败日志时出错", {
+      logger.error({
         jobId: job.id,
         originalError: error.message,
         dbError,
-      });
+      }, "记录任务失败日志时出错");
     }
   }
 
@@ -157,10 +157,10 @@ export class JobMonitor {
       return results;
     }
     catch (error) {
-      logger.error("获取任务执行历史失败", {
+      logger.error({
         jobId,
         error,
-      });
+      }, "获取任务执行历史失败");
       throw error;
     }
   }
@@ -207,10 +207,10 @@ export class JobMonitor {
       return stats;
     }
     catch (error) {
-      logger.error("获取任务执行统计失败", {
+      logger.error({
         jobId,
         error,
-      });
+      }, "获取任务执行统计失败");
       throw error;
     }
   }
@@ -226,18 +226,18 @@ export class JobMonitor {
 
       const deletedCount = deletedRows.length;
 
-      logger.info("清理过期执行日志完成", {
+      logger.info({
         retentionDays,
         deletedRows: deletedCount,
-      });
+      }, "清理过期执行日志完成");
 
       return deletedCount;
     }
     catch (error) {
-      logger.error("清理过期执行日志失败", {
+      logger.error({
         retentionDays,
         error,
-      });
+      }, "清理过期执行日志失败");
       throw error;
     }
   }
@@ -310,10 +310,10 @@ export class JobMonitor {
       };
     }
     catch (error) {
-      logger.error("获取系统执行概览失败", {
+      logger.error({
         days,
         error,
-      });
+      }, "获取系统执行概览失败");
       throw error;
     }
   }

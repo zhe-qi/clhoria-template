@@ -56,6 +56,7 @@ export default function createApp() {
   /** 去除尾部斜杠中间件 */
   app.use(trimTrailingSlash());
 
+  /** 速率限制中间件 */
   app.use(rateLimiter({
     windowMs: 15 * 60 * 1000,
     limit: 100,
@@ -63,8 +64,12 @@ export default function createApp() {
     store: ioredisStore,
   }));
 
+  /** 404 处理 */
   app.notFound(notFound);
+
+  /** 错误处理 */
   app.onError(onError);
+
   return app;
 }
 

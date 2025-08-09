@@ -37,16 +37,15 @@ export async function initializeProduction(app: OpenAPIHono<AppBindings>): Promi
  * 开发环境初始化流程
  */
 export function initializeDevelopment(app: OpenAPIHono<AppBindings>): void {
-  logger.info("正在初始化开发环境...");
-
   // 异步执行初始化任务，不阻塞服务启动
   initializeAppCore()
     .then(() => {
       // 确保调度器初始化完成后再初始化 Bull Board
       setupBullBoard(app);
+
       logger.info("开发环境初始化完成");
     })
     .catch((error) => {
-      logger.error("开发环境初始化失败:", error);
+      logger.error({ error }, "开发环境初始化失败");
     });
 }

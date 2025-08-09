@@ -19,7 +19,7 @@ export function setupBullBoard(app: OpenAPIHono<AppBindings>): void {
     app.route("/admin/ui/queues", bullBoardAdapter.registerPlugin());
   }
   catch (error) {
-    logger.error("Bull Board UI 集成失败:", error);
+    logger.error({ error }, "Bull Board UI 集成失败");
     // 在开发环境中不抛出错误，避免影响服务启动
     if (env.NODE_ENV === "production") {
       throw error;

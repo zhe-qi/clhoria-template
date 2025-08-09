@@ -119,7 +119,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     return c.json({ token: accessToken, refreshToken }, HttpStatusCodes.OK);
   }
   catch (error: any) {
-    logger.error("adminLogin error details:", {
+    logger.error({
       message: error.message,
       stack: error.stack,
       name: error.name,
@@ -129,7 +129,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       detail: error.detail,
       table: error.table,
       column: error.column,
-    });
+    }, "adminLogin error details:");
 
     // 记录异常情况下的失败日志，忽略日志失败避免影响主要逻辑
     await logContext.logFailure().catch(() => {});
