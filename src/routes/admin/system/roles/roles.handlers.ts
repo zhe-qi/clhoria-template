@@ -1,6 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 
-import { eq, ilike, or } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
@@ -9,20 +9,23 @@ import { systemRole } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
 import { assignMenusToRole, assignPermissionsToRole, assignUsersToRole } from "@/lib/permissions";
+import { pickContext } from "@/utils/tools/hono-helpers";
 
 import type { SystemRolesRouteHandlerType } from "./roles.index";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   const params = c.req.valid("query");
+  const domain = c.get("userDomain");
 
-  let whereCondition;
+  let whereCondition = eq(systemRole.domain, domain);
 
   // 搜索条件
   if (params.search) {
-    whereCondition = or(
+    const searchCondition = or(
       ilike(systemRole.code, `%${params.search}%`),
       ilike(systemRole.name, `%${params.search}%`),
     );
+    whereCondition = and(whereCondition, searchCondition)!;
   }
 
   const result = await pagination<InferSelectModel<typeof systemRole>>(
@@ -36,11 +39,12 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
 
 export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const userId = c.get("userId");
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   try {
     const [role] = await db.insert(systemRole).values({
       ...body,
+      domain,
       createdBy: userId,
     }).returning();
 
@@ -59,11 +63,15 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
 
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
+  const domain = c.get("userDomain");
 
   const [role] = await db
     .select()
     .from(systemRole)
-    .where(eq(systemRole.id, id));
+    .where(and(
+      eq(systemRole.id, id),
+      eq(systemRole.domain, domain),
+    ));
 
   if (!role) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
@@ -75,7 +83,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const userId = c.get("userId");
+  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
 
   const [updated] = await db
     .update(systemRole)
@@ -83,7 +91,10 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
       ...body,
       updatedBy: userId,
     })
-    .where(eq(systemRole.id, id))
+    .where(and(
+      eq(systemRole.id, id),
+      eq(systemRole.domain, domain),
+    ))
     .returning();
 
   if (!updated) {
@@ -95,10 +106,14 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
+  const domain = c.get("userDomain");
 
   const [deleted] = await db
     .delete(systemRole)
-    .where(eq(systemRole.id, id))
+    .where(and(
+      eq(systemRole.id, id),
+      eq(systemRole.domain, domain),
+    ))
     .returning({ id: systemRole.id });
 
   if (!deleted) {
@@ -117,7 +132,10 @@ export const assignPermissions: SystemRolesRouteHandlerType<"assignPermissions">
   const [role] = await db
     .select({ id: systemRole.id })
     .from(systemRole)
-    .where(eq(systemRole.id, id));
+    .where(and(
+      eq(systemRole.id, id),
+      eq(systemRole.domain, domain),
+    ));
 
   if (!role) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
@@ -136,7 +154,10 @@ export const assignMenus: SystemRolesRouteHandlerType<"assignMenus"> = async (c)
   const [role] = await db
     .select({ id: systemRole.id })
     .from(systemRole)
-    .where(eq(systemRole.id, id));
+    .where(and(
+      eq(systemRole.id, id),
+      eq(systemRole.domain, domain),
+    ));
 
   if (!role) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
@@ -155,7 +176,10 @@ export const assignUsers: SystemRolesRouteHandlerType<"assignUsers"> = async (c)
   const [role] = await db
     .select({ id: systemRole.id })
     .from(systemRole)
-    .where(eq(systemRole.id, id));
+    .where(and(
+      eq(systemRole.id, id),
+      eq(systemRole.domain, domain),
+    ));
 
   if (!role) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);

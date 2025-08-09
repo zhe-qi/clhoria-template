@@ -395,7 +395,10 @@ export async function deleteMenu(id: string, domain?: string) {
   }
 
   // 删除相关的角色菜单关联
-  await db.delete(systemRoleMenu).where(eq(systemRoleMenu.menuId, id));
+  await db.delete(systemRoleMenu).where(and(
+    eq(systemRoleMenu.menuId, id),
+    eq(systemRoleMenu.domain, menuToDelete.domain),
+  ));
 
   // 删除菜单
   const [deletedMenu] = await db

@@ -12,7 +12,7 @@ export const systemUser = pgTable("system_user", {
   ...defaultColumns,
   username: varchar({ length: 64 }).notNull().unique(),
   password: text().notNull(),
-  domain: varchar({ length: 64 }).notNull(),
+  domain: varchar({ length: 64 }).notNull().default("default"),
   builtIn: boolean().default(false),
   avatar: text(),
   nickName: varchar({ length: 64 }).notNull(),

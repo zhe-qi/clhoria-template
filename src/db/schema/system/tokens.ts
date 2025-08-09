@@ -15,7 +15,7 @@ export const systemTokens = pgTable("system_tokens", {
   status: tokenStatusEnum().notNull(),
   userId: uuid().notNull(),
   username: varchar({ length: 64 }).notNull(),
-  domain: varchar({ length: 64 }).notNull(),
+  domain: varchar({ length: 64 }).notNull().default("default"),
   loginTime: timestamp({ mode: "string" }).notNull().$defaultFn(() => formatDate(new Date())),
   expiresAt: timestamp({ mode: "string" }).notNull(),
   ip: varchar({ length: 64 }).notNull(),

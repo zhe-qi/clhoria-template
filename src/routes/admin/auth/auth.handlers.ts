@@ -61,7 +61,10 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
 
     // 3. 密码验证通过后查询用户角色
     const userRoles = await db.query.systemUserRole.findMany({
-      where: eq(systemUserRole.userId, user.id),
+      where: and(
+        eq(systemUserRole.userId, user.id),
+        eq(systemUserRole.domain, user.domain),
+      ),
     });
 
     const roles = userRoles.map(ur => ur.roleId);

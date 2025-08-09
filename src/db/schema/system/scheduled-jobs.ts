@@ -9,7 +9,7 @@ import { jobStatusEnum } from "../../common/enums";
 export const systemScheduledJobs = pgTable("system_scheduled_jobs", {
   ...defaultColumns,
   /** 所属域ID */
-  domain: varchar({ length: 64 }).notNull(),
+  domain: varchar({ length: 64 }).notNull().default("default"),
   /** 任务名称 */
   name: varchar({ length: 128 }).notNull(),
   /** 任务描述 */

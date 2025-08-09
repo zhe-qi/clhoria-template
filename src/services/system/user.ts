@@ -172,6 +172,7 @@ export async function assignRolesToUser(
         .delete(systemUserRole)
         .where(and(
           eq(systemUserRole.userId, userId),
+          eq(systemUserRole.domain, domain),
           inArray(systemUserRole.roleId, toRemove),
         ));
     }
@@ -181,6 +182,7 @@ export async function assignRolesToUser(
         toAdd.map(roleId => ({
           userId,
           roleId,
+          domain,
         })),
       );
     }
@@ -239,7 +241,10 @@ export async function refreshUserRoleCache(userId: string, domain: string): Prom
   const userRoles = await db
     .select({ roleId: systemUserRole.roleId })
     .from(systemUserRole)
-    .where(eq(systemUserRole.userId, userId));
+    .where(and(
+      eq(systemUserRole.userId, userId),
+      eq(systemUserRole.domain, domain),
+    ));
 
   const roles = userRoles.map(ur => ur.roleId);
 

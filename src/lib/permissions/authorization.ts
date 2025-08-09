@@ -129,6 +129,7 @@ export async function assignUsersToRole(
         .delete(systemUserRole)
         .where(and(
           eq(systemUserRole.roleId, roleId),
+          eq(systemUserRole.domain, domain),
           inArray(systemUserRole.userId, toRemove),
         ));
     }
@@ -138,6 +139,7 @@ export async function assignUsersToRole(
         toAdd.map(userId => ({
           userId,
           roleId,
+          domain,
         })),
       );
     }

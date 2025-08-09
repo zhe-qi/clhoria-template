@@ -13,7 +13,7 @@ export const systemPost = pgTable("system_post", {
   postName: varchar({ length: 50 }).notNull(),
   postSort: integer().notNull().default(0),
   status: statusEnum().notNull(),
-  domain: varchar({ length: 64 }).notNull(),
+  domain: varchar({ length: 64 }).notNull().default("default"),
   remark: text(),
 }, table => [
   // 域内岗位编码唯一

@@ -27,10 +27,12 @@ export async function initSysUserRole() {
     {
       userId: adminUser.id,
       roleId: superRole.id,
+      domain: "default",
     },
     {
       userId: normalUser.id,
       roleId: userRole.id,
+      domain: "default",
     },
   ];
 

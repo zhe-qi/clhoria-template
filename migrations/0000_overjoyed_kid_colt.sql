@@ -176,15 +176,16 @@ CREATE TABLE "system_role" (
 	"name" varchar(64) NOT NULL,
 	"description" text,
 	"pid" uuid,
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "system_role_code_unique" UNIQUE("code")
+	CONSTRAINT "system_role_domain_code_unique" UNIQUE("domain","code")
 );
 --> statement-breakpoint
 CREATE TABLE "system_role_menu" (
 	"role_id" uuid NOT NULL,
 	"menu_id" uuid NOT NULL,
-	"domain" varchar(64) NOT NULL,
-	CONSTRAINT "system_role_menu_role_id_menu_id_domain_pk" PRIMARY KEY("role_id","menu_id","domain")
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
+	CONSTRAINT "system_role_menu_domain_role_id_menu_id_pk" PRIMARY KEY("domain","role_id","menu_id")
 );
 --> statement-breakpoint
 CREATE TABLE "system_scheduled_jobs" (
@@ -254,7 +255,8 @@ CREATE TABLE "system_user_post" (
 CREATE TABLE "system_user_role" (
 	"user_id" uuid NOT NULL,
 	"role_id" uuid NOT NULL,
-	CONSTRAINT "system_user_role_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
+	CONSTRAINT "system_user_role_domain_user_id_role_id_pk" PRIMARY KEY("domain","user_id","role_id")
 );
 --> statement-breakpoint
 CREATE TABLE "tasks" (

@@ -7,9 +7,9 @@ import { systemRole } from "./role";
 export const systemRoleMenu = pgTable("system_role_menu", {
   roleId: uuid().notNull(),
   menuId: uuid().notNull(),
-  domain: varchar({ length: 64 }).notNull(),
+  domain: varchar({ length: 64 }).notNull().default("default"),
 }, table => [
-  primaryKey({ columns: [table.roleId, table.menuId, table.domain] }),
+  primaryKey({ columns: [table.domain, table.roleId, table.menuId] }),
 ]);
 
 export const systemRoleMenuRelations = relations(systemRoleMenu, ({ one }) => ({

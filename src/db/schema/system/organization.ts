@@ -7,7 +7,7 @@ import { statusEnum } from "../../common/enums";
 
 export const systemOrganization = pgTable("system_organization", {
   ...defaultColumns,
-  domain: varchar({ length: 64 }).notNull(),
+  domain: varchar({ length: 64 }).notNull().default("default"),
   code: varchar({ length: 64 }).notNull(),
   name: varchar({ length: 128 }).notNull(),
   description: text(),

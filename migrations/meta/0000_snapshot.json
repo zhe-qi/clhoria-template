@@ -1,5 +1,5 @@
 {
-  "id": "3490dc62-2db0-4be9-8a06-52f04fbc6940",
+  "id": "6f161f9e-ca63-4c6d-8503-bfb337dcb4ed",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1199,6 +1199,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "domain": {
+          "name": "domain",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'default'"
+        },
         "status": {
           "name": "status",
           "type": "integer",
@@ -1211,10 +1218,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "system_role_code_unique": {
-          "name": "system_role_code_unique",
+        "system_role_domain_code_unique": {
+          "name": "system_role_domain_code_unique",
           "nullsNotDistinct": false,
           "columns": [
+            "domain",
             "code"
           ]
         }
@@ -1243,18 +1251,19 @@
           "name": "domain",
           "type": "varchar(64)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'default'"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "system_role_menu_role_id_menu_id_domain_pk": {
-          "name": "system_role_menu_role_id_menu_id_domain_pk",
+        "system_role_menu_domain_role_id_menu_id_pk": {
+          "name": "system_role_menu_domain_role_id_menu_id_pk",
           "columns": [
+            "domain",
             "role_id",
-            "menu_id",
-            "domain"
+            "menu_id"
           ]
         }
       },
@@ -1696,14 +1705,22 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "domain": {
+          "name": "domain",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'default'"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "system_user_role_user_id_role_id_pk": {
-          "name": "system_user_role_user_id_role_id_pk",
+        "system_user_role_domain_user_id_role_id_pk": {
+          "name": "system_user_role_domain_user_id_role_id_pk",
           "columns": [
+            "domain",
             "user_id",
             "role_id"
           ]

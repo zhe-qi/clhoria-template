@@ -23,7 +23,7 @@ export const systemNotices = pgTable("system_notices", {
   /** 状态: 1=启用 0=禁用 */
   status: integer().default(1).notNull(),
   /** 多租户域 */
-  domain: varchar({ length: 100 }).notNull(),
+  domain: varchar({ length: 100 }).notNull().default("default"),
   /** 排序 */
   sortOrder: integer().default(0).notNull(),
 }, table => [
