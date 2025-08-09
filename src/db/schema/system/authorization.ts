@@ -103,3 +103,19 @@ export const userRoutesResponseSchema = z.object({
   home: z.string().meta({ description: "首页路由" }),
   routes: z.array(z.any()).meta({ description: "路由列表" }),
 });
+// 获取用户角色的Schema
+export const getUserRolesSchema = z.object({
+  userId: z.string().meta({ description: "用户ID" }),
+  domain: z.string().optional().meta({ description: "域/租户" }),
+});
+
+// 用户角色响应Schema
+export const userRolesResponseSchema = z.array(
+  z.object({
+    id: z.string().meta({ description: "角色ID" }),
+    code: z.string().meta({ description: "角色代码" }),
+    name: z.string().meta({ description: "角色名称" }),
+    description: z.string().nullable().meta({ description: "角色描述" }),
+    status: z.number().meta({ description: "状态: 1=启用 0=禁用" }),
+  }),
+);

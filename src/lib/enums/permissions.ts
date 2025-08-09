@@ -72,6 +72,9 @@ export const PermissionAction = {
   /** 获取用户路由 */
   GET_USER_ROUTES: "get-user-routes",
 
+  /** 获取用户角色 */
+  GET_USER_ROLES: "get-user-roles",
+
   /** 获取角色权限 */
   GET_ROLE_PERMISSIONS: "get-role-permissions",
 

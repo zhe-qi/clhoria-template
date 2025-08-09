@@ -8,9 +8,11 @@ import {
   assignPermissionsToRoleSchema,
   assignRoutesToRoleSchema,
   assignUsersToRoleSchema,
+  getUserRolesSchema,
   getUserRoutesSchema,
   roleMenusSchema,
   rolePermissionsSchema,
+  userRolesResponseSchema,
   userRoutesResponseSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
@@ -147,6 +149,37 @@ export const getUserRoutes = createRoute({
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(getUserRoutesSchema),
+      "请求参数错误",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "用户不存在",
+    ),
+  },
+});
+/** 获取用户角色 */
+export const getUserRoles = createRoute({
+  tags,
+  permission: {
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
+    action: PermissionAction.GET_USER_ROLES,
+  },
+  summary: "获取用户角色",
+  method: "get",
+  path: `${routePrefix}/users/{userId}/roles`,
+  request: {
+    params: IdUUIDParamsSchema.extend({
+      userId: IdUUIDParamsSchema.shape.id.meta({ description: "用户ID" }),
+    }).omit({ id: true }),
+    query: getUserRolesSchema.omit({ userId: true }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      userRolesResponseSchema,
+      "获取用户角色成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(getUserRolesSchema),
       "请求参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(

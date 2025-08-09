@@ -10,6 +10,7 @@ export const systemAuthorization = createRouter()
   .openapi(routes.assignRoutesToRole, handlers.assignRoutesToRole)
   .openapi(routes.assignUsersToRole, handlers.assignUsersToRole)
   .openapi(routes.getUserRoutes, handlers.getUserRoutes)
+  .openapi(routes.getUserRoles, handlers.getUserRoles)
   .openapi(routes.getRolePermissions, handlers.getRolePermissions)
   .openapi(routes.getRoleMenus, handlers.getRoleMenus);
 

@@ -106,6 +106,46 @@ export const getUserRoutes: SystemAuthorizationRouteHandlerType<"getUserRoutes">
   return c.json(userRoutes, HttpStatusCodes.OK);
 };
 
+/** 获取用户的角色列表 */
+export const getUserRoles: SystemAuthorizationRouteHandlerType<"getUserRoles"> = async (c) => {
+  const { userId } = c.req.valid("param");
+  const { domain: queryDomain } = c.req.valid("query");
+  const userDomain = c.get("userDomain");
+  const domain = queryDomain || userDomain;
+
+  // 检查用户是否存在
+  const user = await db.query.systemUser.findFirst({
+    where: (table, { eq }) => eq(table.id, userId),
+  });
+
+  if (!user) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  // 获取用户角色
+  const userRoles = await db.query.systemUserRole.findMany({
+    where: (table, { eq, and }) => and(
+      eq(table.userId, userId),
+      eq(table.domain, domain),
+    ),
+    with: {
+      role: {
+        columns: {
+          id: true,
+          code: true,
+          name: true,
+          description: true,
+          status: true,
+        },
+      },
+    },
+  });
+
+  const roles = userRoles.map(ur => ur.role);
+
+  return c.json(roles, HttpStatusCodes.OK);
+};
+
 // 获取角色权限
 export const getRolePermissions: SystemAuthorizationRouteHandlerType<"getRolePermissions"> = async (c) => {
   const { roleId } = c.req.valid("param");
