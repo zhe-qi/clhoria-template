@@ -1,11 +1,15 @@
 import { Queue, QueueEvents, Worker } from "bullmq";
 import { formatDate } from "date-fns";
 
+import type { JobExecutionStatusType } from "@/lib/enums";
+
+import { JobExecutionStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 import { redisClient } from "@/lib/redis";
 
 import type {
   AddJobOptions,
+  BulkJobData,
   HealthCheckResult,
   JobPriority,
   QueueMetrics,
@@ -176,7 +180,7 @@ export class JobQueueManager {
 
   /** 绑定工作进程事件 */
   private bindWorkerEvents() {
-    this.worker.on("completed", (job) => {
+    this.worker.on(JobExecutionStatus.COMPLETED, (job) => {
       const duration = job.finishedOn && job.processedOn
         ? Math.max(0, job.finishedOn - job.processedOn)
         : 0;
@@ -193,7 +197,7 @@ export class JobQueueManager {
       }, "任务完成");
     });
 
-    this.worker.on("failed", (job, error) => {
+    this.worker.on(JobExecutionStatus.FAILED, (job, error) => {
       this.metrics.failedJobs++;
 
       // 记录失败模式以便分析
@@ -207,7 +211,7 @@ export class JobQueueManager {
       }, "任务失败");
     });
 
-    this.worker.on("active", (job) => {
+    this.worker.on(JobExecutionStatus.ACTIVE, (job) => {
       logger.debug({
         jobId: job.id,
         jobName: job.name,
@@ -258,19 +262,19 @@ export class JobQueueManager {
 
   /** 绑定队列事件 */
   private bindQueueEvents() {
-    this.queueEvents.on("waiting", ({ jobId }) => {
+    this.queueEvents.on(JobExecutionStatus.WAITING, ({ jobId }) => {
       logger.debug({ jobId }, "任务等待中");
     });
 
-    this.queueEvents.on("active", ({ jobId, prev }) => {
+    this.queueEvents.on(JobExecutionStatus.ACTIVE, ({ jobId, prev }) => {
       logger.debug({ jobId, previousStatus: prev }, "任务激活");
     });
 
-    this.queueEvents.on("completed", ({ jobId, returnvalue }) => {
+    this.queueEvents.on(JobExecutionStatus.COMPLETED, ({ jobId, returnvalue }) => {
       logger.debug({ jobId, returnValue: returnvalue }, "任务完成事件");
     });
 
-    this.queueEvents.on("failed", ({ jobId, failedReason }) => {
+    this.queueEvents.on(JobExecutionStatus.FAILED, ({ jobId, failedReason }) => {
       logger.debug({ jobId, reason: failedReason }, "任务失败事件");
     });
 
@@ -312,11 +316,7 @@ export class JobQueueManager {
   }
 
   /** 批量添加任务 */
-  async addBulkJobs(jobs: Array<{
-    name: string;
-    data: any;
-    options?: any;
-  }>): Promise<void> {
+  async addBulkJobs(jobs: Array<BulkJobData>): Promise<void> {
     this.ensureInitialized();
 
     if (jobs.length === 0)
@@ -341,7 +341,7 @@ export class JobQueueManager {
   async cleanJobs(
     grace: number,
     limit: number,
-    type: "completed" | "failed" | "active" | "waiting",
+    type: JobExecutionStatusType,
   ): Promise<number> {
     this.ensureInitialized();
 
@@ -648,7 +648,7 @@ export class JobQueueManager {
       const startTime = Date.now();
       while (Date.now() - startTime < timeout) {
         const activeJobs = await this.queue.getActive();
-        if (activeJobs.length === 0)
+        if (activeJobs.length < 1)
           break;
 
         logger.debug(`等待 ${activeJobs.length} 个活跃任务完成`);

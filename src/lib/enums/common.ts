@@ -9,20 +9,6 @@ export const Status = {
   /** 封禁状态 */
   BANNED: -1,
 } as const;
-/** 定时任务状态枚举 */
-export const JobStatus = {
-  /** 启用状态 */
-  ENABLED: 1,
-
-  /** 禁用状态 */
-  DISABLED: 0,
-
-  /** 暂停状态 */
-  PAUSED: 2,
-} as const;
-
-/** 定时任务状态类型 */
-export type JobStatusType = (typeof JobStatus)[keyof typeof JobStatus];
 
 /** 状态类型 */
 export type StatusType = (typeof Status)[keyof typeof Status];

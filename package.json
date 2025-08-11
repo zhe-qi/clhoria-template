@@ -38,7 +38,7 @@
     "@hono/zod-openapi": "^1.1.0",
     "@node-rs/argon2": "^2.0.2",
     "@scalar/hono-api-reference": "^0.9.13",
-    "bullmq": "^5.56.9",
+    "bullmq": "^5.56.10",
     "casbin": "^5.38.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
@@ -58,12 +58,12 @@
     "rate-limit-redis": "^4.2.1",
     "stoker": "^2.0.1",
     "uuid": "^11.1.0",
-    "zod": "4.0.16"
+    "zod": "4.0.17"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^5.2.0",
+    "@antfu/eslint-config": "^5.2.1",
     "@types/node": "^24.2.1",
-    "@typescript/native-preview": "7.0.0-dev.20250809.1",
+    "@typescript/native-preview": "7.0.0-dev.20250811.1",
     "chalk": "^5.5.0",
     "cross-env": "^10.0.0",
     "drizzle-kit": "^0.31.4",
@@ -71,9 +71,9 @@
     "eslint-plugin-format": "^1.0.1",
     "gradient-string": "^3.0.0",
     "lint-staged": "^16.1.5",
-    "rolldown": "1.0.0-beta.31",
+    "rolldown": "1.0.0-beta.32",
     "simple-git-hooks": "^2.13.1",
-    "tsdown": "^0.13.4",
+    "tsdown": "^0.14.1",
     "tsx": "^4.20.3",
     "typescript": "5.9.2",
     "vitest": "^3.2.4"

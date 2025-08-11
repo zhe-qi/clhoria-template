@@ -19,6 +19,9 @@ export * from "./cache";
 // 通用枚举
 export * from "./common";
 
+// Jobs 相关枚举
+export * from "./jobs";
+
 // 权限相关枚举
 export * from "./permissions";
 

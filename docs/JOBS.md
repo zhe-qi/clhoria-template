@@ -145,7 +145,7 @@ else {
 const cleaned = await queueManager.cleanJobs(
   60 * 60 * 1000, // 1小时前
   50, // 最多50个
-  "completed" // 已完成状态
+  JobExecutionStatus.COMPLETED // 已完成状态
 );
 console.log(`清理了 ${cleaned} 个任务`);
 ```
@@ -227,11 +227,13 @@ PATCH /api/admin/scheduled-jobs/:id
 系统自动记录任务执行日志到 `system_job_execution_logs` 表：
 
 ```typescript
+import { JobExecutionStatus, JobExecutionStatusType } from "@/lib/enums";
+
 interface JobExecutionLog {
   id: string;
   jobId: string;
   executionId: string;
-  status: "waiting" | "active" | "completed" | "failed" | "delayed" | "paused";
+  status: JobExecutionStatusType; // 使用枚举类型: WAITING | ACTIVE | COMPLETED | FAILED | DELAYED | PAUSED
   startedAt?: Date;
   finishedAt?: Date;
   durationMs?: number;
@@ -239,6 +241,16 @@ interface JobExecutionLog {
   errorMessage?: string;
   retryCount: number;
 }
+
+// 任务执行状态枚举
+const JobExecutionStatus = {
+  WAITING: "waiting",     // 等待执行
+  ACTIVE: "active",       // 执行中
+  COMPLETED: "completed", // 已完成
+  FAILED: "failed",       // 执行失败
+  DELAYED: "delayed",     // 已延迟
+  PAUSED: "paused",       // 已暂停
+} as const;
 ```
 
 ## 错误处理和重试
@@ -297,7 +309,7 @@ setInterval(async () => {
   await queueManager.cleanJobs(
     24 * 60 * 60 * 1000, // 24小时前
     100, // 最多清理100个
-    "completed"
+    JobExecutionStatus.COMPLETED
   );
 }, 60 * 60 * 1000); // 每小时执行一次
 ```

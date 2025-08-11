@@ -5,6 +5,7 @@ import { and, desc, eq, gte, lt } from "drizzle-orm";
 
 import db from "@/db";
 import { systemJobExecutionLogs } from "@/db/schema";
+import { JobExecutionStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 import { formatDate } from "@/utils/tools/formatter";
 
@@ -18,7 +19,7 @@ export class JobMonitor {
       await db.insert(systemJobExecutionLogs).values({
         jobId: this.extractJobConfigId(job),
         executionId: job.id || "unknown",
-        status: "active",
+        status: JobExecutionStatus.ACTIVE,
         startedAt: formatDate(new Date()),
         createdBy: "system",
         updatedBy: "system",
@@ -47,7 +48,7 @@ export class JobMonitor {
       await db
         .update(systemJobExecutionLogs)
         .set({
-          status: "completed",
+          status: JobExecutionStatus.COMPLETED,
           finishedAt: formatDate(new Date()),
           durationMs: duration,
           result,
@@ -84,7 +85,7 @@ export class JobMonitor {
       await db
         .update(systemJobExecutionLogs)
         .set({
-          status: "failed",
+          status: JobExecutionStatus.FAILED,
           finishedAt: formatDate(new Date()),
           durationMs: duration,
           errorMessage: error.message,
@@ -180,8 +181,8 @@ export class JobMonitor {
 
       const stats = {
         totalExecutions: logs.length,
-        successfulExecutions: logs.filter(log => log.status === "completed").length,
-        failedExecutions: logs.filter(log => log.status === "failed").length,
+        successfulExecutions: logs.filter(log => log.status === JobExecutionStatus.COMPLETED).length,
+        failedExecutions: logs.filter(log => log.status === JobExecutionStatus.FAILED).length,
         averageDuration: 0,
         lastExecution: null as Date | null,
         successRate: 0,
@@ -269,10 +270,10 @@ export class JobMonitor {
         const stats = jobStats.get(jobId)!;
         stats.total++;
 
-        if (log.status === "completed") {
+        if (log.status === JobExecutionStatus.COMPLETED) {
           stats.successful++;
         }
-        else if (log.status === "failed") {
+        else if (log.status === JobExecutionStatus.FAILED) {
           stats.failed++;
         }
 
@@ -293,18 +294,18 @@ export class JobMonitor {
         const stats = dailyStats.get(date)!;
         stats.total++;
 
-        if (log.status === "completed") {
+        if (log.status === JobExecutionStatus.COMPLETED) {
           stats.successful++;
         }
-        else if (log.status === "failed") {
+        else if (log.status === JobExecutionStatus.FAILED) {
           stats.failed++;
         }
       });
 
       return {
         totalExecutions: logs.length,
-        successfulExecutions: logs.filter(log => log.status === "completed").length,
-        failedExecutions: logs.filter(log => log.status === "failed").length,
+        successfulExecutions: logs.filter(log => log.status === JobExecutionStatus.COMPLETED).length,
+        failedExecutions: logs.filter(log => log.status === JobExecutionStatus.FAILED).length,
         jobStats: Object.fromEntries(jobStats),
         dailyStats: Object.fromEntries(dailyStats),
       };

@@ -1,5 +1,7 @@
 import type { ConnectionOptions, Job } from "bullmq";
 
+import type { JobExecutionStatusType, JobStatusType } from "@/lib/enums";
+
 /** 任务执行结果 */
 export interface JobResult<T = unknown> {
   /** 执行是否成功 */
@@ -57,18 +59,6 @@ export interface ScheduledJobConfig {
   domain: string;
 }
 
-/** 任务执行状态枚举 */
-export const JobExecutionStatus = {
-  WAITING: "waiting",
-  ACTIVE: "active",
-  COMPLETED: "completed",
-  FAILED: "failed",
-  DELAYED: "delayed",
-  PAUSED: "paused",
-} as const;
-
-export type JobExecutionStatusType = (typeof JobExecutionStatus)[keyof typeof JobExecutionStatus];
-
 /** 任务执行日志 */
 export interface JobExecutionLog {
   /** 日志ID */
@@ -92,15 +82,6 @@ export interface JobExecutionLog {
   /** 重试次数 */
   retryCount: number;
 }
-
-/** 任务状态枚举 */
-export const JobStatus = {
-  ENABLED: 1,
-  DISABLED: 0,
-  PAUSED: 2,
-} as const;
-
-export type JobStatusType = (typeof JobStatus)[keyof typeof JobStatus];
 
 /** 创建定时任务参数 */
 export interface CreateScheduledJobParams {
@@ -223,4 +204,14 @@ export interface AddJobOptions {
   category?: string;
   /** 超时时间 */
   timeout?: number;
+}
+
+/** 批量作业数据项 */
+export interface BulkJobData {
+  /** 作业名称 */
+  name: string;
+  /** 作业数据 */
+  data: any;
+  /** 作业选项 */
+  options?: AddJobOptions;
 }
