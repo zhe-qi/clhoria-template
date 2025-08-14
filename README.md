@@ -18,6 +18,7 @@ Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优
 - **多租户支持**: 域管理和数据隔离
 - **自动化文档**: OpenAPI 规范，自动生成 API 文档
 - **多层认证授权**: JWT + Casbin 基于角色的访问控制
+- **声明式分页器**: 基于 Prisma 规范的声明式查询，支持复杂条件和多表关联
 - **完整 RBAC**: 用户、角色、权限、菜单管理
 - **部门管理**: 树形组织架构，支持数据权限
 - **岗位管理**: 用户职务配置和权限分配
@@ -221,6 +222,7 @@ src/
 ├── lib/
 │   ├── create-app.ts        # 应用创建和中间件配置
 │   ├── configure-open-api.ts # OpenAPI 配置
+│   ├── pagination/          # 声明式分页器
 │   └── enums/               # 枚举定义
 ├── scripts/                 # 脚本文件
 └── types/                   # TypeScript 类型定义
@@ -272,6 +274,55 @@ src/services/
 - **混合实现**: 简单 CRUD 操作直接在 handler 中实现，复杂业务逻辑抽离为服务函数
 - **事务管理**: 复杂业务操作使用 `db.transaction()` 确保数据一致性
 - **缓存集成**: 服务层集成 Redis 缓存，提供数据缓存和权限缓存管理
+
+### 声明式分页器
+
+基于 [Prisma 查询规范](https://prisma.org.cn/docs/orm/reference/prisma-client-reference#or) 的声明式分页解决方案：
+
+```typescript
+import paginatedQuery from "@/lib/pagination";
+
+type PaginatedResult = z.infer<typeof selectAdminUsersSchema> & {
+  usersToRoles: typeof usersToRoles.$inferSelect;
+};
+
+export const list: RouteHandlerType<"list"> = async (c) => {
+  const query = c.req.valid("query");
+
+  const [error, result] = await paginatedQuery<PaginatedResult>({
+    table: adminUsers,
+    params: {
+      ...query,
+      where: {
+        username: { contains: "admin" },
+        status: { equals: 1 },
+        OR: [
+          { email: { endsWith: "@company.com" } },
+          { role: { in: ["admin", "moderator"] } }
+        ],
+        AND: [
+          { createdAt: { gte: new Date("2024-01-01") } },
+          { NOT: { deletedAt: { not: null } } }
+        ]
+      },
+      orderBy: [
+        { field: "createdAt", direction: "desc" },
+        { field: "username", direction: "asc" }
+      ],
+      join: { usersToRoles: { type: "left", on: { id: "userId" }, as: "roles" } },
+    },
+    joinTables: {
+      usersToRoles,
+    },
+  });
+
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+  }
+
+  return c.json(result, HttpStatusCodes.OK);
+};
+```
 
 ## 部署
 
