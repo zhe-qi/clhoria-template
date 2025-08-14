@@ -53,8 +53,11 @@ describe("notices routes with real authentication", () => {
   it("access without token should return 401", async () => {
     const response = await noticesClient.system.notices.$get({
       query: {
-        page: "1",
-        limit: "10",
+        skip: "1",
+        take: "10",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
     expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
@@ -65,8 +68,11 @@ describe("notices routes with real authentication", () => {
     const response = await noticesClient.system.notices.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -184,8 +190,11 @@ describe("notices routes with real authentication", () => {
     const response = await noticesClient.system.notices.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -201,9 +210,9 @@ describe("notices routes with real authentication", () => {
       // @ts-ignore
       expect(typeof json.meta.total).toBe("number");
       // @ts-ignore
-      expect(json.meta.page).toBe(1);
+      expect(json.meta.skip).toBe(1);
       // @ts-ignore
-      expect(json.meta.limit).toBe(10);
+      expect(json.meta.take).toBe(10);
     }
   });
 
@@ -218,9 +227,15 @@ describe("notices routes with real authentication", () => {
     const response = await noticesClient.system.notices.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
-          type: "NOTIFICATION",
+          skip: "0",
+          take: "10",
+          where: {
+            type: {
+              contains: "ANNOUNCEMENT",
+            },
+          },
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -232,9 +247,9 @@ describe("notices routes with real authentication", () => {
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       expectTypeOf(json.data).toBeArray();
-      // 验证所有返回的通知都是 NOTIFICATION 类型
+      // 验证所有返回的通知都是 ANNOUNCEMENT 类型
       json.data.forEach((notice: any) => {
-        expect(notice.type).toBe("NOTIFICATION");
+        expect(notice.type).toBe("ANNOUNCEMENT");
       });
     }
   });
@@ -250,9 +265,15 @@ describe("notices routes with real authentication", () => {
     const response = await noticesClient.system.notices.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
-          status: "1",
+          skip: "1",
+          take: "10",
+          where: {
+            status: {
+              equals: "1",
+            },
+          },
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -282,9 +303,15 @@ describe("notices routes with real authentication", () => {
     const response = await noticesClient.system.notices.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
-          search: "测试通知",
+          skip: "1",
+          take: "10",
+          where: {
+            title: {
+              contains: "测试通知",
+            },
+          },
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -381,8 +408,11 @@ describe("notices routes with real authentication", () => {
     const response = await noticesClient.system.notices.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {

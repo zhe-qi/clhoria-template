@@ -1,10 +1,16 @@
+import type { z } from "zod";
+
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
+import type { selectSystemNoticesSchema } from "@/db/schema";
+
+import { systemNotices } from "@/db/schema";
+import { getQueryValidationError } from "@/lib/enums/zod";
+import paginatedQuery from "@/lib/pagination";
 import {
   createNotice,
   deleteNotice,
   getAdminNotice,
-  getAdminNotices,
   updateNotice,
 } from "@/services/system/notices";
 import { pickContext } from "@/utils/tools/hono-helpers";
@@ -13,16 +19,17 @@ import type { SystemNoticesRouteHandlerType } from "./notices.index";
 
 export const list: SystemNoticesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
-  const { search, type, status, page, limit } = query;
-  const userDomain = c.get("userDomain");
+  const domain = c.get("userDomain");
 
-  const result = await getAdminNotices({
-    domain: userDomain,
-    search,
-    type,
-    status: status ? (Number(status) as 0 | 1) : undefined,
-    pagination: { page, limit },
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemNoticesSchema>>({
+    table: systemNotices,
+    params: query,
+    domain,
   });
+
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+  }
 
   return c.json(result, HttpStatusCodes.OK);
 };

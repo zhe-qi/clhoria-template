@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { selectTsOperationLogSchema } from "@/db/schema";
 import { PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const routePrefix = "/system/operation-log";
 const tags = [`${routePrefix}（操作日志）`];
@@ -30,7 +30,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(selectTsOperationLogSchema),
+      GetPaginatedResultSchema<typeof selectTsOperationLogSchema>(selectTsOperationLogSchema),
       "操作日志列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

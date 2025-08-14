@@ -1,16 +1,15 @@
-import { createRoute, z } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 
 import {
   insertSystemNoticesSchema,
-  noticeTypeSchema,
   patchSystemNoticesSchema,
   responseSystemNoticesSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 const routePrefix = "/system/notices";
@@ -18,12 +17,6 @@ const tags = [`${routePrefix}（通知公告管理）`];
 
 // 管理员创建通知公告的请求体，不包含domain字段（从用户上下文获取）
 const adminCreateNoticeSchema = insertSystemNoticesSchema.omit({ domain: true });
-
-const ListQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().optional().meta({ description: "搜索关键词（标题、内容）" }),
-  type: noticeTypeSchema.optional().meta({ description: "公告类型" }),
-  status: z.enum(["0", "1"]).optional().meta({ description: "公告状态: 1=启用 0=禁用" }),
-});
 
 /** 获取通知公告列表 */
 export const list = createRoute({
@@ -36,16 +29,16 @@ export const list = createRoute({
   method: "get",
   path: routePrefix,
   request: {
-    query: ListQuerySchema,
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(responseSystemNoticesSchema),
+      GetPaginatedResultSchema<typeof responseSystemNoticesSchema>(responseSystemNoticesSchema),
       "获取通知公告列表成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(ListQuerySchema),
-      "查询参数错误",
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

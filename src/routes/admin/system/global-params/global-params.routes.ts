@@ -10,14 +10,10 @@ import {
   responseGlobalParamsSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const KeyParamsSchema = z.object({
   key: z.string().min(1, "参数键不能为空").meta({ description: "参数键名" }),
-});
-
-const ListQuerySchema = PaginationParamsSchema.extend({
-  isPublic: z.enum(["0", "1"]).optional().meta({ description: "是否公开参数: 1=是 0=否" }),
 });
 
 const routePrefix = "/system/global-params";
@@ -30,20 +26,20 @@ export const list = createRoute({
     resource: PermissionResource.SYSTEM_GLOBAL_PARAMS,
     action: PermissionAction.READ,
   },
-  summary: "获取全局参数列表（分页）",
+  summary: "获取全局参数列表",
   method: "get",
   path: routePrefix,
   request: {
-    query: ListQuerySchema,
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(responseGlobalParamsSchema),
-      "获取全局参数列表成功",
+      GetPaginatedResultSchema<typeof responseGlobalParamsSchema>(responseGlobalParamsSchema),
+      "全局参数列表获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(ListQuerySchema),
-      "查询参数错误",
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

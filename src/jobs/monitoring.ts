@@ -1,7 +1,7 @@
 import type { Job } from "bullmq";
 
 import { format, subDays } from "date-fns";
-import { and, desc, eq, gte, lt } from "drizzle-orm";
+import { and, count, desc, eq, gte, lt } from "drizzle-orm";
 
 import db from "@/db";
 import { systemJobExecutionLogs } from "@/db/schema";
@@ -125,7 +125,7 @@ export class JobMonitor {
       startDate?: Date;
       endDate?: Date;
     } = {},
-  ) {
+  ): Promise<{ data: any[]; total: number }> {
     try {
       const { limit = 50, offset = 0, status, startDate, endDate } = options;
 
@@ -145,17 +145,34 @@ export class JobMonitor {
         conditions.push(lt(systemJobExecutionLogs.startedAt, formatDate(endDate)));
       }
 
-      const query = db
+      const whereCondition = and(...conditions);
+
+      // 获取总数
+      const countQuery = db
+        .select({ count: count() })
+        .from(systemJobExecutionLogs)
+        .where(whereCondition);
+
+      // 获取分页数据
+      const dataQuery = db
         .select()
         .from(systemJobExecutionLogs)
-        .where(and(...conditions));
-
-      const results = await query
+        .where(whereCondition)
         .orderBy(desc(systemJobExecutionLogs.createdAt))
         .limit(limit)
         .offset(offset);
 
-      return results;
+      const [countResult, results] = await Promise.all([
+        countQuery,
+        dataQuery,
+      ]);
+
+      const total = countResult[0]?.count || 0;
+
+      return {
+        data: results,
+        total,
+      };
     }
     catch (error) {
       logger.error({

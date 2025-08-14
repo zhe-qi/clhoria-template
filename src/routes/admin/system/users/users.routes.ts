@@ -1,11 +1,11 @@
-import { createRoute, z } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSystemUserSchema, patchSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/users";
@@ -22,14 +22,16 @@ export const list = createRoute({
   method: "get",
   path: routePrefix,
   request: {
-    query: PaginationParamsSchema.extend({
-      status: z.coerce.number().optional().meta({ description: "用户状态" }),
-    }),
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(responseSystemUserSchema),
-      "系统用户列表响应成功",
+      GetPaginatedResultSchema<typeof responseSystemUserSchema>(responseSystemUserSchema),
+      "列表响应成功",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

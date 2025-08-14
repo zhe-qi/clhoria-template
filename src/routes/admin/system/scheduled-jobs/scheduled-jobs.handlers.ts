@@ -11,12 +11,12 @@ export const list: SystemScheduledJobsRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
 
   try {
-    const jobs = await scheduledJobsService.getScheduledJobs({
+    const result = await scheduledJobsService.getScheduledJobs({
       domain,
-      ...query,
+      params: query,
     });
 
-    return c.json(jobs, HttpStatusCodes.OK);
+    return c.json(result, HttpStatusCodes.OK);
   }
   catch (error: any) {
     return c.json({ message: error.message || "获取任务列表失败" }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
@@ -134,15 +134,27 @@ export const getExecutionHistory: SystemScheduledJobsRouteHandlerType<"getExecut
   const { id } = c.req.valid("param");
   const query = c.req.valid("query");
 
-  // 转换日期字符串为Date对象
+  // 将新的分页参数转换为旧格式
   const options = {
-    ...query,
-    startDate: query.startDate ? new Date(query.startDate) : undefined,
-    endDate: query.endDate ? new Date(query.endDate) : undefined,
+    page: Math.floor((query.skip || 0) / (query.take || 10)) + 1,
+    limit: query.take || 10,
+    status: query.where?.status,
+    startDate: query.where?.startDate ? new Date(query.where.startDate) : undefined,
+    endDate: query.where?.endDate ? new Date(query.where.endDate) : undefined,
   };
 
-  const history = await scheduledJobsService.getJobExecutionHistory(id, domain, options);
-  return c.json(history, HttpStatusCodes.OK);
+  const { data, total } = await scheduledJobsService.getJobExecutionHistory(id, domain, options);
+
+  const result = {
+    data,
+    meta: {
+      total,
+      skip: query.skip || 0,
+      take: query.take || 10,
+    },
+  };
+
+  return c.json(result, HttpStatusCodes.OK);
 };
 
 /** 获取任务执行统计 */

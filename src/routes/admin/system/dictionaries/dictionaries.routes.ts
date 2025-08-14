@@ -10,18 +10,13 @@ import {
   responseSystemDictionariesSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const routePrefix = "/system/dictionaries";
 const tags = [`${routePrefix}（字典管理）`];
 
 const CodeParamsSchema = z.object({
   code: z.string().min(1, "字典编码不能为空").meta({ description: "字典编码" }),
-});
-
-const ListQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().optional().meta({ description: "搜索关键词（编码、名称、描述）" }),
-  status: z.enum(["0", "1"]).optional().meta({ description: "字典状态: 1=启用 0=禁用" }),
 });
 
 /** 获取字典列表 */
@@ -31,20 +26,20 @@ export const list = createRoute({
     resource: PermissionResource.SYSTEM_DICTIONARIES,
     action: PermissionAction.READ,
   },
-  summary: "获取字典列表（分页）",
+  summary: "获取字典列表",
   method: "get",
   path: routePrefix,
   request: {
-    query: ListQuerySchema,
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(responseSystemDictionariesSchema),
-      "获取字典列表成功",
+      GetPaginatedResultSchema<typeof responseSystemDictionariesSchema>(responseSystemDictionariesSchema),
+      "字典列表获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(ListQuerySchema),
-      "查询参数错误",
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

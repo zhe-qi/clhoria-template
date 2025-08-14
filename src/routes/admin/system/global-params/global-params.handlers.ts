@@ -7,12 +7,10 @@ import * as globalParamsService from "@/services/system/global-params";
 import type { SystemGlobalParamsRouteHandlerType } from "./global-params.index";
 
 export const list: SystemGlobalParamsRouteHandlerType<"list"> = async (c) => {
-  const { search, isPublic, page = 1, limit = 20 } = c.req.valid("query");
+  const query = c.req.valid("query");
 
   const result = await globalParamsService.getAdminList({
-    search,
-    isPublic,
-    pagination: { page: Number(page), limit: Number(limit) },
+    params: query,
   });
 
   return c.json(result, HttpStatusCodes.OK);

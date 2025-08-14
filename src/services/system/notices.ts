@@ -1,33 +1,41 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type z from "zod/v4";
 
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import type {
   NoticeTypeValue,
   patchSystemNoticesSchema,
   selectSystemNoticesSchema,
 } from "@/db/schema";
-import type { StatusType } from "@/lib/enums";
 
 import db from "@/db";
 import { systemNotices } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { CacheConfig, getNoticeKey, getNoticesAllKey } from "@/lib/enums/cache";
 import { logger } from "@/lib/logger";
-import { pagination } from "@/lib/pagination";
+import paginatedQuery from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
 import { formatDate } from "@/utils";
 
 export interface NoticesListOptions {
-  search?: string;
-  type?: NoticeTypeValue;
-  status?: StatusType;
   domain: string;
+  params: {
+    skip?: number;
+    take?: number;
+    where?: Record<string, any> | Record<string, never> | null;
+    orderBy?: Record<string, "asc" | "desc"> | Record<string, "asc" | "desc">[] | Record<string, never> | null;
+    join?: Record<string, any> | Record<string, never> | null;
+  };
+}
+
+export interface NoticesPublicOptions {
+  domain: string;
+  type?: NoticeTypeValue;
   enabledOnly?: boolean;
   pagination?: {
-    page: number;
-    limit: number;
+    skip: number;
+    take: number;
   };
 }
 
@@ -118,7 +126,7 @@ export async function clearAllNoticeCache(domain: string) {
 /**
  * 获取通知公告列表（简单模式，用于公开API）
  */
-export async function getPublicNotices(options: NoticesListOptions) {
+export async function getPublicNotices(options: NoticesPublicOptions) {
   const { domain, enabledOnly = true, type, pagination: paginationOptions } = options;
 
   // 尝试从缓存获取
@@ -148,15 +156,32 @@ export async function getPublicNotices(options: NoticesListOptions) {
 
   let result;
   if (paginationOptions) {
-    result = await pagination<InferSelectModel<typeof systemNotices>>(
-      systemNotices,
-      whereCondition!,
-      {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-        orderBy: [desc(systemNotices.sortOrder), desc(systemNotices.createdAt)],
+    // 直接使用 skip/take 参数进行分页查询
+    const { skip, take } = paginationOptions;
+
+    const paginationResult = await paginatedQuery<InferSelectModel<typeof systemNotices>>({
+      table: systemNotices,
+      params: {
+        skip,
+        take,
+        where: {
+          domain,
+          ...(enabledOnly ? { status: Status.ENABLED } : {}),
+          ...(type ? { type: type.toString() } : {}),
+        },
+        orderBy: [
+          { sortOrder: "desc" },
+          { createdAt: "desc" },
+        ],
       },
-    );
+      domain,
+    });
+
+    const [error, data] = paginationResult;
+    if (error) {
+      throw new Error(`通知公告列表查询失败: ${error}`);
+    }
+    return data;
   }
   else {
     const data = await query;
@@ -179,43 +204,25 @@ export async function getPublicNotices(options: NoticesListOptions) {
  * 获取通知公告列表（分页模式，用于管理API）
  */
 export async function getAdminNotices(options: NoticesListOptions) {
-  const {
-    domain,
-    search,
-    type,
-    status,
-    pagination: paginationOptions = { page: 1, limit: 20 },
-  } = options;
+  const { domain, params } = options;
 
-  let whereCondition = eq(systemNotices.domain, domain);
-
-  if (search) {
-    whereCondition = and(
-      whereCondition,
-      or(
-        ilike(systemNotices.title, `%${search}%`),
-        ilike(systemNotices.content, `%${search}%`),
-      ),
-    )!;
-  }
-
-  if (type) {
-    whereCondition = and(whereCondition, eq(systemNotices.type, type))!;
-  }
-
-  if (status !== undefined) {
-    whereCondition = and(whereCondition, eq(systemNotices.status, status))!;
-  }
-
-  return await pagination<InferSelectModel<typeof systemNotices>>(
-    systemNotices,
-    whereCondition!,
-    {
-      page: paginationOptions.page,
-      limit: paginationOptions.limit,
-      orderBy: [desc(systemNotices.sortOrder), desc(systemNotices.createdAt)],
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemNoticesSchema>>({
+    table: systemNotices,
+    params: {
+      skip: params.skip ?? 0,
+      take: params.take ?? 10,
+      where: params.where,
+      orderBy: params.orderBy,
+      join: params.join,
     },
-  );
+    domain,
+  });
+
+  if (error) {
+    throw new Error(`通知公告列表查询失败: ${error.message}`);
+  }
+
+  return result;
 }
 
 /**

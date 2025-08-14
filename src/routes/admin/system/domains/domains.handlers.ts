@@ -1,36 +1,29 @@
 import type { InferSelectModel } from "drizzle-orm";
 
-import { eq, ilike, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { systemDomain } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
-import { pagination } from "@/lib/pagination";
+import { getQueryValidationError } from "@/lib/enums/zod";
+import paginatedQuery from "@/lib/pagination";
 import { formatDate } from "@/utils";
 
 import type { SystemDomainsRouteHandlerType } from "./domains.index";
 
 export const list: SystemDomainsRouteHandlerType<"list"> = async (c) => {
-  const params = c.req.valid("query");
+  const query = c.req.valid("query");
 
-  let searchCondition;
+  const [error, result] = await paginatedQuery<InferSelectModel<typeof systemDomain>>({
+    table: systemDomain,
+    params: query,
+  });
 
-  // 搜索条件
-  if (params.search) {
-    searchCondition = or(
-      ilike(systemDomain.code, `%${params.search}%`),
-      ilike(systemDomain.name, `%${params.search}%`),
-      systemDomain.description ? ilike(systemDomain.description, `%${params.search}%`) : undefined,
-    );
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
-
-  const result = await pagination<InferSelectModel<typeof systemDomain>>(
-    systemDomain,
-    searchCondition,
-    { page: params.page, limit: params.limit },
-  );
 
   return c.json(result, HttpStatusCodes.OK);
 };

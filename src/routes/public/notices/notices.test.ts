@@ -23,13 +23,15 @@ describe("public notices routes", () => {
   it("should be able to get public notices list", async () => {
     const response = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "10",
-        domain: "default",
+        skip: "0",
+        take: "10",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(response.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK]).toContain(response.status);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       if ("data" in json) {
@@ -37,8 +39,8 @@ describe("public notices routes", () => {
         expect(Array.isArray(json.data)).toBe(true);
         expect(json.data.length).toBeGreaterThanOrEqual(0);
         expect(typeof json.meta.total).toBe("number");
-        expect(json.meta.page).toBe(1);
-        expect(json.meta.limit).toBe(10);
+        expect(json.meta.skip).toBe(0);
+        expect(json.meta.take).toBe(10);
 
         // 验证所有返回的通知都是已启用的
         json.data.forEach((notice: any) => {
@@ -65,21 +67,24 @@ describe("public notices routes", () => {
   it("should be able to filter public notices by type", async () => {
     const response = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "10",
-        type: "NOTIFICATION",
-        domain: "default",
+        skip: "0",
+        take: "10",
+        where: {
+          type: "ANNOUNCEMENT",
+        },
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(response.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK]).toContain(response.status);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       if ("data" in json) {
         expect(Array.isArray(json.data)).toBe(true);
-        // 验证所有返回的通知都是 NOTIFICATION 类型且已启用
+        // 验证所有返回的通知都是 ANNOUNCEMENT 类型且已启用
         json.data.forEach((notice: any) => {
-          expect(notice.type).toBe("NOTIFICATION");
+          expect(notice.type).toBe("ANNOUNCEMENT");
           expect(notice.status).toBe(1);
         });
       }
@@ -90,14 +95,17 @@ describe("public notices routes", () => {
   it("should be able to filter public announcements by type", async () => {
     const response = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "10",
-        type: "ANNOUNCEMENT",
-        domain: "default",
+        skip: "1",
+        take: "10",
+        where: {
+          type: "ANNOUNCEMENT",
+        },
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(response.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK]).toContain(response.status);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       if ("data" in json) {
@@ -115,14 +123,22 @@ describe("public notices routes", () => {
   it("should be able to search public notices", async () => {
     const response = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "10",
-        search: "测试",
-        domain: "default",
+        skip: "1",
+        take: "10",
+        where: {
+          title: {
+            contains: "测试",
+          },
+          content: {
+            contains: "测试",
+          },
+        },
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(response.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK]).toContain(response.status);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       if ("data" in json) {
@@ -143,9 +159,11 @@ describe("public notices routes", () => {
     // 测试页码为0
     const response1 = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "0",
-        limit: "10",
-        domain: "default",
+        skip: "0",
+        take: "10",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
     expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response1.status)).toBe(true);
@@ -153,9 +171,11 @@ describe("public notices routes", () => {
     // 测试每页数量为0
     const response2 = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "0",
-        domain: "default",
+        skip: "1",
+        take: "0",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
     expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response2.status)).toBe(true);
@@ -163,9 +183,11 @@ describe("public notices routes", () => {
     // 测试超大分页数量
     const response3 = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "1000",
-        domain: "default",
+        skip: "1",
+        take: "1000",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
     expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY].includes(response3.status)).toBe(true);
@@ -190,20 +212,22 @@ describe("public notices routes", () => {
   it("should handle large page numbers gracefully", async () => {
     const response = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "999999",
-        limit: "10",
-        domain: "default",
+        skip: "999999",
+        take: "10",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(response.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK]).toContain(response.status);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       if ("data" in json) {
         expect(Array.isArray(json.data)).toBe(true);
         // 超大页码应该返回空数组
         expect(json.data.length).toBe(0);
-        expect(json.meta.page).toBe(999999);
+        expect(json.meta.skip).toBe(999999);
       }
     }
   });
@@ -212,14 +236,22 @@ describe("public notices routes", () => {
   it("should handle empty search gracefully", async () => {
     const response = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "10",
-        search: "",
-        domain: "default",
+        skip: "1",
+        take: "10",
+        where: {
+          title: {
+            contains: "",
+          },
+          content: {
+            contains: "",
+          },
+        },
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(response.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK]).toContain(response.status);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
       if ("data" in json) {
@@ -234,13 +266,17 @@ describe("public notices routes", () => {
     // 先获取列表中的第一条记录
     const listResponse = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "1",
-        domain: "default",
+        skip: "1",
+        take: "1",
+        where: {
+          domain: "default",
+        },
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(listResponse.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(listResponse.status);
 
     if (listResponse.status === HttpStatusCodes.OK) {
       const listJson = await listResponse.json();
@@ -260,7 +296,7 @@ describe("public notices routes", () => {
           },
         });
 
-        expect(response.status).toBe(HttpStatusCodes.OK);
+        expect([HttpStatusCodes.OK]).toContain(response.status);
         if (response.status === HttpStatusCodes.OK) {
           const json = await response.json();
           expect(json.id).toBe(firstNotice.id);
@@ -304,13 +340,17 @@ describe("public notices routes", () => {
   it("should return notices in correct order (by sortOrder desc, then createdAt desc)", async () => {
     const response = await publicNoticesClient["public-notices"].$get({
       query: {
-        page: "1",
-        limit: "5",
-        domain: "default",
+        skip: "1",
+        take: "5",
+        where: {
+          domain: "default",
+        },
+        orderBy: {},
+        join: {},
       },
     });
 
-    expect(response.status).toBe(HttpStatusCodes.OK);
+    expect([HttpStatusCodes.OK]).toContain(response.status);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
 

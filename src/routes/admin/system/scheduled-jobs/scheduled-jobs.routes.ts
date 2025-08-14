@@ -10,26 +10,19 @@ import {
   selectSystemScheduledJobsSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 
 const routePrefix = "/system/scheduled-jobs";
 const tags = [`${routePrefix}（定时任务管理）`];
 
 const errorResponseSchema = z.object({ message: z.string() });
 
-// 查询参数 Schema
-const ScheduledJobsQuerySchema = PaginationParamsSchema.extend({
-  search: z.string().meta({ description: "搜索关键词" }).optional(),
-  status: z.coerce.number().int().min(0).max(2).meta({ description: "任务状态: 0=禁用 1=启用 2=暂停" }).optional(),
-  handlerName: z.string().meta({ description: "处理器名称" }).optional(),
-});
-
 // 执行历史查询参数
 const ExecutionHistoryQuerySchema = PaginationParamsSchema.extend({
-  status: z.string().meta({ description: "执行状态" }).optional(),
-  startDate: z.string().datetime().meta({ description: "开始日期" }).optional(),
-  endDate: z.string().datetime().meta({ description: "结束日期" }).optional(),
-});
+  status: z.string().describe("执行状态").optional(),
+  startDate: z.string().datetime().describe("开始日期").optional(),
+  endDate: z.string().datetime().describe("结束日期").optional(),
+}); ;
 
 // 状态切换参数
 const ToggleStatusSchema = z.object({
@@ -52,16 +45,16 @@ export const list = createRoute({
     action: PermissionAction.READ,
   },
   request: {
-    query: ScheduledJobsQuerySchema,
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSystemScheduledJobsSchema),
-      "获取成功",
+      GetPaginatedResultSchema<typeof selectSystemScheduledJobsSchema>(selectSystemScheduledJobsSchema),
+      "定时任务列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(ScheduledJobsQuerySchema),
-      "参数验证失败",
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
       errorResponseSchema,
@@ -241,8 +234,8 @@ export const getExecutionHistory = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.array(selectSystemJobExecutionLogsSchema),
-      "获取成功",
+      GetPaginatedResultSchema<typeof selectSystemJobExecutionLogsSchema>(selectSystemJobExecutionLogsSchema),
+      "执行历史获取成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "任务不存在"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

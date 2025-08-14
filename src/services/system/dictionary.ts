@@ -1,28 +1,32 @@
 import type { InferSelectModel } from "drizzle-orm";
 import type z from "zod/v4";
 
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { DictionaryItem, insertSystemDictionariesSchema, patchSystemDictionariesSchema, selectSystemDictionariesSchema } from "@/db/schema";
-import type { StatusType } from "@/lib/enums";
 
 import db from "@/db";
 import { systemDictionaries } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { CacheConfig, getDictionariesAllKey, getDictionaryKey } from "@/lib/enums/cache";
 import { logger } from "@/lib/logger";
-import { pagination } from "@/lib/pagination";
+import paginatedQuery from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
 import { formatDate } from "@/utils";
 
 export interface DictionariesListOptions {
-  search?: string;
-  status?: StatusType;
-  enabledOnly?: boolean;
-  pagination?: {
-    page: number;
-    limit: number;
+  domain?: string;
+  params: {
+    skip?: number;
+    take?: number;
+    where?: Record<string, any> | Record<string, never> | null;
+    orderBy?: Record<string, "asc" | "desc"> | Record<string, "asc" | "desc">[] | Record<string, never> | null;
+    join?: Record<string, any> | Record<string, never> | null;
   };
+}
+
+export interface DictionariesPublicOptions {
+  enabledOnly?: boolean;
 }
 
 export interface DictionariesBatchOptions {
@@ -117,7 +121,7 @@ export async function clearAllDictionaryCache() {
 /**
  * 获取字典列表（简单模式，用于公开API）
  */
-export async function getPublicDictionaries(options: DictionariesListOptions = {}) {
+export async function getPublicDictionaries(options: DictionariesPublicOptions = {}) {
   const { enabledOnly = true } = options;
 
   // 尝试从缓存获取
@@ -153,38 +157,26 @@ export async function getPublicDictionaries(options: DictionariesListOptions = {
 /**
  * 获取字典列表（分页模式，用于管理API）
  */
-export async function getAdminDictionaries(options: DictionariesListOptions = {}) {
-  const {
-    search,
-    status,
-    pagination: paginationOptions = { page: 1, limit: 20 },
-  } = options;
+export async function getAdminDictionaries(options: DictionariesListOptions) {
+  const { domain, params } = options;
 
-  let whereCondition = eq(systemDictionaries.status, Status.ENABLED);
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemDictionariesSchema>>({
+    table: systemDictionaries,
+    params: {
+      skip: params.skip ?? 0,
+      take: params.take ?? 10,
+      where: params.where,
+      orderBy: params.orderBy,
+      join: params.join,
+    },
+    domain,
+  });
 
-  if (search) {
-    whereCondition = and(
-      whereCondition,
-      or(
-        ilike(systemDictionaries.code, `%${search}%`),
-        ilike(systemDictionaries.name, `%${search}%`),
-        ilike(systemDictionaries.description, `%${search}%`),
-      ),
-    )!;
+  if (error) {
+    throw new Error(`字典列表查询失败: ${error.message}`);
   }
 
-  if (status != null) {
-    whereCondition = and(
-      whereCondition,
-      eq(systemDictionaries.status, status),
-    )!;
-  }
-
-  return await pagination<InferSelectModel<typeof systemDictionaries>>(
-    systemDictionaries,
-    whereCondition!,
-    paginationOptions,
-  );
+  return result;
 }
 
 /**

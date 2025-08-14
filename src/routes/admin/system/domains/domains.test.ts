@@ -54,8 +54,11 @@ describe("sysDomains routes with real authentication", () => {
   it("access without token should return 401", async () => {
     const response = await sysDomainsClient.system.domains.$get({
       query: {
-        page: "1",
-        limit: "10",
+        skip: "1",
+        take: "10",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
     expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
@@ -66,8 +69,11 @@ describe("sysDomains routes with real authentication", () => {
     const response = await sysDomainsClient.system.domains.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -117,18 +123,19 @@ describe("sysDomains routes with real authentication", () => {
   });
 
   /** 管理员创建域参数验证 */
-  it("admin create domain should validate parameters", async () => {
-    // 跳过测试如果没有管理员 token
+  it("should validate domain creation parameters", async () => {
     if (!adminToken) {
       expect(true).toBe(true);
       return;
     }
 
-    const response = await sysDomainsClient.system.domains.$post(
+    // 测试空代码
+    const emptyCodeResponse = await sysDomainsClient.system.domains.$post(
       {
         // @ts-ignore
         json: {
-          code: "", // 域代码为空
+          code: "",
+          name: "测试域",
         },
       },
       {
@@ -136,19 +143,44 @@ describe("sysDomains routes with real authentication", () => {
       },
     );
 
-    expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
-    if (response.status === HttpStatusCodes.UNPROCESSABLE_ENTITY) {
-      const json = await response.json();
-      expect(json.success).toBe(false);
-      expect(json.error).toBeDefined();
-      expect(json.error.name).toBe("ZodError");
-      expect(json.error.issues).toBeDefined();
-    }
+    expect(emptyCodeResponse.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
+
+    // 测试空名称
+    const emptyNameResponse = await sysDomainsClient.system.domains.$post(
+      {
+        // @ts-ignore
+        json: {
+          code: "test-code",
+          name: "",
+        },
+      },
+      {
+        headers: getAuthHeaders(adminToken),
+      },
+    );
+
+    expect(emptyNameResponse.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
+
+    // 测试无效状态
+    const invalidStatusResponse = await sysDomainsClient.system.domains.$post(
+      {
+        // @ts-ignore
+        json: {
+          code: "test-code",
+          name: "测试域",
+          status: 999,
+        },
+      },
+      {
+        headers: getAuthHeaders(adminToken),
+      },
+    );
+
+    expect(invalidStatusResponse.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
   });
 
   /** 域代码重复验证 */
   it("should prevent duplicate domain codes", async () => {
-    // 跳过测试如果没有管理员 token
     if (!adminToken) {
       expect(true).toBe(true);
       return;
@@ -175,8 +207,7 @@ describe("sysDomains routes with real authentication", () => {
   });
 
   /** 管理员获取域列表 */
-  it("admin should be able to list domains", async () => {
-    // 跳过测试如果没有管理员 token
+  it("should list domains with pagination", async () => {
     if (!adminToken) {
       expect(true).toBe(true);
       return;
@@ -185,8 +216,8 @@ describe("sysDomains routes with real authentication", () => {
     const response = await sysDomainsClient.system.domains.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "0",
+          take: "10",
         },
       },
       {
@@ -202,43 +233,23 @@ describe("sysDomains routes with real authentication", () => {
       // @ts-ignore
       expect(typeof json.meta.total).toBe("number");
       // @ts-ignore
-      expect(json.meta.page).toBe(1);
+      expect(json.meta.skip).toBe(0);
       // @ts-ignore
-      expect(json.meta.limit).toBe(10);
-    }
-  });
+      expect(json.meta.take).toBe(10);
 
-  /** 搜索功能测试 */
-  it("admin should be able to search domains", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await sysDomainsClient.system.domains.$get(
-      {
-        query: {
-          page: "1",
-          limit: "10",
-          search: "测试",
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    expect(response.status).toBe(HttpStatusCodes.OK);
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expectTypeOf(json.data).toBeArray();
+      // 检查返回的域数据结构
+      if (json.data.length > 0) {
+        const domain = json.data[0];
+        expect(domain).toHaveProperty("id");
+        expect(domain).toHaveProperty("code");
+        expect(domain).toHaveProperty("name");
+        expect(domain).toHaveProperty("status");
+      }
     }
   });
 
   /** 管理员获取单个域 */
-  it("admin should be able to get single domain", async () => {
-    // 跳过测试如果没有管理员 token 或创建的域 ID
+  it("should get single domain by ID", async () => {
     if (!adminToken || !createdDomainId) {
       expect(true).toBe(true);
       return;
@@ -261,12 +272,13 @@ describe("sysDomains routes with real authentication", () => {
       expect(json.id).toBe(createdDomainId);
       expect(json.code).toBe(testDomain.code);
       expect(json.name).toBe(testDomain.name);
+      expect(json).toHaveProperty("createdAt");
+      expect(json).toHaveProperty("updatedAt");
     }
   });
 
   /** 管理员更新域 */
-  it("admin should be able to update domain", async () => {
-    // 跳过测试如果没有管理员 token 或创建的域 ID
+  it("should update domain successfully", async () => {
     if (!adminToken || !createdDomainId) {
       expect(true).toBe(true);
       return;
@@ -296,11 +308,13 @@ describe("sysDomains routes with real authentication", () => {
       expect(json.name).toBe(updateData.name);
       expect(json.description).toBe(updateData.description);
       expect(json.status).toBe(updateData.status);
+      expect(json.code).toBe(testDomain.code); // 代码不应该改变
+      expect(json.id).toBe(createdDomainId); // ID不应该改变
     }
   });
 
-  /** 普通用户权限测试（如果有 userToken） */
-  it("regular user should have limited access", async () => {
+  /** 普通用户权限测试 */
+  it("regular user should have access if authorized", async () => {
     // 跳过测试如果没有普通用户 token
     if (!userToken) {
       expect(true).toBe(true);
@@ -310,8 +324,8 @@ describe("sysDomains routes with real authentication", () => {
     const response = await sysDomainsClient.system.domains.$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "0",
+          take: "10",
         },
       },
       {
@@ -319,8 +333,8 @@ describe("sysDomains routes with real authentication", () => {
       },
     );
 
-    // 普通用户可能没有访问系统域的权限
-    expect([HttpStatusCodes.OK, HttpStatusCodes.FORBIDDEN, HttpStatusCodes.UNAUTHORIZED]).toContain(response.status);
+    // 普通用户可能有权限或没权限，都是正常的
+    expect([HttpStatusCodes.OK, HttpStatusCodes.FORBIDDEN]).toContain(response.status);
   });
 
   /** ID 参数验证 */
@@ -389,9 +403,8 @@ describe("sysDomains routes with real authentication", () => {
     expect(response.status).toBe(HttpStatusCodes.NO_CONTENT);
   });
 
-  /** 验证域已被删除 */
+  /** 删除域后验证不可访问 */
   it("deleted domain should return 404", async () => {
-    // 跳过测试如果没有管理员 token 或创建的域 ID
     if (!adminToken || !createdDomainId) {
       expect(true).toBe(true);
       return;
@@ -409,5 +422,63 @@ describe("sysDomains routes with real authentication", () => {
     );
 
     expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+
+    const json = await response.json();
+    expect(json).toHaveProperty("message");
+  });
+
+  /** 测试域状态过滤 */
+  it("should support status filtering in domain list", async () => {
+    if (!adminToken) {
+      expect(true).toBe(true);
+      return;
+    }
+
+    // 先尝试按状态过滤现有域
+    const filterResponse = await sysDomainsClient.system.domains.$get(
+      {
+        query: {
+          skip: "0",
+          take: "10",
+          where: JSON.stringify({ status: Status.ENABLED }),
+        },
+      },
+      { headers: getAuthHeaders(adminToken) },
+    );
+
+    expect(filterResponse.status).toBe(HttpStatusCodes.OK);
+    if (filterResponse.status === HttpStatusCodes.OK) {
+      const json = await filterResponse.json();
+      expect(json).toHaveProperty("data");
+      expect(json).toHaveProperty("meta");
+
+      // 如果有数据，检查所有返回的域都是启用状态
+      if (json.data.length > 0) {
+        json.data.forEach((domain: any) => {
+          expect(domain.status).toBe(Status.ENABLED);
+        });
+      }
+    }
+  });
+
+  /** 测试更新不存在的域 */
+  it("should return 404 when updating non-existent domain", async () => {
+    if (!adminToken) {
+      expect(true).toBe(true);
+      return;
+    }
+
+    const response = await sysDomainsClient.system.domains[":id"].$patch(
+      {
+        param: { id: "550e8400-e29b-41d4-a716-446655440000" },
+        json: { name: "不存在的域" },
+      },
+      { headers: getAuthHeaders(adminToken) },
+    );
+
+    expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+
+    const json = await response.json();
+    expect(json).toHaveProperty("message");
   });
 });

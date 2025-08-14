@@ -51,8 +51,11 @@ describe("loginLog routes with real authentication", () => {
   it("access without token should return 401", async () => {
     const response = await loginLogClient.system["login-log"].$get({
       query: {
-        page: "1",
-        limit: "10",
+        skip: "1",
+        take: "10",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
     expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
@@ -63,8 +66,11 @@ describe("loginLog routes with real authentication", () => {
     const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -87,8 +93,11 @@ describe("loginLog routes with real authentication", () => {
     const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -104,9 +113,9 @@ describe("loginLog routes with real authentication", () => {
       // @ts-ignore
       expect(typeof json.meta.total).toBe("number");
       // @ts-ignore
-      expect(json.meta.page).toBe(1);
+      expect(json.meta.skip).toBe(1);
       // @ts-ignore
-      expect(json.meta.limit).toBe(10);
+      expect(json.meta.take).toBe(10);
     }
   });
 
@@ -121,9 +130,15 @@ describe("loginLog routes with real authentication", () => {
     const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
-          search: "admin",
+          skip: "1",
+          take: "10",
+          where: {
+            path: {
+              contains: "admin",
+            },
+          },
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -152,8 +167,11 @@ describe("loginLog routes with real authentication", () => {
     const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "2",
-          limit: "5",
+          skip: "2",
+          take: "5",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -166,9 +184,9 @@ describe("loginLog routes with real authentication", () => {
       const json = await response.json();
       expectTypeOf(json.data).toBeArray();
       // @ts-ignore
-      expect(json.meta.page).toBe(2);
+      expect(json.meta.skip).toBe(2);
       // @ts-ignore
-      expect(json.meta.limit).toBe(5);
+      expect(json.meta.take).toBe(5);
     }
   });
 
@@ -183,8 +201,11 @@ describe("loginLog routes with real authentication", () => {
     const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -208,8 +229,8 @@ describe("loginLog routes with real authentication", () => {
       {
         // @ts-ignore
         query: {
-          page: "invalid",
-          limit: "10",
+          skip: "invalid",
+          take: "10",
         },
       },
       {
@@ -237,8 +258,11 @@ describe("loginLog routes with real authentication", () => {
     const response = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "1",
-          limit: "1",
+          skip: "1",
+          take: "1",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -274,9 +298,15 @@ describe("loginLog routes with real authentication", () => {
     const usernameResponse = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
-          search: "admin",
+          skip: "1",
+          take: "10",
+          where: {
+            path: {
+              contains: "admin",
+            },
+          },
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -290,9 +320,15 @@ describe("loginLog routes with real authentication", () => {
     const typeResponse = await loginLogClient.system["login-log"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
-          search: "login",
+          skip: "1",
+          take: "10",
+          where: {
+            type: {
+              contains: "login",
+            },
+          },
+          orderBy: {},
+          join: {},
         },
       },
       {

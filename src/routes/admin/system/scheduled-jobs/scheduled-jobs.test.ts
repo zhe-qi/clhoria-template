@@ -109,8 +109,11 @@ describe("scheduledJobs routes with real authentication", () => {
   it("access without token should return 401", async () => {
     const response = await scheduledJobsClient.system["scheduled-jobs"].$get({
       query: {
-        page: "1",
-        limit: "10",
+        skip: "1",
+        take: "10",
+        where: {},
+        orderBy: {},
+        join: {},
       },
     });
     expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
@@ -121,8 +124,11 @@ describe("scheduledJobs routes with real authentication", () => {
     const response = await scheduledJobsClient.system["scheduled-jobs"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -251,8 +257,11 @@ describe("scheduledJobs routes with real authentication", () => {
     const response = await scheduledJobsClient.system["scheduled-jobs"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -263,8 +272,9 @@ describe("scheduledJobs routes with real authentication", () => {
     expect(response.status).toBe(HttpStatusCodes.OK);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expect(Array.isArray(json)).toBe(true);
-      expect(json.length).toBeGreaterThanOrEqual(0);
+      expect(typeof json).toBe("object");
+      expect(Array.isArray(json.data)).toBe(true);
+      expect(json.data.length).toBeGreaterThanOrEqual(0);
     }
   });
 
@@ -431,8 +441,11 @@ describe("scheduledJobs routes with real authentication", () => {
           id: createdJobId,
         },
         query: {
-          page: "1",
-          limit: "20",
+          skip: "1",
+          take: "20",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {
@@ -443,9 +456,10 @@ describe("scheduledJobs routes with real authentication", () => {
     expect(response.status).toBe(HttpStatusCodes.OK);
     if (response.status === HttpStatusCodes.OK) {
       const json = await response.json();
-      expect(Array.isArray(json)).toBe(true);
+      expect(typeof json).toBe("object");
+      expect(Array.isArray(json.data)).toBe(true);
       // 执行历史可能为空，这是正常的
-      expect(json.length).toBeGreaterThanOrEqual(0);
+      expect(json.data.length).toBeGreaterThanOrEqual(0);
     }
   });
 
@@ -523,8 +537,11 @@ describe("scheduledJobs routes with real authentication", () => {
     const response = await scheduledJobsClient.system["scheduled-jobs"].$get(
       {
         query: {
-          page: "1",
-          limit: "10",
+          skip: "1",
+          take: "10",
+          where: {},
+          orderBy: {},
+          join: {},
         },
       },
       {

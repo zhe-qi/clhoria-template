@@ -1,50 +1,31 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { z } from "zod";
 
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+
+import type { selectSysEndpointSchema } from "@/db/schema";
 
 import db from "@/db";
 import { casbinRule, systemEndpoint } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
-import { pagination } from "@/lib/pagination";
+import { getQueryValidationError } from "@/lib/enums/zod";
+import paginatedQuery from "@/lib/pagination";
 import { formatDate } from "@/utils/tools/formatter";
 
 import type { SystemEndpointsRouteHandlerType } from "./endpoints.index";
 
 // 查询API端点列表
 export const list: SystemEndpointsRouteHandlerType<"list"> = async (c) => {
-  const params = c.req.valid("query");
+  const query = c.req.valid("query");
 
-  const conditions = [];
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSysEndpointSchema>>({
+    table: systemEndpoint,
+    params: query,
+  });
 
-  if (params.search) {
-    conditions.push(or(
-      ilike(systemEndpoint.path, `%${params.search}%`),
-      ilike(systemEndpoint.summary, `%${params.search}%`),
-      ilike(systemEndpoint.controller, `%${params.search}%`),
-    ));
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
-
-  if (params.method) {
-    conditions.push(eq(systemEndpoint.method, params.method));
-  }
-
-  if (params.action) {
-    conditions.push(ilike(systemEndpoint.action, `%${params.action}%`));
-  }
-
-  if (params.resource) {
-    conditions.push(ilike(systemEndpoint.resource, `%${params.resource}%`));
-  }
-
-  // 组合条件
-  const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
-
-  const result = await pagination<InferSelectModel<typeof systemEndpoint>>(
-    systemEndpoint,
-    whereCondition,
-    { page: params.page, limit: params.limit, orderBy: [systemEndpoint.createdAt] },
-  );
 
   return c.json(result, HttpStatusCodes.OK);
 };

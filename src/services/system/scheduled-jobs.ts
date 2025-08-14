@@ -1,9 +1,8 @@
 import type { InferSelectModel } from "drizzle-orm";
 
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { ScheduledJobConfig } from "@/jobs/types";
-import type { PaginationParams } from "@/lib/pagination";
 
 import db from "@/db";
 import { systemJobHandlers, systemScheduledJobs } from "@/db/schema";
@@ -12,6 +11,7 @@ import { getAvailableHandlerNames, validateHandlerName } from "@/jobs/registry";
 import { getScheduler } from "@/jobs/scheduler";
 import { JobStatus } from "@/lib/enums";
 import { logger } from "@/lib/logger";
+import paginatedQuery from "@/lib/pagination";
 import { formatDate } from "@/utils/tools/formatter";
 
 // 类型定义
@@ -51,11 +51,17 @@ interface UpdateScheduledJobParams {
 }
 
 /** 定时任务查询参数 */
-interface QueryScheduledJobsParams extends PaginationParams {
+/** 定时任务查询参数 */
+/** 定时任务查询参数 */
+interface QueryScheduledJobsParams {
   domain: string;
-  search?: string;
-  status?: number;
-  handlerName?: string;
+  params: {
+    skip?: number;
+    take?: number;
+    where?: Record<string, any> | Record<string, never> | null;
+    orderBy?: Record<string, "asc" | "desc"> | Record<string, "asc" | "desc">[] | Record<string, never> | null;
+    join?: Record<string, any> | Record<string, never> | null;
+  };
 }
 
 /** 创建定时任务 */
@@ -278,38 +284,26 @@ export async function deleteScheduledJob(jobId: string, domain: string): Promise
 }
 
 /** 获取定时任务列表 */
-export async function getScheduledJobs(params: QueryScheduledJobsParams): Promise<ScheduledJob[]> {
-  const { domain, search, status, handlerName, page = 1, limit = 20 } = params;
-  const offset = (page - 1) * limit;
+export async function getScheduledJobs(options: QueryScheduledJobsParams) {
+  const { domain, params } = options;
 
-  const whereConditions = [eq(systemScheduledJobs.domain, domain)];
+  const [error, result] = await paginatedQuery<ScheduledJob>({
+    table: systemScheduledJobs,
+    params: {
+      skip: params.skip ?? 0,
+      take: params.take ?? 10,
+      where: params.where,
+      orderBy: params.orderBy,
+      join: params.join,
+    },
+    domain,
+  });
 
-  if (search) {
-    whereConditions.push(
-      or(
-        ilike(systemScheduledJobs.name, `%${search}%`),
-        ilike(systemScheduledJobs.description, `%${search}%`),
-      )!,
-    );
+  if (error) {
+    throw new Error(`定时任务列表查询失败: ${error.message}`);
   }
 
-  if (status != null) {
-    whereConditions.push(eq(systemScheduledJobs.status, status));
-  }
-
-  if (handlerName) {
-    whereConditions.push(eq(systemScheduledJobs.handlerName, handlerName));
-  }
-
-  const jobs = await db
-    .select()
-    .from(systemScheduledJobs)
-    .where(and(...whereConditions))
-    .orderBy(desc(systemScheduledJobs.createdAt))
-    .limit(limit)
-    .offset(offset);
-
-  return jobs;
+  return result;
 }
 
 /** 获取单个定时任务详情 */

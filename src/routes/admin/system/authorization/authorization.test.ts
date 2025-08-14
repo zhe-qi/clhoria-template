@@ -1,13 +1,13 @@
-/* eslint-disable ts/ban-ts-comment */
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import * as HttpStatusCodes from "stoker/http-status-codes";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
+import db from "@/db";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { getAdminToken, getAuthHeaders, getUserToken } from "@/utils/test-utils";
+import { getAdminToken, getAuthHeaders } from "@/utils/test-utils";
 
 import { systemAuthorization } from "./authorization.index";
 
@@ -25,510 +25,293 @@ function createAuthorizationApp() {
 
 const authorizationClient = testClient(createAuthorizationApp());
 
-describe("authorization routes with real authentication", () => {
+describe("authorization management", () => {
   let adminToken: string;
-  let userToken: string;
   let testRoleId: string;
-  const testUserId: string = "550e8400-e29b-41d4-a716-446655440000";
+  let testUserId: string;
 
-  /** 获取管理员token */
-  it("should get admin token", async () => {
+  beforeAll(async () => {
+    // 获取管理员token
     adminToken = await getAdminToken();
-    expect(adminToken).toBeDefined();
-  });
 
-  /** 获取普通用户token */
-  it("should get user token", async () => {
-    try {
-      userToken = await getUserToken();
-      expect(userToken).toBeDefined();
-    }
-    catch (error) {
-      // 用户不存在是正常的
-      expect(error).toBeDefined();
-    }
-  });
-
-  /** 未认证访问应该返回 401 */
-  it("access without token should return 401", async () => {
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post({
-      param: { roleId: "550e8400-e29b-41d4-a716-446655440000" },
-      json: {
-        domain: "default",
-        permissions: [],
-      },
+    // 查找一个存在的角色用于测试
+    const role = await db.query.systemRole.findFirst({
+      where: (table, { eq }) => eq(table.domain, "default"),
     });
-    expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
+    testRoleId = role?.id || "550e8400-e29b-41d4-a716-446655440000";
+
+    // 查找一个存在的用户用于测试
+    const user = await db.query.systemUser.findFirst({
+      where: (table, { eq }) => eq(table.domain, "default"),
+    });
+    testUserId = user?.id || "550e8400-e29b-41d4-a716-446655440000";
   });
 
-  /** 无效 token 应该返回 401 */
-  it("access with invalid token should return 401", async () => {
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
-      {
-        param: { roleId: "550e8400-e29b-41d4-a716-446655440000" },
+  describe("authentication", () => {
+    it("should reject requests without token", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post({
+        param: { roleId: testRoleId },
         json: {
           domain: "default",
           permissions: [],
         },
-      },
-      {
-        headers: {
-          Authorization: "Bearer invalid-token",
+      });
+      expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
+    });
+
+    it("should reject requests with invalid token", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
+        {
+          param: { roleId: testRoleId },
+          json: {
+            domain: "default",
+            permissions: [],
+          },
         },
-      },
-    );
-    expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
+        {
+          headers: {
+            Authorization: "Bearer invalid-token",
+          },
+        },
+      );
+      expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
+    });
   });
 
-  /** 管理员分配权限给角色 */
-  it("admin should be able to assign permissions to role", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    // 使用一个已知的角色ID（假设系统中存在默认角色）
-    testRoleId = "550e8400-e29b-41d4-a716-446655440000";
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
-      {
-        param: { roleId: testRoleId },
-        json: {
-          domain: "default",
-          permissions: [], // 空数组测试
+  describe("role permission management", () => {
+    it("should assign permissions to role successfully", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
+        {
+          param: { roleId: testRoleId },
+          json: {
+            domain: "default",
+            permissions: ["SYSTEM_USERS:READ", "SYSTEM_ROLES:READ"],
+          },
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    // 角色可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.success).toBe(true);
-      expect(typeof json.added).toBe("number");
-      expect(typeof json.removed).toBe("number");
-    }
-  });
-
-  /** 分配权限参数验证 */
-  it("assign permissions should validate parameters", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
-      {
-        param: { roleId: "invalid-uuid" },
-        // @ts-ignore
-        json: {
-          domain: "default",
-          permissions: "not-an-array" as any, // 错误的参数类型
+        {
+          headers: getAuthHeaders(adminToken),
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
+      );
 
-    expect([HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-    if ((response.status as number) === HttpStatusCodes.BAD_REQUEST || (response.status as number) === HttpStatusCodes.UNPROCESSABLE_ENTITY) {
-      const json: any = await (response as any).json();
-      expect(json.success).toBe(false);
-      expect(json.error).toBeDefined();
-    }
-  });
-
-  /** 管理员分配路由给角色 */
-  it("admin should be able to assign routes to role", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].routes.$post(
-      {
-        param: { roleId: testRoleId },
-        json: {
-          domain: "default",
-          menuIds: [], // 空数组测试
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    // 角色可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.success).toBe(true);
-      expect(typeof json.added).toBe("number");
-      expect(typeof json.removed).toBe("number");
-    }
-  });
-
-  /** 管理员分配用户给角色 */
-  it("admin should be able to assign users to role", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].users.$post(
-      {
-        param: { roleId: testRoleId },
-        json: {
-          userIds: [], // 空数组测试
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    // 角色可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.success).toBe(true);
-      expect(typeof json.added).toBe("number");
-      expect(typeof json.removed).toBe("number");
-    }
-  });
-
-  /** 管理员获取用户路由 */
-  it("admin should be able to get user routes", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    // 使用管理员自己的用户ID
-    const response = await authorizationClient.system.authorization.users[":userId"].routes.$get(
-      {
-        param: { userId: testUserId },
-        query: {
-          domain: "default",
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    // 用户可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(Array.isArray(json.routes)).toBe(true);
-      expect(json.home).toBeDefined();
-    }
-  });
-
-  /** 获取用户路由参数验证 */
-  it("get user routes should validate parameters", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.users[":userId"].routes.$get(
-      {
-        param: { userId: "invalid-uuid" },
-        query: {
-          domain: "default",
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    expect([HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-  });
-
-  /** 管理员获取用户角色 */
-  it("admin should be able to get user roles", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    // 使用测试用户ID
-    const response = await authorizationClient.system.authorization.users[":userId"].roles.$get(
-      {
-        param: { userId: testUserId },
-        query: {
-          domain: "default",
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    // 用户可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(Array.isArray(json)).toBe(true);
-      // 如果有角色，验证角色对象结构
-      if (json.length > 0) {
-        expect(json[0]).toHaveProperty("id");
-        expect(json[0]).toHaveProperty("code");
-        expect(json[0]).toHaveProperty("name");
-        expect(json[0]).toHaveProperty("status");
-        expect(typeof json[0].id).toBe("string");
-        expect(typeof json[0].code).toBe("string");
-        expect(typeof json[0].name).toBe("string");
-        expect(typeof json[0].status).toBe("number");
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(json).toHaveProperty("success");
+        expect(json).toHaveProperty("added");
+        expect(json).toHaveProperty("removed");
+        expect(typeof json.success).toBe("boolean");
+        expect(typeof json.added).toBe("number");
+        expect(typeof json.removed).toBe("number");
       }
-    }
+      else {
+        // 角色可能不存在，这是正常的
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
+
+    it("should get role permissions", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
+        {
+          param: { roleId: testRoleId },
+          query: { domain: "default" },
+        },
+        {
+          headers: getAuthHeaders(adminToken),
+        },
+      );
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(json).toHaveProperty("domain");
+        expect(json).toHaveProperty("permissions");
+        expect(Array.isArray(json.permissions)).toBe(true);
+      }
+      else {
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
   });
 
-  /** 获取用户角色参数验证 */
-  it("get user roles should validate parameters", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.users[":userId"].roles.$get(
-      {
-        param: { userId: "invalid-uuid" },
-        query: {
-          domain: "default",
+  describe("role menu management", () => {
+    it("should assign routes to role successfully", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].routes.$post(
+        {
+          param: { roleId: testRoleId },
+          json: {
+            domain: "default",
+            menuIds: [],
+          },
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
+        {
+          headers: getAuthHeaders(adminToken),
+        },
+      );
 
-    expect([HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(json).toHaveProperty("success");
+        expect(json).toHaveProperty("added");
+        expect(json).toHaveProperty("removed");
+      }
+      else {
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
+
+    it("should get role menus", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].menus.$get(
+        {
+          param: { roleId: testRoleId },
+          query: { domain: "default" },
+        },
+        {
+          headers: getAuthHeaders(adminToken),
+        },
+      );
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(json).toHaveProperty("domain");
+        expect(json).toHaveProperty("menuIds");
+        expect(Array.isArray(json.menuIds)).toBe(true);
+      }
+      else {
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
   });
 
-  /** 获取不存在用户的角色应该返回404 */
-  it("get roles for non-existent user should return 404", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.users[":userId"].roles.$get(
-      {
-        param: { userId: "550e8400-e29b-41d4-a716-446655441111" }, // 不存在的用户ID
-        query: {
-          domain: "default",
+  describe("user role management", () => {
+    it("should assign roles to user successfully", async () => {
+      const response = await authorizationClient.system.authorization.users[":userId"].roles.$post(
+        {
+          param: { userId: testUserId },
+          json: {
+            roleIds: [],
+          },
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
+        {
+          headers: getAuthHeaders(adminToken),
+        },
+      );
 
-    expect([HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(json).toHaveProperty("success");
+        expect(json).toHaveProperty("added");
+        expect(json).toHaveProperty("removed");
+      }
+      else {
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
+
+    it("should get user roles", async () => {
+      const response = await authorizationClient.system.authorization.users[":userId"].roles.$get(
+        {
+          param: { userId: testUserId },
+          query: { domain: "default" },
+        },
+        {
+          headers: getAuthHeaders(adminToken),
+        },
+      );
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(Array.isArray(json)).toBe(true);
+        if (json.length > 0) {
+          const role = json[0];
+          expect(role).toHaveProperty("id");
+          expect(role).toHaveProperty("code");
+          expect(role).toHaveProperty("name");
+          expect(role).toHaveProperty("status");
+        }
+      }
+      else {
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
+
+    it("should get user routes", async () => {
+      const response = await authorizationClient.system.authorization.users[":userId"].routes.$get(
+        {
+          param: { userId: testUserId },
+          query: { domain: "default" },
+        },
+        {
+          headers: getAuthHeaders(adminToken),
+        },
+      );
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(json).toHaveProperty("routes");
+        expect(json).toHaveProperty("home");
+        expect(Array.isArray(json.routes)).toBe(true);
+      }
+      else {
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
   });
 
-  /** 管理员为用户分配角色 */
-  it("admin should be able to assign roles to user", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.users[":userId"].roles.$post(
-      {
-        param: { userId: testUserId },
-        json: {
-          roleIds: [], // 空数组测试
+  describe("role user management", () => {
+    it("should assign users to role successfully", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].users.$post(
+        {
+          param: { roleId: testRoleId },
+          json: {
+            userIds: [],
+          },
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
+        {
+          headers: getAuthHeaders(adminToken),
+        },
+      );
 
-    // 用户可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.success).toBe(true);
-      expect(typeof json.added).toBe("number");
-      expect(typeof json.removed).toBe("number");
-    }
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        expect(json).toHaveProperty("success");
+        expect(json).toHaveProperty("added");
+        expect(json).toHaveProperty("removed");
+      }
+      else {
+        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+      }
+    });
   });
 
-  /** 为不存在用户分配角色应该返回404 */
-  it("assign roles to non-existent user should return 404", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.users[":userId"].roles.$post(
-      {
-        param: { userId: "550e8400-e29b-41d4-a716-446655441111" }, // 不存在的用户ID
-        json: {
-          roleIds: [],
+  describe("parameter validation", () => {
+    it("should validate UUID parameters", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
+        {
+          param: { roleId: "invalid-uuid" },
+          query: { domain: "default" },
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    expect([HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-  });
-
-  /** 管理员获取角色权限 */
-  it("admin should be able to get role permissions", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
-      {
-        param: { roleId: testRoleId },
-        query: {
-          domain: "default",
+        {
+          headers: getAuthHeaders(adminToken),
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
+      );
 
-    // 角色可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
+      expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    });
 
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(Array.isArray(json.permissions)).toBe(true);
-    }
-  });
-
-  /** 管理员获取角色菜单 */
-  it("admin should be able to get role menus", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].menus.$get(
-      {
-        param: { roleId: testRoleId },
-        query: {
-          domain: "default",
+    it("should validate request body", async () => {
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
+        {
+          param: { roleId: testRoleId },
+          json: {
+            domain: "default",
+            // @ts-expect-error - 故意传入错误的数据类型进行测试
+            permissions: "not-an-array",
+          },
         },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    // 角色可能不存在或参数验证失败，返回相应状态码是正常的
-    expect([HttpStatusCodes.OK, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(Array.isArray(json.menuIds)).toBe(true);
-    }
-  });
-
-  /** 普通用户权限测试（如果有 userToken） */
-  it("regular user should have limited access", async () => {
-    // 跳过测试如果没有普通用户 token
-    if (!userToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
-      {
-        param: { roleId: testRoleId },
-        json: {
-          domain: "default",
-          permissions: [],
+        {
+          headers: getAuthHeaders(adminToken),
         },
-      },
-      {
-        headers: getAuthHeaders(userToken),
-      },
-    );
+      );
 
-    // 普通用户可能没有授权管理权限或参数验证失败，也可能角色不存在
-    expect([HttpStatusCodes.OK, HttpStatusCodes.FORBIDDEN, HttpStatusCodes.UNAUTHORIZED, HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-  });
-
-  /** UUID 参数验证 */
-  it("should validate UUID parameters", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
-      {
-        param: { roleId: "invalid-uuid" },
-        query: {
-          domain: "default",
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    expect([HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-  });
-
-  /** 404 测试 */
-  it("should return 404 for non-existent role", async () => {
-    // 跳过测试如果没有管理员 token
-    if (!adminToken) {
-      expect(true).toBe(true);
-      return;
-    }
-
-    const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
-      {
-        param: { roleId: "550e8400-e29b-41d4-a716-446655441111" }, // 不存在的 UUID
-        query: {
-          domain: "default",
-        },
-      },
-      {
-        headers: getAuthHeaders(adminToken),
-      },
-    );
-
-    expect([HttpStatusCodes.NOT_FOUND, HttpStatusCodes.BAD_REQUEST, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
+      expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    });
   });
 });

@@ -8,7 +8,7 @@ import {
   responseSystemNoticesSchema,
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 const prefix = "/public-notices";
@@ -18,8 +18,8 @@ const ListQuerySchema = PaginationParamsSchema.extend({
   type: noticeTypeSchema.optional().meta({ description: "公告类型" }),
   domain: z.string().optional().meta({ description: "域名，默认为default" }),
 }).partial({
-  page: true,
-  limit: true,
+  skip: true,
+  take: true,
 });
 
 /** 获取通知公告列表 */
@@ -33,7 +33,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(responseSystemNoticesSchema).or(z.array(responseSystemNoticesSchema)),
+      GetPaginatedResultSchema<typeof responseSystemNoticesSchema>(responseSystemNoticesSchema).or(z.array(responseSystemNoticesSchema)),
       "获取通知公告列表成功，有分页参数时返回分页结果，无分页参数时返回数组",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(

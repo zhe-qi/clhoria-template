@@ -13,12 +13,10 @@ import {
 import type { SystemDictionariesRouteHandlerType } from "./dictionaries.index";
 
 export const list: SystemDictionariesRouteHandlerType<"list"> = async (c) => {
-  const { search, status, page, limit } = c.req.valid("query");
+  const query = c.req.valid("query");
 
   const result = await getAdminDictionaries({
-    search,
-    status: status ? (Number(status) as 0 | 1) : undefined,
-    pagination: { page, limit },
+    params: query,
   });
 
   return c.json(result, HttpStatusCodes.OK);

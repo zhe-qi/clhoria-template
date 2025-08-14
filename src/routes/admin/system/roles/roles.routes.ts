@@ -5,7 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSystemRoleSchema, patchSystemRoleSchema, selectSystemRoleSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/roles";
@@ -26,8 +26,12 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(selectSystemRoleSchema),
+      GetPaginatedResultSchema<typeof selectSystemRoleSchema>(selectSystemRoleSchema),
       "系统角色列表响应成功",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

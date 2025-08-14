@@ -1,14 +1,14 @@
 import type { z } from "@hono/zod-openapi";
 import type { InferSelectModel } from "drizzle-orm";
 
-import { and, eq, inArray, like, or } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import type { insertSystemMenuSchema, menuItemSchema, patchSystemMenuSchema, routeMetaSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemMenu, systemRoleMenu } from "@/db/schema";
 import { getUserMenusKey, Status } from "@/lib/enums";
-import { pagination } from "@/lib/pagination";
+import paginatedQuery from "@/lib/pagination";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import { redisClient } from "@/lib/redis";
 
@@ -270,29 +270,34 @@ export async function getRoleMenuIds(roleId: string, domain: string): Promise<st
  * 获取菜单分页列表
  */
 export async function getMenuList(options: {
-  search?: string;
-  page: number;
-  limit: number;
+  params: {
+    skip?: number;
+    take?: number;
+    where?: Record<string, any> | Record<string, never> | null;
+    orderBy?: Record<string, "asc" | "desc"> | Record<string, "asc" | "desc">[] | Record<string, never> | null;
+    join?: Record<string, any> | Record<string, never> | null;
+  };
   domain: string;
 }) {
-  const { search, page, limit, domain } = options;
+  const { params, domain } = options;
 
-  let searchCondition = eq(systemMenu.domain, domain);
-  if (search) {
-    searchCondition = and(
-      eq(systemMenu.domain, domain),
-      or(
-        like(systemMenu.name, `%${search}%`),
-        like(systemMenu.path, `%${search}%`),
-      ),
-    )!;
+  const [error, result] = await paginatedQuery<InferSelectModel<typeof systemMenu>>({
+    table: systemMenu,
+    params: {
+      skip: params.skip ?? 0,
+      take: params.take ?? 10,
+      where: params.where,
+      orderBy: params.orderBy,
+      join: params.join,
+    },
+    domain,
+  });
+
+  if (error) {
+    throw new Error(`菜单列表查询失败: ${error.message}`);
   }
 
-  return await pagination<InferSelectModel<typeof systemMenu>>(
-    systemMenu,
-    searchCondition,
-    { page, limit, orderBy: [systemMenu.id] },
-  );
+  return result;
 }
 
 /**

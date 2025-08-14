@@ -10,13 +10,19 @@ import type { SystemNoticesRouteHandlerType } from "./notices.index";
 
 export const list: SystemNoticesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
-  const { type, domain = CacheConfig.DEFAULT_DOMAIN, page, limit } = query;
+  const { type, domain = CacheConfig.DEFAULT_DOMAIN, skip, take } = query;
+
+  // 直接使用skip/take分页参数
+  let pagination;
+  if (skip !== undefined && take !== undefined) {
+    pagination = { skip, take };
+  }
 
   const result = await getPublicNotices({
     domain,
     type,
     enabledOnly: true, // 公开API只返回启用的通知公告
-    pagination: page && limit ? { page, limit } : undefined,
+    pagination,
   });
 
   return c.json(result, HttpStatusCodes.OK);

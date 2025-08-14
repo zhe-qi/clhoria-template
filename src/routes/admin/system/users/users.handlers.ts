@@ -1,45 +1,37 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { z } from "zod";
 
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
+
+import type { responseSystemUserSchema, selectSystemUserSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
-import { pagination } from "@/lib/pagination";
+import { getQueryValidationError } from "@/lib/enums/zod";
+import paginatedQuery from "@/lib/pagination";
 import { clearUserPermissionCache, createUser } from "@/services/system/user";
 import { omit, pickContext } from "@/utils";
 
 import type { SystemUsersRouteHandlerType } from "./users.index";
 
 export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
-  const params = c.req.valid("query");
+  const query = c.req.valid("query");
   const domain = c.get("userDomain");
 
-  let whereCondition = eq(systemUser.domain, domain);
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemUserSchema>>({
+    table: systemUser,
+    params: query,
+    domain,
+  });
 
-  // 搜索条件
-  if (params.search) {
-    const searchCondition = or(
-      ilike(systemUser.username, `%${params.search}%`),
-      ilike(systemUser.nickName, `%${params.search}%`),
-    );
-    whereCondition = and(whereCondition, searchCondition)!;
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
-
-  if (params.status != null) {
-    whereCondition = and(whereCondition, eq(systemUser.status, params.status))!;
-  }
-
-  const result = await pagination<InferSelectModel<typeof systemUser>>(
-    systemUser,
-    whereCondition,
-    { page: params.page, limit: params.limit },
-  );
 
   // 移除密码字段
-  const data = result.data.map(user => omit(user, ["password"]));
+  const data: z.infer<typeof responseSystemUserSchema>[] = result.data.map(user => omit(user, ["password"]));
 
   return c.json({ data, meta: result.meta }, HttpStatusCodes.OK);
 };

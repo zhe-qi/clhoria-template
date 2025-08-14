@@ -5,7 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSysEndpointSchema, patchSysEndpointSchema, selectSysEndpointSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/endpoints";
@@ -22,17 +22,16 @@ export const list = createRoute({
   method: "get",
   path: routePrefix,
   request: {
-    query: PaginationParamsSchema.extend({
-      search: z.string().optional().meta({ description: "搜索关键词" }),
-      method: z.string().optional().meta({ description: "HTTP方法过滤" }),
-      action: z.string().optional().meta({ description: "动作过滤" }),
-      resource: z.string().optional().meta({ description: "资源过滤" }),
-    }),
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(selectSysEndpointSchema),
+      GetPaginatedResultSchema<typeof selectSysEndpointSchema>(selectSysEndpointSchema),
       "API端点列表响应成功",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

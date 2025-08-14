@@ -5,7 +5,7 @@ import { createErrorSchema } from "stoker/openapi/schemas";
 
 import { insertSystemPostSchema, patchSystemPostSchema, responseSystemPostSchema, simpleSystemPostSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/posts";
@@ -22,14 +22,16 @@ export const list = createRoute({
   method: "get",
   path: routePrefix,
   request: {
-    query: PaginationParamsSchema.extend({
-      search: z.string().optional().meta({ description: "搜索岗位名称或编码" }),
-    }),
+    query: PaginationParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(responseSystemPostSchema),
+      GetPaginatedResultSchema<typeof responseSystemPostSchema>(responseSystemPostSchema),
       "岗位列表响应成功",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

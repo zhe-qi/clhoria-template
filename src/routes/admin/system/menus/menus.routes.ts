@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { insertSystemMenuSchema, patchSystemMenuSchema, selectSystemMenuSchema } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
-import { createPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/menus";
@@ -18,19 +18,21 @@ export const list = createRoute({
     resource: PermissionResource.SYSTEM_MENUS,
     action: PermissionAction.READ,
   },
-  path: routePrefix,
-  method: "get",
-  request: {
-    query: PaginationParamsSchema.extend({
-      search: z.string().optional().meta({ description: "搜索关键词" }),
-    }),
-  },
   tags,
-  summary: "查询菜单列表",
+  summary: "获取系统菜单列表",
+  method: "get",
+  path: routePrefix,
+  request: {
+    query: PaginationParamsSchema,
+  },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createPaginatedResultSchema(selectSystemMenuSchema),
-      "查询成功",
+      GetPaginatedResultSchema<typeof selectSystemMenuSchema>(selectSystemMenuSchema),
+      "菜单列表获取成功",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(PaginationParamsSchema),
+      "查询参数验证错误",
     ),
   },
 });

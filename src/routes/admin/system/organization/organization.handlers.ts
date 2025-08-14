@@ -1,19 +1,22 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { z } from "zod";
 
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
+
+import type { selectSystemOrganizationSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemOrganization } from "@/db/schema";
 import { getDuplicateKeyError, Status } from "@/lib/enums";
-import { pagination } from "@/lib/pagination";
+import { getQueryValidationError } from "@/lib/enums/zod";
+import paginatedQuery from "@/lib/pagination";
 import { formatDate } from "@/utils/tools/formatter";
 import { pickContext } from "@/utils/tools/hono-helpers";
 
 import type { SystemOrganizationRouteHandlerType } from "./organization.index";
 
-export type OrganizationRecord = InferSelectModel<typeof systemOrganization>;
+export type OrganizationRecord = z.infer<typeof selectSystemOrganizationSchema>;
 
 interface OrganizationTreeNode extends OrganizationRecord {
   children?: OrganizationTreeNode[];
@@ -230,28 +233,18 @@ async function deleteOrganization(id: string, domain: string): Promise<boolean> 
 }
 
 export const list: SystemOrganizationRouteHandlerType<"list"> = async (c) => {
-  const params = c.req.valid("query");
+  const query = c.req.valid("query");
   const domain = c.get("userDomain");
 
-  let searchCondition = eq(systemOrganization.domain, domain);
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemOrganizationSchema>>({
+    table: systemOrganization,
+    params: query,
+    domain,
+  });
 
-  // 搜索条件
-  if (params.search) {
-    const searchFields = or(
-      ilike(systemOrganization.code, `%${params.search}%`),
-      ilike(systemOrganization.name, `%${params.search}%`),
-      systemOrganization.description ? ilike(systemOrganization.description, `%${params.search}%`) : undefined,
-    );
-    if (searchFields) {
-      searchCondition = and(searchCondition, searchFields)!;
-    }
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
-
-  const result = await pagination<InferSelectModel<typeof systemOrganization>>(
-    systemOrganization,
-    searchCondition,
-    { page: params.page, limit: params.limit },
-  );
 
   return c.json(result, HttpStatusCodes.OK);
 };

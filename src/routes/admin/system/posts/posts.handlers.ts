@@ -1,37 +1,33 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { z } from "zod";
 
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
+
+import type { selectSystemPostSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemPost, systemUserPost } from "@/db/schema";
 import { getDuplicateKeyError, Status } from "@/lib/enums";
-import { pagination } from "@/lib/pagination";
+import { getQueryValidationError } from "@/lib/enums/zod";
+import paginatedQuery from "@/lib/pagination";
 import { pickContext } from "@/utils";
 
 import type { SystemPostsRouteHandlerType } from "./posts.index";
 
 export const list: SystemPostsRouteHandlerType<"list"> = async (c) => {
-  const params = c.req.valid("query");
+  const query = c.req.valid("query");
   const domain = c.get("userDomain");
 
-  let whereCondition = eq(systemPost.domain, domain);
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemPostSchema>>({
+    table: systemPost,
+    params: query,
+    domain,
+  });
 
-  // 搜索条件
-  if (params.search) {
-    const searchCondition = or(
-      ilike(systemPost.postName, `%${params.search}%`),
-      ilike(systemPost.postCode, `%${params.search}%`),
-    );
-    whereCondition = and(whereCondition, searchCondition)!;
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
-
-  const result = await pagination<InferSelectModel<typeof systemPost>>(
-    systemPost,
-    whereCondition,
-    { page: params.page, limit: params.limit },
-  );
 
   return c.json({ data: result.data, meta: result.meta }, HttpStatusCodes.OK);
 };

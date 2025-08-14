@@ -1,38 +1,34 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { z } from "zod";
 
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
+
+import type { selectSystemRoleSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemRole } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
-import { pagination } from "@/lib/pagination";
+import { getQueryValidationError } from "@/lib/enums/zod";
+import paginatedQuery from "@/lib/pagination";
 import { assignMenusToRole, assignPermissionsToRole, assignUsersToRole } from "@/lib/permissions";
 import { pickContext } from "@/utils/tools/hono-helpers";
 
 import type { SystemRolesRouteHandlerType } from "./roles.index";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
-  const params = c.req.valid("query");
+  const query = c.req.valid("query");
   const domain = c.get("userDomain");
 
-  let whereCondition = eq(systemRole.domain, domain);
+  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemRoleSchema>>({
+    table: systemRole,
+    params: query,
+    domain,
+  });
 
-  // 搜索条件
-  if (params.search) {
-    const searchCondition = or(
-      ilike(systemRole.code, `%${params.search}%`),
-      ilike(systemRole.name, `%${params.search}%`),
-    );
-    whereCondition = and(whereCondition, searchCondition)!;
+  if (error) {
+    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
-
-  const result = await pagination<InferSelectModel<typeof systemRole>>(
-    systemRole,
-    whereCondition,
-    { page: params.page, limit: params.limit },
-  );
 
   return c.json(result, HttpStatusCodes.OK);
 };

@@ -7,13 +7,11 @@ import type { SystemMenusRouteHandlerType as RouteHandlerType } from "./menus.in
 
 /** 查询菜单列表 */
 export const list: RouteHandlerType<"list"> = async (c) => {
-  const params = c.req.valid("query");
+  const query = c.req.valid("query");
   const domain = c.get("userDomain");
 
   const result = await menuService.getMenuList({
-    search: params.search,
-    page: params.page,
-    limit: params.limit,
+    params: query,
     domain,
   });
 

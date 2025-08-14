@@ -1,7 +1,6 @@
-import type { InferSelectModel } from "drizzle-orm";
 import type z from "zod/v4";
 
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { insertGlobalParamsSchema, patchGlobalParamsSchema, selectGlobalParamsSchema } from "@/db/schema";
 
@@ -10,18 +9,23 @@ import { globalParams } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { CacheConfig, getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enums/cache";
 import { logger } from "@/lib/logger";
-import { pagination } from "@/lib/pagination";
+import paginatedQuery from "@/lib/pagination";
 import { redisClient } from "@/lib/redis";
 import { formatDate } from "@/utils/tools/formatter";
 
 export interface GlobalParamsListOptions {
-  search?: string;
-  isPublic?: "0" | "1";
-  publicOnly?: "true" | "false";
-  pagination?: {
-    page: number;
-    limit: number;
+  domain?: string;
+  params: {
+    skip?: number;
+    take?: number;
+    where?: Record<string, any> | Record<string, never> | null;
+    orderBy?: Record<string, "asc" | "desc"> | Record<string, "asc" | "desc">[] | Record<string, never> | null;
+    join?: Record<string, any> | Record<string, never> | null;
   };
+}
+
+export interface GlobalParamsPublicOptions {
+  publicOnly?: "true" | "false";
 }
 
 export interface GlobalParamsBatchOptions {
@@ -116,7 +120,7 @@ export async function clearAllCache() {
 /**
  * 获取全局参数列表（简单模式，用于公开API）
  */
-export async function getPublicList(options: GlobalParamsListOptions = {}) {
+export async function getPublicList(options: GlobalParamsPublicOptions = {}) {
   const { publicOnly = "true" } = options;
 
   // 尝试从缓存获取
@@ -155,37 +159,26 @@ export async function getPublicList(options: GlobalParamsListOptions = {}) {
 /**
  * 获取全局参数列表（分页模式，用于管理API）
  */
-export async function getAdminList(options: GlobalParamsListOptions = {}) {
-  const {
-    search,
-    isPublic,
-    pagination: paginationOptions = { page: 1, limit: 20 },
-  } = options;
+export async function getAdminList(options: GlobalParamsListOptions) {
+  const { domain, params } = options;
 
-  let whereCondition = eq(globalParams.status, Status.ENABLED);
+  const [error, result] = await paginatedQuery<z.infer<typeof selectGlobalParamsSchema>>({
+    table: globalParams,
+    params: {
+      skip: params.skip ?? 0,
+      take: params.take ?? 10,
+      where: params.where,
+      orderBy: params.orderBy,
+      join: params.join,
+    },
+    domain,
+  });
 
-  if (search) {
-    whereCondition = and(
-      whereCondition,
-      or(
-        ilike(globalParams.key, `%${search}%`),
-        ilike(globalParams.description, `%${search}%`),
-      ),
-    )!;
+  if (error) {
+    throw new Error(`全局参数列表查询失败: ${error.message}`);
   }
 
-  if (isPublic !== undefined) {
-    whereCondition = and(
-      whereCondition,
-      eq(globalParams.isPublic, Number(isPublic)),
-    )!;
-  }
-
-  return await pagination<InferSelectModel<typeof globalParams>>(
-    globalParams,
-    whereCondition,
-    paginationOptions,
-  );
+  return result;
 }
 
 /**
