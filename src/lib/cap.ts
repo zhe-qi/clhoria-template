@@ -3,6 +3,7 @@ import { and, eq, gt, lte } from "drizzle-orm";
 
 import db from "@/db";
 import { capChallenges, capTokens } from "@/db/schema";
+import { formatDate } from "@/utils";
 
 /**
  * Cap.js 验证码服务实例
@@ -15,12 +16,12 @@ export const cap = new Cap({
         await db.insert(capChallenges).values({
           token,
           data: JSON.stringify(challengeData),
-          expires: new Date(challengeData.expires),
+          expires: formatDate(new Date(challengeData.expires)),
         }).onConflictDoUpdate({
           target: capChallenges.token,
           set: {
             data: JSON.stringify(challengeData),
-            expires: new Date(challengeData.expires),
+            expires: formatDate(new Date(challengeData.expires)),
           },
         });
       },
@@ -32,7 +33,7 @@ export const cap = new Cap({
           .from(capChallenges)
           .where(and(
             eq(capChallenges.token, token),
-            gt(capChallenges.expires, new Date()),
+            gt(capChallenges.expires, formatDate(new Date())),
           ))
           .limit(1);
 
@@ -49,7 +50,7 @@ export const cap = new Cap({
           token: capChallenges.token,
         })
           .from(capChallenges)
-          .where(lte(capChallenges.expires, new Date()));
+          .where(lte(capChallenges.expires, formatDate(new Date())));
 
         return rows.map(row => row.token);
       },
@@ -58,11 +59,11 @@ export const cap = new Cap({
       store: async (tokenKey, expires) => {
         await db.insert(capTokens).values({
           key: tokenKey,
-          expires: new Date(expires),
+          expires: formatDate(new Date(expires)),
         }).onConflictDoUpdate({
           target: capTokens.key,
           set: {
-            expires: new Date(expires),
+            expires: formatDate(new Date(expires)),
           },
         });
       },
@@ -73,7 +74,7 @@ export const cap = new Cap({
           .from(capTokens)
           .where(and(
             eq(capTokens.key, tokenKey),
-            gt(capTokens.expires, new Date()),
+            gt(capTokens.expires, formatDate(new Date())),
           ))
           .limit(1);
 
@@ -88,7 +89,7 @@ export const cap = new Cap({
           key: capTokens.key,
         })
           .from(capTokens)
-          .where(lte(capTokens.expires, new Date()));
+          .where(lte(capTokens.expires, formatDate(new Date())));
 
         return rows.map(row => row.key);
       },

@@ -3,7 +3,7 @@ import { jwt } from "hono/jwt";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
-import { loginSystemUserSchema, responseSystemUserSchema, routeMetaSchema } from "@/db/schema";
+import { loginSystemUserSchema, menuItemSchema, responseSystemUserSchema } from "@/db/schema";
 import env from "@/env";
 
 const tags = ["/auth (身份认证)"];
@@ -137,17 +137,7 @@ export const getUserMenus = createRoute({
   summary: "获取当前用户菜单",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      // TODO: 密码的这个地方使用递归报错，只能暂时先这样解决一下
-      z.array(z.object({
-        name: z.string().meta({ description: "路由名称" }),
-        path: z.string().meta({ description: "路由路径" }),
-        redirect: z.string().optional().meta({ description: "重定向路径" }),
-        component: z.string().optional().meta({ description: "组件路径" }),
-        meta: routeMetaSchema,
-        children: z.array(z.any()).optional().meta({
-          describe: "子菜单",
-        }),
-      })),
+      z.array(menuItemSchema).meta({ description: "用户菜单列表" }),
       "获取成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(

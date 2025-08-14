@@ -8,7 +8,7 @@ export const capChallenges = pgTable("cap_challenges", {
   id: defaultColumns.id,
   token: text().notNull().unique(),
   data: text().notNull(),
-  expires: timestamp().notNull(),
+  expires: timestamp({ mode: "string" }).notNull(),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 }, table => [
@@ -20,7 +20,7 @@ export const capChallenges = pgTable("cap_challenges", {
 export const capTokens = pgTable("cap_tokens", {
   id: defaultColumns.id,
   key: text().notNull().unique(),
-  expires: timestamp().notNull(),
+  expires: timestamp({ mode: "string" }).notNull(),
   createdAt: defaultColumns.createdAt,
   updatedAt: defaultColumns.updatedAt,
 }, table => [
