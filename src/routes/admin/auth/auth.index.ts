@@ -13,7 +13,9 @@ export const auth = createRouter()
   .openapi(routes.logout, handlers.logout)
   .openapi(routes.getUserInfo, handlers.getUserInfo)
   .openapi(routes.getUserPermissions, handlers.getUserPermissions)
-  .openapi(routes.getUserMenus, handlers.getUserMenus);
+  .openapi(routes.getUserMenus, handlers.getUserMenus)
+  .openapi(routes.createChallenge, handlers.createChallenge)
+  .openapi(routes.redeemChallenge, handlers.redeemChallenge);
 
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];

@@ -11,17 +11,12 @@ import env from "@/env";
 import { getScheduler } from "@/jobs/scheduler";
 import createApp from "@/lib/create-app";
 import { casbin } from "@/middlewares/jwt-auth";
-import { auth } from "@/routes/admin/admin.index";
+import { getAdminToken, getAuthHeaders, getUserToken } from "@/utils/test-utils";
 
 import { systemScheduledJobs as systemScheduledJobsRoutes } from "./scheduled-jobs.index";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
-}
-
-// 创建认证应用
-function createAuthApp() {
-  return createApp().route("/", auth);
 }
 
 // 创建定时任务管理应用
@@ -32,7 +27,6 @@ function createScheduledJobsApp() {
     .route("/", systemScheduledJobsRoutes);
 }
 
-const authClient = testClient(createAuthApp());
 const scheduledJobsClient = testClient(createScheduledJobsApp());
 
 // Redis队列验证辅助函数
@@ -93,42 +87,21 @@ describe("scheduledJobs routes with real authentication", () => {
     }
   });
 
-  /** 管理员登录获取 token */
-  it("admin login should return valid token", async () => {
-    const response = await authClient.auth.login.$post({
-      json: {
-        username: "admin",
-        password: "123456",
-        domain: "default",
-      },
-    });
-
-    expect(response.status).toBe(HttpStatusCodes.OK);
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.token).toBeDefined();
-      adminToken = json.token;
-    }
+  /** 获取管理员token */
+  it("should get admin token", async () => {
+    adminToken = await getAdminToken();
+    expect(adminToken).toBeDefined();
   });
 
-  /** 普通用户登录获取 token */
-  it("user login should return valid token", async () => {
-    const response = await authClient.auth.login.$post({
-      json: {
-        username: "user",
-        password: "123456",
-        domain: "default",
-      },
-    });
-
-    // 可能用户不存在，这是正常的
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.token).toBeDefined();
-      userToken = json.token;
+  /** 获取普通用户token */
+  it("should get user token", async () => {
+    try {
+      userToken = await getUserToken();
+      expect(userToken).toBeDefined();
     }
-    else {
-      expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+    catch (error) {
+      // 用户不存在是正常的
+      expect(error).toBeDefined();
     }
   });
 
@@ -172,9 +145,7 @@ describe("scheduledJobs routes with real authentication", () => {
     const response = await scheduledJobsClient.system["scheduled-jobs"].handlers.$get(
       {},
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -221,9 +192,7 @@ describe("scheduledJobs routes with real authentication", () => {
         json: testJob,
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -259,9 +228,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -289,9 +256,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -318,9 +283,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -354,9 +317,7 @@ describe("scheduledJobs routes with real authentication", () => {
         json: updateData,
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -391,9 +352,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -446,9 +405,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -479,9 +436,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -512,9 +467,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -544,9 +497,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -577,9 +528,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
+        headers: getAuthHeaders(userToken),
       },
     );
 
@@ -602,9 +551,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -626,9 +573,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -654,9 +599,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -698,7 +641,7 @@ describe("scheduledJobs routes with real authentication", () => {
     // 1. 创建任务
     const createResponse = await scheduledJobsClient.system["scheduled-jobs"].$post(
       { json: redisTestJob },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
+      { headers: getAuthHeaders(adminToken) },
     );
 
     expect(createResponse.status).toBe(HttpStatusCodes.OK);
@@ -726,7 +669,7 @@ describe("scheduledJobs routes with real authentication", () => {
       {
         param: { id: testJobId },
       },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
+      { headers: getAuthHeaders(adminToken) },
     );
 
     if (verifyResponse.status !== HttpStatusCodes.OK) {
@@ -738,7 +681,7 @@ describe("scheduledJobs routes with real authentication", () => {
         param: { id: testJobId },
         json: { status: 1 },
       },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
+      { headers: getAuthHeaders(adminToken) },
     );
 
     expect(enableResponse.status).toBe(HttpStatusCodes.OK);
@@ -764,7 +707,7 @@ describe("scheduledJobs routes with real authentication", () => {
         param: { id: testJobId },
         json: { status: 0 },
       },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
+      { headers: getAuthHeaders(adminToken) },
     );
 
     expect(disableResponse.status).toBe(HttpStatusCodes.OK);
@@ -777,7 +720,7 @@ describe("scheduledJobs routes with real authentication", () => {
     // 4. 删除任务
     const deleteResponse = await scheduledJobsClient.system["scheduled-jobs"][":id"].$delete(
       { param: { id: testJobId } },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
+      { headers: getAuthHeaders(adminToken) },
     );
 
     expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
@@ -810,7 +753,7 @@ describe("scheduledJobs routes with real authentication", () => {
     // 1. 创建任务
     const createResponse = await scheduledJobsClient.system["scheduled-jobs"].$post(
       { json: deleteTestJob },
-      { headers: { Authorization: `Bearer ${adminToken}` } },
+      { headers: getAuthHeaders(adminToken) },
     );
 
     expect(createResponse.status).toBe(HttpStatusCodes.OK);
@@ -830,9 +773,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -848,9 +789,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 
@@ -867,9 +806,7 @@ describe("scheduledJobs routes with real authentication", () => {
         },
       },
       {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
+        headers: getAuthHeaders(adminToken),
       },
     );
 

@@ -1,4 +1,4 @@
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema } from "stoker/openapi/schemas";
@@ -249,6 +249,47 @@ export const getRoleMenus = createRoute({
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
       "角色不存在",
+    ),
+  },
+});
+
+/** 为用户分配角色 */
+export const assignRolesToUser = createRoute({
+  tags,
+  permission: {
+    resource: PermissionResource.SYSTEM_AUTHORIZATION,
+    action: PermissionAction.ASSIGN_USERS,
+  },
+  summary: "分配角色给用户",
+  method: "post",
+  path: `${routePrefix}/users/{userId}/roles`,
+  request: {
+    params: IdUUIDParamsSchema.extend({
+      userId: IdUUIDParamsSchema.shape.id.meta({ description: "用户ID" }),
+    }).omit({ id: true }),
+    body: jsonContentRequired(
+      z.object({
+        roleIds: z.array(z.string()).meta({ description: "角色ID列表" }),
+      }),
+      "分配角色参数",
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        success: z.boolean(),
+        added: z.number(),
+        removed: z.number(),
+      }),
+      "分配成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(IdUUIDParamsSchema),
+      "请求参数错误",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      "用户不存在",
     ),
   },
 });

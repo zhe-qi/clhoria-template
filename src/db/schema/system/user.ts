@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 import { defaultColumns } from "@/db/common/default-columns";
 
@@ -61,4 +62,6 @@ export const loginSystemUserSchema = insertSystemUserSchema.pick({
   username: true,
   password: true,
   domain: true,
+}).extend({
+  captchaToken: z.string().min(1).meta({ description: "验证码token" }),
 });

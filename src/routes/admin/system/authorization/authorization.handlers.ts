@@ -1,15 +1,19 @@
+import { and, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
 import db from "@/db";
+import { systemUser } from "@/db/schema";
 import {
   assignPermissionsToRole as assignPermissionsToRoleLib,
   assignUsersToRole as assignUsersToRoleLib,
 } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import * as menuService from "@/services/system/menu";
+import { assignRolesToUser as assignRolesToUserService, clearUserPermissionCache } from "@/services/system/user";
+import { pickContext } from "@/utils";
 
 import type { SystemAuthorizationRouteHandlerType } from "./authorization.index";
 
@@ -189,4 +193,31 @@ export const getRoleMenus: SystemAuthorizationRouteHandlerType<"getRoleMenus"> =
   const menuIds = await menuService.getRoleMenuIds(roleId, domain);
 
   return c.json({ domain, menuIds }, HttpStatusCodes.OK);
+};
+
+/** 为用户分配角色 */
+export const assignRolesToUser: SystemAuthorizationRouteHandlerType<"assignRolesToUser"> = async (c) => {
+  const { userId } = c.req.valid("param");
+  const { roleIds } = c.req.valid("json");
+  const [domain, currentUserId] = pickContext(c, ["userDomain", "userId"]);
+
+  // 检查用户是否存在
+  const [user] = await db
+    .select({ id: systemUser.id })
+    .from(systemUser)
+    .where(and(
+      eq(systemUser.id, userId),
+      eq(systemUser.domain, domain),
+    ));
+
+  if (!user) {
+    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const result = await assignRolesToUserService(userId, roleIds, domain, currentUserId);
+
+  // 清理用户相关缓存
+  void await clearUserPermissionCache(userId, domain);
+
+  return c.json(result, HttpStatusCodes.OK);
 };

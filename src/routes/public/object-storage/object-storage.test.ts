@@ -9,17 +9,12 @@ import createApp from "@/lib/create-app";
 import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
 import { reloadPolicy } from "@/lib/permissions/casbin/rbac";
 import { casbin } from "@/middlewares/jwt-auth";
-import { auth } from "@/routes/admin/admin.index";
+import { getAdminToken, getAuthHeaders, getUserToken } from "@/utils/test-utils";
 
 import { objectStorage } from "./object-storage.index";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
-}
-
-// 创建认证应用
-function createAuthApp() {
-  return createApp().route("/", auth);
 }
 
 // 创建对象存储应用（公共路由）
@@ -35,7 +30,6 @@ function createAdminObjectStorageApp() {
     .route("/", objectStorage);
 }
 
-const authClient = testClient(createAuthApp());
 const objectStorageClient = testClient(createObjectStorageApp());
 const adminObjectStorageClient = testClient(createAdminObjectStorageApp());
 
@@ -52,42 +46,21 @@ describe("object-storage routes with real authentication", () => {
     await reloadPolicy();
   });
 
-  /** 管理员登录获取 token */
-  it("admin login should return valid token", async () => {
-    const response = await authClient.auth.login.$post({
-      json: {
-        username: "admin",
-        password: "123456",
-        domain: "default",
-      },
-    });
-
-    expect(response.status).toBe(HttpStatusCodes.OK);
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.token).toBeDefined();
-      adminToken = json.token;
-    }
+  /** 获取管理员token */
+  it("should get admin token", async () => {
+    adminToken = await getAdminToken();
+    expect(adminToken).toBeDefined();
   });
 
-  /** 普通用户登录获取 token */
-  it("user login should return valid token", async () => {
-    const response = await authClient.auth.login.$post({
-      json: {
-        username: "user",
-        password: "123456",
-        domain: "default",
-      },
-    });
-
-    // 可能用户不存在，这是正常的
-    if (response.status === HttpStatusCodes.OK) {
-      const json = await response.json();
-      expect(json.token).toBeDefined();
-      userToken = json.token;
+  /** 获取普通用户token */
+  it("should get user token", async () => {
+    try {
+      userToken = await getUserToken();
+      expect(userToken).toBeDefined();
     }
-    else {
-      expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+    catch (error) {
+      // 用户不存在是正常的
+      expect(error).toBeDefined();
     }
   });
 
@@ -130,9 +103,7 @@ describe("object-storage routes with real authentication", () => {
           },
         },
         {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
+          headers: getAuthHeaders(adminToken),
         },
       );
 
@@ -267,9 +238,7 @@ describe("object-storage routes with real authentication", () => {
           },
         },
         {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-          },
+          headers: getAuthHeaders(adminToken),
         },
       );
 
@@ -364,9 +333,7 @@ describe("object-storage routes with real authentication", () => {
           },
         },
         {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
+          headers: getAuthHeaders(userToken),
         },
       );
 

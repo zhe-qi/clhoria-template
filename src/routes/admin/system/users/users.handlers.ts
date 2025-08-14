@@ -8,7 +8,7 @@ import db from "@/db";
 import { systemUser } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { pagination } from "@/lib/pagination";
-import { assignRolesToUser, clearUserPermissionCache, createUser } from "@/services/system/user";
+import { clearUserPermissionCache, createUser } from "@/services/system/user";
 import { omit, pickContext } from "@/utils";
 
 import type { SystemUsersRouteHandlerType } from "./users.index";
@@ -142,27 +142,4 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   void await clearUserPermissionCache(id, domain);
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);
-};
-
-export const assignRoles: SystemUsersRouteHandlerType<"assignRoles"> = async (c) => {
-  const { id } = c.req.valid("param");
-  const { roleIds } = c.req.valid("json");
-  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
-
-  // 检查用户是否存在
-  const [user] = await db
-    .select({ id: systemUser.id })
-    .from(systemUser)
-    .where(and(
-      eq(systemUser.id, id),
-      eq(systemUser.domain, domain),
-    ));
-
-  if (!user) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
-  }
-
-  const result = await assignRolesToUser(id, roleIds, domain, userId);
-
-  return c.json(result, HttpStatusCodes.OK);
 };

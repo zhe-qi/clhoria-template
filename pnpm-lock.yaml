@@ -22,31 +22,34 @@ importers:
         version: 6.12.0(@bull-board/ui@6.12.0)
       '@bull-board/hono':
         specifier: ^6.12.0
-        version: 6.12.0(hono@4.9.0)
+        version: 6.12.0(hono@4.9.1)
+      '@cap.js/server':
+        specifier: ^3.0.0
+        version: 3.0.0
       '@hono/node-server':
-        specifier: 1.18.1
-        version: 1.18.1(hono@4.9.0)
+        specifier: 1.18.2
+        version: 1.18.2(hono@4.9.1)
       '@hono/node-ws':
         specifier: ^1.2.0
-        version: 1.2.0(@hono/node-server@1.18.1(hono@4.9.0))(hono@4.9.0)
+        version: 1.2.0(@hono/node-server@1.18.2(hono@4.9.1))(hono@4.9.1)
       '@hono/prometheus':
         specifier: ^1.0.2
-        version: 1.0.2(hono@4.9.0)(prom-client@15.1.3)
+        version: 1.0.2(hono@4.9.1)(prom-client@15.1.3)
       '@hono/sentry':
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.9.0)
+        version: 1.2.2(hono@4.9.1)
       '@hono/zod-openapi':
         specifier: ^1.1.0
-        version: 1.1.0(hono@4.9.0)(zod@4.0.17)
+        version: 1.1.0(hono@4.9.1)(zod@4.0.17)
       '@node-rs/argon2':
         specifier: ^2.0.2
         version: 2.0.2
       '@scalar/hono-api-reference':
         specifier: ^0.9.13
-        version: 0.9.13(hono@4.9.0)
+        version: 0.9.13(hono@4.9.1)
       bullmq:
-        specifier: ^5.56.10
-        version: 5.56.10
+        specifier: ^5.57.0
+        version: 5.57.0
       casbin:
         specifier: ^5.38.0
         version: 5.38.0
@@ -64,19 +67,19 @@ importers:
         version: 12.0.2
       drizzle-orm:
         specifier: ^0.44.4
-        version: 0.44.4(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7)
+        version: 0.44.4(@cloudflare/workers-types@4.20250813.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7)
       drizzle-zod:
         specifier: ^0.8.3
-        version: 0.8.3(drizzle-orm@0.44.4(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7))(zod@4.0.17)
+        version: 0.8.3(drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250813.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7))(zod@4.0.17)
       hono:
-        specifier: ^4.9.0
-        version: 4.9.0
+        specifier: ^4.9.1
+        version: 4.9.1
       hono-pino:
         specifier: ^0.10.1
-        version: 0.10.1(hono@4.9.0)(pino@9.8.0)
+        version: 0.10.1(hono@4.9.1)(pino@9.9.0)
       hono-rate-limiter:
         specifier: ^0.4.2
-        version: 0.4.2(hono@4.9.0)
+        version: 0.4.2(hono@4.9.1)
       iconv-lite:
         specifier: ^0.6.3
         version: 0.6.3
@@ -84,8 +87,8 @@ importers:
         specifier: 5.7.0
         version: 5.7.0
       pino:
-        specifier: ^9.8.0
-        version: 9.8.0
+        specifier: ^9.9.0
+        version: 9.9.0
       pino-pretty:
         specifier: ^13.1.1
         version: 13.1.1
@@ -96,11 +99,11 @@ importers:
         specifier: ^15.1.3
         version: 15.1.3
       rate-limit-redis:
-        specifier: ^4.2.1
-        version: 4.2.1(express-rate-limit@7.5.1(express@5.1.0))
+        specifier: ^4.2.2
+        version: 4.2.2(express-rate-limit@7.5.1(express@5.1.0))
       stoker:
         specifier: ^2.0.1
-        version: 2.0.1(@asteasolutions/zod-to-openapi@8.1.0(zod@4.0.17))(@hono/zod-openapi@1.1.0(hono@4.9.0)(zod@4.0.17))(hono@4.9.0)(openapi3-ts@4.5.0)
+        version: 2.0.1(@asteasolutions/zod-to-openapi@8.1.0(zod@4.0.17))(@hono/zod-openapi@1.1.0(hono@4.9.1)(zod@4.0.17))(hono@4.9.1)(openapi3-ts@4.5.0)
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -111,12 +114,15 @@ importers:
       '@antfu/eslint-config':
         specifier: ^5.2.1
         version: 5.2.1(@vue/compiler-sfc@3.5.11)(eslint-plugin-format@1.0.1(eslint@9.33.0(jiti@2.4.2)))(eslint@9.33.0(jiti@2.4.2))(typescript@5.9.2)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.2.1))
+      '@cloudflare/workers-types':
+        specifier: ^4.20250813.0
+        version: 4.20250813.0
       '@types/node':
         specifier: ^24.2.1
         version: 24.2.1
       '@typescript/native-preview':
-        specifier: 7.0.0-dev.20250811.1
-        version: 7.0.0-dev.20250811.1
+        specifier: 7.0.0-dev.20250813.1
+        version: 7.0.0-dev.20250813.1
       chalk:
         specifier: ^5.5.0
         version: 5.5.0
@@ -146,10 +152,10 @@ importers:
         version: 2.13.1
       tsdown:
         specifier: ^0.14.1
-        version: 0.14.1(@typescript/native-preview@7.0.0-dev.20250811.1)(typescript@5.9.2)
+        version: 0.14.1(@typescript/native-preview@7.0.0-dev.20250813.1)(typescript@5.9.2)
       tsx:
-        specifier: ^4.20.3
-        version: 4.20.3
+        specifier: ^4.20.4
+        version: 4.20.4
       typescript:
         specifier: 5.9.2
         version: 5.9.2
@@ -415,6 +421,9 @@ packages:
   '@bull-board/ui@6.12.0':
     resolution: {integrity: sha512-a1+9bUlNViXIQcO9KPOd1EP66Ts4caYHgsc5OuunDMZ9Q6Y7sfrQXMhfnv3JWahSNo3hiX6Fc8wIL4p/bcTwsw==}
 
+  '@cap.js/server@3.0.0':
+    resolution: {integrity: sha512-UjEiOT5idL5YXwAcuKCJ+EOqfxLQWNmMLYeqjZ7qq4mO+RjBwEDunEBW+EHdjD3TWFI0z7Hj6NEkrd67ct5kRg==}
+
   '@casbin/expression-eval@5.3.0':
     resolution: {integrity: sha512-mMTHMYXcnBBv/zMvxMpcdVyt2bfw8Y0GnmRLbkFQ1CVJZb4XZp7xWjRh7ymOLuJdsu58rci9gmOOv/99DtJvPA==}
 
@@ -423,6 +432,9 @@ packages:
 
   '@clack/prompts@0.11.0':
     resolution: {integrity: sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw==}
+
+  '@cloudflare/workers-types@4.20250813.0':
+    resolution: {integrity: sha512-RFFjomDndGR+p7ug1HWDlW21qOJyRZbmI99dUtuR9tmwJbSZhUUnSFmzok9lBYVfkMMrO1O5vmB+IlgiecgLEA==}
 
   '@dprint/formatter@0.3.0':
     resolution: {integrity: sha512-N9fxCxbaBOrDkteSOzaCqwWjso5iAe+WJPsHC021JfHNj2ThInPNEF13ORDKta3llq5D1TlclODCvOvipH7bWQ==}
@@ -950,8 +962,8 @@ packages:
     resolution: {integrity: sha512-Z5kJ+wU3oA7MMIqVR9tyZRtjYPr4OC004Q4Rw7pgOKUOKkJfZ3O24nz3WYfGRpMDNmcOi3TwQOmgm7B7Tpii0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@hono/node-server@1.18.1':
-    resolution: {integrity: sha512-O3puG/b7owYYmoQ2XPBf3SxBz6Dhk5VmWFhbaBU8/5wcUaXUPS0goxaI2Zfyg+Cu14ILJHEU7IFRw7miFxuXxg==}
+  '@hono/node-server@1.18.2':
+    resolution: {integrity: sha512-icgNvC0vRYivzyuSSaUv9ttcwtN8fDyd1k3AOIBDJgYd84tXRZSS6na8X54CY/oYoFTNhEmZraW/Rb9XYwX4KA==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -1690,6 +1702,9 @@ packages:
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
 
+  '@types/node@22.17.1':
+    resolution: {integrity: sha512-y3tBaz+rjspDTylNjAX37jEC3TETEFGNJL6uQDxwF9/8GLLIjW1rvVHlynyuUKMnMr1Roq8jOv3vkopBjC4/VA==}
+
   '@types/node@24.2.1':
     resolution: {integrity: sha512-DRh5K+ka5eJic8CjH7td8QpYEV6Zo10gfRkjHCO3weqZHWDtAaSTFtl4+VMqOJ4N5jcuhZ9/l+yy8rVgw7BQeQ==}
 
@@ -1764,50 +1779,50 @@ packages:
     resolution: {integrity: sha512-ldgiJ+VAhQCfIjeOgu8Kj5nSxds0ktPOSO9p4+0VDH2R2pLvQraaM5Oen2d7NxzMCm+Sn/vJT+mv2H5u6b/3fA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-jlodzPn799oItzbpBmUwJ6rh9e+fxNklDCbnVv7SwCLU/RZNdTdumezdN0RdWPKhZasI1iE4DQWAXoif+ZshuQ==}
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-DFnQ8nWb0/OCuQ7nLShMDq6BTmGHIjUx/tDvvOdCgo+f1CSkur/4lh4ckpohjjqBbtOGEoKR31+u7b2zP5tqaw==}
     engines: {node: '>=20.6.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-LjGwgqwx93AnGhIde25tw0ClDceErE4nUE/zhYtGsI183RMRibThzKAMQqZHO9L2Xb5cy9ouog9hPtFHAZnytw==}
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-ObGEm8AtXVCHfRth+8WLh12r8iYx1uWBsrtKjW7iPkBsans9pZ53vaEIvDoYC+MuFsVLAb7FFnHcrYCiM72lDg==}
     engines: {node: '>=20.6.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-Jt4hcNfUSP3qJut8sowUy/YwxBcL2Q0wkQYoPPDfWu7ppSrDIvUnojH254KqTPAUvSENnpfMayeq6IgdyWIDmg==}
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-o16fqspXpq2pJHct70tSWFx798SuHrFNCIdm40/o7bmKT4P586T5cuyaW/PoT++iLi2EH4zGn5/qd9CcdnUtDA==}
     engines: {node: '>=20.6.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-rlzcRjKhlYM5lVGhjzoZ8uL4MCX8exLuOawKU6WT4QJAZHAboABNTD/ywsTXny62tmnMtVgBSUnKX9lczRx4vQ==}
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-sL11FnCS95Qg+wYjJ0Jv7ReVLZBkTFz8DBA70SZXKdJaLDOHqxT2LnsJPXEoXemAiafvfmRdeOXyLYoX7H99kA==}
     engines: {node: '>=20.6.0'}
     cpu: [arm]
     os: [linux]
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-iHq021EGaVV7GEPre/OzqPv0Q9568H5gK3g9T6RLRysbcdEaMqNHOdegDQQNjMM2mlOHI7lS3X1xCGiLREPghQ==}
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-A2uHS3AA+oZmEAXlezih+8K9n5MZ47Fe/dSO/aD3pv+Y505Ll770LerJCM/uLwZXzIwfSDwZzAeG6xaDSVwdbg==}
     engines: {node: '>=20.6.0'}
     cpu: [x64]
     os: [linux]
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-aOrI1Kwh5uBUWmyTFgpQhqgeIdHlvtMcpC/mhGN9WGetABNajZcT271LUNJh0mfiLFvBMFnd3AtrUt1DRplFng==}
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-ySsmOQ/6GjmHneESdsHD0BvsRz+abPFVknQpaNQrIBdOyjyqP93JqIBjDDRO17txklH6p3Pu/eoUgUWW8rTNWA==}
     engines: {node: '>=20.6.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-Q5i2Gh73/rr+ck0HtzFlKMtZDM+l+2ILlO+beEHPtNlHBfrLaDbKh7up3csWqNDLyG4YcDLNvpg8MZURDOzQtg==}
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-m5ttkCxnePiu9+4VXOIz+UHCJTLc7UX95e4cyoHiw7lSwFNp8IJhRyRdHX1meZtKvldnzdXplSYeAvKZM7vNkA==}
     engines: {node: '>=20.6.0'}
     cpu: [x64]
     os: [win32]
 
-  '@typescript/native-preview@7.0.0-dev.20250811.1':
-    resolution: {integrity: sha512-RmMRT8m9BYen1hW36yS8dkfyqbakBkzhXI+JtY/XvxRmpeAUHqsFuU/W5zaniynmXVdiVn9pPHwIzicQ76jbWQ==}
+  '@typescript/native-preview@7.0.0-dev.20250813.1':
+    resolution: {integrity: sha512-numdzvDqiLfsL8m4KVFdeUHpr40a66ePFh5IKGmmHzYAPBgjtrk7cEU6GVfaVVo5U5nFRe33Qzd7bDq06a1IrA==}
     engines: {node: '>=20.6.0'}
     hasBin: true
 
@@ -1988,8 +2003,8 @@ packages:
     resolution: {integrity: sha512-bkXY9WsVpY7CvMhKSR6pZilZu9Ln5WDrKVBUXf2S443etkmEO4V58heTecXcUIsNsi4Rx8JUO4NfX1IcQl4deg==}
     engines: {node: '>=18.20'}
 
-  bullmq@5.56.10:
-    resolution: {integrity: sha512-rhmVJo7yAZLKb05TRT9MNMvRqnCUBNW915D8Wn4O/MvjvNMbzDvNjvSaPZzdxxXlRH4GjbtIh0Waeff2LKF+Lg==}
+  bullmq@5.57.0:
+    resolution: {integrity: sha512-Xlh5mh6VQmHS6x5PIuYNf55Nn3T7GGN5Is+zHysN4ZUomX3RziyRFzQXeWgn3SKbaXxQ3aLWHjYDMaE5MhEXyA==}
 
   bytes@3.1.2:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
@@ -2863,8 +2878,8 @@ packages:
     peerDependencies:
       hono: ^4.1.1
 
-  hono@4.9.0:
-    resolution: {integrity: sha512-JAUc4Sqi3lhby2imRL/67LMcJFKiCu7ZKghM7iwvltVZzxEC5bVJCsAa4NTnSfmWGb+N2eOVtFE586R+K3fejA==}
+  hono@4.9.1:
+    resolution: {integrity: sha512-qfvdJ42t6CQE0N/iSCa8KsW8SQqYD67YB+TYbwPHlnALvX+s7ynh8otR1NEk5jXtUg73gpV/B82OSufDmwtX3w==}
     engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
@@ -3431,8 +3446,8 @@ packages:
   pino-std-serializers@7.0.0:
     resolution: {integrity: sha512-e906FRY0+tV27iq4juKzSYPbUj2do2X2JX4EzSca1631EB2QJQUqGbDuERal7LCtOpxl6x3+nvo9NPZcmjkiFA==}
 
-  pino@9.8.0:
-    resolution: {integrity: sha512-L5+rV1wL7vGAcxXP7sPpN5lrJ07Piruka6ArXr7EWBXxdVWjJshGVX8suFsiusJVcGKDGUFfbgbnKdg+VAC+0g==}
+  pino@9.9.0:
+    resolution: {integrity: sha512-zxsRIQG9HzG+jEljmvmZupOMDUQ0Jpj0yAgE28jQvvrdYTlEaiGwelJpdndMl/MBuRr70heIj83QyqJUWaU8mQ==}
     hasBin: true
 
   pkg-types@1.3.1:
@@ -3523,8 +3538,8 @@ packages:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
 
-  rate-limit-redis@4.2.1:
-    resolution: {integrity: sha512-JsUsVmRVI6G/XrlYtfGV1NMCbGS/CVYayHkxD5Ism5FaL8qpFHCXbFkUeIi5WJ/onJOKWCgtB/xtCLa6qSXb4g==}
+  rate-limit-redis@4.2.2:
+    resolution: {integrity: sha512-0SGzpSCZQgkJuUK5AqGaUkgwTMaujWIek0PwlZBDsdNIcasrJae8AC47tP5UHayqDcocJxtogL6DnZFTLoruUw==}
     engines: {node: '>= 16'}
     peerDependencies:
       express-rate-limit: '>= 6'
@@ -3922,8 +3937,8 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  tsx@4.20.3:
-    resolution: {integrity: sha512-qjbnuR9Tr+FJOMBqJCW5ehvIo/buZq7vH7qD7JziU98h6l3qGy0a/yPFjwO+y0/T7GFpNgNAvEcPPVfyT8rrPQ==}
+  tsx@4.20.4:
+    resolution: {integrity: sha512-yyxBKfORQ7LuRt/BQKBXrpcq59ZvSW0XxwfjAt3w2/8PmdxaFzijtMhTawprSHhpzeM5BgU2hXHG3lklIERZXg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -3948,6 +3963,9 @@ packages:
 
   unconfig@7.3.2:
     resolution: {integrity: sha512-nqG5NNL2wFVGZ0NA/aCFw0oJ2pxSf1lwg4Z5ill8wd7K4KX/rQbHlwbh+bjctXL5Ly1xtzHenHGOK0b+lG6JVg==}
+
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
   undici-types@7.10.0:
     resolution: {integrity: sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag==}
@@ -4712,16 +4730,21 @@ snapshots:
       '@bull-board/ui': 6.12.0
       redis-info: 3.1.0
 
-  '@bull-board/hono@6.12.0(hono@4.9.0)':
+  '@bull-board/hono@6.12.0(hono@4.9.1)':
     dependencies:
       '@bull-board/api': 6.12.0(@bull-board/ui@6.12.0)
       '@bull-board/ui': 6.12.0
       ejs: 3.1.10
-      hono: 4.9.0
+      hono: 4.9.1
 
   '@bull-board/ui@6.12.0':
     dependencies:
       '@bull-board/api': 6.12.0(@bull-board/ui@6.12.0)
+
+  '@cap.js/server@3.0.0':
+    dependencies:
+      '@types/node': 22.17.1
+      typescript: 5.9.2
 
   '@casbin/expression-eval@5.3.0':
     dependencies:
@@ -4737,6 +4760,8 @@ snapshots:
       '@clack/core': 0.5.0
       picocolors: 1.1.1
       sisteransi: 1.0.5
+
+  '@cloudflare/workers-types@4.20250813.0': {}
 
   '@dprint/formatter@0.3.0': {}
 
@@ -5083,40 +5108,40 @@ snapshots:
       '@eslint/core': 0.15.2
       levn: 0.4.1
 
-  '@hono/node-server@1.18.1(hono@4.9.0)':
+  '@hono/node-server@1.18.2(hono@4.9.1)':
     dependencies:
-      hono: 4.9.0
+      hono: 4.9.1
 
-  '@hono/node-ws@1.2.0(@hono/node-server@1.18.1(hono@4.9.0))(hono@4.9.0)':
+  '@hono/node-ws@1.2.0(@hono/node-server@1.18.2(hono@4.9.1))(hono@4.9.1)':
     dependencies:
-      '@hono/node-server': 1.18.1(hono@4.9.0)
-      hono: 4.9.0
+      '@hono/node-server': 1.18.2(hono@4.9.1)
+      hono: 4.9.1
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@hono/prometheus@1.0.2(hono@4.9.0)(prom-client@15.1.3)':
+  '@hono/prometheus@1.0.2(hono@4.9.1)(prom-client@15.1.3)':
     dependencies:
-      hono: 4.9.0
+      hono: 4.9.1
       prom-client: 15.1.3
 
-  '@hono/sentry@1.2.2(hono@4.9.0)':
+  '@hono/sentry@1.2.2(hono@4.9.1)':
     dependencies:
-      hono: 4.9.0
+      hono: 4.9.1
       toucan-js: 4.1.1
 
-  '@hono/zod-openapi@1.1.0(hono@4.9.0)(zod@4.0.17)':
+  '@hono/zod-openapi@1.1.0(hono@4.9.1)(zod@4.0.17)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.1.0(zod@4.0.17)
-      '@hono/zod-validator': 0.7.2(hono@4.9.0)(zod@4.0.17)
-      hono: 4.9.0
+      '@hono/zod-validator': 0.7.2(hono@4.9.1)(zod@4.0.17)
+      hono: 4.9.1
       openapi3-ts: 4.5.0
       zod: 4.0.17
 
-  '@hono/zod-validator@0.7.2(hono@4.9.0)(zod@4.0.17)':
+  '@hono/zod-validator@0.7.2(hono@4.9.1)(zod@4.0.17)':
     dependencies:
-      hono: 4.9.0
+      hono: 4.9.1
       zod: 4.0.17
 
   '@humanfs/core@0.19.1': {}
@@ -5442,10 +5467,10 @@ snapshots:
     dependencies:
       '@scalar/types': 0.2.11
 
-  '@scalar/hono-api-reference@0.9.13(hono@4.9.0)':
+  '@scalar/hono-api-reference@0.9.13(hono@4.9.1)':
     dependencies:
       '@scalar/core': 0.3.11
-      hono: 4.9.0
+      hono: 4.9.1
 
   '@scalar/openapi-types@0.3.7':
     dependencies:
@@ -5851,6 +5876,10 @@ snapshots:
 
   '@types/ms@0.7.34': {}
 
+  '@types/node@22.17.1':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@24.2.1':
     dependencies:
       undici-types: 7.10.0
@@ -5959,36 +5988,36 @@ snapshots:
       '@typescript-eslint/types': 8.39.0
       eslint-visitor-keys: 4.2.1
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250811.1':
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250813.1':
     optional: true
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250811.1':
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250813.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250811.1':
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250813.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20250811.1':
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20250813.1':
     optional: true
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20250811.1':
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20250813.1':
     optional: true
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250811.1':
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250813.1':
     optional: true
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20250811.1':
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20250813.1':
     optional: true
 
-  '@typescript/native-preview@7.0.0-dev.20250811.1':
+  '@typescript/native-preview@7.0.0-dev.20250813.1':
     optionalDependencies:
-      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20250811.1
-      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20250811.1
-      '@typescript/native-preview-linux-arm': 7.0.0-dev.20250811.1
-      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20250811.1
-      '@typescript/native-preview-linux-x64': 7.0.0-dev.20250811.1
-      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20250811.1
-      '@typescript/native-preview-win32-x64': 7.0.0-dev.20250811.1
+      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20250813.1
+      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20250813.1
+      '@typescript/native-preview-linux-arm': 7.0.0-dev.20250813.1
+      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20250813.1
+      '@typescript/native-preview-linux-x64': 7.0.0-dev.20250813.1
+      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20250813.1
+      '@typescript/native-preview-win32-x64': 7.0.0-dev.20250813.1
 
   '@vitest/eslint-plugin@1.3.4(eslint@9.33.0(jiti@2.4.2))(typescript@5.9.2)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.2.1))':
     dependencies:
@@ -6202,7 +6231,7 @@ snapshots:
 
   builtin-modules@5.0.0: {}
 
-  bullmq@5.56.10:
+  bullmq@5.57.0:
     dependencies:
       cron-parser: 4.9.0
       ioredis: 5.7.0
@@ -6406,8 +6435,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.4(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7):
+  drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250813.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7):
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20250813.0
       '@libsql/client': 0.15.4
       '@opentelemetry/api': 1.9.0
       '@types/better-sqlite3': 7.6.11
@@ -6415,9 +6445,9 @@ snapshots:
       kysely: 0.27.6
       postgres: 3.4.7
 
-  drizzle-zod@0.8.3(drizzle-orm@0.44.4(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7))(zod@4.0.17):
+  drizzle-zod@0.8.3(drizzle-orm@0.44.4(@cloudflare/workers-types@4.20250813.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7))(zod@4.0.17):
     dependencies:
-      drizzle-orm: 0.44.4(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7)
+      drizzle-orm: 0.44.4(@cloudflare/workers-types@4.20250813.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(postgres@3.4.7)
       zod: 4.0.17
 
   dts-resolver@2.1.1: {}
@@ -7083,17 +7113,17 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono-pino@0.10.1(hono@4.9.0)(pino@9.8.0):
+  hono-pino@0.10.1(hono@4.9.1)(pino@9.9.0):
     dependencies:
       defu: 6.1.4
-      hono: 4.9.0
-      pino: 9.8.0
+      hono: 4.9.1
+      pino: 9.9.0
 
-  hono-rate-limiter@0.4.2(hono@4.9.0):
+  hono-rate-limiter@0.4.2(hono@4.9.1):
     dependencies:
-      hono: 4.9.0
+      hono: 4.9.1
 
-  hono@4.9.0: {}
+  hono@4.9.1: {}
 
   hookable@5.5.3: {}
 
@@ -7825,7 +7855,7 @@ snapshots:
 
   pino-std-serializers@7.0.0: {}
 
-  pino@9.8.0:
+  pino@9.9.0:
     dependencies:
       atomic-sleep: 1.0.0
       fast-redact: 3.5.0
@@ -7940,7 +7970,7 @@ snapshots:
 
   range-parser@1.2.1: {}
 
-  rate-limit-redis@4.2.1(express-rate-limit@7.5.1(express@5.1.0)):
+  rate-limit-redis@4.2.2(express-rate-limit@7.5.1(express@5.1.0)):
     dependencies:
       express-rate-limit: 7.5.1(express@5.1.0)
 
@@ -8008,7 +8038,7 @@ snapshots:
 
   rfdc@1.4.1: {}
 
-  rolldown-plugin-dts@0.15.6(@typescript/native-preview@7.0.0-dev.20250811.1)(rolldown@1.0.0-beta.32)(typescript@5.9.2):
+  rolldown-plugin-dts@0.15.6(@typescript/native-preview@7.0.0-dev.20250813.1)(rolldown@1.0.0-beta.32)(typescript@5.9.2):
     dependencies:
       '@babel/generator': 7.28.0
       '@babel/parser': 7.28.0
@@ -8020,7 +8050,7 @@ snapshots:
       get-tsconfig: 4.10.1
       rolldown: 1.0.0-beta.32
     optionalDependencies:
-      '@typescript/native-preview': 7.0.0-dev.20250811.1
+      '@typescript/native-preview': 7.0.0-dev.20250813.1
       typescript: 5.9.2
     transitivePeerDependencies:
       - oxc-resolver
@@ -8226,12 +8256,12 @@ snapshots:
 
   std-env@3.9.0: {}
 
-  stoker@2.0.1(@asteasolutions/zod-to-openapi@8.1.0(zod@4.0.17))(@hono/zod-openapi@1.1.0(hono@4.9.0)(zod@4.0.17))(hono@4.9.0)(openapi3-ts@4.5.0):
+  stoker@2.0.1(@asteasolutions/zod-to-openapi@8.1.0(zod@4.0.17))(@hono/zod-openapi@1.1.0(hono@4.9.1)(zod@4.0.17))(hono@4.9.1)(openapi3-ts@4.5.0):
     dependencies:
-      hono: 4.9.0
+      hono: 4.9.1
     optionalDependencies:
       '@asteasolutions/zod-to-openapi': 8.1.0(zod@4.0.17)
-      '@hono/zod-openapi': 1.1.0(hono@4.9.0)(zod@4.0.17)
+      '@hono/zod-openapi': 1.1.0(hono@4.9.1)(zod@4.0.17)
       openapi3-ts: 4.5.0
 
   string-argv@0.3.2: {}
@@ -8359,7 +8389,7 @@ snapshots:
       picomatch: 4.0.3
       typescript: 5.9.2
 
-  tsdown@0.14.1(@typescript/native-preview@7.0.0-dev.20250811.1)(typescript@5.9.2):
+  tsdown@0.14.1(@typescript/native-preview@7.0.0-dev.20250813.1)(typescript@5.9.2):
     dependencies:
       ansis: 4.1.0
       cac: 6.7.14
@@ -8369,7 +8399,7 @@ snapshots:
       empathic: 2.0.0
       hookable: 5.5.3
       rolldown: 1.0.0-beta.32
-      rolldown-plugin-dts: 0.15.6(@typescript/native-preview@7.0.0-dev.20250811.1)(rolldown@1.0.0-beta.32)(typescript@5.9.2)
+      rolldown-plugin-dts: 0.15.6(@typescript/native-preview@7.0.0-dev.20250813.1)(rolldown@1.0.0-beta.32)(typescript@5.9.2)
       semver: 7.7.2
       tinyexec: 1.0.1
       tinyglobby: 0.2.14
@@ -8385,10 +8415,10 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsx@4.20.3:
+  tsx@4.20.4:
     dependencies:
       esbuild: 0.25.4
-      get-tsconfig: 4.10.0
+      get-tsconfig: 4.10.1
     optionalDependencies:
       fsevents: 2.3.3
 
@@ -8417,6 +8447,8 @@ snapshots:
       defu: 6.1.4
       jiti: 2.4.2
       quansync: 0.2.10
+
+  undici-types@6.21.0: {}
 
   undici-types@7.10.0: {}
 

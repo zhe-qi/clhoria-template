@@ -10,7 +10,6 @@ export const systemUsers = createRouter()
   .openapi(routes.update, handlers.update)
   .openapi(routes.remove, handlers.remove)
   .openapi(routes.create, handlers.create)
-  .openapi(routes.assignRoles, handlers.assignRoles)
   .openapi(routes.list, handlers.list);
 
 type RouteTypes = {

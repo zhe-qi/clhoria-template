@@ -10,6 +10,25 @@ CREATE TABLE "client_users" (
 	CONSTRAINT "client_users_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
+CREATE TABLE "cap_challenges" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"token" text NOT NULL,
+	"data" text NOT NULL,
+	"expires" timestamp NOT NULL,
+	"created_at" timestamp,
+	"updated_at" timestamp,
+	CONSTRAINT "cap_challenges_token_unique" UNIQUE("token")
+);
+--> statement-breakpoint
+CREATE TABLE "cap_tokens" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"key" text NOT NULL,
+	"expires" timestamp NOT NULL,
+	"created_at" timestamp,
+	"updated_at" timestamp,
+	CONSTRAINT "cap_tokens_key_unique" UNIQUE("key")
+);
+--> statement-breakpoint
 CREATE TABLE "casbin_rule" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"ptype" varchar(8),
@@ -132,7 +151,7 @@ CREATE TABLE "system_notices" (
 	"type" "notice_type" DEFAULT 'NOTIFICATION' NOT NULL,
 	"content" text,
 	"status" integer DEFAULT 1 NOT NULL,
-	"domain" varchar(100) NOT NULL,
+	"domain" varchar(100) DEFAULT 'default' NOT NULL,
 	"sort_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
@@ -142,7 +161,7 @@ CREATE TABLE "system_organization" (
 	"created_by" varchar(64) NOT NULL,
 	"updated_at" timestamp,
 	"updated_by" varchar(64),
-	"domain" varchar(64) NOT NULL,
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
 	"code" varchar(64) NOT NULL,
 	"name" varchar(128) NOT NULL,
 	"description" text,
@@ -161,7 +180,7 @@ CREATE TABLE "system_post" (
 	"post_name" varchar(50) NOT NULL,
 	"post_sort" integer DEFAULT 0 NOT NULL,
 	"status" integer DEFAULT 1 NOT NULL,
-	"domain" varchar(64) NOT NULL,
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
 	"remark" text,
 	CONSTRAINT "system_post_domain_postCode_unique" UNIQUE("domain","post_code")
 );
@@ -194,7 +213,7 @@ CREATE TABLE "system_scheduled_jobs" (
 	"created_by" varchar(64) NOT NULL,
 	"updated_at" timestamp,
 	"updated_by" varchar(64),
-	"domain" varchar(64) NOT NULL,
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
 	"name" varchar(128) NOT NULL,
 	"description" text,
 	"handler_name" varchar(128) NOT NULL,
@@ -215,7 +234,7 @@ CREATE TABLE "system_tokens" (
 	"status" integer DEFAULT 1 NOT NULL,
 	"user_id" uuid NOT NULL,
 	"username" varchar(64) NOT NULL,
-	"domain" varchar(64) NOT NULL,
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
 	"login_time" timestamp NOT NULL,
 	"expires_at" timestamp NOT NULL,
 	"ip" varchar(64) NOT NULL,
@@ -238,7 +257,7 @@ CREATE TABLE "system_user" (
 	"updated_by" varchar(64),
 	"username" varchar(64) NOT NULL,
 	"password" text NOT NULL,
-	"domain" varchar(64) NOT NULL,
+	"domain" varchar(64) DEFAULT 'default' NOT NULL,
 	"built_in" boolean DEFAULT false,
 	"avatar" text,
 	"nick_name" varchar(64) NOT NULL,
@@ -309,6 +328,10 @@ CREATE TABLE "ts_operation_log" (
 	CONSTRAINT "ts_operation_log_id_start_time_pk" PRIMARY KEY("id","start_time")
 );
 --> statement-breakpoint
+CREATE INDEX "cap_challenges_token_expires_idx" ON "cap_challenges" USING btree ("token","expires");--> statement-breakpoint
+CREATE INDEX "cap_challenges_expires_idx" ON "cap_challenges" USING btree ("expires");--> statement-breakpoint
+CREATE INDEX "cap_tokens_key_expires_idx" ON "cap_tokens" USING btree ("key","expires");--> statement-breakpoint
+CREATE INDEX "cap_tokens_expires_idx" ON "cap_tokens" USING btree ("expires");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v0_v1_v2_v3" ON "casbin_rule" USING btree ("ptype","v0","v1","v2","v3");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v0" ON "casbin_rule" USING btree ("ptype","v0");--> statement-breakpoint
 CREATE INDEX "idx_ptype_v3" ON "casbin_rule" USING btree ("ptype","v3");--> statement-breakpoint

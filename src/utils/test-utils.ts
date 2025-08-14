@@ -1,0 +1,115 @@
+import { addDays, getUnixTime } from "date-fns";
+import { and, eq } from "drizzle-orm";
+import { sign } from "hono/jwt";
+
+import db from "@/db";
+import { systemUser, systemUserRole } from "@/db/schema";
+import env from "@/env";
+import { JwtTokenType } from "@/lib/enums";
+import { setUserRolesToCache } from "@/services/system/user";
+
+/** 缓存的token信息 */
+interface CachedToken {
+  token: string;
+  userId: string;
+  domain: string;
+}
+
+/** 单例缓存 */
+let adminTokenCache: CachedToken | null = null;
+let userTokenCache: CachedToken | null = null;
+
+/**
+ * 生成测试用的JWT token
+ */
+async function generateTestToken(username: string, domain: string = "default"): Promise<CachedToken> {
+  // 查询用户信息
+  const user = await db.query.systemUser.findFirst({
+    where: and(
+      eq(systemUser.username, username),
+      eq(systemUser.domain, domain),
+    ),
+    columns: {
+      id: true,
+      username: true,
+      domain: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error(`测试用户 ${username} 不存在`);
+  }
+
+  // 查询用户角色
+  const userRoles = await db.query.systemUserRole.findMany({
+    where: and(
+      eq(systemUserRole.userId, user.id),
+      eq(systemUserRole.domain, user.domain),
+    ),
+  });
+
+  const roles = userRoles.map(ur => ur.roleId);
+
+  // 生成token payload
+  const now = getUnixTime(new Date());
+  const accessTokenExp = getUnixTime(addDays(new Date(), 7));
+  const jti = crypto.randomUUID();
+
+  const tokenPayload = {
+    uid: user.id,
+    username: user.username,
+    domain: user.domain,
+    iat: now,
+    exp: accessTokenExp,
+    jti,
+  };
+
+  // 将用户角色存储到 Redis
+  await setUserRolesToCache(user.id, user.domain, roles);
+
+  // 生成token
+  const token = await sign({ ...tokenPayload, type: JwtTokenType.ACCESS }, env.ADMIN_JWT_SECRET, "HS256");
+
+  return {
+    token,
+    userId: user.id,
+    domain: user.domain,
+  };
+}
+
+/**
+ * 获取admin测试token（单例模式）
+ */
+export async function getAdminToken(): Promise<string> {
+  if (!adminTokenCache) {
+    adminTokenCache = await generateTestToken("admin");
+  }
+  return adminTokenCache.token;
+}
+
+/**
+ * 获取普通用户测试token（单例模式）
+ */
+export async function getUserToken(): Promise<string> {
+  if (!userTokenCache) {
+    userTokenCache = await generateTestToken("user");
+  }
+  return userTokenCache.token;
+}
+
+/**
+ * 生成认证请求头
+ */
+export function getAuthHeaders(token: string): Record<string, string> {
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+/**
+ * 清除缓存的token（测试结束时调用）
+ */
+export function clearTokenCache(): void {
+  adminTokenCache = null;
+  userTokenCache = null;
+}

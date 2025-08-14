@@ -12,7 +12,8 @@ export const systemAuthorization = createRouter()
   .openapi(routes.getUserRoutes, handlers.getUserRoutes)
   .openapi(routes.getUserRoles, handlers.getUserRoles)
   .openapi(routes.getRolePermissions, handlers.getRolePermissions)
-  .openapi(routes.getRoleMenus, handlers.getRoleMenus);
+  .openapi(routes.getRoleMenus, handlers.getRoleMenus)
+  .openapi(routes.assignRolesToUser, handlers.assignRolesToUser);
 
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];

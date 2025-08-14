@@ -10,6 +10,7 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import db from "@/db";
 import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
 import env from "@/env";
+import { cap } from "@/lib/cap";
 import { JwtTokenType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import { logger } from "@/lib/logger";
 import { getUserMenus as getUserMenusService } from "@/services/system/menu";
@@ -21,12 +22,19 @@ import type { AuthRouteHandlerType } from "./auth.index";
 
 export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
   const body = c.req.valid("json");
-  const { username, password, domain } = body;
+  const { username, password, domain, captchaToken } = body;
 
   const logContext = await createLoginLogContext(c, username, domain);
 
   try {
-    // 1. 查询用户基本信息
+    // 1. 验证验证码token
+    const { success } = await cap.validateToken(captchaToken);
+    if (!success) {
+      await logContext.logFailure();
+      return c.json({ message: "验证码验证失败" }, HttpStatusCodes.UNAUTHORIZED);
+    }
+
+    // 2. 查询用户基本信息
     const user = await db.query.systemUser.findFirst({
       where: and(
         eq(systemUser.username, username),
@@ -51,7 +59,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    // 2. 验证密码
+    // 3. 验证密码
     const isPasswordValid = await verify(user.password, password);
 
     if (!isPasswordValid) {
@@ -59,7 +67,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
       return c.json({ message: "密码错误" }, HttpStatusCodes.UNAUTHORIZED);
     }
 
-    // 3. 密码验证通过后查询用户角色
+    // 4. 密码验证通过后查询用户角色
     const userRoles = await db.query.systemUserRole.findMany({
       where: and(
         eq(systemUserRole.userId, user.id),
@@ -140,7 +148,7 @@ export const adminLogin: AuthRouteHandlerType<"adminLogin"> = async (c) => {
     // 根据路由定义，只能返回 401 Unauthorized
     return c.json({ message: "登录失败" }, HttpStatusCodes.UNAUTHORIZED);
   }
-};
+}; ;
 
 /** 刷新 Token */
 export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
@@ -291,5 +299,32 @@ export const getUserMenus: AuthRouteHandlerType<"getUserMenus"> = async (c) => {
   }
   catch {
     return c.json({ message: HttpStatusPhrases.UNAUTHORIZED }, HttpStatusCodes.UNAUTHORIZED);
+  }
+};
+
+/** 生成验证码挑战 */
+export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c) => {
+  try {
+    const challenge = await cap.createChallenge();
+    return c.json(challenge, HttpStatusCodes.OK);
+  }
+  catch (error: any) {
+    logger.error({ error: error.message }, "创建验证码挑战失败");
+    return c.json({ message: "创建验证码挑战失败" }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
+  }
+};
+
+/** 验证用户解答并生成验证token */
+export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c) => {
+  const body = c.req.valid("json");
+  const { token, solutions } = body;
+
+  try {
+    const result = await cap.redeemChallenge({ token, solutions });
+    return c.json(result, HttpStatusCodes.OK);
+  }
+  catch (error: any) {
+    logger.error({ error: error.message }, "验证码验证失败");
+    return c.json({ success: false }, HttpStatusCodes.BAD_REQUEST);
   }
 };

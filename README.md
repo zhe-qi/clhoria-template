@@ -29,6 +29,7 @@ Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优
 - **任务队列**: 基于 BullMQ 的定时任务和后台任务队列管理
 - **对象存储**: 集成 Cloudflare R2 对象存储服务
 - **连接池监控**: 数据库连接池状态监控和性能分析
+- **智能验证码**: 集成 Cap.js，支持多种挑战类型的现代化验证码系统
 - **AI 原生开发**: Claude Code + OpenAPI 自动生成，告别手工维护接口文档的痛苦
 - **类型安全体系**: Hono + Zod + TypeScript 全链路类型推导，编译时发现问题
 - **智能测试覆盖**: Vitest + AI 辅助，自动生成测试用例，确保接口稳定性
@@ -246,24 +247,31 @@ src/db/schema/
 
 ### 服务层
 
-服务层采用函数式架构，强调代码复用和模块化设计：
+服务层采用混合架构模式，根据业务复杂度选择合适的实现方式：
 
 ```text
 src/services/
-├── {domain}.ts             # 领域业务逻辑服务
-├── shared/                  # 公共服务模块
-│   ├── cache.ts            # 缓存服务
-│   ├── auth.ts             # 认证服务
-│   └── validation.ts       # 验证服务
-└── index.ts                # 统一导出
+├── system/                  # 系统模块服务
+│   ├── user.ts             # 用户管理服务
+│   ├── global-params.ts    # 全局参数服务
+│   ├── menu.ts             # 菜单管理服务
+│   ├── dictionary.ts       # 字典管理服务
+│   ├── notices.ts          # 通知公告服务
+│   └── scheduled-jobs.ts   # 定时任务服务
+├── logging/                 # 日志模块服务
+│   ├── timescale-service.ts # 时序数据库服务
+│   └── index.ts            # 日志服务导出
+├── object-storage.ts        # 对象存储服务
+└── ip.ts                   # IP 地址解析服务
 ```
 
-**设计原则**：
+**架构原则**：
 
-- **函数式设计**: 所有服务都是纯函数或异步函数
-- **公共服务抽离**: 将通用功能抽离为独立的共享服务模块
-- **依赖注入**: 通过参数传递依赖，便于测试和复用
-- **领域隔离**: 按业务领域组织服务，避免交叉依赖
+- **按需抽离**: 仅当业务逻辑在多个路由间复用时才创建服务层，避免过度抽象
+- **函数式设计**: 采用命名导出的纯函数/异步函数，支持 `create*`、`get*`、`update*`、`delete*` 等标准前缀
+- **混合实现**: 简单 CRUD 操作直接在 handler 中实现，复杂业务逻辑抽离为服务函数
+- **事务管理**: 复杂业务操作使用 `db.transaction()` 确保数据一致性
+- **缓存集成**: 服务层集成 Redis 缓存，提供数据缓存和权限缓存管理
 
 ## 部署
 
@@ -289,6 +297,16 @@ pnpm start
 ## 部署特性
 
 **可选 SaaS 依赖**: sentry、Cloudflare R2 对象存储等第三方服务均为可选，可完全部署在内网环境。技术栈符合信创要求，支持迁移至国产数据库（如达梦、人大金仓等）。
+
+## 验证码系统对比
+
+### 🔐 Cap.js vs svg-captcha
+
+| 对比维度     | Cap.js (本项目采用)                            | svg-captcha                     |
+| ------------ | ---------------------------------------------- | ------------------------------- |
+| **安全性**   | 多种挑战类型，难以被自动化工具破解             | 基于图像识别，易被 OCR 工具破解 |
+| **用户体验** | 现代化交互界面，快速通过验证，用户体验遥遥领先 | 传统图片验证，识别扭曲文字      |
+| **扩展性**   | 数据库存储，支持分布式部署和自定义挑战类型     | 内存存储，功能固定              |
 
 ## 性能对比
 
@@ -327,7 +345,6 @@ pnpm start
 
 - **[Serena](https://github.com/SerenaAI/serena-mcp)**: 智能代码分析和重构建议
 - **[Context7](https://github.com/context7/mcp-plugin)**: 实时技术文档查询和代码示例
-- **Database Explorer**: 数据库架构可视化和查询优化
 
 ## 监控
 
@@ -343,8 +360,6 @@ pnpm start
 | 应用指标   | <http://localhost:9999/metrics>                                    | 无需认证       |
 
 ## 开发计划
-
-### 后续计划
 
 - [ ] **工作流自动化**: 集成 n8n 工作流引擎
 - [ ] **上下文工程工具链**: 扩展 AI 辅助开发工具，支持更复杂的业务场景
@@ -364,7 +379,7 @@ pnpm test:coverage
 
 ## 支持
 
-如有问题或建议，请创建 [Issue](https://github.com/your-repo/issues) 或联系维护者。
+如有问题或建议，请创建 [Issue](https://github.com/zhe-qi/clhoria-template/issues) 或联系维护者。
 
 ## 贡献指南
 
@@ -372,4 +387,4 @@ pnpm test:coverage
 
 ## 许可证
 
-MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
+MIT License - 查看 [LICENSE](https://github.com/zhe-qi/clhoria-template/blob/main/LICENSE) 文件了解详情。

@@ -156,3 +156,56 @@ export const getUserMenus = createRoute({
     ),
   },
 });
+
+/** 生成验证码挑战 */
+export const createChallenge = createRoute({
+  path: "/auth/challenge",
+  method: "post",
+  tags,
+  summary: "生成验证码挑战",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        challenge: z.any().meta({ description: "验证码挑战数据" }),
+        token: z.string().optional().meta({ description: "挑战token" }),
+        expires: z.number().meta({ description: "过期时间戳" }),
+      }),
+      "生成成功",
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+      z.object({ message: z.string() }),
+      "生成失败",
+    ),
+  },
+});
+
+/** 验证用户解答并生成验证token */
+export const redeemChallenge = createRoute({
+  path: "/auth/redeem",
+  method: "post",
+  request: {
+    body: jsonContentRequired(
+      z.object({
+        token: z.string().meta({ description: "挑战token" }),
+        solutions: z.array(z.number()).meta({ description: "用户解答" }),
+      }),
+      "验证请求",
+    ),
+  },
+  tags,
+  summary: "验证用户解答",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        success: z.boolean().meta({ description: "验证结果" }),
+        token: z.string().optional().meta({ description: "验证token" }),
+        expires: z.number().optional().meta({ description: "过期时间戳" }),
+      }),
+      "验证成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      z.object({ success: z.boolean() }),
+      "验证失败",
+    ),
+  },
+});
