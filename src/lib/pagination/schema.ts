@@ -103,30 +103,58 @@ export const PaginationParamsSchema = z.object({
     flexibleJsonPreprocess,
     z.union([
       WhereConditionSchema,
-      z.object({}).optional(), // 空对象
+      z.object({}).optional(),
       z.undefined(),
       z.null(),
     ]).optional(),
-  ).optional(),
+  ).optional().openapi({
+    type: "object",
+    description: "查询条件，参考文档 https://prisma.org.cn/docs/orm/reference/prisma-client-reference#or",
+    example: {
+      name: { contains: "张三" },
+      age: { gte: 18 },
+      AND: [
+        { status: { equals: "active" } },
+        { createdAt: { gte: "2023-01-01" } },
+      ],
+    },
+  }),
   orderBy: z.preprocess(
     flexibleJsonPreprocess,
     z.union([
       OrderBySchema,
-      z.object({}).optional(), // 空对象
+      z.object({}).optional(),
       z.undefined(),
       z.null(),
     ]).optional(),
-  ).optional(),
+  ).optional().openapi({
+    type: "object",
+    description: "排序配置，支持复杂条件",
+    example: {
+      createdAt: "desc",
+      name: "asc",
+    },
+  }),
   join: z.preprocess(
     flexibleJsonPreprocess,
     z.union([
       JoinConfigSchema,
-      z.object({}).optional(), // 空对象
+      z.object({}).optional(),
       z.undefined(),
       z.null(),
     ]).optional(),
-  ).optional(),
-}).partial(); // 使整个对象的所有属性都变成可选的
+  ).optional().openapi({
+    type: "object",
+    description: "表连接配置，需要联系后端将表添加到白名单",
+    example: {
+      user: {
+        type: "left",
+        on: { userId: "id" },
+        as: "u",
+      },
+    },
+  }),
+}).partial();
 
 // 分页结果 Schema
 export function GetPaginatedResultSchema<T extends z.ZodTypeAny>(dataSchema: z.ZodSchema): z.ZodObject<{

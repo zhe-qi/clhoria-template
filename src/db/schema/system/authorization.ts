@@ -79,30 +79,28 @@ export const routeMetaSchema = z.object({
 
 // 菜单项Schema
 export const menuItemSchema = z.object({
-  name: z.string().meta({ description: "路由名称" }),
-  path: z.string().meta({ description: "路由路径" }),
-  redirect: z.string().optional().meta({ description: "重定向路径" }),
-  component: z.string().optional().meta({ description: "组件路径" }),
+  name: z.string().openapi({ description: "路由名称" }),
+  path: z.string().openapi({ description: "路由路径" }),
+  redirect: z.string().optional().openapi({ description: "重定向路径" }),
+  component: z.string().optional().openapi({ description: "组件路径" }),
   meta: routeMetaSchema,
   get children() {
-    return z.array(menuItemSchema).optional().meta({
-      describe: "子菜单",
-      openapi: {
-        description: "子菜单项列表",
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/menuItemSchema",
-        },
+    return z.array(menuItemSchema).optional().openapi({
+      description: "子菜单项列表",
+      type: "array",
+      items: {
+        $ref: "#/components/schemas/menuItemSchema",
       },
     });
   },
 });
 
-// 用户路由响应Schema - 避免循环引用，直接定义类型
+// 用户路由响应Schema
 export const userRoutesResponseSchema = z.object({
-  home: z.string().meta({ description: "首页路由" }),
-  routes: z.array(z.any()).meta({ description: "路由列表" }),
+  home: z.string().openapi({ description: "首页路由" }),
+  routes: z.array(menuItemSchema).openapi({ description: "路由列表" }),
 });
+
 // 获取用户角色的Schema
 export const getUserRolesSchema = z.object({
   userId: z.string().meta({ description: "用户ID" }),

@@ -90,14 +90,14 @@ export const assignUsersToRole: SystemAuthorizationRouteHandlerType<"assignUsers
 
 // 获取用户路由
 export const getUserRoutes: SystemAuthorizationRouteHandlerType<"getUserRoutes"> = async (c) => {
-  const { userId } = c.req.valid("param");
+  const { id } = c.req.valid("param");
   const { domain: queryDomain } = c.req.valid("query");
   const userDomain = c.get("userDomain");
   const domain = queryDomain || userDomain;
 
   // 检查用户是否存在
   const user = await db.query.systemUser.findFirst({
-    where: (table, { eq }) => eq(table.id, userId),
+    where: (table, { eq }) => eq(table.id, id),
   });
 
   if (!user) {
@@ -105,7 +105,7 @@ export const getUserRoutes: SystemAuthorizationRouteHandlerType<"getUserRoutes">
   }
 
   // 获取用户路由
-  const userRoutes = await menuService.getUserRoutesSimple(userId, domain);
+  const userRoutes = await menuService.getUserRoutesSimple(id, domain);
 
   return c.json(userRoutes, HttpStatusCodes.OK);
 };

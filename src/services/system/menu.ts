@@ -3,7 +3,7 @@ import type { InferSelectModel } from "drizzle-orm";
 
 import { and, eq, inArray } from "drizzle-orm";
 
-import type { insertSystemMenuSchema, menuItemSchema, patchSystemMenuSchema, routeMetaSchema } from "@/db/schema";
+import type { insertSystemMenuSchema, menuItemSchema, patchSystemMenuSchema, routeMetaSchema, userRoutesResponseSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemMenu, systemRoleMenu } from "@/db/schema";
@@ -439,7 +439,7 @@ export async function getConstantRoutes(domain: string = "default") {
 /**
  * 获取用户路由（简化版，用于 sys-menus handlers）
  */
-export async function getUserRoutesSimple(userId: string, domain: string) {
+export async function getUserRoutesSimple(userId: string, domain: string): Promise<z.infer<typeof userRoutesResponseSchema>> {
   // 获取用户的所有角色（包括隐式角色）
   const roles = await rbac.getImplicitRolesForUser(userId, domain);
 
@@ -450,8 +450,18 @@ export async function getUserRoutesSimple(userId: string, domain: string) {
   // 使用公共函数获取菜单数据（排除常量菜单）
   const menus = await getMenusByRoles(roles, domain, false);
 
-  // 直接返回优化后的菜单树结构
-  const menuTree = buildMenuTree(menus);
+  // 构建菜单树并转换为MenuItem格式
+  const menuTreeData = buildMenuTree(menus);
+
+  // 递归转换为MenuItem格式
+  const transformTree = (nodes: Array<SelectMenuData & TreeNode<SelectMenuData>>): MenuItem[] => {
+    return nodes.map(node => ({
+      ...transformToMenuItem(node),
+      children: node.children ? transformTree(node.children as Array<SelectMenuData & TreeNode<SelectMenuData>>) : undefined,
+    }));
+  };
+
+  const menuTree = transformTree(menuTreeData);
 
   return {
     routes: menuTree,

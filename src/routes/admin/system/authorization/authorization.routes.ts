@@ -135,12 +135,15 @@ export const getUserRoutes = createRoute({
   },
   summary: "获取用户路由",
   method: "get",
-  path: `${routePrefix}/users/{userId}/routes`,
+  path: "/system/authorization/users/{userId}/routes",
   request: {
-    params: IdUUIDParamsSchema.extend({
-      userId: IdUUIDParamsSchema.shape.id.meta({ description: "用户ID" }),
-    }).omit({ id: true }),
-    query: getUserRoutesSchema.omit({ userId: true }),
+    params: IdUUIDParamsSchema,
+    query: z.object({
+      domain: z.string().openapi({
+        description: "域",
+        example: "default",
+      }),
+    }),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -149,14 +152,15 @@ export const getUserRoutes = createRoute({
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(getUserRoutesSchema),
-      "请求参数错误",
+      "请求参数验证失败",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       notFoundSchema,
       "用户不存在",
     ),
   },
-});
+}); ;
+
 /** 获取用户角色 */
 export const getUserRoles = createRoute({
   tags,

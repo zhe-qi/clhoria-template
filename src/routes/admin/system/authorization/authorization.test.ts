@@ -235,7 +235,7 @@ describe("authorization management", () => {
     it("should get user routes", async () => {
       const response = await authorizationClient.system.authorization.users[":userId"].routes.$get(
         {
-          param: { userId: testUserId },
+          param: { id: testUserId },
           query: { domain: "default" },
         },
         {
