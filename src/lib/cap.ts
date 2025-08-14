@@ -1,97 +1,62 @@
 import Cap from "@cap.js/server";
-import { and, eq, gt, lte } from "drizzle-orm";
 
-import db from "@/db";
-import { capChallenges, capTokens } from "@/db/schema";
-import { formatDate } from "@/utils";
+import { redisClient } from "@/lib/redis";
 
 /**
  * Cap.js 验证码服务实例
- * 使用PostgreSQL数据库存储挑战和token数据
+ * 使用Redis缓存存储挑战和token数据，支持自动过期清理
  */
 export const cap = new Cap({
   storage: {
     challenges: {
       store: async (token, challengeData) => {
-        await db.insert(capChallenges).values({
-          token,
-          data: JSON.stringify(challengeData),
-          expires: formatDate(new Date(challengeData.expires)),
-        }).onConflictDoUpdate({
-          target: capChallenges.token,
-          set: {
-            data: JSON.stringify(challengeData),
-            expires: formatDate(new Date(challengeData.expires)),
-          },
-        });
+        const key = `cap:challenge:${token}`;
+        const ttlSeconds = Math.ceil((challengeData.expires - Date.now()) / 1000);
+        if (ttlSeconds > 0) {
+          await redisClient.setex(key, ttlSeconds, JSON.stringify(challengeData));
+        }
       },
       read: async (token) => {
-        const [row] = await db.select({
-          data: capChallenges.data,
-          expires: capChallenges.expires,
-        })
-          .from(capChallenges)
-          .where(and(
-            eq(capChallenges.token, token),
-            gt(capChallenges.expires, formatDate(new Date())),
-          ))
-          .limit(1);
-
-        return row
-          ? { challenge: JSON.parse(row.data), expires: new Date(row.expires).getTime() }
-          : null;
+        const key = `cap:challenge:${token}`;
+        const data = await redisClient.get(key);
+        if (!data) {
+          return null;
+        }
+        const challengeData = JSON.parse(data);
+        return {
+          challenge: challengeData,
+          expires: challengeData.expires,
+        };
       },
       delete: async (token) => {
-        await db.delete(capChallenges)
-          .where(eq(capChallenges.token, token));
+        const key = `cap:challenge:${token}`;
+        await redisClient.del(key);
       },
       listExpired: async () => {
-        const rows = await db.select({
-          token: capChallenges.token,
-        })
-          .from(capChallenges)
-          .where(lte(capChallenges.expires, formatDate(new Date())));
-
-        return rows.map(row => row.token);
+        // Redis自动过期处理，无需手动清理过期数据
+        return [];
       },
     },
     tokens: {
       store: async (tokenKey, expires) => {
-        await db.insert(capTokens).values({
-          key: tokenKey,
-          expires: formatDate(new Date(expires)),
-        }).onConflictDoUpdate({
-          target: capTokens.key,
-          set: {
-            expires: formatDate(new Date(expires)),
-          },
-        });
+        const key = `cap:token:${tokenKey}`;
+        const ttlSeconds = Math.ceil((expires - Date.now()) / 1000);
+        if (ttlSeconds > 0) {
+          await redisClient.setex(key, ttlSeconds, expires.toString());
+        }
       },
       get: async (tokenKey) => {
-        const [row] = await db.select({
-          expires: capTokens.expires,
-        })
-          .from(capTokens)
-          .where(and(
-            eq(capTokens.key, tokenKey),
-            gt(capTokens.expires, formatDate(new Date())),
-          ))
-          .limit(1);
-
-        return row ? new Date(row.expires).getTime() : null;
+        const key = `cap:token:${tokenKey}`;
+        const expiresStr = await redisClient.get(key);
+        return expiresStr ? Number.parseInt(expiresStr, 10) : null;
       },
       delete: async (tokenKey) => {
-        await db.delete(capTokens)
-          .where(eq(capTokens.key, tokenKey));
+        const key = `cap:token:${tokenKey}`;
+        await redisClient.del(key);
       },
       listExpired: async () => {
-        const rows = await db.select({
-          key: capTokens.key,
-        })
-          .from(capTokens)
-          .where(lte(capTokens.expires, formatDate(new Date())));
-
-        return rows.map(row => row.key);
+        // Redis自动过期处理，无需手动清理过期数据
+        return [];
       },
     },
   },
