@@ -30,7 +30,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof selectTsOperationLogSchema>(selectTsOperationLogSchema),
+      GetPaginatedResultSchema(selectTsOperationLogSchema),
       "操作日志列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

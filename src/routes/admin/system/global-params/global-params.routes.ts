@@ -34,7 +34,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof responseGlobalParamsSchema>(responseGlobalParamsSchema),
+      GetPaginatedResultSchema(responseGlobalParamsSchema),
       "全局参数列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

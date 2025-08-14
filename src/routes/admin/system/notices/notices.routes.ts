@@ -33,7 +33,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof responseSystemNoticesSchema>(responseSystemNoticesSchema),
+      GetPaginatedResultSchema(responseSystemNoticesSchema),
       "获取通知公告列表成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

@@ -33,7 +33,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof responseSystemNoticesSchema>(responseSystemNoticesSchema).or(z.array(responseSystemNoticesSchema)),
+      GetPaginatedResultSchema(responseSystemNoticesSchema).or(z.array(responseSystemNoticesSchema)),
       "获取通知公告列表成功，有分页参数时返回分页结果，无分页参数时返回数组",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(

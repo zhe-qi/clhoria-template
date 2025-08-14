@@ -157,16 +157,9 @@ export const PaginationParamsSchema = z.object({
 }).partial();
 
 // 分页结果 Schema
-export function GetPaginatedResultSchema<T extends z.ZodTypeAny>(dataSchema: z.ZodSchema): z.ZodObject<{
-  data: z.ZodArray<T>;
-  meta: z.ZodObject<{
-    total: z.ZodNumber;
-    skip: z.ZodNumber;
-    take: z.ZodNumber;
-  }>;
-}> {
+export function GetPaginatedResultSchema<T extends z.ZodTypeAny>(dataSchema: T) {
   return z.object({
-    data: z.array(dataSchema) as z.ZodArray<T>,
+    data: z.array(dataSchema),
     meta: z.object({
       total: z.number().meta({ description: "总条数" }),
       skip: z.number().meta({ description: "页码" }),

@@ -26,7 +26,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof selectSysEndpointSchema>(selectSysEndpointSchema),
+      GetPaginatedResultSchema(selectSysEndpointSchema),
       "API端点列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

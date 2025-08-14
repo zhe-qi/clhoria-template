@@ -25,7 +25,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof selectTsLoginLogSchema>(selectTsLoginLogSchema),
+      GetPaginatedResultSchema(selectTsLoginLogSchema),
       "登录日志列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

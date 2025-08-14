@@ -49,7 +49,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof selectSystemScheduledJobsSchema>(selectSystemScheduledJobsSchema),
+      GetPaginatedResultSchema(selectSystemScheduledJobsSchema),
       "定时任务列表获取成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -234,7 +234,7 @@ export const getExecutionHistory = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema<typeof selectSystemJobExecutionLogsSchema>(selectSystemJobExecutionLogsSchema),
+      GetPaginatedResultSchema(selectSystemJobExecutionLogsSchema),
       "执行历史获取成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "任务不存在"),
