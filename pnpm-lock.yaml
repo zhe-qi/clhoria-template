@@ -75,8 +75,8 @@ importers:
         specifier: ^4.9.1
         version: 4.9.1
       hono-pino:
-        specifier: ^0.10.1
-        version: 0.10.1(hono@4.9.1)(pino@9.9.0)
+        specifier: ^0.10.2
+        version: 0.10.2(hono@4.9.1)(pino@9.9.0)
       hono-rate-limiter:
         specifier: ^0.4.2
         version: 0.4.2(hono@4.9.1)
@@ -2904,8 +2904,8 @@ packages:
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
-  hono-pino@0.10.1:
-    resolution: {integrity: sha512-kkm5A5YHsXFBcmPMZ9VTV4A1HMdcQ2HmfogI9oitE4jWa91gTHuvFFuILuD+Bo0pU33cGyF+NfWeq3fo2LNmSg==}
+  hono-pino@0.10.2:
+    resolution: {integrity: sha512-h8h4jODUoWdY7n7J1GsOO5Szpf0KH0+bdh8inJVTFrud/R/cxNjKty/pEaJIYSY9+enP0dfAiY+gjXTEFkARYg==}
     engines: {node: '>=18'}
     peerDependencies:
       hono: '>=4.0.0'
@@ -7230,7 +7230,7 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono-pino@0.10.1(hono@4.9.1)(pino@9.9.0):
+  hono-pino@0.10.2(hono@4.9.1)(pino@9.9.0):
     dependencies:
       defu: 6.1.4
       hono: 4.9.1

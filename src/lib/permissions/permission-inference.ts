@@ -1,13 +1,9 @@
 import type { RouteConfig } from "@hono/zod-openapi";
 
-import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
+import type { PermissionConfig } from "@/utils/tools/permission";
 
 import { PermissionAction, PermissionResource } from "@/lib/enums";
-
-export interface PermissionConfig {
-  resource: PermissionResourceType;
-  action: PermissionActionType;
-}
+import { parsePermission } from "@/utils/tools/permission";
 
 /**
  * 从 operationId 推断权限配置
@@ -23,16 +19,7 @@ export function inferPermissionFromOperationId(operationId: string): PermissionC
     throw new Error(`Invalid operationId format: ${operationId}. Expected "resource:action"`);
   }
 
-  const [resource, action] = operationId.split(":");
-
-  if (!resource || !action) {
-    throw new Error(`Invalid operationId format: ${operationId}. Expected "resource:action"`);
-  }
-
-  return {
-    resource: resource as PermissionResourceType,
-    action: action as PermissionActionType,
-  };
+  return parsePermission(operationId);
 }
 
 /**

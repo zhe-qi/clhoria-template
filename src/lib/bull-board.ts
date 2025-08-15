@@ -3,7 +3,7 @@ import { BullMQAdapter } from "@bull-board/api/bullMQAdapter.js";
 import { HonoAdapter } from "@bull-board/hono";
 import { serveStatic } from "@hono/node-server/serve-static";
 
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 import { getScheduler } from "../jobs/scheduler";
 

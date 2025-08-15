@@ -1,6 +1,6 @@
 import { toZonedTime, format as tzFormat } from "date-fns-tz";
 
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * 格式化日期

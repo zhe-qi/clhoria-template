@@ -1,4 +1,4 @@
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * 设置优雅关闭处理

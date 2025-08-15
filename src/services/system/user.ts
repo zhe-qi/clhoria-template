@@ -10,7 +10,7 @@ import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
 import { CacheConfig, getPermissionResultKey, getUserRolesKey, getUserStatusKey, LoginLogType, TokenStatus } from "@/lib/enums";
 import { clearUserCache } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
-import { redisClient } from "@/lib/redis";
+import redisClient from "@/lib/redis";
 import { getIPAddress } from "@/services/ip";
 import { TimescaleLogService } from "@/services/logging";
 import { formatDate } from "@/utils/tools/formatter";

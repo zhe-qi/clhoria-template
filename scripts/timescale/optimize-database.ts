@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 import { optimizeForWrites, showCurrentConfig } from "@/db/timescale";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * 数据库性能优化脚本

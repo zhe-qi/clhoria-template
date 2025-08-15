@@ -2,7 +2,7 @@
 
 import { v7 as uuidV7 } from "uuid";
 
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { TimescaleLogService } from "@/services/logging";
 import { formatDate } from "@/utils/tools/formatter";
 

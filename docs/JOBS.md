@@ -65,7 +65,7 @@ await scheduler.initialize();
 // src/jobs/handlers/my-tasks.ts
 import type { Job } from "bullmq";
 
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 import type { JobHandler } from "../types";
 

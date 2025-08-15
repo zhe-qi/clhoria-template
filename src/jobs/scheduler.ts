@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import db from "@/db";
 import { systemScheduledJobs } from "@/db/schema";
 import { JobStatus } from "@/lib/enums";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 import type { ScheduledJobConfig } from "./types";
 

@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 
 import db from "@/db";
 import { checkTimescaleExtension, setupHypertables } from "@/db/timescale";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * 从现有的日志表迁移数据到 TimescaleDB hypertables
@@ -37,15 +37,15 @@ async function migrateToTimescale() {
       logger.info("开始迁移登录日志数据...");
       await db.execute(sql`
         INSERT INTO ts_login_log (
-          id, user_id, username, domain, login_time, 
-          ip, port, address, user_agent, request_id, 
-          type, created_by, created_at
-        )
-        SELECT 
           id, user_id, username, domain, login_time,
           ip, port, address, user_agent, request_id,
           type, created_by, created_at
-        FROM system_login_log 
+        )
+        SELECT
+          id, user_id, username, domain, login_time,
+          ip, port, address, user_agent, request_id,
+          type, created_by, created_at
+        FROM system_login_log
         ORDER BY login_time
       `);
       logger.info("登录日志数据迁移完成");
@@ -61,12 +61,12 @@ async function migrateToTimescale() {
           user_agent, params, body, response,
           start_time, end_time, duration, created_by, created_at
         )
-        SELECT 
+        SELECT
           id, user_id, username, domain, module_name,
           description, request_id, method, url, ip,
           user_agent, params, body, response,
           start_time, end_time, duration, created_by, created_at
-        FROM system_operation_log 
+        FROM system_operation_log
         ORDER BY start_time
       `);
       logger.info("操作日志数据迁移完成");
@@ -111,13 +111,13 @@ async function backupOriginalTables() {
 
     // 备份登录日志表
     await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS system_login_log_backup AS 
+      CREATE TABLE IF NOT EXISTS system_login_log_backup AS
       SELECT * FROM system_login_log
     `);
 
     // 备份操作日志表
     await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS system_operation_log_backup AS 
+      CREATE TABLE IF NOT EXISTS system_operation_log_backup AS
       SELECT * FROM system_operation_log
     `);
 

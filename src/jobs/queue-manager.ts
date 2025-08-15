@@ -4,8 +4,8 @@ import { formatDate } from "date-fns";
 import type { JobExecutionStatusType } from "@/lib/enums";
 
 import { JobExecutionStatus } from "@/lib/enums";
-import { logger } from "@/lib/logger";
-import { redisClient } from "@/lib/redis";
+import logger from "@/lib/logger";
+import redisClient from "@/lib/redis";
 
 import type {
   AddJobOptions,

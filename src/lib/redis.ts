@@ -5,7 +5,9 @@ import env from "@/env";
 
 export const redisConnectionOptions = parseURL(env.REDIS_URL);
 
-export const redisClient = new Redis({
+const redisClient = new Redis({
   ...redisConnectionOptions,
   maxRetriesPerRequest: null,
 });
+
+export default redisClient;

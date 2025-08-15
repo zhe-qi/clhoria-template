@@ -10,7 +10,7 @@ import { systemMenu, systemRoleMenu } from "@/db/schema";
 import { getUserMenusKey, Status } from "@/lib/enums";
 import paginatedQuery from "@/lib/pagination";
 import * as rbac from "@/lib/permissions/casbin/rbac";
-import { redisClient } from "@/lib/redis";
+import redisClient from "@/lib/redis";
 
 import { getUserRolesFromCache } from "./user";
 

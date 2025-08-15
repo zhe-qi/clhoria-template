@@ -5,7 +5,7 @@ import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 import db from "@/db";
 import { systemEndpoint, systemRoleMenu, systemUserRole } from "@/db/schema";
 import { getPermissionResultKey, getUserMenusKey, getUserRolesKey } from "@/lib/enums";
-import { redisClient } from "@/lib/redis";
+import redisClient from "@/lib/redis";
 import { compareObjects } from "@/utils/tools/object";
 
 import * as rbac from "./casbin/rbac";

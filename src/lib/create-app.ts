@@ -16,7 +16,7 @@ import { v7 as uuidV7 } from "uuid";
 
 import type { AppBindings, AppOpenAPI } from "@/types/lib";
 
-import { redisClient } from "@/lib/redis";
+import redisClient from "@/lib/redis";
 import { pinoLogger } from "@/middlewares/pino-logger";
 
 export function createRouter() {

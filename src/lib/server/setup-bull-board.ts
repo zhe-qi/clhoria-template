@@ -4,7 +4,7 @@ import type { AppBindings } from "@/types/lib";
 
 import env from "@/env";
 import { initializeBullBoard } from "@/lib/bull-board";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { jwtWithQuery } from "@/middlewares/special/jwt-auth-with-query";
 
 /**

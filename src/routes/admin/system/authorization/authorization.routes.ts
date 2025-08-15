@@ -135,7 +135,7 @@ export const getUserRoutes = createRoute({
   },
   summary: "获取用户路由",
   method: "get",
-  path: "/system/authorization/users/{userId}/routes",
+  path: "/system/authorization/users/{id}/routes",
   request: {
     params: IdUUIDParamsSchema,
     query: z.object({

@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 import { checkTimescaleExtension, createTimescaleExtension, setupHypertables } from "@/db/timescale";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * TimescaleDB 初始化脚本

@@ -1,6 +1,5 @@
 import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
-
-import type { PermissionConfig } from "./permission-inference";
+import type { PermissionConfig } from "@/utils/tools/permission";
 
 /**
  * 端点权限信息
@@ -202,18 +201,4 @@ export function isPermissionMatch(
  */
 export function permissionToString(permission: PermissionConfig): string {
   return `${permission.resource}:${permission.action}`;
-}
-
-/**
- * 字符串转权限配置
- */
-export function stringToPermission(str: string): PermissionConfig {
-  const [resource, action] = str.split(":");
-  if (!resource || !action) {
-    throw new Error(`Invalid permission string format: ${str}`);
-  }
-  return {
-    resource: resource as PermissionResourceType,
-    action: action as PermissionActionType,
-  };
 }

@@ -1,5 +1,5 @@
 import env from "@/env";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * 打印服务启动消息

@@ -206,10 +206,9 @@ describe("authorization management", () => {
     });
 
     it("should get user roles", async () => {
-      // @ts-expect-error - 参数测试
-      const response = await authorizationClient.system.authorization.users[":id"].roles.$get(
+      const response = await authorizationClient.system.authorization.users[":userId"].roles.$get(
         {
-          param: { id: testUserId },
+          param: { userId: testUserId },
           query: { domain: "default" },
         },
         {
@@ -234,7 +233,7 @@ describe("authorization management", () => {
     });
 
     it("should get user routes", async () => {
-      const response = await authorizationClient.system.authorization.users[":userId"].routes.$get(
+      const response = await authorizationClient.system.authorization.users[":id"].routes.$get(
         {
           param: { id: testUserId },
           query: { domain: "default" },

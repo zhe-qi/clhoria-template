@@ -138,9 +138,9 @@ export const getExecutionHistory: SystemScheduledJobsRouteHandlerType<"getExecut
   const options = {
     page: Math.floor((query.skip || 0) / (query.take || 10)) + 1,
     limit: query.take || 10,
-    status: query.where?.status,
-    startDate: query.where?.startDate ? new Date(query.where.startDate) : undefined,
-    endDate: query.where?.endDate ? new Date(query.where.endDate) : undefined,
+    status: typeof query.where?.status === "string" ? query.where.status : undefined,
+    startDate: typeof query.where?.startDate === "string" ? new Date(query.where.startDate) : undefined,
+    endDate: typeof query.where?.endDate === "string" ? new Date(query.where.endDate) : undefined,
   };
 
   const { data, total } = await scheduledJobsService.getJobExecutionHistory(id, domain, options);

@@ -4,7 +4,7 @@ import path from "node:path";
 
 import db from "@/db";
 import { systemJobHandlers } from "@/db/schema";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { formatDate } from "@/utils/tools/formatter";
 
 import type { JobHandlerMeta } from "./types";

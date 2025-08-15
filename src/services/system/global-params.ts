@@ -8,9 +8,9 @@ import db from "@/db";
 import { globalParams } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { CacheConfig, getGlobalParamKey, getGlobalParamsAllKey } from "@/lib/enums/cache";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import paginatedQuery from "@/lib/pagination";
-import { redisClient } from "@/lib/redis";
+import redisClient from "@/lib/redis";
 import { formatDate } from "@/utils/tools/formatter";
 
 export interface GlobalParamsListOptions {

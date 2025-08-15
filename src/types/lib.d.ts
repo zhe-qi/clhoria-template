@@ -2,7 +2,7 @@ import type { RouteConfig as HonoRouteConfig, OpenAPIHono, RouteHandler } from "
 import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
 
-import type { PermissionConfig } from "@/lib/permissions";
+import type { PermissionConfig } from "@/utils/tools/permission";
 
 export interface AppBindings {
   Variables: {

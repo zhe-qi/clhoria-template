@@ -4,7 +4,7 @@ import type { AppBindings } from "@/types/lib";
 
 import { adminApp } from "@/app";
 import { initializeScheduler } from "@/jobs/scheduler";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { collectAndSyncEndpointPermissions } from "@/lib/permissions";
 
 import { setupBullBoard } from "./setup-bull-board";

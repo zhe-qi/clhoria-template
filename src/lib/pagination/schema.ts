@@ -14,14 +14,14 @@ export const JoinConfigSchema = z.record(z.string(), JoinConditionSchema);
 
 // Where 操作符 Schema
 export const WhereOperatorSchema = z.object({
-  equals: z.any().optional(),
-  not: z.any().optional(),
-  in: z.array(z.any()).optional(),
-  notIn: z.array(z.any()).optional(),
-  lt: z.any().optional(),
-  lte: z.any().optional(),
-  gt: z.any().optional(),
-  gte: z.any().optional(),
+  equals: z.unknown().optional(),
+  not: z.unknown().optional(),
+  in: z.array(z.unknown()).optional(),
+  notIn: z.array(z.unknown()).optional(),
+  lt: z.unknown().optional(),
+  lte: z.unknown().optional(),
+  gt: z.unknown().optional(),
+  gte: z.unknown().optional(),
   contains: z.string().optional(),
   startsWith: z.string().optional(),
   endsWith: z.string().optional(),
@@ -30,7 +30,7 @@ export const WhereOperatorSchema = z.object({
 // 定义递归类型的基础结构
 function makeWhereConditionSchema() {
   // 创建一个递归引用占位符
-  const baseSchema = z.record(z.string(), z.any());
+  const baseSchema = z.record(z.string(), z.unknown());
 
   // 定义条件组结构
   const conditionGroup = z.object({
@@ -43,7 +43,7 @@ function makeWhereConditionSchema() {
   return z.record(
     z.string(),
     z.union([
-      z.any(),
+      z.unknown(),
       WhereOperatorSchema,
       conditionGroup,
     ]),
@@ -60,7 +60,7 @@ export const OrderBySchema = z.union([
 ]);
 
 // 更灵活的预处理函数，支持 null、undefined、空字符串、空对象和正常JSON字符串
-function flexibleJsonPreprocess(val: any) {
+function flexibleJsonPreprocess(val: unknown): unknown {
   // 如果是 undefined 或 null，直接返回 undefined
   if (val === undefined || val === null) {
     return undefined;

@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 
 import db from "@/db";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * 优化 PostgreSQL 和 TimescaleDB 配置以提升写入性能

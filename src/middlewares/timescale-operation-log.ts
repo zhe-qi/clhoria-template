@@ -4,7 +4,7 @@ import type { JWTPayload } from "hono/utils/jwt/types";
 import { differenceInMilliseconds, formatISO } from "date-fns";
 import { v7 as uuidV7 } from "uuid";
 
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { TimescaleLogService } from "@/services/logging";
 
 interface OperationLogOptions {

@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 
 import db from "@/db";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 /**
  * 创建 TimescaleDB 扩展

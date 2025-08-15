@@ -5,7 +5,7 @@ import type { AppOpenAPI } from "@/types/lib";
 
 import db from "@/db";
 import { systemEndpoint } from "@/db/schema/system/endpoint";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { compareObjects } from "@/utils";
 
 import type { EndpointPermission } from "./permission-config";

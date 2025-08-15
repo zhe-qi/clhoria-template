@@ -30,5 +30,7 @@ export default antfu({
       case: "kebabCase",
       ignore: ["README.md"],
     }],
+    // 顶层函数允许使用箭头函数
+    "antfu/top-level-function": "off",
   },
 });

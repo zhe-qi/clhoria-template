@@ -25,7 +25,7 @@ const db = drizzle({
   // 自动在数据库使用 snake_case 命名风格
   casing: "snake_case",
   // 开发环境数据库日志
-  // logger: env.NODE_ENV !== "production",
+  logger: false, // 或者 env.NODE_ENV !== "production"
 });
 
 export default db;

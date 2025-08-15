@@ -1,6 +1,6 @@
 import { pinoLogger as honoLogger } from "hono-pino";
 
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 export function pinoLogger() {
   return honoLogger({

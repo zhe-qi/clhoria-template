@@ -10,7 +10,7 @@ import { getJobMonitor } from "@/jobs/monitoring";
 import { getAvailableHandlerNames, validateHandlerName } from "@/jobs/registry";
 import { getScheduler } from "@/jobs/scheduler";
 import { JobStatus } from "@/lib/enums";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import paginatedQuery from "@/lib/pagination";
 import { formatDate } from "@/utils/tools/formatter";
 

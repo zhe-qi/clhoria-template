@@ -1,7 +1,7 @@
 import iconv from "iconv-lite";
 import { Buffer } from "node:buffer";
 
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 
 interface IPLocationResponse {
   addr: string;

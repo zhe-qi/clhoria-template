@@ -6,7 +6,7 @@ import { and, count, eq, lt, or } from "drizzle-orm";
 import db from "@/db";
 import { systemTokens } from "@/db/schema";
 import { TokenStatus } from "@/lib/enums";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { formatDate } from "@/utils/tools/formatter";
 
 import type { JobHandler } from "../types";

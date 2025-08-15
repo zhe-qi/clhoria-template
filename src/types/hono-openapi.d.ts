@@ -1,5 +1,5 @@
 import type { PermissionConfigOptions } from "@/lib/permissions/permission-config";
-import type { PermissionConfig } from "@/lib/permissions/permission-inference";
+import type { PermissionConfig } from "@/utils/tools/permission";
 
 declare module "@hono/zod-openapi" {
   interface RouteConfig {

@@ -6,7 +6,7 @@ import { and, count, desc, eq, gte, lt } from "drizzle-orm";
 import db from "@/db";
 import { systemJobExecutionLogs } from "@/db/schema";
 import { JobExecutionStatus } from "@/lib/enums";
-import { logger } from "@/lib/logger";
+import logger from "@/lib/logger";
 import { formatDate } from "@/utils/tools/formatter";
 
 import type { JobResult } from "./types";

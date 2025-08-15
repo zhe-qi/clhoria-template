@@ -2,8 +2,6 @@ import { and, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
-import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
-
 import db from "@/db";
 import { systemUser } from "@/db/schema";
 import {
@@ -14,6 +12,7 @@ import * as rbac from "@/lib/permissions/casbin/rbac";
 import * as menuService from "@/services/system/menu";
 import { assignRolesToUser as assignRolesToUserService, clearUserPermissionCache } from "@/services/system/user";
 import { pickContext } from "@/utils";
+import { parsePermissions } from "@/utils/tools/permission";
 
 import type { SystemAuthorizationRouteHandlerType } from "./authorization.index";
 
@@ -34,13 +33,7 @@ export const assignPermissionsToRole: SystemAuthorizationRouteHandlerType<"assig
   }
 
   // 将权限字符串转换为对象格式
-  const permissionObjects = permissions.map((perm: string) => {
-    const [resource, action] = perm.split(":");
-    return {
-      resource: resource as PermissionResourceType,
-      action: action as PermissionActionType,
-    };
-  });
+  const permissionObjects = parsePermissions(permissions);
 
   const result = await assignPermissionsToRoleLib(roleId, permissionObjects, currentDomain);
 
@@ -145,10 +138,13 @@ export const getUserRoles: SystemAuthorizationRouteHandlerType<"getUserRoles"> =
     },
   });
 
-  const roles = userRoles.map(ur => ur.role);
+  // 过滤掉空的角色数据，确保返回的都是有效角色
+  const roles = userRoles
+    .map(ur => ur.role)
+    .filter(role => role !== null);
 
   return c.json(roles, HttpStatusCodes.OK);
-};
+}; ;
 
 // 获取角色权限
 export const getRolePermissions: SystemAuthorizationRouteHandlerType<"getRolePermissions"> = async (c) => {
