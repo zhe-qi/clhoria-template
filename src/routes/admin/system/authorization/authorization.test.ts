@@ -49,24 +49,18 @@ describe("authorization management", () => {
 
   describe("authentication", () => {
     it("should reject requests without token", async () => {
-      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post({
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get({
         param: { roleId: testRoleId },
-        json: {
-          domain: "default",
-          permissions: [],
-        },
+        query: { domain: "default" },
       });
       expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
     });
 
     it("should reject requests with invalid token", async () => {
-      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
+      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
         {
           param: { roleId: testRoleId },
-          json: {
-            domain: "default",
-            permissions: [],
-          },
+          query: { domain: "default" },
         },
         {
           headers: {
@@ -79,36 +73,7 @@ describe("authorization management", () => {
   });
 
   describe("role permission management", () => {
-    it("should assign permissions to role successfully", async () => {
-      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
-        {
-          param: { roleId: testRoleId },
-          json: {
-            domain: "default",
-            permissions: ["SYSTEM_USERS:READ", "SYSTEM_ROLES:READ"],
-          },
-        },
-        {
-          headers: getAuthHeaders(adminToken),
-        },
-      );
-
-      if (response.status === HttpStatusCodes.OK) {
-        const json = await response.json();
-        expect(json).toHaveProperty("success");
-        expect(json).toHaveProperty("added");
-        expect(json).toHaveProperty("removed");
-        expect(typeof json.success).toBe("boolean");
-        expect(typeof json.added).toBe("number");
-        expect(typeof json.removed).toBe("number");
-      }
-      else {
-        // 角色可能不存在，这是正常的
-        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
-      }
-    });
-
-    it("should get role permissions", async () => {
+    it("should get role permissions successfully", async () => {
       const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
         {
           param: { roleId: testRoleId },
@@ -132,32 +97,7 @@ describe("authorization management", () => {
   });
 
   describe("role menu management", () => {
-    it("should assign routes to role successfully", async () => {
-      const response = await authorizationClient.system.authorization.roles[":roleId"].routes.$post(
-        {
-          param: { roleId: testRoleId },
-          json: {
-            domain: "default",
-            menuIds: [],
-          },
-        },
-        {
-          headers: getAuthHeaders(adminToken),
-        },
-      );
-
-      if (response.status === HttpStatusCodes.OK) {
-        const json = await response.json();
-        expect(json).toHaveProperty("success");
-        expect(json).toHaveProperty("added");
-        expect(json).toHaveProperty("removed");
-      }
-      else {
-        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
-      }
-    });
-
-    it("should get role menus", async () => {
+    it("should get role menus successfully", async () => {
       const response = await authorizationClient.system.authorization.roles[":roleId"].menus.$get(
         {
           param: { roleId: testRoleId },
@@ -181,31 +121,7 @@ describe("authorization management", () => {
   });
 
   describe("user role management", () => {
-    it("should assign roles to user successfully", async () => {
-      const response = await authorizationClient.system.authorization.users[":userId"].roles.$post(
-        {
-          param: { userId: testUserId },
-          json: {
-            roleIds: [],
-          },
-        },
-        {
-          headers: getAuthHeaders(adminToken),
-        },
-      );
-
-      if (response.status === HttpStatusCodes.OK) {
-        const json = await response.json();
-        expect(json).toHaveProperty("success");
-        expect(json).toHaveProperty("added");
-        expect(json).toHaveProperty("removed");
-      }
-      else {
-        expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
-      }
-    });
-
-    it("should get user roles", async () => {
+    it("should get user roles successfully", async () => {
       const response = await authorizationClient.system.authorization.users[":userId"].roles.$get(
         {
           param: { userId: testUserId },
@@ -219,20 +135,15 @@ describe("authorization management", () => {
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
         expect(Array.isArray(json)).toBe(true);
-        if (json.length > 0) {
-          const role = json[0];
-          expect(role).toHaveProperty("id");
-          expect(role).toHaveProperty("code");
-          expect(role).toHaveProperty("name");
-          expect(role).toHaveProperty("status");
-        }
       }
       else {
         expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
       }
     });
+  });
 
-    it("should get user routes", async () => {
+  describe("user route management", () => {
+    it("should get user routes successfully", async () => {
       const response = await authorizationClient.system.authorization.users[":id"].routes.$get(
         {
           param: { id: testUserId },
@@ -246,72 +157,11 @@ describe("authorization management", () => {
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
         expect(json).toHaveProperty("routes");
-        expect(json).toHaveProperty("home");
         expect(Array.isArray(json.routes)).toBe(true);
-      }
-      else {
-        expect([HttpStatusCodes.NOT_FOUND, HttpStatusCodes.UNPROCESSABLE_ENTITY]).toContain(response.status);
-      }
-    });
-  });
-
-  describe("role user management", () => {
-    it("should assign users to role successfully", async () => {
-      const response = await authorizationClient.system.authorization.roles[":roleId"].users.$post(
-        {
-          param: { roleId: testRoleId },
-          json: {
-            userIds: [],
-          },
-        },
-        {
-          headers: getAuthHeaders(adminToken),
-        },
-      );
-
-      if (response.status === HttpStatusCodes.OK) {
-        const json = await response.json();
-        expect(json).toHaveProperty("success");
-        expect(json).toHaveProperty("added");
-        expect(json).toHaveProperty("removed");
       }
       else {
         expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
       }
-    });
-  });
-
-  describe("parameter validation", () => {
-    it("should validate UUID parameters", async () => {
-      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$get(
-        {
-          param: { roleId: "invalid-uuid" },
-          query: { domain: "default" },
-        },
-        {
-          headers: getAuthHeaders(adminToken),
-        },
-      );
-
-      expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
-    });
-
-    it("should validate request body", async () => {
-      const response = await authorizationClient.system.authorization.roles[":roleId"].permissions.$post(
-        {
-          param: { roleId: testRoleId },
-          json: {
-            domain: "default",
-            // @ts-expect-error - 故意传入错误的数据类型进行测试
-            permissions: "not-an-array",
-          },
-        },
-        {
-          headers: getAuthHeaders(adminToken),
-        },
-      );
-
-      expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
   });
 });

@@ -3,9 +3,8 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { PermissionActionType, PermissionResourceType } from "@/lib/enums";
 
 import db from "@/db";
-import { systemEndpoint, systemRoleMenu, systemUserRole } from "@/db/schema";
-import { getPermissionResultKey, getUserMenusKey, getUserRolesKey } from "@/lib/enums";
-import redisClient from "@/lib/redis";
+import { systemEndpoint, systemRoleMenu } from "@/db/schema";
+import { assignRolesToUser, clearRoleUsersPermissionCache } from "@/services/system/user";
 import { compareObjects } from "@/utils/tools/object";
 
 import * as rbac from "./casbin/rbac";
@@ -99,84 +98,44 @@ export async function assignMenusToRole(
 }
 
 /**
- * 为角色分配用户
+ * 为角色分配用户（基于 assignRolesToUser 实现，避免重复逻辑）
  */
 export async function assignUsersToRole(
   roleId: string,
   userIds: string[],
   domain: string,
 ) {
-  return db.transaction(async (tx) => {
-    // 获取当前角色的所有用户
-    const currentUsers = await rbac.getUsersForRole(roleId, domain);
-    const currentUserSet = new Set(currentUsers);
-    const newUserSet = new Set(userIds);
+  // 获取当前角色的所有用户
+  const currentUsers = await rbac.getUsersForRole(roleId, domain);
+  const currentUserSet = new Set(currentUsers);
+  const newUserSet = new Set(userIds);
 
-    // 找出需要添加的用户
-    const toAdd = userIds.filter(userId => !currentUserSet.has(userId));
-    // 找出需要删除的用户
-    const toRemove = currentUsers.filter(userId => !newUserSet.has(userId));
+  // 找出需要添加的用户
+  const toAdd = userIds.filter(userId => !currentUserSet.has(userId));
+  // 找出需要删除的用户
+  const toRemove = currentUsers.filter(userId => !newUserSet.has(userId));
 
-    // 更新 Casbin
-    const casbinOps = await Promise.all([
-      ...toAdd.map(userId => rbac.addRoleForUser(userId, roleId, domain)),
-      ...toRemove.map(userId => rbac.deleteRoleForUser(userId, roleId, domain)),
-    ]);
+  // 为每个用户分配/移除角色（复用 assignRolesToUser 逻辑）
+  const results = await Promise.all([
+    // 为新增用户添加角色
+    ...toAdd.map(async (userId) => {
+      const currentRoles = await rbac.getRolesForUser(userId, domain);
+      const newRoles = [...currentRoles, roleId];
+      return assignRolesToUser(userId, newRoles, domain, "system");
+    }),
+    // 为移除用户删除角色
+    ...toRemove.map(async (userId) => {
+      const currentRoles = await rbac.getRolesForUser(userId, domain);
+      const newRoles = currentRoles.filter(r => r !== roleId);
+      return assignRolesToUser(userId, newRoles, domain, "system");
+    }),
+  ]);
 
-    // 更新数据库
-    if (toRemove.length > 0) {
-      await tx
-        .delete(systemUserRole)
-        .where(and(
-          eq(systemUserRole.roleId, roleId),
-          eq(systemUserRole.domain, domain),
-          inArray(systemUserRole.userId, toRemove),
-        ));
-    }
-
-    if (toAdd.length > 0) {
-      await tx.insert(systemUserRole).values(
-        toAdd.map(userId => ({
-          userId,
-          roleId,
-          domain,
-        })),
-      );
-    }
-
-    // 更新 Redis 缓存
-    await Promise.all([
-      ...toAdd.map(userId =>
-        redisClient.sadd(
-          getUserRolesKey(userId, domain),
-          roleId,
-        ),
-      ),
-      ...toRemove.map(userId =>
-        redisClient.srem(
-          getUserRolesKey(userId, domain),
-          roleId,
-        ),
-      ),
-    ]);
-
-    // 清理用户权限结果缓存
-    const allAffectedUsers = [...toAdd, ...toRemove];
-    const clearCacheTasks = allAffectedUsers.map(async (userId) => {
-      const pattern = getPermissionResultKey(userId, domain, "*", "*");
-      const keys = await redisClient.keys(pattern);
-      if (keys.length > 0) {
-        await redisClient.del(...keys);
-      }
-    });
-    await Promise.all(clearCacheTasks);
-
-    return {
-      success: casbinOps.every(Boolean),
-      added: toAdd.length,
-      removed: toRemove.length,
-    };
-  });
+  return {
+    success: results.every(r => r.success),
+    added: toAdd.length,
+    removed: toRemove.length,
+  };
 }
 
 /**
@@ -257,37 +216,4 @@ export async function getUserMenuIds(userId: string, domain: string): Promise<st
   });
 
   return roleMenus.map(rm => rm.menuId);
-}
-
-/**
- * 清理用户的 Redis 缓存
- */
-export async function clearUserCache(userId: string, domain: string) {
-  const userRolesKey = getUserRolesKey(userId, domain);
-  const userMenusKey = getUserMenusKey(userId, domain);
-
-  await redisClient.del(userRolesKey, userMenusKey);
-}
-
-/**
- * 清理角色相关用户的权限结果缓存
- */
-export async function clearRoleUsersPermissionCache(roleId: string, domain: string) {
-  // 获取拥有该角色的所有用户
-  const users = await rbac.getUsersForRole(roleId, domain);
-
-  if (users.length < 1) {
-    return;
-  }
-
-  // 清理每个用户的权限结果缓存
-  const clearTasks = users.map(async (userId) => {
-    const pattern = getPermissionResultKey(userId, domain, "*", "*");
-    const keys = await redisClient.keys(pattern);
-    if (keys.length > 0) {
-      await redisClient.del(...keys);
-    }
-  });
-
-  await Promise.all(clearTasks);
 }

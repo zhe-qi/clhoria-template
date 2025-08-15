@@ -7,8 +7,7 @@ import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
 import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
-import { CacheConfig, getPermissionResultKey, getUserRolesKey, getUserStatusKey, LoginLogType, TokenStatus } from "@/lib/enums";
-import { clearUserCache } from "@/lib/permissions";
+import { CacheConfig, getPermissionResultKey, getUserMenusKey, getUserRolesKey, getUserStatusKey, LoginLogType, TokenStatus } from "@/lib/enums";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import redisClient from "@/lib/redis";
 import { getIPAddress } from "@/services/ip";
@@ -259,7 +258,7 @@ export async function refreshUserRoleCache(userId: string, domain: string): Prom
  */
 export async function clearUserPermissionCache(userId: string, domain: string): Promise<void> {
   // 清理用户基础缓存
-  await clearUserCache(userId, domain);
+  await clearUserBasicCache(userId, domain);
 
   // 清理用户状态缓存
   await clearUserStatusCache(userId, domain);
@@ -333,6 +332,39 @@ export async function setUserStatusToCache(userId: string, domain: string, isVal
 export async function clearUserStatusCache(userId: string, domain: string): Promise<void> {
   const key = getUserStatusKey(userId, domain);
   await redisClient.del(key);
+}
+
+/**
+ * 清理用户的基础 Redis 缓存（用户角色和菜单）
+ */
+export async function clearUserBasicCache(userId: string, domain: string): Promise<void> {
+  const userRolesKey = getUserRolesKey(userId, domain);
+  const userMenusKey = getUserMenusKey(userId, domain);
+
+  await redisClient.del(userRolesKey, userMenusKey);
+}
+
+/**
+ * 清理角色相关用户的权限结果缓存
+ */
+export async function clearRoleUsersPermissionCache(roleId: string, domain: string): Promise<void> {
+  // 获取拥有该角色的所有用户
+  const users = await rbac.getUsersForRole(roleId, domain);
+
+  if (users.length < 1) {
+    return;
+  }
+
+  // 清理每个用户的权限结果缓存
+  const clearTasks = users.map(async (userId) => {
+    const pattern = getPermissionResultKey(userId, domain, "*", "*");
+    const keys = await redisClient.keys(pattern);
+    if (keys.length > 0) {
+      await redisClient.del(...keys);
+    }
+  });
+
+  await Promise.all(clearTasks);
 }
 
 /**
