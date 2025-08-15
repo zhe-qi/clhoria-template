@@ -2,7 +2,7 @@
 import { config } from "dotenv";
 import { expand } from "dotenv-expand";
 import path from "node:path";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { parseEnvOrExit } from "@/utils/zod";
 
@@ -13,6 +13,9 @@ expand(config({
   ),
 }));
 
+/**
+ * 环境变量验证模式，包含对于环境变量的校验，转换，默认值，类型等
+ */
 const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(9999),

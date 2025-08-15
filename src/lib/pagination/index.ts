@@ -1,6 +1,6 @@
-import type { PaginatedParams, PaginatedToResult } from "@/types/pagination";
-
 import db from "@/db";
+
+import type { PaginatedParams, PaginatedToResult } from "./types";
 
 import {
   applyFiltersToQuery,
@@ -10,13 +10,9 @@ import {
   buildQueryContext,
 } from "./query-builders";
 import { executeQueries, formatQueryResults } from "./query-executors";
-// 导入功能模块
 import { validateParams } from "./validators";
 
-/**
- * 执行分页查询，传入声明式参数，返回分页结果
- * @returns 返回元组 [error, result]，互斥关系：有 error 时 result 为 null，无 error 时 result 非空
- */
+/** 执行分页查询，传入声明式参数，返回分页结果 */
 export default async function paginatedQuery<TResult>(paginatedParams: PaginatedParams): PaginatedToResult<TResult> {
   const { table, params, joinTables, domain } = paginatedParams;
 

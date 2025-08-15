@@ -1,5 +1,5 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type z from "zod/v4";
+import type z from "zod";
 
 import { and, eq } from "drizzle-orm";
 
