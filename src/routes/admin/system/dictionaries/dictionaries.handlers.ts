@@ -1,6 +1,5 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
-
 import { getDuplicateKeyError } from "@/lib/enums";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import {
   batchGetDictionaries,
   createDictionary,

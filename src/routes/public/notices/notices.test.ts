@@ -1,9 +1,9 @@
 import { testClient } from "hono/testing";
-import * as HttpStatusCodes from "stoker/http-status-codes";
 import { describe, expect, it } from "vitest";
 
 import env from "@/env";
 import createApp from "@/lib/create-app";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
 import { notices } from "./notices.index";
 

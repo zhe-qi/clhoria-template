@@ -1,5 +1,4 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
-
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as scheduledJobsService from "@/services/system/scheduled-jobs";
 import { pickContext } from "@/utils/tools/hono-helpers";
 

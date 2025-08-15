@@ -10,13 +10,13 @@ import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { trimTrailingSlash } from "hono/trailing-slash";
 import { RedisStore } from "rate-limit-redis";
-import { notFound, onError, serveEmojiFavicon } from "stoker/middlewares";
-import { defaultHook } from "stoker/openapi";
 import { v7 as uuidV7 } from "uuid";
 
 import type { AppBindings, AppOpenAPI } from "@/types/lib";
 
 import redisClient from "@/lib/redis";
+import { notFound, onError, serveEmojiFavicon } from "@/lib/stoker/middlewares";
+import { defaultHook } from "@/lib/stoker/openapi";
 import { pinoLogger } from "@/middlewares/pino-logger";
 
 export function createRouter() {

@@ -1,7 +1,4 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import { jsonContent } from "stoker/openapi/helpers";
-import { createErrorSchema } from "stoker/openapi/schemas";
 
 import {
   noticeTypeSchema,
@@ -9,6 +6,9 @@ import {
 } from "@/db/schema";
 import { notFoundSchema } from "@/lib/enums";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import { jsonContent } from "@/lib/stoker/openapi/helpers";
+import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 import { IdUUIDParamsSchema } from "@/utils/zod/schemas";
 
 const prefix = "/public-notices";

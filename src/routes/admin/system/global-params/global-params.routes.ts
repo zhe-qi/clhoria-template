@@ -1,7 +1,4 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema } from "stoker/openapi/schemas";
 
 import {
   batchGetGlobalParamsSchema,
@@ -11,6 +8,9 @@ import {
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
+import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 
 const KeyParamsSchema = z.object({
   key: z.string().min(1, "参数键不能为空").meta({ description: "参数键名" }),

@@ -1,12 +1,11 @@
 import type { z } from "zod";
 
-import * as HttpStatusCodes from "stoker/http-status-codes";
-
 import type { selectSystemNoticesSchema } from "@/db/schema";
 
 import { systemNotices } from "@/db/schema";
 import { getQueryValidationError } from "@/lib/enums/zod";
 import paginatedQuery from "@/lib/pagination";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import {
   createNotice,
   deleteNotice,

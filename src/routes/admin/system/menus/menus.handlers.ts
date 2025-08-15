@@ -1,5 +1,4 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
-
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as menuService from "@/services/system/menu";
 import { pickContext } from "@/utils";
 

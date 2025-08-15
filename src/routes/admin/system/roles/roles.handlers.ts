@@ -1,8 +1,6 @@
 import type { z } from "zod";
 
 import { and, eq } from "drizzle-orm";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import type { selectSystemRoleSchema } from "@/db/schema";
 
@@ -12,6 +10,8 @@ import { getDuplicateKeyError } from "@/lib/enums";
 import { getQueryValidationError } from "@/lib/enums/zod";
 import paginatedQuery from "@/lib/pagination";
 import { assignMenusToRole, assignPermissionsToRole, assignUsersToRole } from "@/lib/permissions";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { pickContext } from "@/utils/tools/hono-helpers";
 
 import type { SystemRolesRouteHandlerType } from "./roles.index";

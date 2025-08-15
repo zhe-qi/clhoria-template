@@ -1,7 +1,6 @@
 import type { z } from "zod";
 
 import { and, eq } from "drizzle-orm";
-import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import type { selectSysEndpointSchema } from "@/db/schema";
 
@@ -10,6 +9,7 @@ import { casbinRule, systemEndpoint } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { getQueryValidationError } from "@/lib/enums/zod";
 import paginatedQuery from "@/lib/pagination";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { formatDate } from "@/utils/tools/formatter";
 
 import type { SystemEndpointsRouteHandlerType } from "./endpoints.index";

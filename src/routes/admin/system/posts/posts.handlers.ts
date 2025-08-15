@@ -1,8 +1,6 @@
 import type { z } from "zod";
 
 import { and, count, eq } from "drizzle-orm";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import type { selectSystemPostSchema } from "@/db/schema";
 
@@ -11,6 +9,8 @@ import { systemPost, systemUserPost } from "@/db/schema";
 import { getDuplicateKeyError, Status } from "@/lib/enums";
 import { getQueryValidationError } from "@/lib/enums/zod";
 import paginatedQuery from "@/lib/pagination";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { pickContext } from "@/utils";
 
 import type { SystemPostsRouteHandlerType } from "./posts.index";

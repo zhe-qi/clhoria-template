@@ -1,6 +1,4 @@
 import { and, eq } from "drizzle-orm";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { systemUser } from "@/db/schema";
@@ -9,6 +7,8 @@ import {
   assignUsersToRole as assignUsersToRoleLib,
 } from "@/lib/permissions";
 import * as rbac from "@/lib/permissions/casbin/rbac";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import * as menuService from "@/services/system/menu";
 import { assignRolesToUser as assignRolesToUserService, clearUserPermissionCache } from "@/services/system/user";
 import { pickContext } from "@/utils";

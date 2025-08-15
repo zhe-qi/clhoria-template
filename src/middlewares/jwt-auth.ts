@@ -3,13 +3,13 @@ import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { Enforcer } from "casbin";
 import { and, eq } from "drizzle-orm";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { systemUser } from "@/db/schema";
 import { Status } from "@/lib/enums";
 import { enforcerLaunchedPromise, PermissionConfigManager } from "@/lib/permissions";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { cachePermissionResult, getPermissionResult, getUserRolesFromCache, getUserStatusFromCache, setUserStatusToCache } from "@/services/system/user";
 import { setContextData } from "@/utils";
 

@@ -4,8 +4,6 @@ import { verify } from "@node-rs/argon2";
 import { addDays, fromUnixTime, getUnixTime } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { sign, verify as verifyJwt } from "hono/jwt";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
@@ -13,6 +11,8 @@ import env from "@/env";
 import cap from "@/lib/cap";
 import { JwtTokenType, Status, TokenStatus, TokenType } from "@/lib/enums";
 import logger from "@/lib/logger";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { getUserMenus as getUserMenusService } from "@/services/system/menu";
 import { clearUserPermissionCache, createLoginLogContext, getUserRolesAndPermissionsFromCache, setUserRolesToCache } from "@/services/system/user";
 import { omit } from "@/utils";

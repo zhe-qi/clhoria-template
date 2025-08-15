@@ -1,6 +1,5 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
-
 import { CacheConfig } from "@/lib/enums/cache";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import {
   getPublicNotice,
   getPublicNotices,

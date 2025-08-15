@@ -1,7 +1,6 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
-
 import { getDuplicateKeyError } from "@/lib/enums";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import * as globalParamsService from "@/services/system/global-params";
 
 import type { SystemGlobalParamsRouteHandlerType } from "./global-params.index";

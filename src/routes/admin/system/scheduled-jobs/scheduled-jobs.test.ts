@@ -2,7 +2,6 @@
 import { eq } from "drizzle-orm";
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
-import * as HttpStatusCodes from "stoker/http-status-codes";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import db from "@/db";
@@ -10,6 +9,7 @@ import { systemScheduledJobs } from "@/db/schema";
 import env from "@/env";
 import { getScheduler } from "@/jobs/scheduler";
 import createApp from "@/lib/create-app";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { casbin } from "@/middlewares/jwt-auth";
 import { getAdminToken, getAuthHeaders, getUserToken } from "@/utils/test-utils";
 

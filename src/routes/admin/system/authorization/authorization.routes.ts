@@ -1,7 +1,4 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema } from "stoker/openapi/schemas";
 
 import {
   assignmentResponseSchema,
@@ -16,6 +13,9 @@ import {
   userRoutesResponseSchema,
 } from "@/db/schema";
 import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
+import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 import { IdUUIDParamsSchema } from "@/utils";
 
 const routePrefix = "/system/authorization";

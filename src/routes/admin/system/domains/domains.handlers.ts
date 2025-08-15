@@ -1,14 +1,14 @@
 import type { InferSelectModel } from "drizzle-orm";
 
 import { eq } from "drizzle-orm";
-import * as HttpStatusCodes from "stoker/http-status-codes";
-import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import db from "@/db";
 import { systemDomain } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { getQueryValidationError } from "@/lib/enums/zod";
 import paginatedQuery from "@/lib/pagination";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { formatDate } from "@/utils";
 
 import type { SystemDomainsRouteHandlerType } from "./domains.index";

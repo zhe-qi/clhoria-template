@@ -1,7 +1,6 @@
-import * as HttpStatusCodes from "stoker/http-status-codes";
-
 import db from "@/db";
 import { tasks } from "@/db/schema";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
 import type { TasksRouteHandlerType } from "./tasks.index";
 

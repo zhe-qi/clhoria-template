@@ -1,11 +1,11 @@
 /* eslint-disable ts/ban-ts-comment */
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
-import * as HttpStatusCodes from "stoker/http-status-codes";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
 import env from "@/env";
 import createApp from "@/lib/create-app";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { casbin } from "@/middlewares/jwt-auth";
 import { getAdminToken, getAuthHeaders, getUserToken } from "@/utils/test-utils";
 
