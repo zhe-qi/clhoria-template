@@ -1,4 +1,0 @@
-"pgbouncer" "admin123"
-"monitoring" "monitor123"
-"stats" "stats123"
-"postgres" "postgres"

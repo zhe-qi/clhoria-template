@@ -5,7 +5,6 @@ import { differenceInMilliseconds, formatISO } from "date-fns";
 import { v7 as uuidV7 } from "uuid";
 
 import logger from "@/lib/logger";
-import { TimescaleLogService } from "@/services/logging";
 
 interface OperationLogOptions {
   moduleName: string;
@@ -13,9 +12,9 @@ interface OperationLogOptions {
 }
 
 /**
- * TimescaleDB 操作日志中间件
+ * 操作日志中间件
  */
-export function timescaleOperationLog(options: OperationLogOptions): MiddlewareHandler {
+export function operationLog(options: OperationLogOptions): MiddlewareHandler {
   return async (c: Context, next) => {
     const startTime = new Date();
 
@@ -66,24 +65,26 @@ export function timescaleOperationLog(options: OperationLogOptions): MiddlewareH
     }
 
     // 异步写入，不阻塞响应
-    void TimescaleLogService.addOperationLog({
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const logEntry = {
+      requestId,
+      moduleName: options.moduleName,
+      description: options.description,
+      method,
+      urlPath,
+      ip,
+      userAgent,
       userId,
       username,
       domain,
-      moduleName: options.moduleName,
-      description: options.description,
-      requestId,
-      method,
-      url: urlPath,
-      ip,
-      userAgent,
-      params: params || null,
-      body: body || null,
-      response: response || null,
+      body,
+      params,
+      response,
       startTime: formatISO(startTime),
       endTime: formatISO(endTime),
       duration,
-      createdBy: userId,
-    });
+    };
+
+    // 你可以选择你自己的日志写入方式 比如 阿里云 sls
   };
 }

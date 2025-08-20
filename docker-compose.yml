@@ -1,18 +1,13 @@
 services:
-  # TimescaleDB 数据库（基于 PostgreSQL）
+  # PostgreSQL 17 数据库
   postgres:
-    image: timescale/timescaledb:latest-pg17
+    image: postgres:17
     container_name: hono-postgres
     environment:
       POSTGRES_DB: ${DB_NAME:-postgres}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_INITDB_ARGS: --encoding=UTF-8 --locale=C
-      # TimescaleDB 自动调优配置
-      TS_TUNE_MEMORY: 4GB
-      TS_TUNE_NUM_CPUS: 4
-      TS_TUNE_MAX_CONNS: 100
-      TS_TUNE_MAX_BG_WORKERS: 8
     ports:
       - "5432:5432"
     volumes:
@@ -26,61 +21,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
-  # PgBouncer 连接池 (监控配置)
-  pgbouncer:
-    build:
-      context: ./docker/pgbouncer
-      dockerfile: Dockerfile
-    container_name: hono-pgbouncer
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-postgres}
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
-    ports:
-      - "6432:6432"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - app_network
-    volumes:
-      - pgbouncer_logs:/var/log/pgbouncer
-    healthcheck:
-      test: [CMD-SHELL, "PGPASSWORD=${DB_PASSWORD:-postgres} psql -h localhost -p 6432 -U ${DB_USER:-postgres} -d ${DB_NAME:-postgres} -c 'SELECT 1;' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    restart: unless-stopped
-    profiles:
-      - services
-      - monitoring
-      - full
-
-  # PgBouncer Exporter (Prometheus 指标导出)
-  pgbouncer-exporter:
-    image: prometheuscommunity/pgbouncer-exporter:latest
-    container_name: hono-pgbouncer-exporter
-    environment:
-      PGBOUNCER_EXPORTER_HOST: pgbouncer
-      PGBOUNCER_EXPORTER_PORT: 6432
-      PGBOUNCER_EXPORTER_USER: stats
-      PGBOUNCER_EXPORTER_PASSWORD: stats123
-      PGBOUNCER_EXPORTER_DATABASE: pgbouncer
-    ports:
-      - "9127:9127"
-    depends_on:
-      pgbouncer:
-        condition: service_healthy
-    networks:
-      - app_network
-    restart: unless-stopped
-    profiles:
-      - monitoring
-      - full
 
   # Redis 缓存
   redis:
@@ -117,10 +57,9 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - PORT=${PORT}
-      # 数据库连接（通过 PgBouncer 连接池）
-      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@pgbouncer:6432/postgres}
-      - PGBOUNCER_ADMIN_URL=${PGBOUNCER_ADMIN_URL:-postgresql://pgbouncer:admin123@pgbouncer:6432/pgbouncer}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      # 数据库连接（直连 PostgreSQL）
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
       - LOG_LEVEL=${LOG_LEVEL}
       - CLIENT_JWT_SECRET=${CLIENT_JWT_SECRET}
       - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
@@ -131,8 +70,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      pgbouncer:
-        condition: service_healthy
     networks:
       - app_network
     restart: unless-stopped
@@ -140,61 +77,10 @@ services:
       - app
       - full
 
-  # Prometheus (监控指标收集)
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: hono-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.path=/prometheus
-      - --storage.tsdb.retention.time=15d
-      - --storage.tsdb.retention.size=512MB
-      - --web.console.libraries=/etc/prometheus/console_libraries
-      - --web.console.templates=/etc/prometheus/consoles
-      - --web.enable-lifecycle
-      - --web.enable-admin-api
-    networks:
-      - app_network
-    restart: unless-stopped
-    profiles:
-      - monitoring
-      - full
-
-  # Grafana (监控仪表板)
-  grafana:
-    image: grafana/grafana:latest
-    container_name: hono-grafana
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin123}
-      GF_INSTALL_PLUGINS: grafana-piechart-panel
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources
-    networks:
-      - app_network
-    restart: unless-stopped
-    profiles:
-      - monitoring
-      - full
-
 volumes:
   postgres_data:
     driver: local
-  pgbouncer_logs:
-    driver: local
   redis_data:
-    driver: local
-  prometheus_data:
-    driver: local
-  grafana_data:
     driver: local
 
 networks:

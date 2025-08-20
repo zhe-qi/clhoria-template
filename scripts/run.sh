@@ -45,23 +45,6 @@ if [ $migration_exit_code -ne 0 ]; then
   fi
 fi
 
-echo "迁移完成，开始初始化 TimescaleDB..."
-
-# 初始化 TimescaleDB
-cd /app && pnpm timescale:init
-timescale_exit_code=$?
-
-if [ $timescale_exit_code -ne 0 ]; then
-  echo "TimescaleDB 初始化失败，退出代码 $timescale_exit_code"
-  
-  # 如果环境变量设置为忽略 TimescaleDB 错误，则继续运行
-  if [ "$IGNORE_TIMESCALE_ERRORS" = "true" ]; then
-    echo "IGNORE_TIMESCALE_ERRORS=true，忽略 TimescaleDB 初始化错误并继续..."
-  else
-    echo "警告: TimescaleDB 初始化失败，但不影响基础功能，继续启动..."
-  fi
-fi
-
 echo "开始同步权限端点..."
 
 # 同步权限端点
@@ -70,7 +53,7 @@ sync_exit_code=$?
 
 if [ $sync_exit_code -ne 0 ]; then
   echo "权限同步失败，退出代码 $sync_exit_code"
-  
+
   # 如果环境变量设置为忽略同步错误，则继续运行
   if [ "$IGNORE_SYNC_ERRORS" = "true" ]; then
     echo "IGNORE_SYNC_ERRORS=true，忽略权限同步错误并继续..."

@@ -10,7 +10,7 @@ import * as allPublicExports from "@/routes/public/public.index";
 import env from "./env";
 import createApp from "./lib/create-app";
 import { casbin } from "./middlewares/jwt-auth";
-import { timescaleOperationLog } from "./middlewares/timescale-operation-log";
+import { operationLog } from "./middlewares/operation-log";
 
 // 获取OpenAPIHono实例
 const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
@@ -56,7 +56,7 @@ if (authModule) {
 // 2. 注册中间件（影响后续路由）
 adminApp.use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
 adminApp.use("/*", casbin());
-adminApp.use("/*", timescaleOperationLog({ moduleName: "后台管理", description: "后台管理操作" }));
+adminApp.use("/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }));
 
 // 3. 重新注册 auth 模块（JWT保护的接口会被中间件保护，login/refresh不受影响因为已经注册）
 if (authModule) {

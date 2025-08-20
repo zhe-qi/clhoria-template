@@ -7,11 +7,10 @@ import { v7 as uuidV7 } from "uuid";
 
 import db from "@/db";
 import { systemTokens, systemUser, systemUserRole } from "@/db/schema";
-import { CacheConfig, getPermissionResultKey, getUserMenusKey, getUserRolesKey, getUserStatusKey, LoginLogType, TokenStatus } from "@/lib/enums";
+import { CacheConfig, getPermissionResultKey, getUserMenusKey, getUserRolesKey, getUserStatusKey, TokenStatus } from "@/lib/enums";
 import * as rbac from "@/lib/permissions/casbin/rbac";
 import redisClient from "@/lib/redis";
 import { getIPAddress } from "@/services/ip";
-import { TimescaleLogService } from "@/services/logging";
 import { formatDate } from "@/utils/tools/formatter";
 
 type CreateUserParams = InferInsertModel<typeof systemUser>;
@@ -40,6 +39,7 @@ export async function createLoginLogContext(c: Context, username: string, domain
   const requestId = c.get("requestId") || uuidV7();
   const currentTime = formatDate(new Date());
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const baseLogData = {
     id: uuidV7(),
     username,
@@ -55,21 +55,16 @@ export async function createLoginLogContext(c: Context, username: string, domain
 
   return {
     // 记录失败日志
-    logFailure: (userId: string = "00000000-0000-0000-0000-000000000000") =>
-      TimescaleLogService.addLoginLog({
-        ...baseLogData,
-        userId,
-        type: LoginLogType.FAILURE,
-      }),
+    logFailure: (_userId: string = "00000000-0000-0000-0000-000000000000") => {
+      // TODO: 你可以选择你自己的日志写入方式 比如 阿里云 sls
+      return Promise.resolve();
+    },
 
     // 记录成功日志
-    logSuccess: (userId: string) =>
-      TimescaleLogService.addLoginLog({
-        ...baseLogData,
-        userId,
-        type: LoginLogType.SUCCESS,
-      }),
-
+    logSuccess: (_userId: string) => {
+      // TODO: 你可以选择你自己的日志写入方式 比如 阿里云 sls
+      return Promise.resolve();
+    },
     // 获取 token 数据
     getTokenData: () => ({
       ip: clientIP,
