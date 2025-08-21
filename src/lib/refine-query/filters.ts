@@ -1,0 +1,302 @@
+import type {
+  SQL,
+} from "drizzle-orm";
+import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+
+import {
+  and,
+  between,
+  eq,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  like,
+  lt,
+  lte,
+  ne,
+  not,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
+
+import type { ConditionalFilter, CrudFilters, LogicalFilter } from "./types";
+
+/**
+ * 过滤器转换器类
+ * 将 Refine CrudFilters 转换为 Drizzle SQL 条件
+ */
+export class FiltersConverter {
+  private table: PgTable;
+
+  constructor(table: PgTable) {
+    this.table = table;
+  }
+
+  /**
+   * 转换 CrudFilters 为 SQL 条件
+   */
+  convert(filters?: CrudFilters): SQL<unknown> | undefined {
+    if (!filters || filters.length === 0)
+      return undefined;
+
+    const conditions = filters.map(filter => this.convertFilter(filter));
+    const validConditions = conditions.filter(Boolean) as SQL<unknown>[];
+
+    if (validConditions.length === 0)
+      return undefined;
+    if (validConditions.length === 1)
+      return validConditions[0];
+
+    return and(...validConditions);
+  }
+
+  /**
+   * 转换单个过滤器
+   */
+  private convertFilter(filter: CrudFilters[number]): SQL<unknown> | undefined {
+    if (this.isConditionalFilter(filter)) {
+      return this.convertConditionalFilter(filter);
+    }
+    else {
+      return this.convertLogicalFilter(filter);
+    }
+  }
+
+  /**
+   * 转换逻辑过滤器（字段级别）
+   */
+  private convertLogicalFilter(filter: LogicalFilter): SQL<unknown> | undefined {
+    const column = this.getColumn(filter.field);
+    if (!column) {
+      console.warn(`Unknown field: ${filter.field}`);
+      return undefined;
+    }
+
+    const { operator, value } = filter;
+
+    // 处理空值情况
+    if ((value === null || value === undefined) && !["null", "nnull"].includes(operator)) {
+      return undefined;
+    }
+
+    try {
+      switch (operator) {
+        // 相等性操作符
+        case "eq":
+          return eq(column, value);
+        case "ne":
+          return ne(column, value);
+
+        // 比较操作符
+        case "lt":
+          return lt(column, value);
+        case "gt":
+          return gt(column, value);
+        case "lte":
+          return lte(column, value);
+        case "gte":
+          return gte(column, value);
+
+        // 数组操作符
+        case "in":
+          return Array.isArray(value) && value.length > 0 ? inArray(column, value) : undefined;
+        case "nin":
+          return Array.isArray(value) && value.length > 0 ? notInArray(column, value) : undefined;
+
+        // 字符串操作符（不区分大小写）
+        case "contains":
+          return typeof value === "string" ? ilike(column, `%${value}%`) : undefined;
+        case "ncontains":
+          return typeof value === "string" ? not(ilike(column, `%${value}%`)) : undefined;
+
+        // 字符串操作符（区分大小写）
+        case "containss":
+          return typeof value === "string" ? like(column, `%${value}%`) : undefined;
+        case "ncontainss":
+          return typeof value === "string" ? not(like(column, `%${value}%`)) : undefined;
+
+        // 字符串匹配操作符（不区分大小写）
+        case "startswith":
+          return typeof value === "string" ? ilike(column, `${value}%`) : undefined;
+        case "nstartswith":
+          return typeof value === "string" ? not(ilike(column, `${value}%`)) : undefined;
+        case "endswith":
+          return typeof value === "string" ? ilike(column, `%${value}`) : undefined;
+        case "nendswith":
+          return typeof value === "string" ? not(ilike(column, `%${value}`)) : undefined;
+
+        // 字符串匹配操作符（区分大小写）
+        case "startswiths":
+          return typeof value === "string" ? like(column, `${value}%`) : undefined;
+        case "nstartswiths":
+          return typeof value === "string" ? not(like(column, `${value}%`)) : undefined;
+        case "endswiths":
+          return typeof value === "string" ? like(column, `%${value}`) : undefined;
+        case "nendswiths":
+          return typeof value === "string" ? not(like(column, `%${value}`)) : undefined;
+
+        // 范围操作符
+        case "between":
+          if (Array.isArray(value) && value.length === 2) {
+            return between(column, value[0], value[1]);
+          }
+          return undefined;
+        case "nbetween":
+          if (Array.isArray(value) && value.length === 2) {
+            return not(between(column, value[0], value[1]));
+          }
+          return undefined;
+
+        // 空值操作符
+        case "null":
+          return isNull(column);
+        case "nnull":
+          return isNotNull(column);
+
+        // 数组包含操作符（PostgreSQL 特有）
+        case "ina":
+          // 检查列是否包含数组中的所有元素
+          if (Array.isArray(value) && value.length > 0) {
+            // 使用 PostgreSQL 的 @> 操作符
+            return sql`${column} @> ${JSON.stringify(value)}`;
+          }
+          return undefined;
+        case "nina":
+          // 检查列是否不包含数组中的所有元素
+          if (Array.isArray(value) && value.length > 0) {
+            return not(sql`${column} @> ${JSON.stringify(value)}`);
+          }
+          return undefined;
+
+        default:
+          console.warn(`Unsupported operator: ${operator}`);
+          return undefined;
+      }
+    }
+    catch (error) {
+      console.error(`Error converting filter for field ${filter.field}:`, error);
+      return undefined;
+    }
+  }
+
+  /**
+   * 转换条件过滤器（逻辑组合）
+   */
+  private convertConditionalFilter(filter: ConditionalFilter): SQL<unknown> | undefined {
+    const { operator, value } = filter;
+
+    if (!Array.isArray(value) || value.length === 0) {
+      return undefined;
+    }
+
+    const conditions = value
+      .map(subFilter => this.convertFilter(subFilter))
+      .filter(Boolean) as SQL<unknown>[];
+
+    if (conditions.length === 0)
+      return undefined;
+    if (conditions.length === 1)
+      return conditions[0];
+
+    switch (operator) {
+      case "and":
+        return and(...conditions);
+      case "or":
+        return or(...conditions);
+      default:
+        console.warn(`Unsupported conditional operator: ${operator}`);
+        return undefined;
+    }
+  }
+
+  /**
+   * 获取表列
+   */
+  private getColumn(fieldName: string): PgColumn | undefined {
+    return (this.table as any)[fieldName];
+  }
+
+  /**
+   * 类型守卫：检查是否为条件过滤器
+   */
+  private isConditionalFilter(filter: CrudFilters[number]): filter is ConditionalFilter {
+    return "operator" in filter && ["or", "and"].includes(filter.operator);
+  }
+}
+
+/**
+ * 便捷函数：转换过滤器
+ * @param filters CrudFilters 数组
+ * @param table 表对象
+ * @returns SQL 条件或 undefined
+ */
+export function convertFiltersToSQL(
+  filters: CrudFilters | undefined,
+  table: PgTable,
+): SQL<unknown> | undefined {
+  if (!filters)
+    return undefined;
+
+  const converter = new FiltersConverter(table);
+  return converter.convert(filters);
+}
+
+/**
+ * 验证过滤器字段
+ * @param filters 过滤器数组
+ * @param table 表对象
+ * @returns 验证结果
+ */
+export function validateFilterFields(
+  filters: CrudFilters,
+  table: PgTable,
+): { valid: boolean; invalidFields: string[] } {
+  const tableColumns = Object.keys(table);
+  const invalidFields: string[] = [];
+
+  function checkFilter(filter: CrudFilters[number]) {
+    if ("field" in filter) {
+      // LogicalFilter
+      if (!tableColumns.includes(filter.field)) {
+        invalidFields.push(filter.field);
+      }
+    }
+    else if ("value" in filter && Array.isArray(filter.value)) {
+      // ConditionalFilter
+      filter.value.forEach(checkFilter);
+    }
+  }
+
+  filters.forEach(checkFilter);
+
+  return {
+    valid: invalidFields.length === 0,
+    invalidFields: [...new Set(invalidFields)],
+  };
+}
+
+/**
+ * 获取过滤器中使用的所有字段
+ * @param filters 过滤器数组
+ * @returns 字段名数组
+ */
+export function extractFilterFields(filters: CrudFilters): string[] {
+  const fields: string[] = [];
+
+  function extractFromFilter(filter: CrudFilters[number]) {
+    if ("field" in filter) {
+      fields.push(filter.field);
+    }
+    else if ("value" in filter && Array.isArray(filter.value)) {
+      filter.value.forEach(extractFromFilter);
+    }
+  }
+
+  filters.forEach(extractFromFilter);
+
+  return [...new Set(fields)];
+}

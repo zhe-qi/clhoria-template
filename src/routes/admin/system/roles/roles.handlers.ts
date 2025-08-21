@@ -6,27 +6,35 @@ import type { selectSystemRoleSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemRole } from "@/db/schema";
-import { getDuplicateKeyError } from "@/lib/enums";
-import { getQueryValidationError } from "@/lib/enums/zod";
-import paginatedQuery from "@/lib/pagination";
+import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import { parseTextToZodError } from "@/utils";
 
 import type { SystemRolesRouteHandlerType } from "./roles.index";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
-  const query = c.req.valid("query");
+  // 获取查询参数
+  const rawParams = c.req.query();
+  const parseResult = RefineQueryParamsSchema.safeParse(rawParams);
 
-  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemRoleSchema>>({
-    table: systemRole,
-    params: query,
-  });
-
-  if (error) {
-    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+  if (!parseResult.success) {
+    return c.json(parseResult.error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  return c.json(result, HttpStatusCodes.OK);
+  const queryParams = parseResult.data;
+
+  // 执行查询
+  const [error, result] = await executeRefineQuery<z.infer<typeof selectSystemRoleSchema>>(systemRole, queryParams);
+
+  if (error) {
+    return c.json(parseTextToZodError(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+  }
+
+  // 设置 x-total-count 标头
+  c.header("x-total-count", result.total.toString());
+
+  return c.json({ data: result.data }, HttpStatusCodes.OK);
 };
 
 export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
@@ -39,14 +47,11 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
       createdBy: userId,
     }).returning();
 
-    return c.json(role, HttpStatusCodes.CREATED);
+    return c.json({ data: role }, HttpStatusCodes.CREATED);
   }
   catch (error: any) {
     if (error.message?.includes("duplicate key")) {
-      return c.json(
-        getDuplicateKeyError("code", "角色代码已存在"),
-        HttpStatusCodes.CONFLICT,
-      );
+      return c.json(parseTextToZodError("角色代码已存在"), HttpStatusCodes.CONFLICT);
     }
     throw error;
   }
@@ -61,10 +66,10 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
     .where(eq(systemRole.id, id));
 
   if (!role) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(role, HttpStatusCodes.OK);
+  return c.json({ data: role }, HttpStatusCodes.OK);
 };
 
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
@@ -82,10 +87,10 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json(updated, HttpStatusCodes.OK);
+  return c.json({ data: updated }, HttpStatusCodes.OK);
 };
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
@@ -97,8 +102,8 @@ export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
     .returning({ id: systemRole.id });
 
   if (!deleted) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.body(null, HttpStatusCodes.NO_CONTENT);
+  return c.json({ data: deleted }, HttpStatusCodes.OK);
 };

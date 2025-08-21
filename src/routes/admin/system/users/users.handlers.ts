@@ -2,34 +2,42 @@ import type { z } from "zod";
 
 import { eq } from "drizzle-orm";
 
-import type { responseSystemUserSchema, selectSystemUserSchema } from "@/db/schema";
+import type { selectSystemUserSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemUser } from "@/db/schema";
-import { getQueryValidationError } from "@/lib/enums/zod";
-import paginatedQuery from "@/lib/pagination";
+import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { omit } from "@/utils";
+import { omit, parseTextToZodError } from "@/utils";
 
 import type { SystemUsersRouteHandlerType } from "./users.index";
 
 export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
-  const query = c.req.valid("query");
+  // 获取查询参数
+  const rawParams = c.req.query();
+  const parseResult = RefineQueryParamsSchema.safeParse(rawParams);
 
-  const [error, result] = await paginatedQuery<z.infer<typeof selectSystemUserSchema>>({
-    table: systemUser,
-    params: query,
-  });
+  if (!parseResult.success) {
+    return c.json(parseResult.error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
+  }
+
+  const queryParams = parseResult.data;
+
+  // 执行查询
+  const [error, result] = await executeRefineQuery<z.infer<typeof selectSystemUserSchema>>(systemUser, queryParams);
 
   if (error) {
-    return c.json(getQueryValidationError(error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    return c.json(parseTextToZodError(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 
   // 移除密码字段
-  const data: z.infer<typeof responseSystemUserSchema>[] = result.data.map(user => omit(user, ["password"]));
+  const safeData = result.data.map(({ password, ...user }) => user);
 
-  return c.json({ data, meta: result.meta }, HttpStatusCodes.OK);
+  // 设置 x-total-count 标头
+  c.header("x-total-count", result.total.toString());
+
+  return c.json({ data: safeData }, HttpStatusCodes.OK);
 };
 
 // @ts-expect-error 1111
@@ -47,11 +55,12 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
     .where(eq(systemUser.id, id));
 
   if (!user) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   const userWithoutPassword = omit(user, ["password"]);
-  return c.json(userWithoutPassword, HttpStatusCodes.OK);
+
+  return c.json({ data: userWithoutPassword }, HttpStatusCodes.OK);
 };
 
 export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
@@ -60,7 +69,7 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const { userId } = c.get("jwtPayload");
 
   // 不允许直接更新密码
-  const updateData = omit(body as any, ["password"]);
+  const updateData = omit(body, ["password"]);
 
   const [updated] = await db
     .update(systemUser)
@@ -72,12 +81,12 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   const userWithoutPassword = omit(updated, ["password"]);
 
-  return c.json(userWithoutPassword, HttpStatusCodes.OK);
+  return c.json({ data: userWithoutPassword }, HttpStatusCodes.OK);
 };
 
 export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
@@ -89,8 +98,8 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
     .returning({ id: systemUser.id });
 
   if (!deleted) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.body(null, HttpStatusCodes.NO_CONTENT);
+  return c.json({ data: deleted }, HttpStatusCodes.OK);
 };

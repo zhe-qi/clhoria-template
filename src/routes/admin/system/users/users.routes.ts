@@ -1,12 +1,11 @@
 import { createRoute } from "@hono/zod-openapi";
+import { z } from "zod";
 
 import { insertSystemUserSchema, patchSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
-import { notFoundSchema } from "@/lib/enums";
-import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
+import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
-import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
-import { IdUUIDParamsSchema } from "@/utils";
+import { createErrorSchema, IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 
 const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];
@@ -18,16 +17,20 @@ export const list = createRoute({
   method: "get",
   path: routePrefix,
   request: {
-    query: PaginationParamsSchema,
+    query: RefineQueryParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      GetPaginatedResultSchema(responseSystemUserSchema),
+      RefineResultSchema(z.array(responseSystemUserSchema)),
       "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(PaginationParamsSchema),
+      createErrorSchema(RefineQueryParamsSchema),
       "查询参数验证错误",
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+      createErrorSchema(z.string()),
+      "服务器内部错误",
     ),
   },
 });
@@ -46,7 +49,7 @@ export const create = createRoute({
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      responseSystemUserSchema,
+      RefineResultSchema(responseSystemUserSchema),
       "创建成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -71,7 +74,7 @@ export const get = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      responseSystemUserSchema,
+      RefineResultSchema(responseSystemUserSchema),
       "获取成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
@@ -79,7 +82,7 @@ export const get = createRoute({
       "ID参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      notFoundSchema,
+      createErrorSchema(z.string()),
       "用户不存在",
     ),
   },
@@ -100,7 +103,7 @@ export const update = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      responseSystemUserSchema,
+      RefineResultSchema(responseSystemUserSchema),
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
@@ -108,7 +111,7 @@ export const update = createRoute({
       "请求参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      notFoundSchema,
+      createErrorSchema(z.string()),
       "用户不存在",
     ),
   },
@@ -124,15 +127,16 @@ export const remove = createRoute({
     params: IdUUIDParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.NO_CONTENT]: {
-      description: "删除成功",
-    },
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(IdUUIDParamsSchema),
+      "删除成功",
+    ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
       createErrorSchema(IdUUIDParamsSchema),
       "ID参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      notFoundSchema,
+      createErrorSchema(z.string()),
       "用户不存在",
     ),
   },
