@@ -30,15 +30,12 @@ export function validateParams(params: PaginationParams): ToResult<ValidatedPara
 /**
  * 验证 where 条件
  */
-export function validateWhereCondition(where: unknown, domain?: string): ToResult<unknown> {
+export function validateWhereCondition(where: unknown): ToResult<unknown> {
   if (!where) {
     return [null, where];
   }
 
-  const validWhere = WhereConditionSchema.safeParse({
-    ...where,
-    domain,
-  });
+  const validWhere = WhereConditionSchema.safeParse(where);
 
   if (!validWhere.success) {
     const error = new ValidationError(`无效的 where 条件: ${validWhere.error.message}`);

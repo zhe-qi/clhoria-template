@@ -51,7 +51,7 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       return;
     }
 
-    const { uid: userId, username, domain } = payload as { uid: string; username: string; domain: string };
+    const { uid: userId, username } = payload as { uid: string; username: string };
 
     // 获取响应信息
     let response: any = null;
@@ -76,7 +76,6 @@ export function operationLog(options: OperationLogOptions): MiddlewareHandler {
       userAgent,
       userId,
       username,
-      domain,
       body,
       params,
       response,

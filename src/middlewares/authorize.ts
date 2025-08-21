@@ -20,9 +20,9 @@ export function authorize(resource: string, action: string): MiddlewareHandler {
     }
 
     const payload: JWTPayload = c.get("jwtPayload");
-    const { tenantId, roles } = payload as { tenantId: string; roles: string[] };
+    const { roles } = payload as { roles: string[] };
 
-    const checks = roles.map(role => enforcer.enforce(role, resource, action, tenantId));
+    const checks = roles.map(role => enforcer.enforce(role, resource, action));
     const hasPermission = (await Promise.all(checks)).some(Boolean);
 
     // 如果没有权限，返回禁止访问

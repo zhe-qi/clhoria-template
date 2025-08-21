@@ -13,8 +13,6 @@ export interface AppBindings {
     jwtPayload: JWTPayload & {
       /** 用户角色 */
       roles: string[];
-      /** 租户 ID */
-      tenantId: string;
       /** 用户 ID */
       userId: string;
     };

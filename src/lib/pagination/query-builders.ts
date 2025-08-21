@@ -42,7 +42,6 @@ const operatorsMap: OperatorMap = {
 export function buildQueryContext(
   table: QuerySourceWithoutReturningClause<QuerySource>,
   joinTables?: Record<string, PgTable>,
-  domain?: string,
 ): QueryContext {
   const tableFields = getTableColumns(table as PgTable);
   const tableAliases: Record<string, string> = {};
@@ -50,7 +49,6 @@ export function buildQueryContext(
   return {
     table,
     joinTables,
-    domain,
     tableFields,
     tableAliases,
   };
@@ -265,7 +263,7 @@ export function applyFiltersToQuery<QueryType extends QuerySelectBuilderModeType
     return [null, query];
   }
 
-  const [whereError, validWhere] = validateWhereCondition(validatedParams.where, context.domain);
+  const [whereError, validWhere] = validateWhereCondition(validatedParams.where);
   if (whereError) {
     return [whereError, null];
   }

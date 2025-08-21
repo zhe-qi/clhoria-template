@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import type { selectSystemRoleSchema } from "@/db/schema";
 
@@ -16,12 +16,10 @@ import type { SystemRolesRouteHandlerType } from "./roles.index";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
-  const { tenantId } = c.get("jwtPayload");
 
   const [error, result] = await paginatedQuery<z.infer<typeof selectSystemRoleSchema>>({
     table: systemRole,
     params: query,
-    tenantId,
   });
 
   if (error) {
@@ -33,12 +31,11 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
 
 export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const { tenantId, userId } = c.get("jwtPayload");
+  const { userId } = c.get("jwtPayload");
 
   try {
     const [role] = await db.insert(systemRole).values({
       ...body,
-      tenantId,
       createdBy: userId,
     }).returning();
 
@@ -57,15 +54,11 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
 
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
-  const { tenantId } = c.get("jwtPayload");
 
   const [role] = await db
     .select()
     .from(systemRole)
-    .where(and(
-      eq(systemRole.id, id),
-      eq(systemRole.tenantId, tenantId),
-    ));
+    .where(eq(systemRole.id, id));
 
   if (!role) {
     return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
@@ -77,7 +70,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const { tenantId, userId } = c.get("jwtPayload");
+  const { userId } = c.get("jwtPayload");
 
   const [updated] = await db
     .update(systemRole)
@@ -85,10 +78,7 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
       ...body,
       updatedBy: userId,
     })
-    .where(and(
-      eq(systemRole.id, id),
-      eq(systemRole.tenantId, tenantId),
-    ))
+    .where(eq(systemRole.id, id))
     .returning();
 
   if (!updated) {
@@ -100,14 +90,10 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
-  const { tenantId } = c.get("jwtPayload");
 
   const [deleted] = await db
     .delete(systemRole)
-    .where(and(
-      eq(systemRole.id, id),
-      eq(systemRole.tenantId, tenantId),
-    ))
+    .where(eq(systemRole.id, id))
     .returning({ id: systemRole.id });
 
   if (!deleted) {

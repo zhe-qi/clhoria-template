@@ -1,5 +1,5 @@
 import { addDays, getUnixTime } from "date-fns";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
 
 import db from "@/db";
@@ -10,7 +10,6 @@ import env from "@/env";
 interface CachedToken {
   token: string;
   userId: string;
-  domain: string;
 }
 
 /** 单例缓存 */
@@ -20,17 +19,13 @@ let userTokenCache: CachedToken | null = null;
 /**
  * 生成测试用的JWT token
  */
-async function generateTestToken(username: string, tenantId: string = "default"): Promise<CachedToken> {
+async function generateTestToken(username: string): Promise<CachedToken> {
   // 查询用户信息
   const user = await db.query.systemUser.findFirst({
-    where: and(
-      eq(systemUser.username, username),
-      eq(systemUser.tenantId, tenantId),
-    ),
+    where: eq(systemUser.username, username),
     columns: {
       id: true,
       username: true,
-      tenantId: true,
     },
   });
 
@@ -45,10 +40,10 @@ async function generateTestToken(username: string, tenantId: string = "default")
 
   const tokenPayload = {
     userId: user.id,
-    tenantId: user.tenantId,
     iat: now,
     exp: accessTokenExp,
     jti,
+    roles: [],
   };
 
   // 生成token
@@ -57,7 +52,6 @@ async function generateTestToken(username: string, tenantId: string = "default")
   return {
     token,
     userId: user.id,
-    domain: user.tenantId,
   };
 }
 

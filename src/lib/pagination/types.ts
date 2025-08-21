@@ -213,8 +213,6 @@ export interface QueryContext {
   table: QuerySourceWithoutReturningClause<QuerySource>;
   /** 可用的 JOIN 表集合 */
   joinTables?: Record<string, PgTable>;
-  /** 用户域标识 */
-  domain?: string;
   /** 表字段映射 */
   tableFields: TableFieldsType;
   /** 表别名映射 */
@@ -232,8 +230,6 @@ export interface PaginatedParams {
   params: PaginationParams;
   /** 联表查询白名单 - 允许进行 JOIN 操作的表集合 */
   joinTables?: Record<string, PgTable>;
-  /** 用户域 - 多租户系统中的域标识 */
-  tenantId?: string;
 }
 
 /**

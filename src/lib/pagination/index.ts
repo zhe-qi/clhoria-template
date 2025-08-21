@@ -14,7 +14,7 @@ import { validateParams } from "./validators";
 
 /** 执行分页查询，传入声明式参数，返回分页结果 */
 export default async function paginatedQuery<TResult>(paginatedParams: PaginatedParams): PaginatedToResult<TResult> {
-  const { table, params, joinTables, tenantId } = paginatedParams;
+  const { table, params, joinTables } = paginatedParams;
 
   // 1. 验证参数
   const [paramError, validatedParams] = validateParams(params);
@@ -23,7 +23,7 @@ export default async function paginatedQuery<TResult>(paginatedParams: Paginated
   }
 
   // 2. 构建查询上下文
-  const context = buildQueryContext(table, joinTables, tenantId);
+  const context = buildQueryContext(table, joinTables);
 
   // 3. 构建基础查询
   let dataQuery = db.select().from(table);
