@@ -1,4 +1,3 @@
-import { prometheus } from "@hono/prometheus";
 import { sentry } from "@hono/sentry";
 import { jwt } from "hono/jwt";
 
@@ -20,9 +19,6 @@ const app = createApp();
 // 配置文档主页（非生产环境）
 configureMainDoc?.(app);
 
-const { printMetrics, registerMetrics } = prometheus();
-
-app.use("*", registerMetrics);
 app.use("*", sentry({ dsn: env.SENTRY_DSN }));
 
 // #region 公共路由
@@ -73,10 +69,4 @@ appGroups.forEach((group) => {
   app.route("/", group);
 });
 
-// 添加 metrics 端点（必须在路由分组之后）
-app.get("/metrics", printMetrics);
-
 export default app;
-
-// 导出各个应用实例以便端点收集
-export { adminApp, clientApp, publicApp };

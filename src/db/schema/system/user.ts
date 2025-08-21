@@ -12,13 +12,13 @@ export const systemUser = pgTable("system_user", {
   ...defaultColumns,
   username: varchar({ length: 64 }).notNull().unique(),
   password: text().notNull(),
-  domain: varchar({ length: 64 }).notNull().default("default"),
+  tenantId: varchar({ length: 64 }).notNull().default("default"),
   builtIn: boolean().default(false),
   avatar: text(),
   nickName: varchar({ length: 64 }).notNull(),
   status: statusEnum().notNull(),
 }, table => [
-  index("system_user_domain_status_idx").on(table.domain, table.status),
+  index("system_user_tenant_id_status_idx").on(table.tenantId, table.status),
   index("system_user_username_idx").on(table.username),
 ]);
 
@@ -30,7 +30,7 @@ export const selectSystemUserSchema = createSelectSchema(systemUser, {
   id: schema => schema.meta({ description: "用户ID" }),
   username: schema => schema.meta({ description: "用户名" }),
   password: schema => schema.meta({ description: "密码" }),
-  domain: schema => schema.meta({ description: "域/租户" }),
+  tenantId: schema => schema.meta({ description: "域/租户" }),
   builtIn: schema => schema.meta({ description: "是否内置用户" }),
   avatar: schema => schema.meta({ description: "头像" }),
   nickName: schema => schema.meta({ description: "昵称" }),
@@ -40,7 +40,7 @@ export const selectSystemUserSchema = createSelectSchema(systemUser, {
 export const insertSystemUserSchema = createInsertSchema(systemUser, {
   username: schema => schema.min(4).max(15).regex(/^\w+$/).meta({ description: "用户名" }),
   password: schema => schema.min(6).max(20).meta({ description: "密码" }),
-  domain: schema => schema.min(1).default("default").meta({ description: "域/租户" }),
+  tenantId: schema => schema.min(1).default("default").meta({ description: "域/租户" }),
   nickName: schema => schema.min(1).meta({ description: "昵称" }),
 }).omit({
   id: true,

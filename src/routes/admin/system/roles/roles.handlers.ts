@@ -11,18 +11,17 @@ import { getQueryValidationError } from "@/lib/enums/zod";
 import paginatedQuery from "@/lib/pagination";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { pickContext } from "@/utils/tools/hono-helpers";
 
 import type { SystemRolesRouteHandlerType } from "./roles.index";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
-  const domain = c.get("tenantId");
+  const { tenantId } = c.get("jwtPayload");
 
   const [error, result] = await paginatedQuery<z.infer<typeof selectSystemRoleSchema>>({
     table: systemRole,
     params: query,
-    domain,
+    tenantId,
   });
 
   if (error) {
@@ -34,12 +33,12 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
 
 export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const [domain, userId] = pickContext(c, ["tenantId", "uid"]);
+  const { tenantId, userId } = c.get("jwtPayload");
 
   try {
     const [role] = await db.insert(systemRole).values({
       ...body,
-      domain,
+      tenantId,
       createdBy: userId,
     }).returning();
 
@@ -58,14 +57,14 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
 
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
-  const domain = c.get("tenantId");
+  const { tenantId } = c.get("jwtPayload");
 
   const [role] = await db
     .select()
     .from(systemRole)
     .where(and(
       eq(systemRole.id, id),
-      eq(systemRole.domain, domain),
+      eq(systemRole.tenantId, tenantId),
     ));
 
   if (!role) {
@@ -78,7 +77,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const [domain, userId] = pickContext(c, ["tenantId", "uid"]);
+  const { tenantId, userId } = c.get("jwtPayload");
 
   const [updated] = await db
     .update(systemRole)
@@ -88,7 +87,7 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
     })
     .where(and(
       eq(systemRole.id, id),
-      eq(systemRole.domain, domain),
+      eq(systemRole.tenantId, tenantId),
     ))
     .returning();
 
@@ -101,13 +100,13 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
-  const domain = c.get("tenantId");
+  const { tenantId } = c.get("jwtPayload");
 
   const [deleted] = await db
     .delete(systemRole)
     .where(and(
       eq(systemRole.id, id),
-      eq(systemRole.domain, domain),
+      eq(systemRole.tenantId, tenantId),
     ))
     .returning({ id: systemRole.id });
 

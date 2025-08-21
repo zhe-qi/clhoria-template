@@ -1,11 +1,11 @@
-import { newEnforcer, newModelFromString } from "casbin";
+import { newEnforcer, newModel } from "casbin";
 
 import db from "@/db";
 import { casbinRule, systemRole } from "@/db/schema";
 
 import { DrizzleCasbinAdapter } from "./adapter";
 
-const model = newModelFromString(`
+export const model = newModel(`
 [request_definition]
 r = sub, obj, act, dom
 
@@ -19,7 +19,7 @@ g = _, _, _
 e = some(where (p.eft == allow)) && !some(where (p.eft == deny))
 
 [matchers]
-m = g(r.sub, p.sub, r.dom) && r.obj == p.obj && r.act == p.act && r.dom == p.dom
+m = g(r.sub, p.sub, r.dom) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act) && r.dom == p.dom
 `);
 
 const adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule, systemRole);

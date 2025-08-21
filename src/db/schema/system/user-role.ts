@@ -7,9 +7,9 @@ import { systemUser } from "./user";
 export const systemUserRole = pgTable("system_user_role", {
   userId: uuid().notNull(),
   roleId: uuid().notNull(),
-  domain: varchar({ length: 64 }).notNull().default("default"),
+  tenantId: varchar({ length: 64 }).notNull().default("default"),
 }, table => [
-  primaryKey({ columns: [table.domain, table.userId, table.roleId] }),
+  primaryKey({ columns: [table.tenantId, table.userId, table.roleId] }),
 ]);
 
 export const systemUserRoleRelations = relations(systemUserRole, ({ one }) => ({

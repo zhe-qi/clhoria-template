@@ -1,6 +1,7 @@
 import type { RouteConfig as HonoRouteConfig, OpenAPIHono, RouteHandler } from "@hono/zod-openapi";
 import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
+import type { JWTPayload } from "hono/utils/jwt/types";
 
 export interface AppBindings {
   Variables: {
@@ -8,12 +9,15 @@ export interface AppBindings {
     logger: PinoLogger;
     /** 请求 ID */
     requestId: string;
-    /** 用户角色 */
-    roles: string[];
-    /** 租户 ID */
-    tenantId: string;
-    /** 用户 ID */
-    uid: string;
+    /** JWT 负载 */
+    jwtPayload: JWTPayload & {
+      /** 用户角色 */
+      roles: string[];
+      /** 租户 ID */
+      tenantId: string;
+      /** 用户 ID */
+      userId: string;
+    };
   };
 };
 

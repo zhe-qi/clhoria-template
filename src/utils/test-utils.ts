@@ -20,17 +20,17 @@ let userTokenCache: CachedToken | null = null;
 /**
  * 生成测试用的JWT token
  */
-async function generateTestToken(username: string, domain: string = "default"): Promise<CachedToken> {
+async function generateTestToken(username: string, tenantId: string = "default"): Promise<CachedToken> {
   // 查询用户信息
   const user = await db.query.systemUser.findFirst({
     where: and(
       eq(systemUser.username, username),
-      eq(systemUser.domain, domain),
+      eq(systemUser.tenantId, tenantId),
     ),
     columns: {
       id: true,
       username: true,
-      domain: true,
+      tenantId: true,
     },
   });
 
@@ -44,9 +44,8 @@ async function generateTestToken(username: string, domain: string = "default"): 
   const jti = crypto.randomUUID();
 
   const tokenPayload = {
-    uid: user.id,
-    username: user.username,
-    domain: user.domain,
+    userId: user.id,
+    tenantId: user.tenantId,
     iat: now,
     exp: accessTokenExp,
     jti,
@@ -58,7 +57,7 @@ async function generateTestToken(username: string, domain: string = "default"): 
   return {
     token,
     userId: user.id,
-    domain: user.domain,
+    domain: user.tenantId,
   };
 }
 

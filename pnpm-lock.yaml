@@ -12,17 +12,17 @@ importers:
         specifier: ^8.1.0
         version: 8.1.0(zod@4.0.17)
       '@aws-sdk/client-s3':
-        specifier: ^3.864.0
-        version: 3.864.0
+        specifier: ^3.872.0
+        version: 3.872.0
       '@aws-sdk/s3-request-presigner':
-        specifier: ^3.864.0
-        version: 3.864.0
+        specifier: ^3.872.0
+        version: 3.872.0
       '@bull-board/api':
-        specifier: ^6.12.0
-        version: 6.12.0(@bull-board/ui@6.12.0)
+        specifier: ^6.12.1
+        version: 6.12.1(@bull-board/ui@6.12.1)
       '@bull-board/hono':
-        specifier: ^6.12.0
-        version: 6.12.0(hono@4.9.2)
+        specifier: ^6.12.1
+        version: 6.12.1(hono@4.9.2)
       '@cap.js/server':
         specifier: ^3.0.0
         version: 3.0.0
@@ -32,9 +32,6 @@ importers:
       '@hono/node-ws':
         specifier: ^1.2.0
         version: 1.2.0(@hono/node-server@1.19.0(hono@4.9.2))(hono@4.9.2)
-      '@hono/prometheus':
-        specifier: ^1.0.2
-        version: 1.0.2(hono@4.9.2)(prom-client@15.1.3)
       '@hono/sentry':
         specifier: ^1.2.2
         version: 1.2.2(hono@4.9.2)
@@ -81,8 +78,8 @@ importers:
         specifier: ^0.4.2
         version: 0.4.2(hono@4.9.2)
       iconv-lite:
-        specifier: ^0.6.3
-        version: 0.6.3
+        specifier: ^0.7.0
+        version: 0.7.0
       ioredis:
         specifier: 5.7.0
         version: 5.7.0
@@ -95,15 +92,9 @@ importers:
       postgres:
         specifier: ^3.4.7
         version: 3.4.7
-      prom-client:
-        specifier: ^15.1.3
-        version: 15.1.3
       rate-limit-redis:
         specifier: ^4.2.2
         version: 4.2.2(express-rate-limit@7.5.1(express@5.1.0))
-      socket.io:
-        specifier: ^4.8.1
-        version: 4.8.1
       stoker:
         specifier: ^2.0.1
         version: 2.0.1(@asteasolutions/zod-to-openapi@8.1.0(zod@4.0.17))(@hono/zod-openapi@1.1.0(hono@4.9.2)(zod@4.0.17))(hono@4.9.2)(openapi3-ts@4.5.0)
@@ -121,8 +112,8 @@ importers:
         specifier: ^24.3.0
         version: 24.3.0
       '@typescript/native-preview':
-        specifier: 7.0.0-dev.20250819.1
-        version: 7.0.0-dev.20250819.1
+        specifier: 7.0.0-dev.20250820.1
+        version: 7.0.0-dev.20250820.1
       cross-env:
         specifier: ^10.0.0
         version: 10.0.0
@@ -146,7 +137,7 @@ importers:
         version: 2.13.1
       tsdown:
         specifier: ^0.14.1
-        version: 0.14.1(@typescript/native-preview@7.0.0-dev.20250819.1)(typescript@5.9.2)
+        version: 0.14.1(@typescript/native-preview@7.0.0-dev.20250820.1)(typescript@5.9.2)
       tsx:
         specifier: ^4.20.4
         version: 4.20.4
@@ -245,12 +236,12 @@ packages:
   '@aws-crypto/util@5.2.0':
     resolution: {integrity: sha512-4RkU9EsI6ZpBve5fseQlGNUWKMa1RLPQ1dnjnQoe07ldfIzcsGb5hC5W0Dm7u423KWzawlrpbjXBrXCEv9zazQ==}
 
-  '@aws-sdk/client-s3@3.864.0':
-    resolution: {integrity: sha512-QGYi9bWliewxumsvbJLLyx9WC0a4DP4F+utygBcq0zwPxaM0xDfBspQvP1dsepi7mW5aAjZmJ2+Xb7X0EhzJ/g==}
+  '@aws-sdk/client-s3@3.872.0':
+    resolution: {integrity: sha512-TYXRjjb6fzVzZuDK+6BNdfFLOZXazaaB5l7eESr1NYPKGQB6OxgcLC+NfaA6dKCwShpSglKUUrXFe26kX24Tcg==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/client-sso@3.864.0':
-    resolution: {integrity: sha512-THiOp0OpQROEKZ6IdDCDNNh3qnNn/kFFaTSOiugDpgcE5QdsOxh1/RXq7LmHpTJum3cmnFf8jG59PHcz9Tjnlw==}
+  '@aws-sdk/client-sso@3.872.0':
+    resolution: {integrity: sha512-ZCiZk4TslnhhcFbo95HfNxwtNBXJ5jE/WxhJrFJPMJfAlSuaMu3H3LdfVwgzWs9vBtk2yTRX3gF+clKtZb6D2Q==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/core@3.864.0':
@@ -265,20 +256,20 @@ packages:
     resolution: {integrity: sha512-E/RFVxGTuGnuD+9pFPH2j4l6HvrXzPhmpL8H8nOoJUosjx7d4v93GJMbbl1v/fkDLqW9qN4Jx2cI6PAjohA6OA==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/credential-provider-ini@3.864.0':
-    resolution: {integrity: sha512-PlxrijguR1gxyPd5EYam6OfWLarj2MJGf07DvCx9MAuQkw77HBnsu6+XbV8fQriFuoJVTBLn9ROhMr/ROAYfUg==}
+  '@aws-sdk/credential-provider-ini@3.872.0':
+    resolution: {integrity: sha512-OItc+c6Yu5UUTmHVXpcqiQEkOIAZMWpzM9iXlz+CtzE0njft2obvGtIWQgZl7yVuaROtin4YwPAJscWmKhsb/A==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/credential-provider-node@3.864.0':
-    resolution: {integrity: sha512-2BEymFeXURS+4jE9tP3vahPwbYRl0/1MVaFZcijj6pq+nf5EPGvkFillbdBRdc98ZI2NedZgSKu3gfZXgYdUhQ==}
+  '@aws-sdk/credential-provider-node@3.872.0':
+    resolution: {integrity: sha512-VpzTBfd0a19+5y7obIXzkhjC60yHsom7JNCqymWft+eJJN/6I817ti/59vtwdtujmG/UpLtszy7YGGo8V9oF1g==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/credential-provider-process@3.864.0':
     resolution: {integrity: sha512-Zxnn1hxhq7EOqXhVYgkF4rI9MnaO3+6bSg/tErnBQ3F8kDpA7CFU24G1YxwaJXp2X4aX3LwthefmSJHwcVP/2g==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/credential-provider-sso@3.864.0':
-    resolution: {integrity: sha512-UPyPNQbxDwHVGmgWdGg9/9yvzuedRQVF5jtMkmP565YX9pKZ8wYAcXhcYdNPWFvH0GYdB0crKOmvib+bmCuwkw==}
+  '@aws-sdk/credential-provider-sso@3.872.0':
+    resolution: {integrity: sha512-+wmvQe1D3GrgfHRvmupvSTmt76ynNrWLNm17Bg1ofeYKFThlPWUNhwZ2rFXwZadksQfdmwfPYRxjo8Eg4xogWA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/credential-provider-web-identity@3.864.0':
@@ -333,8 +324,8 @@ packages:
     resolution: {integrity: sha512-VisR+/HuVFICrBPY+q9novEiE4b3mvDofWqyvmxHcWM7HumTz9ZQSuEtnlB/92GVM3KDUrR9EmBHNRrfXYZkcQ==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/s3-request-presigner@3.864.0':
-    resolution: {integrity: sha512-IiVFDxabrqTB1A9qZI6IEa3cOgF2eciUG4UX27HzkMY6UXG0EZhnGkgkgHYMt6j2hGAFOvAh0ogv/XxZLg6Zaw==}
+  '@aws-sdk/s3-request-presigner@3.872.0':
+    resolution: {integrity: sha512-kbxjs4UZU4V6QEHfvO0oTZX6HqViT5fzABob78gXTf+d2cz1+lXWMLtd4avvhT9o+wISWdwYMG3idxCuMUegDQ==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/signature-v4-multi-region@3.864.0':
@@ -402,18 +393,18 @@ packages:
     resolution: {integrity: sha512-ruv7Ae4J5dUYULmeXw1gmb7rYRz57OWCPM57pHojnLq/3Z1CK2lNSLTCVjxVk1F/TZHwOZZrOWi0ur95BbLxNQ==}
     engines: {node: '>=6.9.0'}
 
-  '@bull-board/api@6.12.0':
-    resolution: {integrity: sha512-tlMQTc0EAiYbv8gjR0lCYAXDL1Uc8/dPD9tKjxvG+m9lUUpPAoRUXUHNtzwVQo+AHiF6WHEK9iA3+8KHJamc/w==}
+  '@bull-board/api@6.12.1':
+    resolution: {integrity: sha512-PejAqqtnasXHxGkSVCdh2VLNkwNPZ6/JN1BR31VCqX4l54JtWd9vSlcRU2jrwcNIK4aunvOx4VfKSII1pr4T/w==}
     peerDependencies:
-      '@bull-board/ui': 6.12.0
+      '@bull-board/ui': 6.12.1
 
-  '@bull-board/hono@6.12.0':
-    resolution: {integrity: sha512-Fw32BZrDCdGNiht+JoJVEzrtxQ02jJILoNhK8/FJanWQu6xd3pyn8zQE52wBXmIztbPcmCG5Li+RT3sw7697WA==}
+  '@bull-board/hono@6.12.1':
+    resolution: {integrity: sha512-Id4iNNgUs+qjqa0tVJ4jiwlW+zhyNxlcNKQBT/Cqfw6vshzixwaYfR+9IQU8jeyqB4s/O/icPutArHcfB19mUg==}
     peerDependencies:
       hono: ^4
 
-  '@bull-board/ui@6.12.0':
-    resolution: {integrity: sha512-a1+9bUlNViXIQcO9KPOd1EP66Ts4caYHgsc5OuunDMZ9Q6Y7sfrQXMhfnv3JWahSNo3hiX6Fc8wIL4p/bcTwsw==}
+  '@bull-board/ui@6.12.1':
+    resolution: {integrity: sha512-vTGr3jS01b8JPOfnCqcEDxGUe8k5Zb4iGWiw38hlyiAC8c4qnKMc3FaFTSWeiT9va/s+nr5FqAu/kobqn/yNDg==}
 
   '@cap.js/server@3.0.0':
     resolution: {integrity: sha512-UjEiOT5idL5YXwAcuKCJ+EOqfxLQWNmMLYeqjZ7qq4mO+RjBwEDunEBW+EHdjD3TWFI0z7Hj6NEkrd67ct5kRg==}
@@ -969,12 +960,6 @@ packages:
       '@hono/node-server': ^1.11.1
       hono: ^4.6.0
 
-  '@hono/prometheus@1.0.2':
-    resolution: {integrity: sha512-7z2nBMaiHEaAFfNWfIV2H5/HRezv9kLH0jDY6ZotQQAr3QR7cIYAd6FGiyTIng4GUAw6ZWeX3C0Y4QS36SLRjg==}
-    peerDependencies:
-      hono: '>=3.*'
-      prom-client: ^15.0.0
-
   '@hono/sentry@1.2.2':
     resolution: {integrity: sha512-027grZBrRGDPor8mRd+QOBcSpUlF07YrTp/WFDXZhbvWZ+1LrZdERUqcdg1gBGDUTanHhd9ucblpNNN6+V1bxg==}
     peerDependencies:
@@ -1170,24 +1155,28 @@ packages:
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@node-rs/argon2-linux-arm64-musl@2.0.2':
     resolution: {integrity: sha512-p3YqVMNT/4DNR67tIHTYGbedYmXxW9QlFmF39SkXyEbGQwpgSf6pH457/fyXBIYznTU/smnG9EH+C1uzT5j4hA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@node-rs/argon2-linux-x64-gnu@2.0.2':
     resolution: {integrity: sha512-ZM3jrHuJ0dKOhvA80gKJqBpBRmTJTFSo2+xVZR+phQcbAKRlDMSZMFDiKbSTnctkfwNFtjgDdh5g1vaEV04AvA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@node-rs/argon2-linux-x64-musl@2.0.2':
     resolution: {integrity: sha512-of5uPqk7oCRF/44a89YlWTEfjsftPywyTULwuFDKyD8QtVZoonrJR6ZWvfFE/6jBT68S0okAkAzzMEdBVWdxWw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@node-rs/argon2-wasm32-wasi@2.0.2':
     resolution: {integrity: sha512-U3PzLYKSQYzTERstgtHLd4ZTkOF9co57zTXT77r0cVUsleGZOrd6ut7rHzeWwoJSiHOVxxa0OhG1JVQeB7lLoQ==}
@@ -1276,21 +1265,25 @@ packages:
     resolution: {integrity: sha512-cHGp8yfHL4pes6uaLbO5L58ceFkUK4efd8iE86jClD1QPPDLKiqEXJCFYeuK3OfODuF5EBOmf0SlcUZNEYGdmw==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rolldown/binding-linux-arm64-musl@1.0.0-beta.33':
     resolution: {integrity: sha512-wZ1t7JAvVeFgskH1L9y7c47ITitPytpL0s8FmAT8pVfXcaTmS58ZyoXT+y6cz8uCkQnETjrX3YezTGI18u3ecg==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rolldown/binding-linux-x64-gnu@1.0.0-beta.33':
     resolution: {integrity: sha512-cDndWo3VEYbm7yeujOV6Ie2XHz0K8YX/R/vbNmMo03m1QwtBKKvbYNSyJb3B9+8igltDjd8zNM9mpiNNrq/ekQ==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rolldown/binding-linux-x64-musl@1.0.0-beta.33':
     resolution: {integrity: sha512-bl7uzi6es/l6LT++NZcBpiX43ldLyKXCPwEZGY1rZJ99HQ7m1g3KxWwYCcGxtKjlb2ExVvDZicF6k+96vxOJKg==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rolldown/binding-openharmony-arm64@1.0.0-beta.33':
     resolution: {integrity: sha512-TrgzQanpLgcmmzolCbYA9BPZgF1gYxkIGZhU/HROnJPsq67gcyaYw/JBLioqQLjIwMipETkn25YY799D2OZzJA==}
@@ -1354,51 +1347,61 @@ packages:
     resolution: {integrity: sha512-Py5vFd5HWYN9zxBv3WMrLAXY3yYJ6Q/aVERoeUFwiDGiMOWsMs7FokXihSOaT/PMWUty/Pj60XDQndK3eAfE6A==}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.29.1':
     resolution: {integrity: sha512-RiWpGgbayf7LUcuSNIbahr0ys2YnEERD4gYdISA06wa0i8RALrnzflh9Wxii7zQJEB2/Eh74dX4y/sHKLWp5uQ==}
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.29.1':
     resolution: {integrity: sha512-Z80O+taYxTQITWMjm/YqNoe9d10OX6kDh8X5/rFCMuPqsKsSyDilvfg+vd3iXIqtfmp+cnfL1UrYirkaF8SBZA==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.29.1':
     resolution: {integrity: sha512-fOHRtF9gahwJk3QVp01a/GqS4hBEZCV1oKglVVq13kcK3NeVlS4BwIFzOHDbmKzt3i0OuHG4zfRP0YoG5OF/rA==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-loongarch64-gnu@4.29.1':
     resolution: {integrity: sha512-5a7q3tnlbcg0OodyxcAdrrCxFi0DgXJSoOuidFUzHZ2GixZXQs6Tc3CHmlvqKAmOs5eRde+JJxeIf9DonkmYkw==}
     cpu: [loong64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-powerpc64le-gnu@4.29.1':
     resolution: {integrity: sha512-9b4Mg5Yfz6mRnlSPIdROcfw1BU22FQxmfjlp/CShWwO3LilKQuMISMTtAu/bxmmrE6A902W2cZJuzx8+gJ8e9w==}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-gnu@4.29.1':
     resolution: {integrity: sha512-G5pn0NChlbRM8OJWpJFMX4/i8OEU538uiSv0P6roZcbpe/WfhEO+AT8SHVKfp8qhDQzaz7Q+1/ixMy7hBRidnQ==}
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-s390x-gnu@4.29.1':
     resolution: {integrity: sha512-WM9lIkNdkhVwiArmLxFXpWndFGuOka4oJOZh8EP3Vb8q5lzdSCBuhjavJsw68Q9AKDGeOOIHYzYm4ZFvmWez5g==}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.29.1':
     resolution: {integrity: sha512-87xYCwb0cPGZFoGiErT1eDcssByaLX4fc0z2nRM6eMtV9njAfEE6OW3UniAoDhX4Iq5xQVpE6qO9aJbCFumKYQ==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.29.1':
     resolution: {integrity: sha512-xufkSNppNOdVRCEC4WKvlR1FBDyqCSCpQeMMgv9ZyXqqtKBfkw1yfGMTUTs9Qsl6WQbJnsGboWCp7pJGkeMhKA==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-win32-arm64-msvc@4.29.1':
     resolution: {integrity: sha512-F2OiJ42m77lSkizZQLuC+jiZ2cgueWQL5YC9tjo3AgaEw+KJmVxHGSyQfDUoYR9cci0lAywv2Clmckzulcq6ig==}
@@ -1657,9 +1660,6 @@ packages:
     resolution: {integrity: sha512-mYqtQXPmrwvUljaHyGxYUIIRI3qjBTEb/f5QFi3A6VlxhpmZd5mWXn9W+qUkf2pVE1Hv3SqxefiZOPGdxmO64A==}
     engines: {node: '>=18.0.0'}
 
-  '@socket.io/component-emitter@3.1.2':
-    resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
-
   '@stylistic/eslint-plugin@5.2.3':
     resolution: {integrity: sha512-oY7GVkJGVMI5benlBDCaRrSC1qPasafyv5dOBLLv5MTilMGnErKhO6ziEfodDDIZbo5QxPUNW360VudJOFODMw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -1677,9 +1677,6 @@ packages:
 
   '@types/chai@5.2.2':
     resolution: {integrity: sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg==}
-
-  '@types/cors@2.8.19':
-    resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
 
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
@@ -1776,50 +1773,50 @@ packages:
     resolution: {integrity: sha512-ldgiJ+VAhQCfIjeOgu8Kj5nSxds0ktPOSO9p4+0VDH2R2pLvQraaM5Oen2d7NxzMCm+Sn/vJT+mv2H5u6b/3fA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-sZAKCg5lW10rg4REkm6Qv14+f2OVN4dX+AfznnxZp3iqj9am+0JCg67la3IVlhznY3jwvqJU6QK54vblK+my5A==}
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-7fjmWyR7/c+ZmzcHlsAqH/iBFXXYcuJuedp60/WrLL0ghEPLNw3MbQ2tp3xpQN+rlbYLuwJhR2kXXw88x7Ww1w==}
     engines: {node: '>=20.6.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-EkcJWqnldvsEM59hNicAFGp0a3y4ebp60uJdlgxuOC3kFHffMHTUSxhuxySY4djKV9uei5RZR2O5s3XDrjcKoA==}
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-ErHojMTFSRAV9+Govkan8vtM3JDeGlKIIiuIArhyNHWLz4GZUoZhaoHAKLmLeAX3DcfqlcVYerUVwoVmSL9Cxw==}
     engines: {node: '>=20.6.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-nG07i0oVCISBVPqoHKPpBwYUg3XJhuo/QOScvTagJ4o1XS63HCZOldC0cu26ZyvlrgBaWmteVMzyaaIluwupNQ==}
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-hQxOqtzpFg3sIAZMDT476hjLuoWv3Qa4ANZXAUvbQ9ttG4azVOapQsw8vp/XBmsL9sltBSlYLxGmitiv9smnzA==}
     engines: {node: '>=20.6.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-yhfOqmxyscXYd6gkrvmDInVx5fntetIrIBHGw1ElNmnmlu5HgguXfEXLxYNMVnBRTzrHtHYPQ8jRd79X1uni+g==}
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-mVmNk5R35fSezE8gcOfiSRIVkni0Atsi/pgl+q0ldaZVOYubHot2+Fcbuw+WpgeKwjcCDMuLLlm7iWD2rxYqNQ==}
     engines: {node: '>=20.6.0'}
     cpu: [arm]
     os: [linux]
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-HrVUxN+VBDiiyi3xk4Ih323ZXAyLWu4CNlI1MGqazhOvahKUjTTvuyzdyTWI7Bzf25KcHIXqfyD0PTqQQRMnVw==}
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-rPzvunkZLgbyurLTRHoOvlITUKxqmnsDahzH4p9D8b5XH5Ma8n9nlFyQyu0ClVzspj6/UQZiAviIugO8tH9Wwg==}
     engines: {node: '>=20.6.0'}
     cpu: [x64]
     os: [linux]
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-TRSeuNIA3CI8BmZhioj+QBFdsywadJWKvdC/dhawaYJJuhwz4jbPD7lg/SA2gWihqDC7ZhPq6eqSgaxobW5/uw==}
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-DY76jAXhYerjiJFjqMryiopPpIZGh7NYh90MeYBUOm6QAgNpbuTAhq9n5cwefSpNBb3dPQ3lv5tA0wazwC58zQ==}
     engines: {node: '>=20.6.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-LTLw0FtGmrSZ3mrERcDWJ1P7tvGMZAi5dhbwXBhGHiawX8kwWHZI3J+TqDnU2zrxL22164qsAee2LI4J2bwpNw==}
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-YMRkxn1EnwR2sHfeLxntVKvunCct6ZUNpoBMhU6MWH0uFlneYZSf8LaIgNoQOL9rkw8xQkXYlwQ5pNtGg4ereA==}
     engines: {node: '>=20.6.0'}
     cpu: [x64]
     os: [win32]
 
-  '@typescript/native-preview@7.0.0-dev.20250819.1':
-    resolution: {integrity: sha512-+gl0Sg+Ol5QibPacZziwHyImPtPzuYV1BF/n99LG6U9BAMOXoBamU+9Y5C+0gUdesmz5Ik9ZJpUuX4HTBzULig==}
+  '@typescript/native-preview@7.0.0-dev.20250820.1':
+    resolution: {integrity: sha512-/J2eqdbAEhaswFBXkYQCVf+QfHZaxjMzYprj4HEwkDT1eYK6LgedD2u7vKGtAWF2YC71gbZ9NzykZ3MxWmJFlQ==}
     engines: {node: '>=20.6.0'}
     hasBin: true
 
@@ -1878,10 +1875,6 @@ packages:
 
   '@vue/shared@3.5.11':
     resolution: {integrity: sha512-W8GgysJVnFo81FthhzurdRAWP/byq3q2qIw70e0JWblzVhjgOMiC2GyovXrZTFQJnFVryYaKGP3Tc9vYzYm6PQ==}
-
-  accepts@1.3.8:
-    resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
-    engines: {node: '>= 0.6'}
 
   accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
@@ -1951,18 +1944,11 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  base64id@2.0.0:
-    resolution: {integrity: sha512-lGe34o6EHj9y3Kts9R4ZYs/Gr+6N7MCaMlIFA3F1R2O5/m7K06AxfSeO5530PEERE6/WyEg3lsuyw4GHlPZHog==}
-    engines: {node: ^4.5.0 || >= 5.9}
-
   better-sqlite3@11.3.0:
     resolution: {integrity: sha512-iHt9j8NPYF3oKCNOO5ZI4JwThjt3Z6J6XrcwG85VNMVzv1ByqrHWv5VILEbCMFWDsoHhXvQ7oC8vgRXFAKgl9w==}
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
-
-  bintrees@1.0.2:
-    resolution: {integrity: sha512-VOMgTMwjAaUG580SXn3LacVgjurrbMme7ZZNYGSSV7mmtY6QQRh0Eg3pwIcntQ77DErK1L0NxkbetjcoXzVwKw==}
 
   birpc@2.5.0:
     resolution: {integrity: sha512-VSWO/W6nNQdyP520F1mhf+Lc2f8pjGQOtoHHm7Ze8Go1kX7akpVIrtTa0fn+HB0QJEDVacl6aO08YE0PgXfdnQ==}
@@ -2135,10 +2121,6 @@ packages:
   core-js-compat@3.44.0:
     resolution: {integrity: sha512-JepmAj2zfl6ogy34qfWtcE7nHKAJnKsQFRn++scjVS2bZFllwptzw61BZcZFYBPpUznLfAvh0LGhxKppk04ClA==}
 
-  cors@2.8.5:
-    resolution: {integrity: sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==}
-    engines: {node: '>= 0.10'}
-
   cron-parser@4.9.0:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
@@ -2174,15 +2156,6 @@ packages:
 
   dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
-
-  debug@4.3.7:
-    resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
 
   debug@4.4.1:
     resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
@@ -2395,14 +2368,6 @@ packages:
 
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
-
-  engine.io-parser@5.2.3:
-    resolution: {integrity: sha512-HqD3yTBfnBxIrbnM1DoD6Pcq8NECnh8d4As1Qgh0z5Gg3jRRIqijury0CL3ghu/edArpUYiYqQiDUQBIs4np3Q==}
-    engines: {node: '>=10.0.0'}
-
-  engine.io@6.6.4:
-    resolution: {integrity: sha512-ZCkIjSYNDyGn0R6ewHDtXgns/Zre/NT6Agvq1/WobF7JXgFff4SeDroKiCO3fNJreU9YG429Sc81o4w5ok/W5g==}
-    engines: {node: '>=10.2.0'}
 
   enhanced-resolve@5.18.0:
     resolution: {integrity: sha512-0/r0MySGYG8YqlayBZ6MuCfECmHFdJ5qyPh8s8wa5Hnm6SaFLSK1VYCbj+NKp090Nm1caZhD+QTnmxO7esYGyQ==}
@@ -2915,6 +2880,10 @@ packages:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
 
+  iconv-lite@0.7.0:
+    resolution: {integrity: sha512-cf6L2Ds3h57VVmkZe+Pn+5APsT7FpqJtEhhieDCvrE2MK5Qk9MyffgQyuxQTm6BChfeZNtcOLHp9IcWRVcIcBQ==}
+    engines: {node: '>=0.10.0'}
+
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
 
@@ -3251,16 +3220,8 @@ packages:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
 
-  mime-db@1.52.0:
-    resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
-    engines: {node: '>= 0.6'}
-
   mime-db@1.54.0:
     resolution: {integrity: sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==}
-    engines: {node: '>= 0.6'}
-
-  mime-types@2.1.35:
-    resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
     engines: {node: '>= 0.6'}
 
   mime-types@3.0.1:
@@ -3342,10 +3303,6 @@ packages:
     resolution: {integrity: sha512-kKHJhxwpR/Okycz4HhQKKlhWe4ASEfPgkSWNmKFHd7+ezuQlxkA5cM3+XkBPvm1gmHen3w53qsYAv+8GwRrBlg==}
     engines: {node: '>=18'}
 
-  negotiator@0.6.3:
-    resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
-    engines: {node: '>= 0.6'}
-
   negotiator@1.0.0:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
@@ -3375,10 +3332,6 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
-
-  object-assign@4.1.1:
-    resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
-    engines: {node: '>=0.10.0'}
 
   object-inspect@1.13.4:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
@@ -3537,10 +3490,6 @@ packages:
 
   process-warning@5.0.0:
     resolution: {integrity: sha512-a39t9ApHNx2L4+HBnQKqxxHNs1r7KF+Intd8Q/g1bUh6q0WIp9voPXJ/x0j+ZL45KF1pJd9+q2jLIRMfvEshkA==}
-
-  prom-client@15.1.3:
-    resolution: {integrity: sha512-6ZiOBfCywsD4k1BN9IX0uZhF+tJkV8q8llP64G5Hajs4JOeVLPCwpPVcpXy3BwYiUGgyJzsJJQeOIv7+hDSq8g==}
-    engines: {node: ^16 || ^18 || >=20}
 
   promise-limit@2.7.0:
     resolution: {integrity: sha512-7nJ6v5lnJsXwGprnGXga4wx6d1POjvi5Qmf1ivTRxTjH4Z/9Czja/UCMLVmB9N93GeWOU93XaFaEt6jbuoagNw==}
@@ -3764,17 +3713,6 @@ packages:
     resolution: {integrity: sha512-bSiSngZ/jWeX93BqeIAbImyTbEihizcwNjFoRUIY/T1wWQsfsm2Vw1agPKylXvQTU7iASGdHhyqRlqQzfz+Htg==}
     engines: {node: '>=18'}
 
-  socket.io-adapter@2.5.5:
-    resolution: {integrity: sha512-eLDQas5dzPgOWCk9GuuJC2lBqItuhKI4uxGgo9aIV7MYbk2h9Q6uULEh8WBzThoI7l+qU9Ast9fVUmkqPP9wYg==}
-
-  socket.io-parser@4.2.4:
-    resolution: {integrity: sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==}
-    engines: {node: '>=10.0.0'}
-
-  socket.io@4.8.1:
-    resolution: {integrity: sha512-oZ7iUCxph8WYRHHcjBEc9unw3adt5CmSNlppj/5Q4k2RIrhl8Z5yY2Xr4j9zj0+wzVZ0bxmYoGSzKJnRl6A4yg==}
-    engines: {node: '>=10.2.0'}
-
   sonic-boom@4.2.0:
     resolution: {integrity: sha512-INb7TM37/mAcsGmc9hyyI6+QR3rR1zVRu36B0NeGXKnOOLiZOfER5SA+N7X7k3yUYRzLWafduTDvJAfDswwEww==}
 
@@ -3893,9 +3831,6 @@ packages:
   tar-stream@2.2.0:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
     engines: {node: '>=6'}
-
-  tdigest@0.1.2:
-    resolution: {integrity: sha512-+G0LLgjjo9BZX2MfdvPfH+MKLCrxlXSYec5DaPYP1fe6Iyhf0/fSmJ0bFiZ1F8BT6cGXl2LpltQptzjXKWEkKA==}
 
   thread-stream@3.1.0:
     resolution: {integrity: sha512-OqyPZ9u96VohAyMfJykzmivOrY2wfMSf3C5TtFJVgN+Hm6aj+voFhlK+kZEIv2FBh1X6Xp3DlnCOfEQ3B2J86A==}
@@ -4148,18 +4083,6 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.17.1:
-    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
@@ -4322,13 +4245,13 @@ snapshots:
       '@smithy/util-utf8': 2.3.0
       tslib: 2.8.1
 
-  '@aws-sdk/client-s3@3.864.0':
+  '@aws-sdk/client-s3@3.872.0':
     dependencies:
       '@aws-crypto/sha1-browser': 5.2.0
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
       '@aws-sdk/core': 3.864.0
-      '@aws-sdk/credential-provider-node': 3.864.0
+      '@aws-sdk/credential-provider-node': 3.872.0
       '@aws-sdk/middleware-bucket-endpoint': 3.862.0
       '@aws-sdk/middleware-expect-continue': 3.862.0
       '@aws-sdk/middleware-flexible-checksums': 3.864.0
@@ -4385,7 +4308,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sso@3.864.0':
+  '@aws-sdk/client-sso@3.872.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -4467,13 +4390,13 @@ snapshots:
       '@smithy/util-stream': 4.2.4
       tslib: 2.8.1
 
-  '@aws-sdk/credential-provider-ini@3.864.0':
+  '@aws-sdk/credential-provider-ini@3.872.0':
     dependencies:
       '@aws-sdk/core': 3.864.0
       '@aws-sdk/credential-provider-env': 3.864.0
       '@aws-sdk/credential-provider-http': 3.864.0
       '@aws-sdk/credential-provider-process': 3.864.0
-      '@aws-sdk/credential-provider-sso': 3.864.0
+      '@aws-sdk/credential-provider-sso': 3.872.0
       '@aws-sdk/credential-provider-web-identity': 3.864.0
       '@aws-sdk/nested-clients': 3.864.0
       '@aws-sdk/types': 3.862.0
@@ -4485,13 +4408,13 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/credential-provider-node@3.864.0':
+  '@aws-sdk/credential-provider-node@3.872.0':
     dependencies:
       '@aws-sdk/credential-provider-env': 3.864.0
       '@aws-sdk/credential-provider-http': 3.864.0
-      '@aws-sdk/credential-provider-ini': 3.864.0
+      '@aws-sdk/credential-provider-ini': 3.872.0
       '@aws-sdk/credential-provider-process': 3.864.0
-      '@aws-sdk/credential-provider-sso': 3.864.0
+      '@aws-sdk/credential-provider-sso': 3.872.0
       '@aws-sdk/credential-provider-web-identity': 3.864.0
       '@aws-sdk/types': 3.862.0
       '@smithy/credential-provider-imds': 4.0.7
@@ -4511,9 +4434,9 @@ snapshots:
       '@smithy/types': 4.3.2
       tslib: 2.8.1
 
-  '@aws-sdk/credential-provider-sso@3.864.0':
+  '@aws-sdk/credential-provider-sso@3.872.0':
     dependencies:
-      '@aws-sdk/client-sso': 3.864.0
+      '@aws-sdk/client-sso': 3.872.0
       '@aws-sdk/core': 3.864.0
       '@aws-sdk/token-providers': 3.864.0
       '@aws-sdk/types': 3.862.0
@@ -4679,7 +4602,7 @@ snapshots:
       '@smithy/util-middleware': 4.0.5
       tslib: 2.8.1
 
-  '@aws-sdk/s3-request-presigner@3.864.0':
+  '@aws-sdk/s3-request-presigner@3.872.0':
     dependencies:
       '@aws-sdk/signature-v4-multi-region': 3.864.0
       '@aws-sdk/types': 3.862.0
@@ -4780,21 +4703,21 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@bull-board/api@6.12.0(@bull-board/ui@6.12.0)':
+  '@bull-board/api@6.12.1(@bull-board/ui@6.12.1)':
     dependencies:
-      '@bull-board/ui': 6.12.0
+      '@bull-board/ui': 6.12.1
       redis-info: 3.1.0
 
-  '@bull-board/hono@6.12.0(hono@4.9.2)':
+  '@bull-board/hono@6.12.1(hono@4.9.2)':
     dependencies:
-      '@bull-board/api': 6.12.0(@bull-board/ui@6.12.0)
-      '@bull-board/ui': 6.12.0
+      '@bull-board/api': 6.12.1(@bull-board/ui@6.12.1)
+      '@bull-board/ui': 6.12.1
       ejs: 3.1.10
       hono: 4.9.2
 
-  '@bull-board/ui@6.12.0':
+  '@bull-board/ui@6.12.1':
     dependencies:
-      '@bull-board/api': 6.12.0(@bull-board/ui@6.12.0)
+      '@bull-board/api': 6.12.1(@bull-board/ui@6.12.1)
 
   '@cap.js/server@3.0.0':
     dependencies:
@@ -5177,11 +5100,6 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@hono/prometheus@1.0.2(hono@4.9.2)(prom-client@15.1.3)':
-    dependencies:
-      hono: 4.9.2
-      prom-client: 15.1.3
-
   '@hono/sentry@1.2.2(hono@4.9.2)':
     dependencies:
       hono: 4.9.2
@@ -5404,7 +5322,8 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.17.1
 
-  '@opentelemetry/api@1.9.0': {}
+  '@opentelemetry/api@1.9.0':
+    optional: true
 
   '@oxc-project/runtime@0.82.2': {}
 
@@ -5885,8 +5804,6 @@ snapshots:
       '@smithy/types': 4.3.2
       tslib: 2.8.1
 
-  '@socket.io/component-emitter@3.1.2': {}
-
   '@stylistic/eslint-plugin@5.2.3(eslint@9.33.0(jiti@2.4.2))':
     dependencies:
       '@eslint-community/eslint-utils': 4.7.0(eslint@9.33.0(jiti@2.4.2))
@@ -5915,10 +5832,6 @@ snapshots:
   '@types/chai@5.2.2':
     dependencies:
       '@types/deep-eql': 4.0.2
-
-  '@types/cors@2.8.19':
-    dependencies:
-      '@types/node': 24.3.0
 
   '@types/debug@4.1.12':
     dependencies:
@@ -6048,36 +5961,36 @@ snapshots:
       '@typescript-eslint/types': 8.39.0
       eslint-visitor-keys: 4.2.1
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250819.1':
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20250820.1':
     optional: true
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250819.1':
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20250820.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250819.1':
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20250820.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20250819.1':
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20250820.1':
     optional: true
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20250819.1':
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20250820.1':
     optional: true
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250819.1':
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20250820.1':
     optional: true
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20250819.1':
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20250820.1':
     optional: true
 
-  '@typescript/native-preview@7.0.0-dev.20250819.1':
+  '@typescript/native-preview@7.0.0-dev.20250820.1':
     optionalDependencies:
-      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20250819.1
-      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20250819.1
-      '@typescript/native-preview-linux-arm': 7.0.0-dev.20250819.1
-      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20250819.1
-      '@typescript/native-preview-linux-x64': 7.0.0-dev.20250819.1
-      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20250819.1
-      '@typescript/native-preview-win32-x64': 7.0.0-dev.20250819.1
+      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20250820.1
+      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20250820.1
+      '@typescript/native-preview-linux-arm': 7.0.0-dev.20250820.1
+      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20250820.1
+      '@typescript/native-preview-linux-x64': 7.0.0-dev.20250820.1
+      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20250820.1
+      '@typescript/native-preview-win32-x64': 7.0.0-dev.20250820.1
 
   '@vitest/eslint-plugin@1.3.4(eslint@9.33.0(jiti@2.4.2))(typescript@5.9.2)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@24.3.0))':
     dependencies:
@@ -6163,11 +6076,6 @@ snapshots:
 
   '@vue/shared@3.5.11': {}
 
-  accepts@1.3.8:
-    dependencies:
-      mime-types: 2.1.35
-      negotiator: 0.6.3
-
   accepts@2.0.0:
     dependencies:
       mime-types: 3.0.1
@@ -6221,8 +6129,6 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  base64id@2.0.0: {}
-
   better-sqlite3@11.3.0:
     dependencies:
       bindings: 1.5.0
@@ -6233,8 +6139,6 @@ snapshots:
     dependencies:
       file-uri-to-path: 1.0.0
     optional: true
-
-  bintrees@1.0.2: {}
 
   birpc@2.5.0: {}
 
@@ -6415,11 +6319,6 @@ snapshots:
     dependencies:
       browserslist: 4.25.1
 
-  cors@2.8.5:
-    dependencies:
-      object-assign: 4.1.1
-      vary: 1.1.2
-
   cron-parser@4.9.0:
     dependencies:
       luxon: 3.7.1
@@ -6449,10 +6348,6 @@ snapshots:
   date-fns@4.1.0: {}
 
   dateformat@4.6.3: {}
-
-  debug@4.3.7:
-    dependencies:
-      ms: 2.1.3
 
   debug@4.4.1:
     dependencies:
@@ -6556,24 +6451,6 @@ snapshots:
     dependencies:
       once: 1.4.0
     optional: true
-
-  engine.io-parser@5.2.3: {}
-
-  engine.io@6.6.4:
-    dependencies:
-      '@types/cors': 2.8.19
-      '@types/node': 24.3.0
-      accepts: 1.3.8
-      base64id: 2.0.0
-      cookie: 0.7.2
-      cors: 2.8.5
-      debug: 4.3.7
-      engine.io-parser: 5.2.3
-      ws: 8.17.1
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
 
   enhanced-resolve@5.18.0:
     dependencies:
@@ -7228,6 +7105,10 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
+  iconv-lite@0.7.0:
+    dependencies:
+      safer-buffer: 2.1.2
+
   ieee754@1.2.1: {}
 
   ignore@5.3.2: {}
@@ -7745,13 +7626,7 @@ snapshots:
       braces: 3.0.3
       picomatch: 2.3.1
 
-  mime-db@1.52.0: {}
-
   mime-db@1.54.0: {}
-
-  mime-types@2.1.35:
-    dependencies:
-      mime-db: 1.52.0
 
   mime-types@3.0.1:
     dependencies:
@@ -7825,8 +7700,6 @@ snapshots:
 
   natural-orderby@5.0.0: {}
 
-  negotiator@0.6.3: {}
-
   negotiator@1.0.0: {}
 
   node-abi@3.75.0:
@@ -7856,8 +7729,6 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
-
-  object-assign@4.1.1: {}
 
   object-inspect@1.13.4: {}
 
@@ -8031,11 +7902,6 @@ snapshots:
 
   process-warning@5.0.0: {}
 
-  prom-client@15.1.3:
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      tdigest: 0.1.2
-
   promise-limit@2.7.0:
     optional: true
 
@@ -8137,7 +8003,7 @@ snapshots:
 
   rfdc@1.4.1: {}
 
-  rolldown-plugin-dts@0.15.6(@typescript/native-preview@7.0.0-dev.20250819.1)(rolldown@1.0.0-beta.33)(typescript@5.9.2):
+  rolldown-plugin-dts@0.15.6(@typescript/native-preview@7.0.0-dev.20250820.1)(rolldown@1.0.0-beta.33)(typescript@5.9.2):
     dependencies:
       '@babel/generator': 7.28.0
       '@babel/parser': 7.28.0
@@ -8149,7 +8015,7 @@ snapshots:
       get-tsconfig: 4.10.1
       rolldown: 1.0.0-beta.33
     optionalDependencies:
-      '@typescript/native-preview': 7.0.0-dev.20250819.1
+      '@typescript/native-preview': 7.0.0-dev.20250820.1
       typescript: 5.9.2
     transitivePeerDependencies:
       - oxc-resolver
@@ -8321,36 +8187,6 @@ snapshots:
       ansi-styles: 6.2.1
       is-fullwidth-code-point: 5.0.0
 
-  socket.io-adapter@2.5.5:
-    dependencies:
-      debug: 4.3.7
-      ws: 8.17.1
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
-  socket.io-parser@4.2.4:
-    dependencies:
-      '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.7
-    transitivePeerDependencies:
-      - supports-color
-
-  socket.io@4.8.1:
-    dependencies:
-      accepts: 1.3.8
-      base64id: 2.0.0
-      cors: 2.8.5
-      debug: 4.3.7
-      engine.io: 6.6.4
-      socket.io-adapter: 2.5.5
-      socket.io-parser: 4.2.4
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
   sonic-boom@4.2.0:
     dependencies:
       atomic-sleep: 1.0.0
@@ -8459,10 +8295,6 @@ snapshots:
       readable-stream: 3.6.2
     optional: true
 
-  tdigest@0.1.2:
-    dependencies:
-      bintrees: 1.0.2
-
   thread-stream@3.1.0:
     dependencies:
       real-require: 0.2.0
@@ -8511,7 +8343,7 @@ snapshots:
       picomatch: 4.0.3
       typescript: 5.9.2
 
-  tsdown@0.14.1(@typescript/native-preview@7.0.0-dev.20250819.1)(typescript@5.9.2):
+  tsdown@0.14.1(@typescript/native-preview@7.0.0-dev.20250820.1)(typescript@5.9.2):
     dependencies:
       ansis: 4.1.0
       cac: 6.7.14
@@ -8521,7 +8353,7 @@ snapshots:
       empathic: 2.0.0
       hookable: 5.5.3
       rolldown: 1.0.0-beta.33
-      rolldown-plugin-dts: 0.15.6(@typescript/native-preview@7.0.0-dev.20250819.1)(rolldown@1.0.0-beta.33)(typescript@5.9.2)
+      rolldown-plugin-dts: 0.15.6(@typescript/native-preview@7.0.0-dev.20250820.1)(rolldown@1.0.0-beta.33)(typescript@5.9.2)
       semver: 7.7.2
       tinyexec: 1.0.1
       tinyglobby: 0.2.14
@@ -8712,8 +8544,6 @@ snapshots:
       strip-ansi: 7.1.0
 
   wrappy@1.0.2: {}
-
-  ws@8.17.1: {}
 
   ws@8.18.0: {}
 

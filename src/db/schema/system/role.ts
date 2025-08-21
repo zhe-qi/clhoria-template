@@ -13,10 +13,10 @@ export const systemRole = pgTable("system_role", {
   name: varchar({ length: 64 }).notNull(),
   description: text(),
   pid: uuid(),
-  domain: varchar({ length: 64 }).notNull().default("default"),
+  tenantId: varchar({ length: 64 }).notNull().default("default"),
   status: statusEnum().notNull(),
 }, table => [
-  unique().on(table.domain, table.code),
+  unique().on(table.tenantId, table.code),
 ]);
 
 export const systemRoleRelations = relations(systemRole, ({ many }) => ({
@@ -29,14 +29,14 @@ export const selectSystemRoleSchema = createSelectSchema(systemRole, {
   name: schema => schema.meta({ description: "角色名称" }),
   description: schema => schema.meta({ description: "角色描述" }),
   pid: schema => schema.meta({ description: "父角色ID" }),
-  domain: schema => schema.meta({ description: "所属域" }),
+  tenantId: schema => schema.meta({ description: "所属域" }),
   status: schema => schema.meta({ description: "状态: 1=启用 0=禁用" }),
 });
 
 export const insertSystemRoleSchema = createInsertSchema(systemRole, {
   code: schema => schema.min(1).regex(/^[A-Z_]+$/),
   name: schema => schema.min(1),
-  domain: schema => schema.min(1).default("default"),
+  tenantId: schema => schema.min(1).default("default"),
   createdBy: schema => schema.min(1),
 }).omit({
   id: true,

@@ -233,7 +233,7 @@ export interface PaginatedParams {
   /** 联表查询白名单 - 允许进行 JOIN 操作的表集合 */
   joinTables?: Record<string, PgTable>;
   /** 用户域 - 多租户系统中的域标识 */
-  domain?: string;
+  tenantId?: string;
 }
 
 /**

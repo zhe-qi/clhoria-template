@@ -133,12 +133,12 @@ export async function updatePassword(
 export async function assignRolesToUser(
   userId: string,
   roleIds: string[],
-  domain: string,
+  tenantId: string,
   _operatorId: string,
 ) {
   return db.transaction(async (tx) => {
     // 1. 获取当前用户的角色
-    const currentRoles = await rbac.getRolesForUser(userId, domain);
+    const currentRoles = await rbac.getRolesForUser(userId, tenantId);
     const currentRoleSet = new Set(currentRoles);
     const newRoleSet = new Set(roleIds);
 
@@ -150,8 +150,8 @@ export async function assignRolesToUser(
 
     // 4. 更新 Casbin
     const casbinOps = await Promise.all([
-      ...toAdd.map(roleId => rbac.addRoleForUser(userId, roleId, domain)),
-      ...toRemove.map(roleId => rbac.deleteRoleForUser(userId, roleId, domain)),
+      ...toAdd.map(roleId => rbac.addRoleForUser(userId, roleId, tenantId)),
+      ...toRemove.map(roleId => rbac.deleteRoleForUser(userId, roleId, tenantId)),
     ]);
 
     // 5. 更新数据库
@@ -160,7 +160,7 @@ export async function assignRolesToUser(
         .delete(systemUserRole)
         .where(and(
           eq(systemUserRole.userId, userId),
-          eq(systemUserRole.domain, domain),
+          eq(systemUserRole.tenantId, tenantId),
           inArray(systemUserRole.roleId, toRemove),
         ));
     }
@@ -170,7 +170,7 @@ export async function assignRolesToUser(
         toAdd.map(roleId => ({
           userId,
           roleId,
-          domain,
+          tenantId,
         })),
       );
     }
