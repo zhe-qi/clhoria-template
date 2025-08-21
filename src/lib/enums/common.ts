@@ -5,34 +5,10 @@ export const Status = {
 
   /** 禁用状态 */
   DISABLED: 0,
-
-  /** 封禁状态 */
-  BANNED: -1,
 } as const;
 
 /** 状态类型 */
 export type StatusType = (typeof Status)[keyof typeof Status];
-
-/** 认证类型枚举，定义不同的认证方式 */
-export const AuthType = {
-  /** 密码认证 */
-  PASSWORD: "PASSWORD",
-
-  /** 短信验证码 */
-  SMS: "SMS",
-
-  /** 邮箱验证码 */
-  EMAIL: "EMAIL",
-
-  /** 第三方OAuth */
-  OAUTH: "OAUTH",
-
-  /** 生物识别 */
-  BIOMETRIC: "BIOMETRIC",
-} as const;
-
-/** 认证类型 */
-export type AuthTypeType = (typeof AuthType)[keyof typeof AuthType];
 
 /** 性别枚举 */
 export const Gender = {

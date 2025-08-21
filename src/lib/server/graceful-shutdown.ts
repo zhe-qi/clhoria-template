@@ -1,18 +1,18 @@
 import logger from "@/lib/logger";
 
 /**
- * 设置优雅关闭处理
+ * 设置关闭处理
  */
 export function setupGracefulShutdown(): void {
   const handleShutdown = async (signal: string) => {
-    logger.info(`收到 ${signal} 信号，开始优雅关闭...`);
+    logger.info(`收到 ${signal} 信号，开始关闭...`);
 
     try {
-      logger.info("应用已优雅关闭");
+      logger.info("应用已关闭");
       process.exit(0);
     }
     catch (error) {
-      logger.error({ error }, "优雅关闭失败");
+      logger.error({ error }, "关闭失败");
       process.exit(1);
     }
   };

@@ -2,15 +2,18 @@ import type { RouteConfig as HonoRouteConfig, OpenAPIHono, RouteHandler } from "
 import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
 
-import type { PermissionConfig } from "@/utils/tools/permission";
-
 export interface AppBindings {
   Variables: {
+    /** 日志记录器 */
     logger: PinoLogger;
-    currentPermission: PermissionConfig;
-    userRoles: string[];
-    userDomain: string;
-    userId: string;
+    /** 请求 ID */
+    requestId: string;
+    /** 用户角色 */
+    roles: string[];
+    /** 租户 ID */
+    tenantId: string;
+    /** 用户 ID */
+    uid: string;
   };
 };
 

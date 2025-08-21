@@ -1,5 +1,3 @@
-import type { RouteConfig } from "@hono/zod-openapi";
-
 import type { AppRouteHandler } from "@/types/lib";
 
 import { createRouter } from "@/lib/create-app";
@@ -13,7 +11,6 @@ export const auth = createRouter()
   .openapi(routes.logout, handlers.logout)
   .openapi(routes.getUserInfo, handlers.getUserInfo)
   .openapi(routes.getUserPermissions, handlers.getUserPermissions)
-  .openapi(routes.getUserMenus, handlers.getUserMenus)
   .openapi(routes.createChallenge, handlers.createChallenge)
   .openapi(routes.redeemChallenge, handlers.redeemChallenge);
 
@@ -21,4 +18,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type AuthRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T] & RouteConfig>;
+export type AuthRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

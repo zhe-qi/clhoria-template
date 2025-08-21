@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { jwt } from "hono/jwt";
 
-import { loginSystemUserSchema, menuItemSchema, responseSystemUserSchema } from "@/db/schema";
+import { loginSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
 import env from "@/env";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
@@ -119,25 +119,6 @@ export const getUserPermissions = createRoute({
         roles: z.array(z.string()).meta({ description: "用户角色列表" }),
         permissions: z.array(z.string()).meta({ description: "用户权限列表" }),
       }),
-      "获取成功",
-    ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({ message: z.string() }),
-      "未授权",
-    ),
-  },
-});
-
-/** 获取用户菜单 */
-export const getUserMenus = createRoute({
-  path: "/auth/menus",
-  method: "get",
-  tags,
-  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
-  summary: "获取当前用户菜单",
-  responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      z.array(menuItemSchema).meta({ description: "用户菜单列表" }),
       "获取成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(

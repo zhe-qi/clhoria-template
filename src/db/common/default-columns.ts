@@ -13,7 +13,7 @@ export const defaultColumns = {
   createdAt: timestamp({ mode: "string" })
     .$defaultFn(() => formatDate(new Date())),
   /** 创建人 */
-  createdBy: varchar({ length: 64 }).notNull(),
+  createdBy: varchar({ length: 64 }),
   /** 更新时间 包含自动更新 */
   updatedAt: timestamp({ mode: "string" })
     .$defaultFn(() => formatDate(new Date()))

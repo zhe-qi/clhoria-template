@@ -1,7 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 
 import { insertSystemUserSchema, patchSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
-import { notFoundSchema, PermissionAction, PermissionResource } from "@/lib/enums";
+import { notFoundSchema } from "@/lib/enums";
 import { GetPaginatedResultSchema, PaginationParamsSchema } from "@/lib/pagination";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
@@ -14,10 +14,6 @@ const tags = [`${routePrefix}（系统用户）`];
 /** 获取系统用户分页列表 */
 export const list = createRoute({
   tags,
-  permission: {
-    resource: PermissionResource.SYSTEM_USERS,
-    action: PermissionAction.READ,
-  },
   summary: "获取系统用户列表",
   method: "get",
   path: routePrefix,
@@ -39,10 +35,6 @@ export const list = createRoute({
 /** 创建系统用户 */
 export const create = createRoute({
   tags,
-  permission: {
-    resource: PermissionResource.SYSTEM_USERS,
-    action: PermissionAction.CREATE,
-  },
   summary: "创建系统用户",
   method: "post",
   path: routePrefix,
@@ -71,10 +63,6 @@ export const create = createRoute({
 /** 根据ID获取系统用户详情 */
 export const get = createRoute({
   tags,
-  permission: {
-    resource: PermissionResource.SYSTEM_USERS,
-    action: PermissionAction.READ,
-  },
   summary: "获取系统用户详情",
   method: "get",
   path: `${routePrefix}/{id}`,
@@ -100,10 +88,6 @@ export const get = createRoute({
 /** 更新系统用户 */
 export const update = createRoute({
   tags,
-  permission: {
-    resource: PermissionResource.SYSTEM_USERS,
-    action: PermissionAction.UPDATE,
-  },
   summary: "更新系统用户",
   method: "patch",
   path: `${routePrefix}/{id}`,
@@ -133,10 +117,6 @@ export const update = createRoute({
 /** 删除系统用户 */
 export const remove = createRoute({
   tags,
-  permission: {
-    resource: PermissionResource.SYSTEM_USERS,
-    action: PermissionAction.DELETE,
-  },
   summary: "删除系统用户",
   method: "delete",
   path: `${routePrefix}/{id}`,

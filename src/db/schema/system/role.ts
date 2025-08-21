@@ -5,7 +5,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { defaultColumns } from "@/db/common/default-columns";
 
 import { statusEnum } from "../../common/enums";
-import { systemRoleMenu } from "./role-menu";
 import { systemUserRole } from "./user-role";
 
 export const systemRole = pgTable("system_role", {
@@ -22,7 +21,6 @@ export const systemRole = pgTable("system_role", {
 
 export const systemRoleRelations = relations(systemRole, ({ many }) => ({
   userRoles: many(systemUserRole),
-  roleMenus: many(systemRoleMenu),
 }));
 
 export const selectSystemRoleSchema = createSelectSchema(systemRole, {

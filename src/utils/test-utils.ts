@@ -3,10 +3,8 @@ import { and, eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
 
 import db from "@/db";
-import { systemUser, systemUserRole } from "@/db/schema";
+import { systemUser } from "@/db/schema";
 import env from "@/env";
-import { JwtTokenType } from "@/lib/enums";
-import { setUserRolesToCache } from "@/services/system/user";
 
 /** 缓存的token信息 */
 interface CachedToken {
@@ -40,16 +38,6 @@ async function generateTestToken(username: string, domain: string = "default"): 
     throw new Error(`测试用户 ${username} 不存在`);
   }
 
-  // 查询用户角色
-  const userRoles = await db.query.systemUserRole.findMany({
-    where: and(
-      eq(systemUserRole.userId, user.id),
-      eq(systemUserRole.domain, user.domain),
-    ),
-  });
-
-  const roles = userRoles.map(ur => ur.roleId);
-
   // 生成token payload
   const now = getUnixTime(new Date());
   const accessTokenExp = getUnixTime(addDays(new Date(), 7));
@@ -64,11 +52,8 @@ async function generateTestToken(username: string, domain: string = "default"): 
     jti,
   };
 
-  // 将用户角色存储到 Redis
-  await setUserRolesToCache(user.id, user.domain, roles);
-
   // 生成token
-  const token = await sign({ ...tokenPayload, type: JwtTokenType.ACCESS }, env.ADMIN_JWT_SECRET, "HS256");
+  const token = await sign({ ...tokenPayload, type: "access" }, env.ADMIN_JWT_SECRET, "HS256");
 
   return {
     token,

@@ -6,7 +6,7 @@ import type { ObjectStorageRouteHandlerType } from "./object-storage.index";
 
 export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = async (c) => {
   const { fileName, fileType } = c.req.valid("json");
-  const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
+  const [userId, userDomain] = pickContext(c, ["uid", "tenantId"]);
 
   let finalFileName = fileName;
   if (userId && userDomain) {
@@ -28,7 +28,7 @@ export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = a
 
 export const getDownloadToken: ObjectStorageRouteHandlerType<"getDownloadToken"> = async (c) => {
   const { fileName } = c.req.valid("json");
-  const [userId, userDomain] = pickContext(c, ["userId", "userDomain"]);
+  const [userId, userDomain] = pickContext(c, ["uid", "tenantId"]);
 
   let finalFileName = fileName;
   if (userId && userDomain) {

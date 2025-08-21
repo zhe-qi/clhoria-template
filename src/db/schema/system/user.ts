@@ -6,7 +6,6 @@ import { z } from "zod";
 import { defaultColumns } from "@/db/common/default-columns";
 
 import { statusEnum } from "../../common/enums";
-import { systemUserPost } from "./user-post";
 import { systemUserRole } from "./user-role";
 
 export const systemUser = pgTable("system_user", {
@@ -25,7 +24,6 @@ export const systemUser = pgTable("system_user", {
 
 export const systemUserRelations = relations(systemUser, ({ many }) => ({
   userRoles: many(systemUserRole),
-  userPosts: many(systemUserPost),
 }));
 
 export const selectSystemUserSchema = createSelectSchema(systemUser, {

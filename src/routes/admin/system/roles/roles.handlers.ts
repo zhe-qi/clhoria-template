@@ -9,7 +9,6 @@ import { systemRole } from "@/db/schema";
 import { getDuplicateKeyError } from "@/lib/enums";
 import { getQueryValidationError } from "@/lib/enums/zod";
 import paginatedQuery from "@/lib/pagination";
-import { assignMenusToRole, assignPermissionsToRole, assignUsersToRole } from "@/lib/permissions";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { pickContext } from "@/utils/tools/hono-helpers";
@@ -18,7 +17,7 @@ import type { SystemRolesRouteHandlerType } from "./roles.index";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
-  const domain = c.get("userDomain");
+  const domain = c.get("tenantId");
 
   const [error, result] = await paginatedQuery<z.infer<typeof selectSystemRoleSchema>>({
     table: systemRole,
@@ -35,7 +34,7 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
 
 export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
+  const [domain, userId] = pickContext(c, ["tenantId", "uid"]);
 
   try {
     const [role] = await db.insert(systemRole).values({
@@ -59,7 +58,7 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
 
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
-  const domain = c.get("userDomain");
+  const domain = c.get("tenantId");
 
   const [role] = await db
     .select()
@@ -79,7 +78,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
+  const [domain, userId] = pickContext(c, ["tenantId", "uid"]);
 
   const [updated] = await db
     .update(systemRole)
@@ -102,7 +101,7 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
-  const domain = c.get("userDomain");
+  const domain = c.get("tenantId");
 
   const [deleted] = await db
     .delete(systemRole)
@@ -117,70 +116,4 @@ export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
   }
 
   return c.body(null, HttpStatusCodes.NO_CONTENT);
-};
-
-export const assignPermissions: SystemRolesRouteHandlerType<"assignPermissions"> = async (c) => {
-  const { id } = c.req.valid("param");
-  const { permissions } = c.req.valid("json");
-  const domain = c.get("userDomain");
-
-  // 检查角色是否存在
-  const [role] = await db
-    .select({ id: systemRole.id })
-    .from(systemRole)
-    .where(and(
-      eq(systemRole.id, id),
-      eq(systemRole.domain, domain),
-    ));
-
-  if (!role) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
-  }
-
-  const result = await assignPermissionsToRole(id, permissions, domain);
-  return c.json(result, HttpStatusCodes.OK);
-};
-
-export const assignMenus: SystemRolesRouteHandlerType<"assignMenus"> = async (c) => {
-  const { id } = c.req.valid("param");
-  const { menuIds } = c.req.valid("json");
-  const domain = c.get("userDomain");
-
-  // 检查角色是否存在
-  const [role] = await db
-    .select({ id: systemRole.id })
-    .from(systemRole)
-    .where(and(
-      eq(systemRole.id, id),
-      eq(systemRole.domain, domain),
-    ));
-
-  if (!role) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
-  }
-
-  const result = await assignMenusToRole(id, menuIds, domain);
-  return c.json(result, HttpStatusCodes.OK);
-};
-
-export const assignUsers: SystemRolesRouteHandlerType<"assignUsers"> = async (c) => {
-  const { id } = c.req.valid("param");
-  const { userIds } = c.req.valid("json");
-  const domain = c.get("userDomain");
-
-  // 检查角色是否存在
-  const [role] = await db
-    .select({ id: systemRole.id })
-    .from(systemRole)
-    .where(and(
-      eq(systemRole.id, id),
-      eq(systemRole.domain, domain),
-    ));
-
-  if (!role) {
-    return c.json({ message: HttpStatusPhrases.NOT_FOUND }, HttpStatusCodes.NOT_FOUND);
-  }
-
-  const result = await assignUsersToRole(id, userIds, domain);
-  return c.json(result, HttpStatusCodes.OK);
 };

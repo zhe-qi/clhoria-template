@@ -18,7 +18,7 @@ import type { SystemUsersRouteHandlerType } from "./users.index";
 
 export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   const query = c.req.valid("query");
-  const domain = c.get("userDomain");
+  const domain = c.get("tenantId");
 
   const [error, result] = await paginatedQuery<z.infer<typeof selectSystemUserSchema>>({
     table: systemUser,
@@ -38,7 +38,7 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
 
 export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
+  const [domain, userId] = pickContext(c, ["tenantId", "uid"]);
 
   try {
     const user = await createUser({
@@ -62,7 +62,7 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
 
 export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
-  const domain = c.get("userDomain");
+  const domain = c.get("tenantId");
 
   const [user] = await db
     .select()
@@ -83,7 +83,7 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
 export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const [domain, userId] = pickContext(c, ["userDomain", "userId"]);
+  const [domain, userId] = pickContext(c, ["tenantId", "uid"]);
 
   // 不允许直接更新密码
   const updateData = omit(body as any, ["password"]);
@@ -116,7 +116,7 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
 
 export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
-  const domain = c.get("userDomain");
+  const domain = c.get("tenantId");
 
   const [deleted] = await db
     .delete(systemUser)

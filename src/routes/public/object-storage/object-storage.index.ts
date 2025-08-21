@@ -1,5 +1,3 @@
-import type { RouteConfig } from "@hono/zod-openapi";
-
 import type { AppRouteHandler } from "@/types/lib";
 
 import { createRouter } from "@/lib/create-app";
@@ -15,4 +13,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type ObjectStorageRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T] & RouteConfig>;
+export type ObjectStorageRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

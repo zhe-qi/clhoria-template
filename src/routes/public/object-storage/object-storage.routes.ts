@@ -3,8 +3,8 @@ import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
+import { allJwtAuth } from "@/middlewares/all-jwt-auth";
 import { operationLog } from "@/middlewares/operation-log";
-import { optionalJwtAuth } from "@/middlewares/special/optional-jwt-auth";
 
 const tags = ["/sts-token (对象存储直传)"];
 
@@ -31,7 +31,7 @@ export const getUploadToken = createRoute({
   path: "/sts-token/upload",
   method: "post",
   middleware: [
-    optionalJwtAuth(),
+    allJwtAuth(),
     operationLog({ moduleName: "对象存储", description: "对象存储获取上传token" }),
   ],
   request: {
@@ -63,7 +63,7 @@ export const getDownloadToken = createRoute({
   path: "/sts-token/download",
   method: "post",
   middleware: [
-    optionalJwtAuth(),
+    allJwtAuth(),
     operationLog({ moduleName: "对象存储", description: "对象存储获取下载token" }),
   ],
   request: {
