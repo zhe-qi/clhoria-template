@@ -21,7 +21,6 @@ export function allJwtAuth(): MiddlewareHandler {
       );
     }
 
-    // 统一获取 Authorization 头
     const authHeader = c.req.header("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return c.json(
