@@ -3,7 +3,7 @@ import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { Enforcer } from "casbin";
 
-import { enforcerLaunchedPromise } from "@/lib/casbin";
+import { getEnforcer } from "@/lib/casbin";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 
@@ -12,7 +12,7 @@ import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
  */
 export function authorize(resource: string, action: string): MiddlewareHandler {
   return async (c: Context, next) => {
-    const enforcer = await enforcerLaunchedPromise;
+    const enforcer = await getEnforcer();
 
     // 如果没有加载 Enforcer 实例，返回错误
     if (!(enforcer instanceof Enforcer)) {

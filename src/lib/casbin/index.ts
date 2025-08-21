@@ -1,7 +1,9 @@
+import type { Enforcer } from "casbin";
+
 import { newEnforcer, newModel } from "casbin";
 
 import db from "@/db";
-import { casbinRule, systemRole } from "@/db/schema";
+import { casbinRule } from "@/db/schema";
 
 import { DrizzleCasbinAdapter } from "./adapter";
 
@@ -22,6 +24,13 @@ e = some(where (p.eft == allow)) && !some(where (p.eft == deny))
 m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
 `);
 
-const adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule, systemRole);
+const adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule);
 
-export const enforcerLaunchedPromise = newEnforcer(model, adapter);
+let enforcerPromise: Promise<Enforcer> | null = null;
+
+export const getEnforcer = () => {
+  if (!enforcerPromise) {
+    enforcerPromise = newEnforcer(model, adapter);
+  }
+  return enforcerPromise;
+};
