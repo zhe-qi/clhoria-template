@@ -39,12 +39,12 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
 
 export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
-  const { userId } = c.get("jwtPayload");
+  const { sub } = c.get("jwtPayload");
 
   try {
     const [role] = await db.insert(systemRole).values({
       ...body,
-      createdBy: userId,
+      createdBy: sub,
     }).returning();
 
     return c.json({ data: role }, HttpStatusCodes.CREATED);
@@ -75,13 +75,13 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const { userId } = c.get("jwtPayload");
+  const { sub } = c.get("jwtPayload");
 
   const [updated] = await db
     .update(systemRole)
     .set({
       ...body,
-      updatedBy: userId,
+      updatedBy: sub,
     })
     .where(eq(systemRole.id, id))
     .returning();

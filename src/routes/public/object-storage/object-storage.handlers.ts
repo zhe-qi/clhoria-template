@@ -5,12 +5,12 @@ import type { ObjectStorageRouteHandlerType } from "./object-storage.index";
 
 export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = async (c) => {
   const { fileName, fileType } = c.req.valid("json");
-  const { userId } = c.get("jwtPayload");
+  const { sub } = c.get("jwtPayload");
 
   let finalFileName = fileName;
-  if (userId) {
+  if (sub) {
     // 如果用户已认证，使用用户ID作为路径前缀
-    finalFileName = `users/${userId}/${fileName}`;
+    finalFileName = `users/${sub}/${fileName}`;
   }
   else {
     // 匿名用户使用公共路径
@@ -27,12 +27,12 @@ export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = a
 
 export const getDownloadToken: ObjectStorageRouteHandlerType<"getDownloadToken"> = async (c) => {
   const { fileName } = c.req.valid("json");
-  const { userId } = c.get("jwtPayload");
+  const { sub } = c.get("jwtPayload");
 
   let finalFileName = fileName;
-  if (userId) {
+  if (sub) {
     // 如果用户已认证，使用用户ID作为路径前缀
-    finalFileName = `users/${userId}/${fileName}`;
+    finalFileName = `users/${sub}/${fileName}`;
   }
   else {
     // 匿名用户使用公共路径

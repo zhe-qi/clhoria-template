@@ -14,7 +14,7 @@ export interface AppBindings {
       /** 用户角色 */
       roles: string[];
       /** 用户 ID */
-      userId: string;
+      sub: string;
     };
   };
 };

@@ -57,4 +57,12 @@ export const loginSystemUserSchema = insertSystemUserSchema.pick({
   password: true,
 }).extend({
   captchaToken: z.string().min(1).meta({ description: "验证码token" }),
-}); ;
+});
+
+// 用于获取用户信息的 schema，支持拓展，如果后续新增或者联表可以继续拓展
+export const getUserInfoSchema = responseSystemUserSchema.pick({
+  id: true,
+  username: true,
+  avatar: true,
+  nickName: true,
+});

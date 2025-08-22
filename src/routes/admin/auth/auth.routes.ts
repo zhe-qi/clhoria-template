@@ -1,15 +1,18 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { jwt } from "hono/jwt";
 
-import { loginSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
+import { loginSystemUserSchema } from "@/db/schema";
+import { getUserInfoSchema } from "@/db/schema/system/user";
 import env from "@/env";
+import { RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
+import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 
 const tags = ["/auth (身份认证)"];
 
 /** 后台登录 */
-export const adminLogin = createRoute({
+export const login = createRoute({
   path: "/auth/login",
   method: "post",
   request: {
@@ -22,19 +25,22 @@ export const adminLogin = createRoute({
   summary: "后台登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        token: z.string().meta({ description: "访问令牌" }),
-        refreshToken: z.string().meta({ description: "刷新令牌" }),
-      }),
+      RefineResultSchema(z.object({
+        accessToken: z.string().meta({ description: "访问令牌" }),
+      })),
       "登录成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({ message: z.string() }),
+      createErrorSchema(z.string().meta({ description: "密码错误" })),
       "密码错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      z.object({ message: z.string() }),
+      createErrorSchema(z.string().meta({ description: "用户不存在" })),
       "用户不存在",
+    ),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(
+      createErrorSchema(z.string().meta({ description: "用户被禁用" })),
+      "用户被禁用",
     ),
   },
 });
@@ -43,26 +49,17 @@ export const adminLogin = createRoute({
 export const refreshToken = createRoute({
   path: "/auth/refresh",
   method: "post",
-  request: {
-    body: jsonContentRequired(
-      z.object({
-        refreshToken: z.string().meta({ description: "刷新令牌" }),
-      }),
-      "刷新请求",
-    ),
-  },
   tags,
   summary: "后台刷新访问令牌",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        token: z.string(),
-        refreshToken: z.string(),
-      }),
+      RefineResultSchema(z.object({
+        accessToken: z.string().meta({ description: "访问令牌" }),
+      })),
       "刷新成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({ message: z.string() }),
+      createErrorSchema(z.string().meta({ description: "刷新令牌无效" })),
       "刷新令牌无效",
     ),
   },
@@ -77,18 +74,18 @@ export const logout = createRoute({
   summary: "后台退出登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ message: z.string() }),
+      RefineResultSchema(z.object({})),
       "退出成功",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({ message: z.string() }),
+      createErrorSchema(z.string().meta({ description: "未授权" })),
       "未授权",
     ),
   },
 });
 
 /** 获取用户信息 */
-export const getUserInfo = createRoute({
+export const getIdentity = createRoute({
   path: "/auth/userinfo",
   method: "get",
   tags,
@@ -96,18 +93,18 @@ export const getUserInfo = createRoute({
   summary: "后台获取当前用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      responseSystemUserSchema,
+      RefineResultSchema(getUserInfoSchema),
       "获取成功",
     ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({ message: z.string() }),
-      "未授权",
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      createErrorSchema(z.string().meta({ description: "用户不存在" })),
+      "用户不存在",
     ),
   },
 });
 
 /** 获取用户权限 */
-export const getUserPermissions = createRoute({
+export const getPermissions = createRoute({
   path: "/auth/permissions",
   method: "get",
   tags,
@@ -115,15 +112,12 @@ export const getUserPermissions = createRoute({
   summary: "获取当前用户权限",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        roles: z.array(z.string()).meta({ description: "用户角色列表" }),
-        permissions: z.array(z.string()).meta({ description: "用户权限列表" }),
-      }),
+      RefineResultSchema(z.array(z.array(z.string()))),
       "获取成功",
     ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      z.object({ message: z.string() }),
-      "未授权",
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      createErrorSchema(z.string().meta({ description: "角色不存在" })),
+      "角色不存在",
     ),
   },
 });

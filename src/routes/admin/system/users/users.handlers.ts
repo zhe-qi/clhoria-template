@@ -66,7 +66,7 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
 export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
-  const { userId } = c.get("jwtPayload");
+  const { sub } = c.get("jwtPayload");
 
   // 不允许直接更新密码
   const updateData = omit(body, ["password"]);
@@ -75,7 +75,7 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
     .update(systemUser)
     .set({
       ...updateData,
-      updatedBy: userId,
+      updatedBy: sub,
     })
     .where(eq(systemUser.id, id))
     .returning();
