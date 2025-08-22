@@ -23,7 +23,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   // 1. 验证验证码token
   const { success } = await cap.validateToken(body.captchaToken);
   if (!success) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.UNAUTHORIZED), HttpStatusCodes.UNAUTHORIZED);
+    return c.json(parseTextToZodError("验证码错误"), HttpStatusCodes.BAD_REQUEST);
   }
 
   const { username, password } = body;

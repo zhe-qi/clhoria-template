@@ -13,7 +13,6 @@ import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 export function authorize(): MiddlewareHandler {
   return async (c: Context, next) => {
     const enforcer = await getEnforcer();
-
     if (!(enforcer instanceof Enforcer)) {
       return c.json({ message: HttpStatusPhrases.INTERNAL_SERVER_ERROR }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
     }

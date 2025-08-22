@@ -9,9 +9,9 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 
-const tags = ["/auth (身份认证)"];
+const tags = ["/admin/auth (管理端身份认证)"];
 
-/** 后台登录 */
+/** 管理端登录 */
 export const login = createRoute({
   path: "/auth/login",
   method: "post",
@@ -22,7 +22,7 @@ export const login = createRoute({
     ),
   },
   tags,
-  summary: "后台登录",
+  summary: "管理端登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       RefineResultSchema(z.object({
@@ -33,6 +33,10 @@ export const login = createRoute({
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
       createErrorSchema(z.string().meta({ description: "密码错误" })),
       "密码错误",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(z.string().meta({ description: "验证码错误" })),
+      "验证码错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       createErrorSchema(z.string().meta({ description: "用户不存在" })),
@@ -50,7 +54,7 @@ export const refreshToken = createRoute({
   path: "/auth/refresh",
   method: "post",
   tags,
-  summary: "后台刷新访问令牌",
+  summary: "管理端刷新访问令牌",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       RefineResultSchema(z.object({
@@ -71,7 +75,7 @@ export const logout = createRoute({
   method: "post",
   tags,
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
-  summary: "后台退出登录",
+  summary: "管理端退出登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       RefineResultSchema(z.object({})),
@@ -90,7 +94,7 @@ export const getIdentity = createRoute({
   method: "get",
   tags,
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
-  summary: "后台获取当前用户信息",
+  summary: "管理端获取当前用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       RefineResultSchema(getUserInfoSchema),
