@@ -18,7 +18,7 @@ export const systemUser = pgTable("system_user", {
   status: statusEnum().notNull(),
 }, table => [
   index("system_user_username_idx").on(table.username),
-]); ;
+]);
 
 export const systemUserRelations = relations(systemUser, ({ many }) => ({
   userRoles: many(systemUserRole),
@@ -32,7 +32,7 @@ export const selectSystemUserSchema = createSelectSchema(systemUser, {
   avatar: schema => schema.meta({ description: "头像" }),
   nickName: schema => schema.meta({ description: "昵称" }),
   status: schema => schema.meta({ description: "状态: 1=启用 0=禁用 -1=封禁" }),
-}); ;
+});
 
 export const insertSystemUserSchema = createInsertSchema(systemUser, {
   username: schema => schema.min(4).max(15).regex(/^\w+$/).meta({ description: "用户名" }),
@@ -44,7 +44,7 @@ export const insertSystemUserSchema = createInsertSchema(systemUser, {
   createdBy: true,
   updatedAt: true,
   updatedBy: true,
-}); ;
+});
 
 export const patchSystemUserSchema = insertSystemUserSchema.partial();
 

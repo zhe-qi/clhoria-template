@@ -18,7 +18,6 @@
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio --config drizzle.config.ts",
     "seed": "tsx migrations/seed/index.ts",
-    "sync:permissions": "test -f dist/scripts/sync-permissions.js && node dist/scripts/sync-permissions.js || tsx scripts/sync-permissions.ts",
     "migrate": "drizzle-kit migrate"
   },
   "dependencies": {

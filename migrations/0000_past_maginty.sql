@@ -61,17 +61,14 @@ CREATE TABLE "client_users" (
 );
 --> statement-breakpoint
 CREATE TABLE "system_role" (
-	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64),
 	"updated_at" timestamp,
 	"updated_by" varchar(64),
-	"code" varchar(64) NOT NULL,
+	"code" varchar(64) PRIMARY KEY NOT NULL,
 	"name" varchar(64) NOT NULL,
 	"description" text,
-	"pid" uuid,
-	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "system_role_code_unique" UNIQUE("code")
+	"status" integer DEFAULT 1 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "system_user" (
@@ -91,7 +88,7 @@ CREATE TABLE "system_user" (
 --> statement-breakpoint
 CREATE TABLE "system_user_role" (
 	"user_id" uuid NOT NULL,
-	"role_id" uuid NOT NULL,
+	"role_id" varchar(64) NOT NULL,
 	CONSTRAINT "system_user_role_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
 );
 --> statement-breakpoint

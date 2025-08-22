@@ -1,5 +1,5 @@
 {
-  "id": "c7dfa0f2-e42c-4cf5-8b29-d384360d3a03",
+  "id": "ebd87270-78a2-42b5-b7ae-eb8841c0aeb4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -590,12 +590,6 @@
       "name": "system_role",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -623,7 +617,7 @@
         "code": {
           "name": "code",
           "type": "varchar(64)",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "name": {
@@ -638,12 +632,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "pid": {
-          "name": "pid",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "status": {
           "name": "status",
           "type": "integer",
@@ -655,15 +643,7 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "system_role_code_unique": {
-          "name": "system_role_code_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -785,7 +765,7 @@
         },
         "role_id": {
           "name": "role_id",
-          "type": "uuid",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": true
         }

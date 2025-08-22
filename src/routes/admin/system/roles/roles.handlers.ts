@@ -58,12 +58,12 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
 };
 
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
-  const { id } = c.req.valid("param");
+  const { code } = c.req.valid("param");
 
   const [role] = await db
     .select()
     .from(systemRole)
-    .where(eq(systemRole.id, id));
+    .where(eq(systemRole.code, code));
 
   if (!role) {
     return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -73,7 +73,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
 };
 
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
-  const { id } = c.req.valid("param");
+  const { code } = c.req.valid("param");
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
@@ -83,7 +83,7 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
       ...body,
       updatedBy: sub,
     })
-    .where(eq(systemRole.id, id))
+    .where(eq(systemRole.code, code))
     .returning();
 
   if (!updated) {
@@ -94,12 +94,12 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 };
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
-  const { id } = c.req.valid("param");
+  const { code } = c.req.valid("param");
 
   const [deleted] = await db
     .delete(systemRole)
-    .where(eq(systemRole.id, id))
-    .returning({ id: systemRole.id });
+    .where(eq(systemRole.code, code))
+    .returning({ code: systemRole.code });
 
   if (!deleted) {
     return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);

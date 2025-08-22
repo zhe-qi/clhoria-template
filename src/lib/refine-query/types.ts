@@ -141,10 +141,12 @@ export interface RefineQueryResult<T> {
 /**
  * 基础记录接口
  */
-export interface BaseRecord {
-  id: string | number;
+export type BaseRecord = (
+  | { id: string | number; code?: string }
+  | { id?: string | number; code: string }
+) & {
   [key: string]: any;
-}
+};
 
 /**
  * 错误类型

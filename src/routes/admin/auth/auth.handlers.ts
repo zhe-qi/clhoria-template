@@ -1,6 +1,6 @@
+import { verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { verify } from "hono/jwt";
 
 import db from "@/db";
 import { systemUser, systemUserRole } from "@/db/schema";
@@ -41,7 +41,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
 
   // 统一的用户验证逻辑
   if (!user) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(parseTextToZodError("未找到用户"), HttpStatusCodes.NOT_FOUND);
   }
 
   if (user.status !== Status.ENABLED) {

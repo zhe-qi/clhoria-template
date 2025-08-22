@@ -1,11 +1,11 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { insertSystemRoleSchema, patchSystemRoleSchema, selectSystemRoleSchema } from "@/db/schema";
+import { codeSystemRoleSchema, insertSystemRoleSchema, patchSystemRoleSchema, selectSystemRoleSchema } from "@/db/schema";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
+import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 
 const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];
@@ -74,7 +74,7 @@ export const get = createRoute({
   method: "get",
   path: `${routePrefix}/{id}`,
   request: {
-    params: IdUUIDParamsSchema,
+    params: codeSystemRoleSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -82,7 +82,7 @@ export const get = createRoute({
       "获取成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(IdUUIDParamsSchema),
+      createErrorSchema(codeSystemRoleSchema),
       "ID参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -99,7 +99,7 @@ export const update = createRoute({
   method: "patch",
   path: `${routePrefix}/{id}`,
   request: {
-    params: IdUUIDParamsSchema,
+    params: codeSystemRoleSchema,
     body: jsonContentRequired(
       patchSystemRoleSchema,
       "更新系统角色参数",
@@ -111,7 +111,7 @@ export const update = createRoute({
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(patchSystemRoleSchema).or(createErrorSchema(IdUUIDParamsSchema)),
+      createErrorSchema(patchSystemRoleSchema).or(createErrorSchema(codeSystemRoleSchema)),
       "请求参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -128,15 +128,15 @@ export const remove = createRoute({
   method: "delete",
   path: `${routePrefix}/{id}`,
   request: {
-    params: IdUUIDParamsSchema,
+    params: codeSystemRoleSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(IdUUIDParamsSchema),
+      RefineResultSchema(codeSystemRoleSchema),
       "删除成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(IdUUIDParamsSchema),
+      createErrorSchema(codeSystemRoleSchema),
       "ID参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
