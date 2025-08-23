@@ -3,6 +3,7 @@ import type { Store } from "hono-rate-limiter";
 import type { RedisReply } from "rate-limit-redis";
 
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { pinoLogger } from "hono-pino";
 import { rateLimiter } from "hono-rate-limiter";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
@@ -17,7 +18,8 @@ import type { AppBindings, AppOpenAPI } from "@/types/lib";
 import redisClient from "@/lib/redis";
 import { notFound, onError, serveEmojiFavicon } from "@/lib/stoker/middlewares";
 import { defaultHook } from "@/lib/stoker/openapi";
-import { pinoLogger } from "@/middlewares/pino-logger";
+
+import logger from "./logger";
 
 export function createRouter() {
   return new OpenAPIHono<AppBindings>({
@@ -49,7 +51,7 @@ export default function createApp() {
   app.use(compress());
 
   /** 日志中间件 */
-  app.use(pinoLogger());
+  app.use(pinoLogger({ pino: logger }));
 
   app.use(serveEmojiFavicon("📝"));
 

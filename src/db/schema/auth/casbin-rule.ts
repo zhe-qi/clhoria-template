@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { index, pgTable, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { index, pgTable, primaryKey, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
 export const casbinRule = pgTable("casbin_rule", {
@@ -18,6 +18,9 @@ export const casbinRule = pgTable("casbin_rule", {
   /** 保留字段（暂不使用，默认空字符串） */
   v5: varchar({ length: 64 }).notNull().default(""),
 }, table => [
+  // 复合主键
+  primaryKey({ name: "casbin_rule_pkey", columns: [table.v0, table.v1, table.v2, table.v3, table.v4, table.v5] }),
+
   // 核心：唯一约束（防止重复规则，Casbin权限判断的基础）
   // 规则唯一性逻辑：ptype（p/g）+ 核心字段（v0-v3）组合唯一
   // 原因：p策略需区分（ptype+v0(sub)+v1(obj)+v2(act)+v3(eft)），g策略需区分（ptype+v0(上级)+v1(下级)）

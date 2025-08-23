@@ -58,6 +58,7 @@
     "openapi",
     "papaparse",
     "pgbouncer",
+    "pkey",
     "ptype",
     "rolldown",
     "setex",
