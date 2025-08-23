@@ -11,7 +11,7 @@ import { Status } from "@/lib/enums";
 import logger from "@/lib/logger";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { parseTextToZodError } from "@/utils";
+import { parseRelations, parseTextToZodError, toColumns } from "@/utils";
 import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/utils/tokens/admin";
 
 import type { AuthRouteHandlerType } from "./auth.index";
@@ -119,24 +119,16 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   // 查询用户信息
   const user = await db.query.systemUser.findFirst({
     where: eq(systemUser.id, sub),
-    columns: {
-      id: true,
-      username: true,
-      avatar: true,
-      nickName: true,
-    },
-    with: {
-      userRoles: true,
-    },
+    columns: toColumns(["id", "username", "avatar", "nickName"]),
+    with: parseRelations([{ name: "userRoles", fields: ["roleId"] }]),
   });
 
   if (!user) {
     return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 提取角色数组并移除 userRoles
-  const roles = user.userRoles.map(userRole => userRole.roleId);
   const { userRoles, ...userWithoutRoles } = user;
+  const roles = userRoles.map(({ roleId }) => roleId);
 
   return c.json({ data: { ...userWithoutRoles, roles } }, HttpStatusCodes.OK);
 };

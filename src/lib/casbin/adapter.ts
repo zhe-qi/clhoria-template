@@ -10,25 +10,15 @@ import type { casbinRule } from "@/db/schema";
 
 import { insertCasbinRuleSchema } from "@/db/schema";
 
-// Casbin规则表的插入模型类型
 type TCasbinTable = InferInsertModel<typeof casbinRule>;
-// 带有schema的PostgreSQL数据库实例类型
 type PostgresJsDatabaseSchema = PostgresJsDatabase<typeof schema>;
 
-/**
- * Drizzle ORM适配器，实现Casbin的Adapter接口
- * 用于在PostgreSQL数据库中持久化Casbin访问控制策略
- * 支持完整的CRUD操作及过滤查询功能
- */
 export class DrizzleCasbinAdapter implements Adapter {
-  // Drizzle数据库实例
   private readonly db: PostgresJsDatabaseSchema;
-  // Casbin规则表的Drizzle Schema定义
   private readonly schema: typeof casbinRule;
   // 标识是否启用了过滤加载策略
   private filtered = false;
 
-  // 创建适配器实例
   constructor(db: PostgresJsDatabaseSchema, casbinRuleSchema: typeof casbinRule) {
     this.db = db;
     this.schema = casbinRuleSchema;
@@ -37,7 +27,6 @@ export class DrizzleCasbinAdapter implements Adapter {
   // 从数据库加载所有策略规则到Casbin模型
   async loadPolicy(model: Model): Promise<void> {
     try {
-      // 查询所有规则并加载到模型
       const lines = await this.db.select().from(this.schema);
       lines.forEach(line => this.loadPolicyLine(line, model));
     }
