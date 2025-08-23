@@ -116,7 +116,7 @@ export const getPermissions = createRoute({
   summary: "获取当前用户权限",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.array(z.array(z.string()))),
+      RefineResultSchema(z.array(z.string())),
       "获取成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(

@@ -12,7 +12,7 @@ const queryClient = postgres(
     idle_timeout: 10, // 空闲连接保留10秒
     connect_timeout: 30, // 连接超时30秒
     transform: {
-    // 处理JS undefined转SQL NULL
+    // 处理 JS undefined 转 SQL NULL
       undefined: null,
     },
   },

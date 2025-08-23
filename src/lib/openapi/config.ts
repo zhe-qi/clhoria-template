@@ -21,6 +21,7 @@ export const OPENAPI_VERSION = "3.1.0";
 export const DOC_ENDPOINT = "/doc";
 
 export const API_BASE_PATH = "/api";
+export const API_ADMIN_PATH = `${API_BASE_PATH}/admin`;
 
 export const SCALAR_CONFIG = {
   theme: "kepler",

@@ -6,7 +6,7 @@ import db from "@/db";
 import { systemUser, systemUserRole } from "@/db/schema";
 import env from "@/env";
 import cap from "@/lib/cap";
-import { getEnforcer } from "@/lib/casbin";
+import { enforcerPromise } from "@/lib/casbin";
 import { Status } from "@/lib/enums";
 import logger from "@/lib/logger";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
@@ -125,13 +125,20 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
       avatar: true,
       nickName: true,
     },
+    with: {
+      userRoles: true,
+    },
   });
 
   if (!user) {
     return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json({ data: user }, HttpStatusCodes.OK);
+  // 提取角色数组并移除 userRoles
+  const roles = user.userRoles.map(userRole => userRole.roleId);
+  const { userRoles, ...userWithoutRoles } = user;
+
+  return c.json({ data: { ...userWithoutRoles, roles } }, HttpStatusCodes.OK);
 };
 
 /** 获取用户权限 */
@@ -141,19 +148,37 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
   if (!roles || roles.length === 0) {
     return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
+  const casbinEnforcer = await enforcerPromise;
+  const permissionsSet = new Set(); // 用Set自动去重
 
-  const casbinEnforcer = await getEnforcer();
-  const uniquePermissions = Array.from(
-    new Map(
-      (await Promise.all(
-        roles.map(role => casbinEnforcer.getPermissionsForUser(role)),
-      ))
-        .flat() // 先扁平为一维数组（包含多个 [s,o,a] 子数组）
-        .map(perm => [perm.join(","), perm]), // 用字符串作为唯一标识
-    ).values(),
-  );
+  // 遍历角色，逐个处理权限（避免一次性创建大量中间数组）
+  for (const role of roles) {
+  // 获取当前角色的权限
+    const perms = await casbinEnforcer.getPermissionsForUser(role);
 
-  return c.json({ data: uniquePermissions }, HttpStatusCodes.OK);
+    // 处理当前角色的每一项权限
+    for (const perm of perms) {
+    // 过滤空数组
+      if (!perm || perm.length === 0)
+        continue;
+
+      // 过滤空字符串元素并修剪
+      const filteredPerm = perm.filter(item => item && item.trim() !== "");
+
+      // 过滤处理后为空的数组
+      if (filteredPerm.length === 0)
+        continue;
+
+      // 转换为Casbin策略字符串并加入Set（自动去重）
+      const permStr = `p, ${filteredPerm.join(", ")}`;
+      permissionsSet.add(permStr);
+    }
+  }
+
+  // 转换为最终数组
+  const permissions = Array.from(permissionsSet);
+
+  return c.json({ data: permissions }, HttpStatusCodes.OK);
 };
 
 /** 生成验证码挑战 */

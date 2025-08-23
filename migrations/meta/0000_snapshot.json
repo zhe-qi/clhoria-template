@@ -1,5 +1,5 @@
 {
-  "id": "ebd87270-78a2-42b5-b7ae-eb8841c0aeb4",
+  "id": "54ba7b5f-de84-4f27-bb84-09e3a3a004dc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,12 +8,6 @@
       "name": "casbin_rule",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
         "ptype": {
           "name": "ptype",
           "type": "varchar(8)",
@@ -88,12 +82,6 @@
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            },
-            {
-              "expression": "v3",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
             }
           ],
           "isUnique": true,
@@ -133,27 +121,6 @@
             },
             {
               "expression": "v1",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_casbin_ptype_v3": {
-          "name": "idx_casbin_ptype_v3",
-          "columns": [
-            {
-              "expression": "ptype",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "v3",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

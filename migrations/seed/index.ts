@@ -102,18 +102,27 @@ async function seedCasbinRules(roles: any) {
     return;
   }
 
-  // Create Casbin rule: p admin /* *
-  await db.insert(casbinRule)
-    .values({
-      ptype: "p",
-      v0: "admin", // Use lowercase role code
-      v1: "/*",
-      v2: "*",
-      v3: "",
-    })
-    .onConflictDoNothing();
+  const adminRules = [
+    { v1: "/system/users", v2: "GET" },
+    { v1: "/system/users", v2: "POST" },
+    { v1: "/system/users/{id}", v2: "GET" },
+    { v1: "/system/users/{id}", v2: "PATCH" },
+    { v1: "/system/users/{id}", v2: "DELETE" },
+  ];
 
-  console.log("✅ Created Casbin rule: p admin /* *");
+  for (const rule of adminRules) {
+    await db.insert(casbinRule)
+      .values({
+        ptype: "p",
+        v0: "admin",
+        v1: rule.v1,
+        v2: rule.v2,
+        v3: "",
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log("✅ Created Casbin rules for admin role");
 }
 
 async function main() {

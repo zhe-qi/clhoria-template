@@ -2,10 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { index, pgTable, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
-import { defaultColumns } from "@/db/common/default-columns";
-
 export const casbinRule = pgTable("casbin_rule", {
-  id: defaultColumns.id,
   /** 策略类型：p（权限策略）/g（角色继承） */
   ptype: varchar({ length: 8 }).notNull(), // 非空：所有规则必含 ptype
   /** 主体：角色或用户（p策略=sub，g策略=上级角色/用户） */
@@ -34,14 +31,10 @@ export const casbinRule = pgTable("casbin_rule", {
   // 2. 资源级权限查询索引（高频场景：查某个资源的所有权限规则）
   // 覆盖场景：p策略查询（如按 ptype='p' + v1(obj) 过滤资源权限）
   index("idx_casbin_p_v1").on(table.ptype, table.v1),
-
-  // 3. 域级查询索引（按需保留：若有按 v3(eft/域) 过滤的场景）
-  index("idx_casbin_ptype_v3").on(table.ptype, table.v3),
 ]);
 
 // Zod Schema 适配字段非空+默认值约束
 export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
-  id: schema => schema.meta({ description: "规则ID" }),
   ptype: schema =>
     schema.meta({ description: "策略类型: p=策略 g=角色继承" }),
   v0: schema =>
@@ -63,7 +56,6 @@ type InsertCasbinRuleType = z.infer<typeof selectCasbinRuleSchema>;
 type InsertCasbinRuleInput = z.infer<typeof insertCasbinRuleSchema>;
 
 export const insertCasbinRuleSchema = selectCasbinRuleSchema
-  .omit({ id: true })
   // 显式声明 data 类型为 InsertCasbinRuleInput，解决 TS 7006 隐式 any 问题
   .refine((data: InsertCasbinRuleInput) => {
     if (data.ptype === "g") {

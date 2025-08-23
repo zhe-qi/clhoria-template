@@ -1,5 +1,4 @@
 CREATE TABLE "casbin_rule" (
-	"id" uuid PRIMARY KEY NOT NULL,
 	"ptype" varchar(8) NOT NULL,
 	"v0" varchar(64) NOT NULL,
 	"v1" varchar(254) NOT NULL,
@@ -92,10 +91,9 @@ CREATE TABLE "system_user_role" (
 	CONSTRAINT "system_user_role_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX "casbin_rule_unique_key" ON "casbin_rule" USING btree ("ptype","v0","v1","v2","v3");--> statement-breakpoint
+CREATE UNIQUE INDEX "casbin_rule_unique_key" ON "casbin_rule" USING btree ("ptype","v0","v1","v2");--> statement-breakpoint
 CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0");--> statement-breakpoint
 CREATE INDEX "idx_casbin_p_v1" ON "casbin_rule" USING btree ("ptype","v1");--> statement-breakpoint
-CREATE INDEX "idx_casbin_ptype_v3" ON "casbin_rule" USING btree ("ptype","v3");--> statement-breakpoint
 CREATE INDEX "client_users_username_idx" ON "client_users" USING btree ("username");--> statement-breakpoint
 CREATE INDEX "client_users_mobile_idx" ON "client_users" USING btree ("mobile");--> statement-breakpoint
 CREATE INDEX "client_users_email_idx" ON "client_users" USING btree ("email");--> statement-breakpoint

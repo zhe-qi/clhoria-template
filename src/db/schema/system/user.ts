@@ -65,4 +65,6 @@ export const getUserInfoSchema = responseSystemUserSchema.pick({
   username: true,
   avatar: true,
   nickName: true,
+}).extend({
+  roles: z.array(z.string()).meta({ description: "用户角色" }),
 });
