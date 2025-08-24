@@ -1,7 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { codeSystemRoleSchema, insertSystemRoleSchema, patchSystemRoleSchema, selectSystemRoleSchema } from "@/db/schema";
+import { idSystemRoleSchema, insertSystemRoleSchema, patchSystemRoleSchema, selectSystemRoleSchema } from "@/db/schema";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
@@ -74,7 +74,7 @@ export const get = createRoute({
   method: "get",
   path: `${routePrefix}/{id}`,
   request: {
-    params: codeSystemRoleSchema,
+    params: idSystemRoleSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -82,7 +82,7 @@ export const get = createRoute({
       "获取成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(codeSystemRoleSchema),
+      createErrorSchema(idSystemRoleSchema),
       "ID参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -99,7 +99,7 @@ export const update = createRoute({
   method: "patch",
   path: `${routePrefix}/{id}`,
   request: {
-    params: codeSystemRoleSchema,
+    params: idSystemRoleSchema,
     body: jsonContentRequired(
       patchSystemRoleSchema,
       "更新系统角色参数",
@@ -111,7 +111,7 @@ export const update = createRoute({
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(patchSystemRoleSchema).or(createErrorSchema(codeSystemRoleSchema)),
+      createErrorSchema(patchSystemRoleSchema).or(createErrorSchema(idSystemRoleSchema)),
       "请求参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
@@ -128,20 +128,45 @@ export const remove = createRoute({
   method: "delete",
   path: `${routePrefix}/{id}`,
   request: {
-    params: codeSystemRoleSchema,
+    params: idSystemRoleSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(codeSystemRoleSchema),
+      RefineResultSchema(idSystemRoleSchema),
       "删除成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(codeSystemRoleSchema),
+      createErrorSchema(idSystemRoleSchema),
       "ID参数错误",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       createErrorSchema(z.string()),
       "角色不存在",
+    ),
+  },
+});
+
+/** 获取角色权限 */
+export const getPermissions = createRoute({
+  tags,
+  summary: "获取角色权限",
+  method: "get",
+  path: `${routePrefix}/{id}/permissions`,
+  request: {
+    params: idSystemRoleSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(z.array(z.array(z.string()))),
+      "获取权限成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(idSystemRoleSchema),
+      "ID参数错误",
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+      createErrorSchema(z.string()),
+      "获取权限失败",
     ),
   },
 });

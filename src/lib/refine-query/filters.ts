@@ -249,19 +249,22 @@ export function convertFiltersToSQL(
  * 验证过滤器字段
  * @param filters 过滤器数组
  * @param table 表对象
+ * @param allowedFields 允许的字段白名单，如果提供则严格验证
  * @returns 验证结果
  */
 export function validateFilterFields(
   filters: CrudFilters,
   table: PgTable,
+  allowedFields?: string[],
 ): { valid: boolean; invalidFields: string[] } {
-  const tableColumns = Object.keys(table);
+  // 如果有白名单，使用白名单；否则使用表的所有列
+  const validColumns = allowedFields || Object.keys(table);
   const invalidFields: string[] = [];
 
   function checkFilter(filter: CrudFilters[number]) {
     if ("field" in filter) {
       // LogicalFilter
-      if (!tableColumns.includes(filter.field)) {
+      if (!validColumns.includes(filter.field)) {
         invalidFields.push(filter.field);
       }
     }

@@ -1,5 +1,5 @@
 {
-  "id": "54ba7b5f-de84-4f27-bb84-09e3a3a004dc",
+  "id": "8d8d4253-559a-464d-a0b6-63caa8703845",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -82,6 +82,12 @@
               "isExpression": false,
               "asc": true,
               "nulls": "last"
+            },
+            {
+              "expression": "v3",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
             }
           ],
           "isUnique": true,
@@ -133,7 +139,19 @@
         }
       },
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "casbin_rule_pkey": {
+          "name": "casbin_rule_pkey",
+          "columns": [
+            "v0",
+            "v1",
+            "v2",
+            "v3",
+            "v4",
+            "v5"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -557,6 +575,12 @@
       "name": "system_role",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(64)",
+          "primaryKey": true,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -580,12 +604,6 @@
           "type": "varchar(64)",
           "primaryKey": false,
           "notNull": false
-        },
-        "code": {
-          "name": "code",
-          "type": "varchar(64)",
-          "primaryKey": true,
-          "notNull": true
         },
         "name": {
           "name": "name",

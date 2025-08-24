@@ -72,10 +72,15 @@ export type {
   CrudOperators,
   CrudSort,
   CrudSorting,
+  // Join 相关类型
+  JoinConfig,
+  JoinDefinition,
+  JoinType,
   LogicalFilter,
   Pagination,
 
   QueryExecutionParams,
+  RefineQueryConfig,
   RefineQueryError,
   // 查询相关类型
   RefineQueryParams,

@@ -48,10 +48,21 @@ export const insertSystemUserSchema = createInsertSchema(systemUser, {
 
 export const patchSystemUserSchema = insertSystemUserSchema.partial();
 
-// 用于响应的 schema（不包含密码）
+/** 用于响应的 schema（不包含密码） */
 export const responseSystemUserSchema = selectSystemUserSchema.omit({ password: true });
 
-// 用于登录的 schema（仅包含 username，password，domain ）
+/** 用于响应的schema（包含密码） */
+export const responseSystemUserListItemSchema = selectSystemUserSchema.extend({
+  roles: z.array(z.object({
+    id: z.string().min(1).max(64).meta({ description: "角色ID" }),
+    name: z.string().min(1).max(64).meta({ description: "角色名称" }),
+  })).meta({ description: "用户角色" }),
+});
+
+/** 用于响应的 列表（不包含密码） */
+export const responseSystemUserListSchema = z.array(responseSystemUserListItemSchema.omit({ password: true }));
+
+/** 用于登录的 schema（仅包含 username，password，domain ） */
 export const loginSystemUserSchema = insertSystemUserSchema.pick({
   username: true,
   password: true,
@@ -59,7 +70,7 @@ export const loginSystemUserSchema = insertSystemUserSchema.pick({
   captchaToken: z.string().min(1).meta({ description: "验证码token" }),
 });
 
-// 用于获取用户信息的 schema，支持拓展，如果后续新增或者联表可以继续拓展
+/** 用于获取用户信息的 schema，支持拓展，如果后续新增或者联表可以继续拓展 */
 export const getUserInfoSchema = responseSystemUserSchema.pick({
   id: true,
   username: true,

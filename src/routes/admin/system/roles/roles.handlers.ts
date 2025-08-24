@@ -6,6 +6,7 @@ import type { selectSystemRoleSchema } from "@/db/schema";
 
 import db from "@/db";
 import { systemRole } from "@/db/schema";
+import { enforcerPromise } from "@/lib/casbin";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
@@ -16,16 +17,17 @@ import type { SystemRolesRouteHandlerType } from "./roles.index";
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   // 获取查询参数
   const rawParams = c.req.query();
-  const parseResult = RefineQueryParamsSchema.safeParse(rawParams);
 
+  const parseResult = RefineQueryParamsSchema.safeParse(rawParams);
   if (!parseResult.success) {
     return c.json(parseResult.error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const queryParams = parseResult.data;
-
   // 执行查询
-  const [error, result] = await executeRefineQuery<z.infer<typeof selectSystemRoleSchema>>(systemRole, queryParams);
+  const [error, result] = await executeRefineQuery<z.infer<typeof selectSystemRoleSchema>>({
+    table: systemRole,
+    queryParams: parseResult.data,
+  });
 
   if (error) {
     return c.json(parseTextToZodError(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
@@ -58,12 +60,12 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
 };
 
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
-  const { code } = c.req.valid("param");
+  const { id } = c.req.valid("param");
 
   const [role] = await db
     .select()
     .from(systemRole)
-    .where(eq(systemRole.code, code));
+    .where(eq(systemRole.id, id));
 
   if (!role) {
     return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -73,7 +75,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
 };
 
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
-  const { code } = c.req.valid("param");
+  const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
@@ -83,7 +85,7 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
       ...body,
       updatedBy: sub,
     })
-    .where(eq(systemRole.code, code))
+    .where(eq(systemRole.id, id))
     .returning();
 
   if (!updated) {
@@ -94,16 +96,30 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 };
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
-  const { code } = c.req.valid("param");
+  const { id } = c.req.valid("param");
 
   const [deleted] = await db
     .delete(systemRole)
-    .where(eq(systemRole.code, code))
-    .returning({ code: systemRole.code });
+    .where(eq(systemRole.id, id))
+    .returning({ id: systemRole.id });
 
   if (!deleted) {
     return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json({ data: deleted }, HttpStatusCodes.OK);
+};
+
+export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = async (c) => {
+  const { id } = c.req.valid("param");
+
+  try {
+    const enforcer = await enforcerPromise;
+    const permissions = await enforcer.getPermissionsForUser(id.toString());
+
+    return c.json({ data: permissions }, HttpStatusCodes.OK);
+  }
+  catch {
+    return c.json(parseTextToZodError("获取角色权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+  }
 };

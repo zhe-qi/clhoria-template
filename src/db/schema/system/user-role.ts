@@ -18,6 +18,6 @@ export const systemUserRoleRelations = relations(systemUserRole, ({ one }) => ({
   }),
   role: one(systemRole, {
     fields: [systemUserRole.roleId],
-    references: [systemRole.code],
+    references: [systemRole.id],
   }),
 }));

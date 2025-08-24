@@ -44,7 +44,7 @@ async function seedRoles() {
   // Create admin role
   const [adminRole] = await db.insert(systemRole)
     .values({
-      code: "admin",
+      id: "admin",
       name: "管理员",
       description: "系统管理员角色，拥有所有权限",
       status: Status.ENABLED,
@@ -55,7 +55,7 @@ async function seedRoles() {
   // Create user role
   const [userRole] = await db.insert(systemRole)
     .values({
-      code: "user",
+      id: "user",
       name: "普通用户",
       description: "普通用户角色，拥有基本权限",
       status: Status.ENABLED,
@@ -63,7 +63,7 @@ async function seedRoles() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`✅ Created roles: admin (${adminRole?.code}), user (${userRole?.code})`);
+  console.log(`✅ Created roles: admin (${adminRole?.id}), user (${userRole?.id})`);
   return { adminRole, userRole };
 }
 
@@ -79,7 +79,7 @@ async function seedUserRoles(users: any, roles: any) {
   await db.insert(systemUserRole)
     .values({
       userId: users.adminUser.id,
-      roleId: roles.adminRole.code,
+      roleId: roles.adminRole.id,
     })
     .onConflictDoNothing();
 
@@ -87,7 +87,7 @@ async function seedUserRoles(users: any, roles: any) {
   await db.insert(systemUserRole)
     .values({
       userId: users.regularUser.id,
-      roleId: roles.userRole.code,
+      roleId: roles.userRole.id,
     })
     .onConflictDoNothing();
 
@@ -103,11 +103,18 @@ async function seedCasbinRules(roles: any) {
   }
 
   const adminRules = [
+    { v1: "/system/roles", v2: "GET" },
+    { v1: "/system/roles", v2: "POST" },
+    { v1: "/system/roles/{id}", v2: "DELETE" },
+    { v1: "/system/roles/{id}", v2: "GET" },
+    { v1: "/system/roles/{id}", v2: "PATCH" },
     { v1: "/system/users", v2: "GET" },
     { v1: "/system/users", v2: "POST" },
+    { v1: "/system/users/{id}", v2: "DELETE" },
     { v1: "/system/users/{id}", v2: "GET" },
     { v1: "/system/users/{id}", v2: "PATCH" },
-    { v1: "/system/users/{id}", v2: "DELETE" },
+    { v1: "/system/users/{id}/roles", v2: "DELETE" },
+    { v1: "/system/users/{id}/roles", v2: "POST" },
   ];
 
   for (const rule of adminRules) {

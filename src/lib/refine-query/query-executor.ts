@@ -5,10 +5,11 @@ import { and, count } from "drizzle-orm";
 
 import db from "@/db";
 
-import type { RefineQueryParamsType } from "./schemas";
 import type {
   BaseRecord,
+  JoinConfig,
   QueryExecutionParams,
+  RefineQueryConfig,
   RefineQueryResult,
   Result,
 } from "./types";
@@ -66,67 +67,167 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
       }
       const orderByClause = convertSortersToSQL(finalSorters, this.table);
 
-      // 6. 执行计数查询
-      let total = 0;
-      if (paginationCalc.mode === "server") {
-        const countQuery = db
-          .select({ count: count() })
-          .from(this.table);
-
-        if (whereCondition) {
-          countQuery.where(whereCondition);
-        }
-
-        const countResult = await countQuery;
-        total = countResult[0]?.count || 0;
+      // 6. 根据是否有 Join 配置选择不同的查询方式
+      if (params.joinConfig) {
+        return await this.executeJoinQuery(params, whereCondition, orderByClause, paginationCalc);
       }
-
-      // 7. 构建数据查询
-      let dataQuery = db.select().from(this.table);
-
-      // 应用 WHERE 条件
-      if (whereCondition) {
-        dataQuery = dataQuery.where(whereCondition) as any;
+      else {
+        return await this.executeSimpleQuery(whereCondition, orderByClause, paginationCalc);
       }
-
-      // 应用排序
-      if (orderByClause.length > 0) {
-        dataQuery = dataQuery.orderBy(...orderByClause) as any;
-      }
-
-      // 应用分页（仅服务端分页）
-      if (paginationCalc.mode === "server") {
-        dataQuery = dataQuery
-          .limit(paginationCalc.limit)
-          .offset(paginationCalc.offset) as any;
-      }
-
-      // 8. 执行查询
-      const data = await dataQuery as T[];
-
-      // 9. 处理客户端分页
-      let finalData = data;
-      if (paginationCalc.mode === "client") {
-        total = data.length;
-        const startIndex = paginationCalc.offset;
-        const endIndex = startIndex + paginationCalc.limit;
-        finalData = data.slice(startIndex, endIndex);
-      }
-      else if (paginationCalc.mode === "off") {
-        total = data.length;
-      }
-
-      const result: RefineQueryResult<T> = {
-        data: finalData,
-        total,
-      };
-
-      return [null, result];
     }
     catch (error) {
       const message = error instanceof Error ? error.message : "查询执行失败";
       return [new RefineQueryError(message), null];
     }
+  }
+
+  /**
+   * 执行简单查询（原有逻辑）
+   */
+  private async executeSimpleQuery(
+    whereCondition: SQL<unknown> | undefined,
+    orderByClause: SQL<unknown>[],
+    paginationCalc: any,
+  ): Promise<Result<RefineQueryResult<T>>> {
+    // 6. 执行计数查询
+    let total = 0;
+    if (paginationCalc.mode === "server") {
+      const countQuery = db
+        .select({ count: count() })
+        .from(this.table);
+
+      if (whereCondition) {
+        countQuery.where(whereCondition);
+      }
+
+      const countResult = await countQuery;
+      total = countResult[0]?.count || 0;
+    }
+
+    // 7. 构建数据查询
+    let dataQuery = db.select().from(this.table);
+
+    // 应用 WHERE 条件
+    if (whereCondition) {
+      dataQuery = dataQuery.where(whereCondition) as any;
+    }
+
+    // 应用排序
+    if (orderByClause.length > 0) {
+      dataQuery = dataQuery.orderBy(...orderByClause) as any;
+    }
+
+    // 应用分页（仅服务端分页）
+    if (paginationCalc.mode === "server") {
+      dataQuery = dataQuery
+        .limit(paginationCalc.limit)
+        .offset(paginationCalc.offset) as any;
+    }
+
+    // 8. 执行查询
+    const data = await dataQuery as T[];
+
+    // 9. 处理客户端分页
+    let finalData = data;
+    if (paginationCalc.mode === "client") {
+      total = data.length;
+      const startIndex = paginationCalc.offset;
+      const endIndex = startIndex + paginationCalc.limit;
+      finalData = data.slice(startIndex, endIndex);
+    }
+    else if (paginationCalc.mode === "off") {
+      total = data.length;
+    }
+
+    const result: RefineQueryResult<T> = {
+      data: finalData,
+      total,
+    };
+
+    return [null, result];
+  }
+
+  /**
+   * 执行 Join 查询
+   */
+  private async executeJoinQuery(
+    params: QueryExecutionParams<T>,
+    whereCondition: SQL<unknown> | undefined,
+    orderByClause: SQL<unknown>[],
+    paginationCalc: any,
+  ): Promise<Result<RefineQueryResult<T>>> {
+    const { joinConfig } = params;
+    if (!joinConfig) {
+      throw new Error("Join config is required");
+    }
+
+    // 6. 执行计数查询
+    let total = 0;
+    if (paginationCalc.mode === "server") {
+      let countQuery = this.buildJoinCountQuery(joinConfig);
+
+      if (whereCondition) {
+        countQuery = countQuery.where(whereCondition) as any;
+      }
+
+      // 如果有 groupBy，需要使用子查询计数
+      if (joinConfig.groupBy && joinConfig.groupBy.length > 0) {
+        countQuery = countQuery.groupBy(...joinConfig.groupBy) as any;
+        const countResult = await countQuery;
+        total = countResult.length;
+      }
+      else {
+        const countResult = await countQuery;
+        total = countResult[0]?.count || 0;
+      }
+    }
+
+    // 7. 构建 Join 数据查询
+    let dataQuery = this.buildJoinQuery(joinConfig);
+
+    // 应用 WHERE 条件
+    if (whereCondition) {
+      dataQuery = dataQuery.where(whereCondition) as any;
+    }
+
+    // 应用 GROUP BY
+    if (joinConfig.groupBy && joinConfig.groupBy.length > 0) {
+      dataQuery = dataQuery.groupBy(...joinConfig.groupBy) as any;
+    }
+
+    // 应用排序
+    if (orderByClause.length > 0) {
+      dataQuery = dataQuery.orderBy(...orderByClause) as any;
+    }
+
+    // 应用分页（仅服务端分页）
+    if (paginationCalc.mode === "server") {
+      dataQuery = dataQuery
+        .limit(paginationCalc.limit)
+        .offset(paginationCalc.offset) as any;
+    }
+
+    // 8. 执行查询
+    const data = await dataQuery as T[];
+
+    // 9. 处理客户端分页
+    let finalData = data;
+    if (paginationCalc.mode === "client") {
+      total = data.length;
+      const startIndex = paginationCalc.offset;
+      const endIndex = startIndex + paginationCalc.limit;
+      finalData = data.slice(startIndex, endIndex);
+    }
+    else if (paginationCalc.mode === "off") {
+      total = data.length;
+    }
+
+    const result: RefineQueryResult<T> = {
+      data: finalData,
+      total,
+    };
+
+    return [null, result];
   }
 
   /**
@@ -145,7 +246,7 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
 
     // 验证过滤字段
     if (params.filters && params.filters.length > 0) {
-      const filterValidation = validateFilterFields(params.filters, this.table);
+      const filterValidation = validateFilterFields(params.filters, this.table, params.allowedFields);
       if (!filterValidation.valid) {
         errors.push(`无效的过滤字段: ${filterValidation.invalidFields.join(", ")}`);
       }
@@ -153,7 +254,7 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
 
     // 验证排序字段
     if (params.sorters && params.sorters.length > 0) {
-      const sorterValidation = validateSorterFields(params.sorters, this.table);
+      const sorterValidation = validateSorterFields(params.sorters, this.table, params.allowedFields);
       if (!sorterValidation.valid) {
         errors.push(`无效的排序字段: ${sorterValidation.invalidFields.join(", ")}`);
       }
@@ -164,25 +265,76 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
       errors,
     };
   }
+
+  /**
+   * 构建 Join 查询
+   */
+  private buildJoinQuery(joinConfig: JoinConfig) {
+    let query = db.select(joinConfig.selectFields || {}).from(this.table);
+
+    // 应用所有 joins
+    for (const join of joinConfig.joins) {
+      switch (join.type) {
+        case "left":
+          query = query.leftJoin(join.table, join.on) as any;
+          break;
+        case "right":
+          query = query.rightJoin(join.table, join.on) as any;
+          break;
+        case "inner":
+        default:
+          query = query.innerJoin(join.table, join.on) as any;
+          break;
+      }
+    }
+
+    return query;
+  }
+
+  /**
+   * 构建 Join 计数查询
+   */
+  private buildJoinCountQuery(joinConfig: JoinConfig) {
+    let query = db.select({ count: count() }).from(this.table);
+
+    // 应用所有 joins
+    for (const join of joinConfig.joins) {
+      switch (join.type) {
+        case "left":
+          query = query.leftJoin(join.table, join.on) as any;
+          break;
+        case "right":
+          query = query.rightJoin(join.table, join.on) as any;
+          break;
+        case "inner":
+        default:
+          query = query.innerJoin(join.table, join.on) as any;
+          break;
+      }
+    }
+
+    return query;
+  }
 }
 
 /**
- * 便捷函数：执行 Refine 查询
+ * 便捷函数：执行 Refine 查询（新版本，支持配置对象）
  */
 export async function executeRefineQuery<T extends BaseRecord = BaseRecord>(
-  table: PgTable,
-  queryParams: RefineQueryParamsType,
+  config: RefineQueryConfig<T>,
 ): Promise<Result<RefineQueryResult<T>>> {
-  const executor = new RefineQueryExecutor<T>(table);
+  const executor = new RefineQueryExecutor<T>(config.table);
   return executor.execute({
-    resource: table,
-    filters: queryParams.filters,
-    sorters: queryParams.sorters,
+    resource: config.table,
+    filters: config.queryParams.filters,
+    sorters: config.queryParams.sorters,
     pagination: {
-      current: queryParams.current,
-      pageSize: queryParams.pageSize,
-      mode: queryParams.mode ?? "server",
+      current: config.queryParams.pagination?.current,
+      pageSize: config.queryParams.pagination?.pageSize,
+      mode: config.queryParams.pagination?.mode ?? "server",
     },
+    joinConfig: config.joinConfig,
+    allowedFields: config.allowedFields,
   });
 }
 

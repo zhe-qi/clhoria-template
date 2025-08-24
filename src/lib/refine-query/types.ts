@@ -141,12 +141,10 @@ export interface RefineQueryResult<T> {
 /**
  * 基础记录接口
  */
-export type BaseRecord = (
-  | { id: string | number; code?: string }
-  | { id?: string | number; code: string }
-) & {
+export interface BaseRecord {
+  id: string;
   [key: string]: any;
-};
+}
 
 /**
  * 错误类型
@@ -156,6 +154,50 @@ export class RefineQueryError extends Error {
     super(message);
     this.name = "RefineQueryError";
   }
+}
+
+/**
+ * Join 类型枚举
+ */
+export type JoinType = "inner" | "left" | "right";
+
+/**
+ * Join 定义接口
+ */
+export interface JoinDefinition {
+  /** 要联接的表 */
+  table: any;
+  /** 联接类型 */
+  type: JoinType;
+  /** 联接条件 */
+  on: any;
+}
+
+/**
+ * Join 查询配置接口
+ */
+export interface JoinConfig {
+  /** Join 定义数组 */
+  joins: JoinDefinition[];
+  /** 自定义选择字段 */
+  selectFields?: Record<string, any>;
+  /** 分组字段 */
+  groupBy?: any[];
+}
+
+/**
+ * Refine 查询执行配置接口
+ */
+// eslint-disable-next-line unused-imports/no-unused-vars
+export interface RefineQueryConfig<T = BaseRecord> {
+  /** 主表 */
+  table: any;
+  /** 查询参数（来自前端） */
+  queryParams: RefineQueryParams;
+  /** Join 配置（后端控制） */
+  joinConfig?: JoinConfig;
+  /** 允许的字段白名单 */
+  allowedFields?: string[];
 }
 
 /**
@@ -172,6 +214,10 @@ export interface QueryExecutionParams<_T = BaseRecord> {
   pagination?: Pagination;
   /** 表列映射 */
   tableColumns?: Record<string, any>;
+  /** Join 配置 */
+  joinConfig?: JoinConfig;
+  /** 允许的字段白名单 */
+  allowedFields?: string[];
 }
 
 /**

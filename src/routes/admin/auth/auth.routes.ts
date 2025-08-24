@@ -9,11 +9,12 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 
-const tags = ["/admin/auth (管理端身份认证)"];
+const routePrefix = "/auth";
+const tags = [`${routePrefix} (管理端身份认证)`];
 
 /** 管理端登录 */
 export const login = createRoute({
-  path: "/auth/login",
+  path: `${routePrefix}/login`,
   method: "post",
   request: {
     body: jsonContentRequired(
@@ -51,7 +52,7 @@ export const login = createRoute({
 
 /** 刷新 Token */
 export const refreshToken = createRoute({
-  path: "/auth/refresh",
+  path: `${routePrefix}/refresh`,
   method: "post",
   tags,
   summary: "管理端刷新访问令牌",
@@ -71,7 +72,7 @@ export const refreshToken = createRoute({
 
 /** 退出登录 */
 export const logout = createRoute({
-  path: "/auth/logout",
+  path: `${routePrefix}/logout`,
   method: "post",
   tags,
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
@@ -90,7 +91,7 @@ export const logout = createRoute({
 
 /** 获取用户信息 */
 export const getIdentity = createRoute({
-  path: "/auth/userinfo",
+  path: `${routePrefix}/userinfo`,
   method: "get",
   tags,
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
@@ -109,7 +110,7 @@ export const getIdentity = createRoute({
 
 /** 获取用户权限 */
 export const getPermissions = createRoute({
-  path: "/auth/permissions",
+  path: `${routePrefix}/permissions`,
   method: "get",
   tags,
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
@@ -128,7 +129,7 @@ export const getPermissions = createRoute({
 
 /** 生成验证码挑战 */
 export const createChallenge = createRoute({
-  path: "/auth/challenge",
+  path: `${routePrefix}/challenge`,
   method: "post",
   tags,
   summary: "生成验证码挑战",
@@ -150,7 +151,7 @@ export const createChallenge = createRoute({
 
 /** 验证用户解答并生成验证token */
 export const redeemChallenge = createRoute({
-  path: "/auth/redeem",
+  path: `${routePrefix}/redeem`,
   method: "post",
   request: {
     body: jsonContentRequired(

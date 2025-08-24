@@ -5,7 +5,8 @@ CREATE TABLE "casbin_rule" (
 	"v2" varchar(64) DEFAULT '' NOT NULL,
 	"v3" varchar(64) DEFAULT '' NOT NULL,
 	"v4" varchar(64) DEFAULT '' NOT NULL,
-	"v5" varchar(64) DEFAULT '' NOT NULL
+	"v5" varchar(64) DEFAULT '' NOT NULL,
+	CONSTRAINT "casbin_rule_pkey" PRIMARY KEY("v0","v1","v2","v3","v4","v5")
 );
 --> statement-breakpoint
 CREATE TABLE "client_users" (
@@ -60,11 +61,11 @@ CREATE TABLE "client_users" (
 );
 --> statement-breakpoint
 CREATE TABLE "system_role" (
+	"id" varchar(64) PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64),
 	"updated_at" timestamp,
 	"updated_by" varchar(64),
-	"code" varchar(64) PRIMARY KEY NOT NULL,
 	"name" varchar(64) NOT NULL,
 	"description" text,
 	"status" integer DEFAULT 1 NOT NULL
@@ -91,7 +92,7 @@ CREATE TABLE "system_user_role" (
 	CONSTRAINT "system_user_role_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX "casbin_rule_unique_key" ON "casbin_rule" USING btree ("ptype","v0","v1","v2");--> statement-breakpoint
+CREATE UNIQUE INDEX "casbin_rule_unique_key" ON "casbin_rule" USING btree ("ptype","v0","v1","v2","v3");--> statement-breakpoint
 CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0");--> statement-breakpoint
 CREATE INDEX "idx_casbin_p_v1" ON "casbin_rule" USING btree ("ptype","v1");--> statement-breakpoint
 CREATE INDEX "client_users_username_idx" ON "client_users" USING btree ("username");--> statement-breakpoint

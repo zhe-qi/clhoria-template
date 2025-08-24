@@ -8,11 +8,9 @@ import { defaultColumns } from "@/db/common/default-columns";
 import { statusEnum } from "../../common/enums";
 import { systemUserRole } from "./user-role";
 
-const { id, ...columns } = defaultColumns;
-
 export const systemRole = pgTable("system_role", {
-  ...columns,
-  code: varchar({ length: 64 }).notNull().primaryKey(),
+  ...defaultColumns,
+  id: varchar({ length: 64 }).notNull().primaryKey(),
   name: varchar({ length: 64 }).notNull(),
   description: text(),
   status: statusEnum().notNull(),
@@ -23,14 +21,14 @@ export const systemRoleRelations = relations(systemRole, ({ many }) => ({
 }));
 
 export const selectSystemRoleSchema = createSelectSchema(systemRole, {
-  code: schema => schema.meta({ description: "角色代码" }),
+  id: schema => schema.meta({ description: "角色ID" }),
   name: schema => schema.meta({ description: "角色名称" }),
   description: schema => schema.meta({ description: "角色描述" }),
   status: schema => schema.meta({ description: "状态: 1=启用 0=禁用" }),
 });
 
 export const insertSystemRoleSchema = createInsertSchema(systemRole, {
-  code: schema => schema.min(1).regex(/^[a-z_]+$/),
+  id: schema => schema.min(1).regex(/^[a-z_]+$/),
   name: schema => schema.min(1),
   createdBy: schema => schema.min(1),
 }).omit({
@@ -41,7 +39,7 @@ export const insertSystemRoleSchema = createInsertSchema(systemRole, {
 
 export const patchSystemRoleSchema = insertSystemRoleSchema.partial();
 
-// code 查询 schema
-export const codeSystemRoleSchema = z.object({
-  code: z.string().min(1).regex(/^[a-z_]+$/).meta({ description: "角色代码" }),
+// id 查询 schema
+export const idSystemRoleSchema = z.object({
+  id: z.string().min(1).regex(/^[a-z_]+$/).meta({ description: "角色ID" }),
 });

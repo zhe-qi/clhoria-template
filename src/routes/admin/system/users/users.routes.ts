@@ -1,7 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { insertSystemUserSchema, patchSystemUserSchema, responseSystemUserSchema } from "@/db/schema";
+import { insertSystemUserSchema, patchSystemUserSchema, responseSystemUserListSchema, responseSystemUserSchema } from "@/db/schema";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
@@ -21,7 +21,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.array(responseSystemUserSchema)),
+      RefineResultSchema(responseSystemUserListSchema),
       "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -138,6 +138,77 @@ export const remove = createRoute({
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       createErrorSchema(z.string()),
       "用户不存在",
+    ),
+  },
+});
+
+export const addRole = createRoute({
+  tags,
+  summary: "给用户添加角色",
+  method: "post",
+  path: `${routePrefix}/{userId}/roles`,
+  request: {
+    params: z.object({
+      userId: z.uuid().meta({ description: "用户ID" }),
+    }),
+    body: jsonContentRequired(
+      z.object({
+        roleIds: z.array(z.string().min(1).max(64).meta({ example: "admin", description: "角色编码" })),
+      }),
+      "添加角色参数",
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.CREATED]: jsonContent(
+      createErrorSchema(z.string()),
+      "添加成功",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(z.string()),
+      "The validation error(s)",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      createErrorSchema(z.string()),
+      "用户或角色不存在",
+    ),
+    [HttpStatusCodes.CONFLICT]: jsonContent(
+      createErrorSchema(z.string()),
+      "用户已拥有该角色",
+    ),
+  },
+});
+
+export const removeRole = createRoute({
+  tags,
+  summary: "批量删除用户角色",
+  method: "delete",
+  path: `${routePrefix}/{userId}/roles`,
+  request: {
+    params: z.object({
+      userId: z.uuid().meta({ description: "用户id" }),
+    }),
+    body: jsonContentRequired(
+      z.object({
+        roleIds: z.array(z.string().min(1).max(64).meta({ example: "user", description: "角色编码" })),
+      }),
+      "删除角色参数",
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        message: z.string(),
+        deletedCount: z.number().int(),
+      }),
+      "删除成功",
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(z.string()),
+      "The validation error(s)",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      createErrorSchema(z.string()),
+      "用户或角色不存在",
     ),
   },
 });

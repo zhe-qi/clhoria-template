@@ -92,16 +92,19 @@ export function convertSortersToSQL(
  * 验证排序字段
  * @param sorters 排序条件数组
  * @param table 表对象
+ * @param allowedFields 允许的字段白名单，如果提供则严格验证
  * @returns 验证结果
  */
 export function validateSorterFields(
   sorters: CrudSorting,
   table: PgTable,
+  allowedFields?: string[],
 ): { valid: boolean; invalidFields: string[] } {
-  const tableColumns = Object.keys(table);
+  // 如果有白名单，使用白名单；否则使用表的所有列
+  const validColumns = allowedFields || Object.keys(table);
   const invalidFields = sorters
     .map(sorter => sorter.field)
-    .filter(field => !tableColumns.includes(field));
+    .filter(field => !validColumns.includes(field));
 
   return {
     valid: invalidFields.length === 0,
