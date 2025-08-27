@@ -123,3 +123,75 @@ export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = asy
     return c.json(parseTextToZodError("获取角色权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
+
+export const addPermissions: SystemRolesRouteHandlerType<"addPermissions"> = async (c) => {
+  const { id } = c.req.valid("param");
+  const { permissions } = c.req.valid("json");
+
+  try {
+    // 检查角色是否存在
+    const [role] = await db
+      .select({ id: systemRole.id })
+      .from(systemRole)
+      .where(eq(systemRole.id, id))
+      .limit(1);
+
+    if (!role) {
+      return c.json(parseTextToZodError("角色不存在"), HttpStatusCodes.NOT_FOUND);
+    }
+
+    const enforcer = await enforcerPromise;
+
+    // 将权限格式转换为 casbin 策略格式: [subject, object, action]
+    const policiesForAdd = permissions.map(([resource, action]) => [id, resource, action]);
+
+    // 批量添加权限
+    const success = await enforcer.addPolicies(policiesForAdd);
+
+    if (success) {
+      return c.json({ data: { count: permissions.length } }, HttpStatusCodes.CREATED);
+    }
+    else {
+      return c.json(parseTextToZodError("部分或全部权限已存在"), HttpStatusCodes.CONFLICT);
+    }
+  }
+  catch {
+    return c.json(parseTextToZodError("添加权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+  }
+};
+
+export const removePermissions: SystemRolesRouteHandlerType<"removePermissions"> = async (c) => {
+  const { id } = c.req.valid("param");
+  const { permissions } = c.req.valid("json");
+
+  try {
+    // 检查角色是否存在
+    const [role] = await db
+      .select({ id: systemRole.id })
+      .from(systemRole)
+      .where(eq(systemRole.id, id))
+      .limit(1);
+
+    if (!role) {
+      return c.json(parseTextToZodError("角色不存在"), HttpStatusCodes.NOT_FOUND);
+    }
+
+    const enforcer = await enforcerPromise;
+
+    // 将权限格式转换为 casbin 策略格式: [subject, object, action]
+    const policiesForRemove = permissions.map(([resource, action]) => [id, resource, action]);
+
+    // 批量删除权限
+    const success = await enforcer.removePolicies(policiesForRemove);
+
+    if (success) {
+      return c.json({ data: { count: permissions.length } }, HttpStatusCodes.OK);
+    }
+    else {
+      return c.json(parseTextToZodError("部分或全部权限不存在"), HttpStatusCodes.NOT_FOUND);
+    }
+  }
+  catch {
+    return c.json(parseTextToZodError("删除权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+  }
+};

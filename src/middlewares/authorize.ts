@@ -24,7 +24,6 @@ export function authorize(): MiddlewareHandler<AppBindings> {
     const path = c.req.path.slice(API_ADMIN_PATH.length);
 
     const hasPermission = await hasAnyPermission(enforcer, roles, path, c.req.method);
-
     if (!hasPermission) {
       return c.json(parseTextToZodError(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
     }

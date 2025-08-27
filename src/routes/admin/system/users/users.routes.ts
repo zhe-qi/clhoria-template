@@ -160,7 +160,7 @@ export const addRole = createRoute({
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      createErrorSchema(z.string()),
+      z.object({ data: z.object({ count: z.number().int() }) }),
       "添加成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -196,10 +196,7 @@ export const removeRole = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        message: z.string(),
-        deletedCount: z.number().int(),
-      }),
+      z.object({ data: z.object({ count: z.number().int() }) }),
       "删除成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

@@ -170,3 +170,87 @@ export const getPermissions = createRoute({
     ),
   },
 });
+
+/** 给角色分配权限 */
+export const addPermissions = createRoute({
+  tags,
+  summary: "给角色分配权限",
+  method: "post",
+  path: `${routePrefix}/{id}/permissions`,
+  request: {
+    params: idSystemRoleSchema,
+    body: jsonContentRequired(
+      z.object({
+        permissions: z.array(
+          z.tuple([
+            z.string().min(1).meta({ description: "资源" }),
+            z.string().min(1).meta({ description: "操作" }),
+          ]),
+        ).min(1).meta({ description: "权限列表" }),
+      }),
+      "分配权限参数",
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.CREATED]: jsonContent(
+      z.object({ data: z.object({ count: z.number().int() }) }),
+      "分配权限成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(idSystemRoleSchema),
+      "参数错误",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      createErrorSchema(z.string()),
+      "角色不存在",
+    ),
+    [HttpStatusCodes.CONFLICT]: jsonContent(
+      createErrorSchema(z.string()),
+      "部分权限已存在",
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+      createErrorSchema(z.string()),
+      "分配权限失败",
+    ),
+  },
+});
+
+/** 删除角色权限 */
+export const removePermissions = createRoute({
+  tags,
+  summary: "删除角色权限",
+  method: "delete",
+  path: `${routePrefix}/{id}/permissions`,
+  request: {
+    params: idSystemRoleSchema,
+    body: jsonContentRequired(
+      z.object({
+        permissions: z.array(
+          z.tuple([
+            z.string().min(1).meta({ description: "资源" }),
+            z.string().min(1).meta({ description: "操作" }),
+          ]),
+        ).min(1).meta({ description: "权限列表" }),
+      }),
+      "删除权限参数",
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ data: z.object({ count: z.number().int() }) }),
+      "删除权限成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
+      createErrorSchema(idSystemRoleSchema),
+      "参数错误",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      createErrorSchema(z.string()),
+      "角色不存在或权限不存在",
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
+      createErrorSchema(z.string()),
+      "删除权限失败",
+    ),
+  },
+});

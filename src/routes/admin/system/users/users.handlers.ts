@@ -43,6 +43,10 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
         username: systemUser.username,
         nickName: systemUser.nickName,
         roles: sql`json_agg(json_build_object('id', ${systemRole.id}, 'name', ${systemRole.name}))`,
+        createdAt: systemUser.createdAt,
+        updatedAt: systemUser.updatedAt,
+        status: systemUser.status,
+        avatar: systemUser.avatar,
       },
       groupBy: [systemUser.id],
     },
@@ -213,10 +217,7 @@ export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
       .values(valuesToInsert)
       .returning();
 
-    return c.json(
-      parseTextToZodError(`成功添加 ${created.length} 个角色`),
-      HttpStatusCodes.CREATED,
-    );
+    return c.json({ data: { count: created.length } }, HttpStatusCodes.CREATED);
   }
   catch {
     return c.json(
@@ -269,10 +270,7 @@ export const removeRole: SystemUsersRouteHandlerType<"removeRole"> = async (c) =
       ))
       .returning({ roleId: systemUserRole.roleId });
 
-    return c.json({
-      message: `成功删除 ${result.length} 个角色`,
-      deletedCount: result.length,
-    }, HttpStatusCodes.OK);
+    return c.json({ data: { count: result.length } }, HttpStatusCodes.OK);
   }
   catch {
     return c.json(
