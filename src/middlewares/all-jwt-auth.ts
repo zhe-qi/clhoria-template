@@ -6,6 +6,7 @@ import { verify } from "hono/jwt";
 import env from "@/env";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import { parseTextToZodError } from "@/utils";
 
 /**
  * 所有 JWT 认证中间件,提供给通用且需要认证的接口使用
@@ -16,7 +17,7 @@ export function allJwtAuth(): MiddlewareHandler {
     const requestSource = c.req.header("X-Request-Source");
     if (!requestSource || (requestSource !== "admin" && requestSource !== "client")) {
       return c.json(
-        { message: "请在请求头携带 X-Request-Source: admin 或 client" },
+        parseTextToZodError("请在请求头携带 X-Request-Source: admin 或 client"),
         HttpStatusCodes.FORBIDDEN,
       );
     }
