@@ -39,42 +39,39 @@ services:
     restart: unless-stopped
 
   # Hono 应用
-  # app:
-  #   platform: linux/amd64
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     args:
-  #       NODE_ENV: development
-  #       PORT: 9999
-  #   container_name: hono-app
-  #   ports:
-  #     - "9999:9999"
-  #   image: hono-template
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NODE_ENV=${NODE_ENV}
-  #     - PORT=${PORT}
-  #     # 数据库连接（直连 PostgreSQL）
-  #     - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
-  #     - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
-  #     - LOG_LEVEL=${LOG_LEVEL}
-  #     - CLIENT_JWT_SECRET=${CLIENT_JWT_SECRET}
-  #     - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
-  #     - IGNORE_MIGRATION_ERRORS=true
-  #     - IGNORE_SYNC_ERRORS=true
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - app_network
-  #   restart: unless-stopped
-  #   profiles:
-  #     - app
-  #     - full
+  app:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: development
+        PORT: 9999
+    container_name: hono-app
+    ports:
+      - "9999:9999"
+    image: hono-template
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      # 数据库连接（直连 PostgreSQL）
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - CLIENT_JWT_SECRET=${CLIENT_JWT_SECRET}
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+      - IGNORE_MIGRATION_ERRORS=true
+      - IGNORE_SYNC_ERRORS=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app_network
+    restart: unless-stopped
 
 volumes:
   postgres_data:

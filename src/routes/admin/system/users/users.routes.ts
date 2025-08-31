@@ -110,12 +110,16 @@ export const update = createRoute({
       createErrorSchema(patchSystemUserSchema).or(createErrorSchema(IdUUIDParamsSchema)),
       "请求参数错误",
     ),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(
+      createErrorSchema(z.string()),
+      "内置用户不允许修改状态",
+    ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       createErrorSchema(z.string()),
       "用户不存在",
     ),
   },
-});
+}); ;
 
 /** 删除系统用户 */
 export const remove = createRoute({
@@ -135,12 +139,16 @@ export const remove = createRoute({
       createErrorSchema(IdUUIDParamsSchema),
       "ID参数错误",
     ),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(
+      createErrorSchema(z.string()),
+      "内置用户不允许删除",
+    ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
       createErrorSchema(z.string()),
       "用户不存在",
     ),
   },
-});
+}); ;
 
 export const addRole = createRoute({
   tags,

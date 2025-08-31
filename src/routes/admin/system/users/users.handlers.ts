@@ -119,6 +119,21 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
+  // 检查是否为内置用户
+  const [existingUser] = await db
+    .select({ builtIn: systemUser.builtIn })
+    .from(systemUser)
+    .where(eq(systemUser.id, id));
+
+  if (!existingUser) {
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+  }
+
+  // 内置用户不允许修改状态
+  if (existingUser.builtIn && body.status !== undefined) {
+    return c.json(parseTextToZodError("内置用户不允许修改状态"), HttpStatusCodes.FORBIDDEN);
+  }
+
   // 不允许直接更新密码
   const updateData = omit(body, ["password"]);
 
@@ -138,10 +153,24 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const userWithoutPassword = omit(updated, ["password"]);
 
   return c.json({ data: userWithoutPassword }, HttpStatusCodes.OK);
-};
+}; ;
 
 export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
+
+  // 检查是否为内置用户
+  const [existingUser] = await db
+    .select({ builtIn: systemUser.builtIn })
+    .from(systemUser)
+    .where(eq(systemUser.id, id));
+
+  if (!existingUser) {
+    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+  }
+
+  if (existingUser.builtIn) {
+    return c.json(parseTextToZodError("内置用户不允许删除"), HttpStatusCodes.FORBIDDEN);
+  }
 
   const [deleted] = await db
     .delete(systemUser)
@@ -153,7 +182,7 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   }
 
   return c.json({ data: deleted }, HttpStatusCodes.OK);
-};
+}; ;
 
 export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
   const { userId } = c.req.valid("param");

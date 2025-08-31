@@ -114,7 +114,7 @@ export const getPermissions = createRoute({
   method: "get",
   tags,
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
-  summary: "获取当前用户权限",
+  summary: "管理端获取当前用户权限",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       RefineResultSchema(z.array(z.string())),
@@ -132,7 +132,7 @@ export const createChallenge = createRoute({
   path: `${routePrefix}/challenge`,
   method: "post",
   tags,
-  summary: "生成验证码挑战",
+  summary: "管理端生成验证码挑战",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
@@ -163,7 +163,7 @@ export const redeemChallenge = createRoute({
     ),
   },
   tags,
-  summary: "验证用户解答",
+  summary: "管理端验证用户解答",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       z.object({
