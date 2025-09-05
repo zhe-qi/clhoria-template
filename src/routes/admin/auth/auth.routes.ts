@@ -113,11 +113,11 @@ export const createChallenge = createRoute({
   summary: "管理端生成验证码挑战",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
+      z.object({
         challenge: z.any().meta({ description: "验证码挑战数据" }),
         token: z.string().optional().meta({ description: "挑战token" }),
         expires: z.number().meta({ description: "过期时间戳" }),
-      })),
+      }),
       "生成成功",
     ),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "生成失败"),
@@ -141,11 +141,11 @@ export const redeemChallenge = createRoute({
   summary: "管理端验证用户解答",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
+      z.object({
         success: z.boolean().meta({ description: "验证结果" }),
         token: z.string().optional().meta({ description: "验证token" }),
         expires: z.number().optional().meta({ description: "过期时间戳" }),
-      })),
+      }),
       "验证成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "验证失败"),

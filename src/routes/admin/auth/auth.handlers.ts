@@ -177,7 +177,7 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
 export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c) => {
   try {
     const challenge = await cap.createChallenge();
-    return c.json(Resp.ok(challenge), HttpStatusCodes.OK);
+    return c.json(challenge, HttpStatusCodes.OK);
   }
   catch (error: any) {
     logger.error({ error: error.message }, "创建验证码挑战失败");
@@ -191,7 +191,7 @@ export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c
 
   try {
     const result = await cap.redeemChallenge({ token, solutions });
-    return c.json(Resp.ok(result), HttpStatusCodes.OK);
+    return c.json(result, HttpStatusCodes.OK);
   }
   catch (error: any) {
     logger.error({ error: error.message }, "验证码验证失败");
