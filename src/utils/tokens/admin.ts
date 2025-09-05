@@ -3,12 +3,13 @@ import { sign } from "hono/jwt";
 import crypto from "node:crypto";
 
 import env from "@/env";
+import { ACCESS_TOKEN_EXPIRES_MINUTES, REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
 import redisClient from "@/lib/redis";
 
 // ===== 配置 =====
 const ACCESS_TOKEN_SECRET = env.ADMIN_JWT_SECRET;
-const ACCESS_TOKEN_DURATION = { minutes: 15 }; // 15 分钟
-const REFRESH_TOKEN_DURATION = { days: 7 }; // 7 天
+const ACCESS_TOKEN_DURATION = { minutes: ACCESS_TOKEN_EXPIRES_MINUTES };
+const REFRESH_TOKEN_DURATION = { days: REFRESH_TOKEN_EXPIRES_DAYS };
 
 // 工具: 根据配置计算过期时间
 function calculateExpiration(duration: { minutes?: number; days?: number; hours?: number }) {

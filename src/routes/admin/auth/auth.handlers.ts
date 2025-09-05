@@ -7,6 +7,7 @@ import { systemUser, systemUserRole } from "@/db/schema";
 import env from "@/env";
 import cap from "@/lib/cap";
 import { enforcerPromise } from "@/lib/casbin";
+import { REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
 import { Status } from "@/lib/enums";
 import logger from "@/lib/logger";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
@@ -67,7 +68,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
     httpOnly: true, // 防止 JS 访问
     secure: env.NODE_ENV === "production", // 生产环境启用 https
     sameSite: "strict", // 防止 CSRF
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * REFRESH_TOKEN_EXPIRES_DAYS,
     path: "/", // 所有路径可访问
   });
 
@@ -89,7 +90,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
     httpOnly: true, // 防止 JS 访问
     secure: env.NODE_ENV === "production", // 生产环境启用 https
     sameSite: "strict", // 防止 CSRF
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * REFRESH_TOKEN_EXPIRES_DAYS,
     path: "/", // 所有路径可访问
   });
 
