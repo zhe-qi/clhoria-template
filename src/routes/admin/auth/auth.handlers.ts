@@ -71,7 +71,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
     path: "/", // 所有路径可访问
   });
 
-  return c.json({ data: { accessToken } }, HttpStatusCodes.OK);
+  return c.json(Resp.ok({ accessToken }), HttpStatusCodes.OK);
 };
 
 /** 刷新 Token */
@@ -93,7 +93,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
     path: "/", // 所有路径可访问
   });
 
-  return c.json({ data: { accessToken } }, HttpStatusCodes.OK);
+  return c.json(Resp.ok({ accessToken }), HttpStatusCodes.OK);
 };
 
 /** 退出登录 */
@@ -109,7 +109,7 @@ export const logout: AuthRouteHandlerType<"logout"> = async (c) => {
     path: "/",
   });
 
-  return c.json({ data: {} }, HttpStatusCodes.OK);
+  return c.json(Resp.ok({}), HttpStatusCodes.OK);
 };
 
 /** 获取用户信息 */
@@ -130,7 +130,7 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   const { userRoles, ...userWithoutRoles } = user;
   const roles = userRoles.map(({ roleId }) => roleId);
 
-  return c.json({ data: { ...userWithoutRoles, roles } }, HttpStatusCodes.OK);
+  return c.json(Resp.ok({ ...userWithoutRoles, roles }), HttpStatusCodes.OK);
 };
 
 /** 获取用户权限 */
@@ -141,7 +141,7 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
   const casbinEnforcer = await enforcerPromise;
-  const permissionsSet = new Set(); // 用Set自动去重
+  const permissionsSet = new Set<string>(); // 用Set自动去重
 
   // 遍历角色，逐个处理权限（避免一次性创建大量中间数组）
   for (const role of roles) {
@@ -170,14 +170,14 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
   // 转换为最终数组
   const permissions = Array.from(permissionsSet);
 
-  return c.json({ data: permissions }, HttpStatusCodes.OK);
+  return c.json(Resp.ok({ permissions }), HttpStatusCodes.OK);
 };
 
 /** 生成验证码挑战 */
 export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c) => {
   try {
     const challenge = await cap.createChallenge();
-    return c.json(challenge, HttpStatusCodes.OK);
+    return c.json(Resp.ok(challenge), HttpStatusCodes.OK);
   }
   catch (error: any) {
     logger.error({ error: error.message }, "创建验证码挑战失败");
@@ -191,7 +191,7 @@ export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c
 
   try {
     const result = await cap.redeemChallenge({ token, solutions });
-    return c.json(result, HttpStatusCodes.OK);
+    return c.json(Resp.ok(result), HttpStatusCodes.OK);
   }
   catch (error: any) {
     logger.error({ error: error.message }, "验证码验证失败");

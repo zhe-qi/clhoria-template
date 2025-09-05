@@ -58,7 +58,7 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   const safeData = result.data.map(({ password, ...user }) => user);
   c.header("x-total-count", result.total.toString());
 
-  return c.json({ data: safeData }, HttpStatusCodes.OK);
+  return c.json(Resp.ok(safeData), HttpStatusCodes.OK);
 };
 
 export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
@@ -80,7 +80,7 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
 
     const userWithoutPassword = omit(created, ["password"]);
 
-    return c.json({ data: userWithoutPassword }, HttpStatusCodes.CREATED);
+    return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.CREATED);
   }
   catch (error: any) {
     if (error?.code === "23505" && error?.constraint === "system_user_username_unique") {
@@ -111,7 +111,7 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
 
   const userWithoutPassword = omit(user, ["password"]);
 
-  return c.json({ data: userWithoutPassword }, HttpStatusCodes.OK);
+  return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
 };
 
 export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
@@ -152,8 +152,8 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
 
   const userWithoutPassword = omit(updated, ["password"]);
 
-  return c.json({ data: userWithoutPassword }, HttpStatusCodes.OK);
-}; ;
+  return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
+};
 
 export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
@@ -181,8 +181,8 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json({ data: deleted }, HttpStatusCodes.OK);
-}; ;
+  return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
+};
 
 export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
   const { userId } = c.req.valid("param");
@@ -237,7 +237,7 @@ export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
       .values(valuesToInsert)
       .returning();
 
-    return c.json({ data: { count: created.length } }, HttpStatusCodes.CREATED);
+    return c.json(Resp.ok({ count: created.length }), HttpStatusCodes.CREATED);
   }
   catch {
     return c.json(Resp.fail("添加角色失败"), HttpStatusCodes.UNPROCESSABLE_ENTITY);
@@ -281,7 +281,7 @@ export const removeRole: SystemUsersRouteHandlerType<"removeRole"> = async (c) =
       ))
       .returning({ roleId: systemUserRole.roleId });
 
-    return c.json({ data: { count: result.length } }, HttpStatusCodes.OK);
+    return c.json(Resp.ok({ count: result.length }), HttpStatusCodes.OK);
   }
   catch {
     return c.json(Resp.fail("删除角色失败"), HttpStatusCodes.UNPROCESSABLE_ENTITY);

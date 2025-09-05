@@ -154,7 +154,7 @@ export const addPermissions = createRoute({
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      z.object({ data: z.object({ count: z.number().int() }) }),
+      RefineResultSchema(z.object({ count: z.number().int() })),
       "分配权限成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),
@@ -186,7 +186,7 @@ export const removePermissions = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ data: z.object({ count: z.number().int() }) }),
+      RefineResultSchema(z.object({ count: z.number().int() })),
       "删除权限成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),

@@ -36,7 +36,7 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   // 设置 x-total-count 标头
   c.header("x-total-count", result.total.toString());
 
-  return c.json({ data: result.data }, HttpStatusCodes.OK);
+  return c.json(Resp.ok(result.data), HttpStatusCodes.OK);
 };
 
 export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
@@ -49,7 +49,7 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
       createdBy: sub,
     }).returning();
 
-    return c.json({ data: role }, HttpStatusCodes.CREATED);
+    return c.json(Resp.ok(role), HttpStatusCodes.CREATED);
   }
   catch (error: any) {
     if (error.message?.includes("duplicate key")) {
@@ -71,7 +71,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json({ data: role }, HttpStatusCodes.OK);
+  return c.json(Resp.ok(role), HttpStatusCodes.OK);
 };
 
 export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
@@ -92,7 +92,7 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json({ data: updated }, HttpStatusCodes.OK);
+  return c.json(Resp.ok(updated), HttpStatusCodes.OK);
 };
 
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
@@ -107,7 +107,7 @@ export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  return c.json({ data: deleted }, HttpStatusCodes.OK);
+  return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
 };
 
 export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = async (c) => {
@@ -117,7 +117,7 @@ export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = asy
     const enforcer = await enforcerPromise;
     const permissions = await enforcer.getPermissionsForUser(id.toString());
 
-    return c.json({ data: permissions }, HttpStatusCodes.OK);
+    return c.json(Resp.ok(permissions), HttpStatusCodes.OK);
   }
   catch {
     return c.json(Resp.fail("获取角色权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
@@ -149,7 +149,7 @@ export const addPermissions: SystemRolesRouteHandlerType<"addPermissions"> = asy
     const success = await enforcer.addPolicies(policiesForAdd);
 
     if (success) {
-      return c.json({ data: { count: permissions.length } }, HttpStatusCodes.CREATED);
+      return c.json(Resp.ok({ count: permissions.length }), HttpStatusCodes.CREATED);
     }
     else {
       return c.json(Resp.fail("部分或全部权限已存在"), HttpStatusCodes.CONFLICT);
@@ -185,7 +185,7 @@ export const removePermissions: SystemRolesRouteHandlerType<"removePermissions">
     const success = await enforcer.removePolicies(policiesForRemove);
 
     if (success) {
-      return c.json({ data: { count: permissions.length } }, HttpStatusCodes.OK);
+      return c.json(Resp.ok({ count: permissions.length }), HttpStatusCodes.OK);
     }
     else {
       return c.json(Resp.fail("部分或全部权限不存在"), HttpStatusCodes.NOT_FOUND);

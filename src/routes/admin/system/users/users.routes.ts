@@ -133,7 +133,7 @@ export const addRole = createRoute({
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      z.object({ data: z.object({ count: z.number().int() }) }),
+      RefineResultSchema(z.object({ count: z.number().int() })),
       "添加成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
@@ -160,7 +160,7 @@ export const removeRole = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({ data: z.object({ count: z.number().int() }) }),
+      RefineResultSchema(z.object({ count: z.number().int() })),
       "删除成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
