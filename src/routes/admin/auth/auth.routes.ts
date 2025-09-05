@@ -7,7 +7,7 @@ import env from "@/env";
 import { RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
-import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
+import { respErr } from "@/utils";
 
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];
@@ -31,22 +31,10 @@ export const login = createRoute({
       })),
       "登录成功",
     ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "密码错误" })),
-      "密码错误",
-    ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "验证码错误" })),
-      "验证码错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "用户不存在" })),
-      "用户不存在",
-    ),
-    [HttpStatusCodes.FORBIDDEN]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "用户被禁用" })),
-      "用户被禁用",
-    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErr, "密码错误"),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "验证码错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "用户被禁用"),
   },
 });
 
@@ -63,10 +51,7 @@ export const refreshToken = createRoute({
       })),
       "刷新成功",
     ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "刷新令牌无效" })),
-      "刷新令牌无效",
-    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErr, "刷新令牌无效"),
   },
 });
 
@@ -82,10 +67,7 @@ export const logout = createRoute({
       RefineResultSchema(z.object({})),
       "退出成功",
     ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "未授权" })),
-      "未授权",
-    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErr, "未授权"),
   },
 });
 
@@ -101,10 +83,7 @@ export const getIdentity = createRoute({
       RefineResultSchema(getUserInfoSchema),
       "获取成功",
     ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "用户不存在" })),
-      "用户不存在",
-    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
   },
 });
 
@@ -120,10 +99,7 @@ export const getPermissions = createRoute({
       RefineResultSchema(z.array(z.string())),
       "获取成功",
     ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string().meta({ description: "角色不存在" })),
-      "角色不存在",
-    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在"),
   },
 });
 
@@ -142,10 +118,7 @@ export const createChallenge = createRoute({
       }),
       "生成成功",
     ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      z.object({ message: z.string() }),
-      "生成失败",
-    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "生成失败"),
   },
 });
 
@@ -173,9 +146,6 @@ export const redeemChallenge = createRoute({
       }),
       "验证成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      z.object({ success: z.boolean() }),
-      "验证失败",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "验证失败"),
   },
 });

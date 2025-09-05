@@ -6,15 +6,10 @@ import { v7 as uuidV7 } from "uuid";
 
 import logger from "@/lib/logger";
 
-interface OperationLogOptions {
-  moduleName: string;
-  description: string;
-}
-
 /**
  * 操作日志中间件
  */
-export function operationLog(options: OperationLogOptions): MiddlewareHandler {
+export function operationLog(options: { moduleName: string; description: string }): MiddlewareHandler {
   return async (c: Context, next) => {
     const startTime = new Date();
 

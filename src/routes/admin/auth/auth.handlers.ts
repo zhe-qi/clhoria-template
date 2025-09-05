@@ -11,7 +11,7 @@ import { Status } from "@/lib/enums";
 import logger from "@/lib/logger";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { parseRelations, parseTextToZodError, toColumns } from "@/utils";
+import { parseRelations, Resp, toColumns } from "@/utils";
 import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/utils/tokens/admin";
 
 import type { AuthRouteHandlerType } from "./auth.index";
@@ -23,7 +23,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   // 1. 验证验证码token
   const { success } = await cap.validateToken(body.captchaToken);
   if (!success) {
-    return c.json(parseTextToZodError("验证码错误"), HttpStatusCodes.BAD_REQUEST);
+    return c.json(Resp.fail("验证码错误"), HttpStatusCodes.BAD_REQUEST);
   }
 
   const { username, password } = body;
@@ -41,17 +41,17 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
 
   // 统一的用户验证逻辑
   if (!user) {
-    return c.json(parseTextToZodError("未找到用户"), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail("未找到用户"), HttpStatusCodes.NOT_FOUND);
   }
 
   if (user.status !== Status.ENABLED) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
+    return c.json(Resp.fail(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
   }
 
   // 3. 验证密码和查询角色
   const isPasswordValid = await verify(user.password, password);
   if (!isPasswordValid) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.UNAUTHORIZED), HttpStatusCodes.UNAUTHORIZED);
+    return c.json(Resp.fail(HttpStatusPhrases.UNAUTHORIZED), HttpStatusCodes.UNAUTHORIZED);
   }
   const userRoles = await db.query.systemUserRole.findMany({
     where: eq(systemUserRole.userId, user.id),
@@ -79,7 +79,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
   const refreshTokenFromCookie = getCookie(c, "refreshToken");
 
   if (!refreshTokenFromCookie) {
-    return c.json(parseTextToZodError("刷新令牌不存在"), HttpStatusCodes.UNAUTHORIZED);
+    return c.json(Resp.fail("刷新令牌不存在"), HttpStatusCodes.UNAUTHORIZED);
   }
 
   const { accessToken, refreshToken: newRefreshToken } = await refreshAccessToken(refreshTokenFromCookie);
@@ -124,7 +124,7 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   });
 
   if (!user) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   const { userRoles, ...userWithoutRoles } = user;
@@ -138,7 +138,7 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
   const { roles } = c.get("jwtPayload");
 
   if (!roles || roles.length === 0) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
   const casbinEnforcer = await enforcerPromise;
   const permissionsSet = new Set(); // 用Set自动去重
@@ -181,7 +181,7 @@ export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c
   }
   catch (error: any) {
     logger.error({ error: error.message }, "创建验证码挑战失败");
-    return c.json({ message: "创建验证码挑战失败" }, HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    return c.json(Resp.fail("创建验证码挑战失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -195,6 +195,6 @@ export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c
   }
   catch (error: any) {
     logger.error({ error: error.message }, "验证码验证失败");
-    return c.json({ success: false }, HttpStatusCodes.BAD_REQUEST);
+    return c.json(Resp.fail("验证码验证失败"), HttpStatusCodes.BAD_REQUEST);
   }
 };

@@ -10,7 +10,7 @@ import { systemRole, systemUser, systemUserRole } from "@/db/schema";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { omit, parseTextToZodError } from "@/utils";
+import { omit, Resp } from "@/utils";
 
 import type { SystemUsersRouteHandlerType } from "./users.index";
 
@@ -52,7 +52,7 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
     },
   });
   if (error) {
-    return c.json(parseTextToZodError(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    return c.json(Resp.fail(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 
   const safeData = result.data.map(({ password, ...user }) => user);
@@ -85,13 +85,13 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
   catch (error: any) {
     if (error?.code === "23505" && error?.constraint === "system_user_username_unique") {
       return c.json(
-        parseTextToZodError("用户名已存在"),
+        Resp.fail("用户名已存在"),
         HttpStatusCodes.CONFLICT,
       );
     }
 
     return c.json(
-      parseTextToZodError("请求参数验证错误"),
+      Resp.fail("请求参数验证错误"),
       HttpStatusCodes.UNPROCESSABLE_ENTITY,
     );
   }
@@ -106,7 +106,7 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
     .where(eq(systemUser.id, id));
 
   if (!user) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   const userWithoutPassword = omit(user, ["password"]);
@@ -126,12 +126,12 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
     .where(eq(systemUser.id, id));
 
   if (!existingUser) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   // 内置用户不允许修改状态
   if (existingUser.builtIn && body.status !== undefined) {
-    return c.json(parseTextToZodError("内置用户不允许修改状态"), HttpStatusCodes.FORBIDDEN);
+    return c.json(Resp.fail("内置用户不允许修改状态"), HttpStatusCodes.FORBIDDEN);
   }
 
   // 不允许直接更新密码
@@ -147,7 +147,7 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   const userWithoutPassword = omit(updated, ["password"]);
@@ -165,11 +165,11 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
     .where(eq(systemUser.id, id));
 
   if (!existingUser) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   if (existingUser.builtIn) {
-    return c.json(parseTextToZodError("内置用户不允许删除"), HttpStatusCodes.FORBIDDEN);
+    return c.json(Resp.fail("内置用户不允许删除"), HttpStatusCodes.FORBIDDEN);
   }
 
   const [deleted] = await db
@@ -178,7 +178,7 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
     .returning({ id: systemUser.id });
 
   if (!deleted) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json({ data: deleted }, HttpStatusCodes.OK);
@@ -197,10 +197,7 @@ export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
       .limit(1);
 
     if (!user) {
-      return c.json(
-        parseTextToZodError("用户不存在"),
-        HttpStatusCodes.NOT_FOUND,
-      );
+      return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
     }
 
     // 检查所有角色是否存在
@@ -212,10 +209,7 @@ export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
     if (existingRoles.length !== roleIds.length) {
       const foundRoles = existingRoles.map(role => role.id);
       const notFoundRoles = roleIds.filter(roleId => !foundRoles.includes(roleId));
-      return c.json(
-        parseTextToZodError(`角色不存在: ${notFoundRoles.join(", ")}`),
-        HttpStatusCodes.NOT_FOUND,
-      );
+      return c.json(Resp.fail(`角色不存在: ${notFoundRoles.join(", ")}`), HttpStatusCodes.NOT_FOUND);
     }
 
     // 检查用户是否已拥有这些角色
@@ -229,10 +223,7 @@ export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
 
     if (existingUserRoles.length > 0) {
       const existingRoleIds = existingUserRoles.map(ur => ur.roleId);
-      return c.json(
-        parseTextToZodError(`用户已拥有角色: ${existingRoleIds.join(", ")}`),
-        HttpStatusCodes.CONFLICT,
-      );
+      return c.json(Resp.fail(`用户已拥有角色: ${existingRoleIds.join(", ")}`), HttpStatusCodes.CONFLICT);
     }
 
     // 批量添加用户角色关联
@@ -249,10 +240,7 @@ export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
     return c.json({ data: { count: created.length } }, HttpStatusCodes.CREATED);
   }
   catch {
-    return c.json(
-      parseTextToZodError("添加角色失败"),
-      HttpStatusCodes.UNPROCESSABLE_ENTITY,
-    );
+    return c.json(Resp.fail("添加角色失败"), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 };
 
@@ -269,10 +257,7 @@ export const removeRole: SystemUsersRouteHandlerType<"removeRole"> = async (c) =
       .limit(1);
 
     if (!user) {
-      return c.json(
-        parseTextToZodError("用户不存在"),
-        HttpStatusCodes.NOT_FOUND,
-      );
+      return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
     }
 
     // 检查所有角色是否存在
@@ -284,10 +269,7 @@ export const removeRole: SystemUsersRouteHandlerType<"removeRole"> = async (c) =
     if (existingRoles.length !== roleIds.length) {
       const foundRoles = existingRoles.map(role => role.id);
       const notFoundRoles = roleIds.filter(roleId => !foundRoles.includes(roleId));
-      return c.json(
-        parseTextToZodError(`角色不存在: ${notFoundRoles.join(", ")}`),
-        HttpStatusCodes.NOT_FOUND,
-      );
+      return c.json(Resp.fail(`角色不存在: ${notFoundRoles.join(", ")}`), HttpStatusCodes.NOT_FOUND);
     }
 
     // 批量删除用户角色关联
@@ -302,9 +284,6 @@ export const removeRole: SystemUsersRouteHandlerType<"removeRole"> = async (c) =
     return c.json({ data: { count: result.length } }, HttpStatusCodes.OK);
   }
   catch {
-    return c.json(
-      parseTextToZodError("删除角色失败"),
-      HttpStatusCodes.UNPROCESSABLE_ENTITY,
-    );
+    return c.json(Resp.fail("删除角色失败"), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 };

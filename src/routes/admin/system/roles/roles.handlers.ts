@@ -10,7 +10,7 @@ import { enforcerPromise } from "@/lib/casbin";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { parseTextToZodError } from "@/utils";
+import { Resp } from "@/utils";
 
 import type { SystemRolesRouteHandlerType } from "./roles.index";
 
@@ -30,7 +30,7 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   });
 
   if (error) {
-    return c.json(parseTextToZodError(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    return c.json(Resp.fail(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 
   // 设置 x-total-count 标头
@@ -53,7 +53,7 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   }
   catch (error: any) {
     if (error.message?.includes("duplicate key")) {
-      return c.json(parseTextToZodError("角色代码已存在"), HttpStatusCodes.CONFLICT);
+      return c.json(Resp.fail("角色代码已存在"), HttpStatusCodes.CONFLICT);
     }
     throw error;
   }
@@ -68,7 +68,7 @@ export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
     .where(eq(systemRole.id, id));
 
   if (!role) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json({ data: role }, HttpStatusCodes.OK);
@@ -89,7 +89,7 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
     .returning();
 
   if (!updated) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json({ data: updated }, HttpStatusCodes.OK);
@@ -104,7 +104,7 @@ export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
     .returning({ id: systemRole.id });
 
   if (!deleted) {
-    return c.json(parseTextToZodError(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
+    return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   return c.json({ data: deleted }, HttpStatusCodes.OK);
@@ -120,7 +120,7 @@ export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = asy
     return c.json({ data: permissions }, HttpStatusCodes.OK);
   }
   catch {
-    return c.json(parseTextToZodError("获取角色权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    return c.json(Resp.fail("获取角色权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -137,7 +137,7 @@ export const addPermissions: SystemRolesRouteHandlerType<"addPermissions"> = asy
       .limit(1);
 
     if (!role) {
-      return c.json(parseTextToZodError("角色不存在"), HttpStatusCodes.NOT_FOUND);
+      return c.json(Resp.fail("角色不存在"), HttpStatusCodes.NOT_FOUND);
     }
 
     const enforcer = await enforcerPromise;
@@ -152,11 +152,11 @@ export const addPermissions: SystemRolesRouteHandlerType<"addPermissions"> = asy
       return c.json({ data: { count: permissions.length } }, HttpStatusCodes.CREATED);
     }
     else {
-      return c.json(parseTextToZodError("部分或全部权限已存在"), HttpStatusCodes.CONFLICT);
+      return c.json(Resp.fail("部分或全部权限已存在"), HttpStatusCodes.CONFLICT);
     }
   }
   catch {
-    return c.json(parseTextToZodError("添加权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    return c.json(Resp.fail("添加权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -173,7 +173,7 @@ export const removePermissions: SystemRolesRouteHandlerType<"removePermissions">
       .limit(1);
 
     if (!role) {
-      return c.json(parseTextToZodError("角色不存在"), HttpStatusCodes.NOT_FOUND);
+      return c.json(Resp.fail("角色不存在"), HttpStatusCodes.NOT_FOUND);
     }
 
     const enforcer = await enforcerPromise;
@@ -188,10 +188,10 @@ export const removePermissions: SystemRolesRouteHandlerType<"removePermissions">
       return c.json({ data: { count: permissions.length } }, HttpStatusCodes.OK);
     }
     else {
-      return c.json(parseTextToZodError("部分或全部权限不存在"), HttpStatusCodes.NOT_FOUND);
+      return c.json(Resp.fail("部分或全部权限不存在"), HttpStatusCodes.NOT_FOUND);
     }
   }
   catch {
-    return c.json(parseTextToZodError("删除权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    return c.json(Resp.fail("删除权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };

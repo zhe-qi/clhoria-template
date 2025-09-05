@@ -5,7 +5,7 @@ import { idSystemRoleSchema, insertSystemRoleSchema, patchSystemRoleSchema, sele
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
-import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
+import { respErr } from "@/utils";
 
 const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];
@@ -24,14 +24,8 @@ export const list = createRoute({
       RefineResultSchema(z.array(selectSystemRoleSchema)),
       "列表响应成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(RefineQueryParamsSchema),
-      "查询参数验证错误",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      createErrorSchema(z.string()),
-      "服务器内部错误",
-    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "查询参数验证错误"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
   },
 });
 
@@ -52,18 +46,9 @@ export const create = createRoute({
       RefineResultSchema(selectSystemRoleSchema),
       "创建成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(insertSystemRoleSchema),
-      "请求参数错误",
-    ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(insertSystemRoleSchema),
-      "参数验证失败",
-    ),
-    [HttpStatusCodes.CONFLICT]: jsonContent(
-      createErrorSchema(insertSystemRoleSchema),
-      "角色代码已存在",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "参数验证失败"),
+    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "角色代码已存在"),
   },
 });
 
@@ -81,14 +66,8 @@ export const get = createRoute({
       RefineResultSchema(selectSystemRoleSchema),
       "获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(idSystemRoleSchema),
-      "ID参数错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "角色不存在",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在"),
   },
 });
 
@@ -110,14 +89,8 @@ export const update = createRoute({
       RefineResultSchema(selectSystemRoleSchema),
       "更新成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(patchSystemRoleSchema).or(createErrorSchema(idSystemRoleSchema)),
-      "请求参数错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "角色不存在",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在"),
   },
 });
 
@@ -135,14 +108,8 @@ export const remove = createRoute({
       RefineResultSchema(idSystemRoleSchema),
       "删除成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(idSystemRoleSchema),
-      "ID参数错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "角色不存在",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在"),
   },
 });
 
@@ -160,14 +127,8 @@ export const getPermissions = createRoute({
       RefineResultSchema(z.array(z.array(z.string()))),
       "获取权限成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(idSystemRoleSchema),
-      "ID参数错误",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      createErrorSchema(z.string()),
-      "获取权限失败",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "获取权限失败"),
   },
 });
 
@@ -196,22 +157,10 @@ export const addPermissions = createRoute({
       z.object({ data: z.object({ count: z.number().int() }) }),
       "分配权限成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(idSystemRoleSchema),
-      "参数错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "角色不存在",
-    ),
-    [HttpStatusCodes.CONFLICT]: jsonContent(
-      createErrorSchema(z.string()),
-      "部分权限已存在",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      createErrorSchema(z.string()),
-      "分配权限失败",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在"),
+    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "部分权限已存在"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "分配权限失败"),
   },
 });
 
@@ -240,17 +189,8 @@ export const removePermissions = createRoute({
       z.object({ data: z.object({ count: z.number().int() }) }),
       "删除权限成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(idSystemRoleSchema),
-      "参数错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "角色不存在或权限不存在",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      createErrorSchema(z.string()),
-      "删除权限失败",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在或权限不存在"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "删除权限失败"),
   },
 });

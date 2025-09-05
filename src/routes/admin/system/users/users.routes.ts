@@ -5,7 +5,8 @@ import { insertSystemUserSchema, patchSystemUserSchema, responseSystemUserListSc
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
-import { createErrorSchema, IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
+import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
+import { respErr } from "@/utils";
 
 const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];
@@ -24,14 +25,8 @@ export const list = createRoute({
       RefineResultSchema(responseSystemUserListSchema),
       "列表响应成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(RefineQueryParamsSchema),
-      "查询参数验证错误",
-    ),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(
-      createErrorSchema(z.string()),
-      "服务器内部错误",
-    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "查询参数验证错误"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
   },
 });
 
@@ -52,14 +47,8 @@ export const create = createRoute({
       RefineResultSchema(responseSystemUserSchema),
       "创建成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(insertSystemUserSchema),
-      "The validation error(s)",
-    ),
-    [HttpStatusCodes.CONFLICT]: jsonContent(
-      createErrorSchema(insertSystemUserSchema),
-      "用户名已存在",
-    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
+    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "用户名已存在"),
   },
 });
 
@@ -77,14 +66,8 @@ export const get = createRoute({
       RefineResultSchema(responseSystemUserSchema),
       "获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(IdUUIDParamsSchema),
-      "ID参数错误",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "用户不存在",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
   },
 });
 
@@ -106,18 +89,9 @@ export const update = createRoute({
       RefineResultSchema(responseSystemUserSchema),
       "更新成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(patchSystemUserSchema).or(createErrorSchema(IdUUIDParamsSchema)),
-      "请求参数错误",
-    ),
-    [HttpStatusCodes.FORBIDDEN]: jsonContent(
-      createErrorSchema(z.string()),
-      "内置用户不允许修改状态",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "用户不存在",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "内置用户不允许修改状态"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
   },
 }); ;
 
@@ -135,18 +109,9 @@ export const remove = createRoute({
       RefineResultSchema(IdUUIDParamsSchema),
       "删除成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createErrorSchema(IdUUIDParamsSchema),
-      "ID参数错误",
-    ),
-    [HttpStatusCodes.FORBIDDEN]: jsonContent(
-      createErrorSchema(z.string()),
-      "内置用户不允许删除",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "用户不存在",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "内置用户不允许删除"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
   },
 }); ;
 
@@ -171,18 +136,9 @@ export const addRole = createRoute({
       z.object({ data: z.object({ count: z.number().int() }) }),
       "添加成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(z.string()),
-      "The validation error(s)",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "用户或角色不存在",
-    ),
-    [HttpStatusCodes.CONFLICT]: jsonContent(
-      createErrorSchema(z.string()),
-      "用户已拥有该角色",
-    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户或角色不存在"),
+    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "用户已拥有该角色"),
   },
 });
 
@@ -207,13 +163,7 @@ export const removeRole = createRoute({
       z.object({ data: z.object({ count: z.number().int() }) }),
       "删除成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(z.string()),
-      "The validation error(s)",
-    ),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createErrorSchema(z.string()),
-      "用户或角色不存在",
-    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户或角色不存在"),
   },
 });

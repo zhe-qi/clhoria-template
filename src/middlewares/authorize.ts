@@ -8,7 +8,7 @@ import { enforcerPromise } from "@/lib/casbin";
 import { API_ADMIN_PATH } from "@/lib/openapi/config";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { parseTextToZodError } from "@/utils";
+import { Resp } from "@/utils";
 
 /**
  * 通用 Casbin 权限验证中间件
@@ -17,7 +17,7 @@ export function authorize(): MiddlewareHandler<AppBindings> {
   return async (c, next) => {
     const enforcer = await enforcerPromise;
     if (!(enforcer instanceof Enforcer)) {
-      return c.json(parseTextToZodError(HttpStatusPhrases.INTERNAL_SERVER_ERROR), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+      return c.json(Resp.fail(HttpStatusPhrases.INTERNAL_SERVER_ERROR), HttpStatusCodes.INTERNAL_SERVER_ERROR);
     }
 
     const { roles } = c.get("jwtPayload");
@@ -25,7 +25,7 @@ export function authorize(): MiddlewareHandler<AppBindings> {
 
     const hasPermission = await hasAnyPermission(enforcer, roles, path, c.req.method);
     if (!hasPermission) {
-      return c.json(parseTextToZodError(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
+      return c.json(Resp.fail(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
     }
 
     await next();
