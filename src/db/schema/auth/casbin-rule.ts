@@ -59,7 +59,6 @@ type InsertCasbinRuleType = z.infer<typeof selectCasbinRuleSchema>;
 type InsertCasbinRuleInput = z.infer<typeof insertCasbinRuleSchema>;
 
 export const insertCasbinRuleSchema = selectCasbinRuleSchema
-  // 显式声明 data 类型为 InsertCasbinRuleInput，解决 TS 7006 隐式 any 问题
   .refine((data: InsertCasbinRuleInput) => {
     if (data.ptype === "g") {
       if ((data.v2 !== "") || (data.v3 !== "")) {

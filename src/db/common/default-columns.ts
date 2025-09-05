@@ -5,10 +5,7 @@ import { formatDate } from "@/utils";
 
 export const defaultColumns = {
   /** id，uuid v7 */
-  id: uuid()
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => uuidV7()),
+  id: uuid().primaryKey().notNull().$defaultFn(() => uuidV7()),
   /** 创建时间 */
   createdAt: timestamp({ mode: "string" })
     .$defaultFn(() => formatDate(new Date())),
