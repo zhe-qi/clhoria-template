@@ -121,7 +121,10 @@ routes/{tier}/{feature}/
 
 - **Response Format**: Use `Resp.fail()` or `Resp.ok()` from `src/utils/zod/response.ts`
 - **OpenAPI Success Responses**: Wrap with `RefineResultSchema` (equivalent to ok data wrapper)
-- **OpenAPI Error Responses**: Use `respErr` (equivalent to fail data)
+- **OpenAPI Error Responses**: Use `jsonContent(respErr, "错误描述")` with proper status code, not standalone `respErr`
+  ```typescript
+  [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误")
+  ```
 - **Status Codes**: Always use `HttpStatusCodes` constants instead of magic numbers
 - **Return Format**: Single-line format: `return c.json(data, HttpStatusCodes.OK)`
 - **Error Handling**: Don't blindly use try-catch. Research error behavior of Drizzle, dependencies, and utility functions before catching exceptions
@@ -129,6 +132,7 @@ routes/{tier}/{feature}/
 ### Code Quality & Imports
 
 - **Console Output**: Never use emojis in `console.log`, `console.warn`, or `console.error` statements - keep all output plain text
+- **Logging**: Use the structured logger from `@/lib/logger` instead of `console` statements (except for debugging). Logger methods: `logger.info()`, `logger.warn()`, `logger.error()` with proper pino format
 - **Dynamic Imports**: Always use `await import()` for dynamic imports, never `require()`
 - **Unused Return Values**: Prefix with `void` to explicitly ignore unused function return values
 
@@ -174,6 +178,90 @@ routes/{tier}/{feature}/
 - **Service Creation**: Only create services when logic is reused 2+ times or will likely be reused, otherwise keep in handlers
 - **Function Prefixes**: `create*`, `get*`, `update*`, `delete*`, `assign*`, `clear*`
 - **Transactions**: Use `db.transaction()` for complex multi-step operations
+
+#### Route Module Export Pattern
+Follow this exact pattern for route module exports in `{feature}.index.ts`:
+```typescript
+import type { AppRouteHandler } from "@/types/lib";
+import { createRouter } from "@/lib/create-app";
+import * as handlers from "./{feature}.handlers";
+import * as routes from "./{feature}.routes";
+
+export const featureName = createRouter()
+  .openapi(routes.get, handlers.get)
+  .openapi(routes.update, handlers.update)
+  // ... other routes
+
+type RouteTypes = {
+  [K in keyof typeof routes]: typeof routes[K];
+};
+
+export type FeatureNameRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+```
+
+#### Handler Type Definition Pattern
+Handlers must use strict typing from the index file. **Never use `any` or `Context` as handler parameter types**:
+```typescript
+import type { FeatureNameRouteHandlerType } from "./{feature}.index";
+
+export const list: FeatureNameRouteHandlerType<"list"> = async (c) => {
+  // handler implementation
+};
+```
+
+#### Zod Schema Type Constraints
+All Zod schemas must use explicit type constraints to ensure type safety:
+```typescript
+import type { DataInterface } from "@/path/to/types";
+
+const DataSchema: z.ZodType<DataInterface> = z.object({
+  field: z.string().optional(), // Use .optional() for optional fields, not .nullable()
+  // ... other fields
+}).openapi({ description: "描述" });
+```
+
+**Handler Type Rules:**
+- ALWAYS use the generated route handler type: `FeatureRouteHandlerType<"routeName">`
+- NEVER use `any`, `Context`, or other generic types for handler parameters
+- Ensure Zod schemas match the TypeScript interfaces exactly using `z.ZodType<T>`
+- Use `.optional()` for optional fields in schemas, not `.nullable()`
+- Import and use actual type interfaces to constrain Zod schemas
+
+#### OpenAPI Tag & Path Organization
+For consistent API documentation grouping, follow this pattern in route files:
+
+```typescript
+// Route configuration constants
+const routePrefix = "/feature-name";  // Base path for all routes in this module
+const tags = [`${routePrefix}（功能描述）`];  // Tag format: path + Chinese description
+
+// Apply to routes
+export const list = createRoute({
+  tags,
+  path: routePrefix,  // GET /feature-name
+  // ... other config
+});
+
+export const get = createRoute({
+  tags,
+  path: `${routePrefix}/{id}`,  // GET /feature-name/{id}
+  // ... other config
+});
+```
+
+**Tag Organization Rules:**
+- Use `routePrefix` constant to define base path (e.g., `/system/users`, `/queues`, `/jobs`)
+- Format tags as: `[route_prefix]（Chinese_description）` (e.g., `/queues（队列管理）`)
+- Group related operations under same tag by sharing the `tags` array
+- For complex modules with multiple logical groups, create separate prefix/tag pairs:
+  ```typescript
+  const queueRoutePrefix = "/queues";
+  const jobRoutePrefix = "/jobs";
+  const queueTags = [`${queueRoutePrefix}（队列管理）`];
+  const jobTags = [`${jobRoutePrefix}（任务管理）`];
+  ```
+- Always use template literals with prefix constants for paths: `path: \`\${routePrefix}/{id}\``
+- This ensures consistent API documentation grouping in Scalar UI
 
 ## Development Notes
 
