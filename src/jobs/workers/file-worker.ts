@@ -72,16 +72,3 @@ fileWorker.on("progress", (job, progress) => {
 fileWorker.on("error", (err) => {
   logger.error(`[文件]: Worker错误 - ${err.message}`);
 });
-
-// 优雅关闭
-process.on("SIGINT", async () => {
-  logger.info("[文件]: 正在关闭Worker...");
-  await fileWorker.close();
-  logger.info("[文件]: Worker已关闭");
-});
-
-process.on("SIGTERM", async () => {
-  logger.info("[文件]: 正在关闭Worker...");
-  await fileWorker.close();
-  logger.info("[文件]: Worker已关闭");
-});

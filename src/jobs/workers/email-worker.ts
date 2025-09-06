@@ -67,16 +67,3 @@ emailWorker.on("progress", (job, progress) => {
 emailWorker.on("error", (err) => {
   logger.error(`[邮件]: Worker错误 - ${err.message}`);
 });
-
-// 优雅关闭
-process.on("SIGINT", async () => {
-  logger.info("[邮件]: 正在关闭Worker...");
-  await emailWorker.close();
-  logger.info("[邮件]: Worker已关闭");
-});
-
-process.on("SIGTERM", async () => {
-  logger.info("[邮件]: 正在关闭Worker...");
-  await emailWorker.close();
-  logger.info("[邮件]: Worker已关闭");
-});

@@ -6,6 +6,7 @@ import * as handlers from "./queue-management.handlers";
 import * as routes from "./queue-management.routes";
 
 export const queueManagement = createRouter()
+  // 队列可视化路由，兼容 Bull Board UI
   .openapi(routes.getQueues, handlers.getQueues)
   .openapi(routes.getQueue, handlers.getQueue)
   .openapi(routes.getQueueJobs, handlers.getQueueJobs)

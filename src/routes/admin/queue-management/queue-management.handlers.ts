@@ -604,49 +604,49 @@ async function registerTaskToBullMQ(task: typeof systemScheduledJob.$inferSelect
       return;
     }
 
-    // 构建调度配置
-    const scheduleOptions: any = {
-      jobId: task.name,
-    };
+    // 构建重复任务选项
+    const repeatOptions: any = {};
 
-    if (task.cronExpression) {
-      scheduleOptions.repeat = {
-        pattern: task.cronExpression,
-      };
+    if (task.cronExpression && task.cronExpression.trim()) {
+      repeatOptions.pattern = task.cronExpression;
     }
-    else if (task.intervalMs) {
-      scheduleOptions.repeat = {
-        every: task.intervalMs,
-      };
+    else if (task.intervalMs && task.intervalMs > 0) {
+      repeatOptions.every = task.intervalMs;
+    }
+    else {
+      logger.error(`[系统同步]: 任务 ${task.name} 缺少有效的调度配置`);
+      return;
     }
 
-    // 任务执行选项
-    const jobOptions = {
-      priority: task.priority ?? 5,
-      attempts: (task.maxRetries ?? 3) + 1,
-      backoff: {
-        type: "exponential" as const,
-        delay: 2000,
+    // 任务模板配置
+    const jobTemplate = {
+      name: task.jobName,
+      data: {
+        ...task.jobData,
+        // 添加元数据供 Worker 使用
+        _scheduledJobId: task.id,
+        _taskType: task.taskType,
+        _taskName: task.name,
+        _maxRetries: task.maxRetries ?? 3,
+        _timeout: (task.timeoutSeconds ?? 300) * 1000,
+      } as any,
+      opts: {
+        priority: task.priority ?? 5,
+        attempts: (task.maxRetries ?? 3) + 1, // BullMQ 的 attempts 包含首次执行
+        backoff: {
+          type: "exponential" as const,
+          delay: 2000,
+        },
+        removeOnComplete: 10,
+        removeOnFail: 20,
       },
-      removeOnComplete: 10,
-      removeOnFail: 20,
     };
 
-    // 注册定时任务
+    // 使用 upsertJobScheduler 注册定时任务 - 正确的三参数格式
     await queue.upsertJobScheduler(
-      task.name,
-      scheduleOptions,
-      {
-        name: task.jobName,
-        data: {
-          ...task.jobData,
-          _scheduledJobId: task.id,
-          _taskType: task.taskType,
-          _maxRetries: task.maxRetries ?? 3,
-          _timeout: (task.timeoutSeconds ?? 300) * 1000,
-        } as any,
-        opts: jobOptions,
-      },
+      task.name, // 使用任务名作为唯一标识符
+      repeatOptions,
+      jobTemplate,
     );
 
     logger.info(`[系统同步]: BullMQ任务注册成功 - ${task.name}`);

@@ -20,14 +20,14 @@ import { respErr } from "@/utils";
 
 // 路由配置
 const queueRoutePrefix = "/queues";
-const jobRoutePrefix = "/jobs";
-const healthRoutePrefix = "/queue-health";
+const jobRoutePrefix = "/queues/jobs"; // 合并到队列管理下
+const healthRoutePrefix = "/queues/health"; // 合并到队列管理下
 const scheduledJobsRoutePrefix = "/scheduled-jobs";
 
+// 统一的队列管理标签（包含队列、任务、健康状态）
 const queueTags = [`${queueRoutePrefix}（队列管理）`];
-const jobTags = [`${jobRoutePrefix}（任务管理）`];
-const healthTags = [`${healthRoutePrefix}（系统监控）`];
-const scheduledJobsTags = [`${scheduledJobsRoutePrefix}（定时任务管理）`];
+// 定时任务独立标签
+const scheduledJobsTags = [`${scheduledJobsRoutePrefix}（定时任务）`];
 
 // 参数schemas
 const QueueParamsSchema = z.object({
@@ -234,7 +234,7 @@ export const getJob = createRoute({
   path: `${jobRoutePrefix}/{id}`,
   summary: "获取任务详情",
   description: "根据ID获取任务的详细信息",
-  tags: jobTags,
+  tags: queueTags,
   request: {
     params: JobParamsSchema,
   },
@@ -257,7 +257,7 @@ export const retryJob = createRoute({
   path: `${jobRoutePrefix}/{id}/retry`,
   summary: "重试失败任务",
   description: "重试指定的失败任务",
-  tags: jobTags,
+  tags: queueTags,
   request: {
     params: JobParamsSchema,
   },
@@ -280,7 +280,7 @@ export const removeJob = createRoute({
   path: `${jobRoutePrefix}/{id}`,
   summary: "删除任务",
   description: "删除指定的任务",
-  tags: jobTags,
+  tags: queueTags,
   request: {
     params: JobParamsSchema,
   },
@@ -303,7 +303,7 @@ export const promoteJob = createRoute({
   path: `${jobRoutePrefix}/{id}/promote`,
   summary: "提升延迟任务",
   description: "将延迟任务提升为立即执行",
-  tags: jobTags,
+  tags: queueTags,
   request: {
     params: JobParamsSchema,
   },
@@ -326,7 +326,7 @@ export const getHealth = createRoute({
   path: healthRoutePrefix,
   summary: "获取队列健康状态",
   description: "返回所有队列的健康状态信息",
-  tags: healthTags,
+  tags: queueTags,
   responses: {
     [HttpStatusCodes.OK]: {
       content: {

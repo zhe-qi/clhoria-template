@@ -15,6 +15,7 @@ import env from "@/env";
 import { emailQueue, fileQueue, systemQueue, userQueue } from "@/jobs/queues";
 import { Status } from "@/lib/enums/common";
 import logger from "@/lib/logger";
+import redisClient from "@/lib/redis";
 import { formatDate } from "@/utils/tools/formatter";
 
 /**
@@ -181,11 +182,30 @@ const queueMap: Record<string, Queue> = {
 /**
  * 同步系统任务到数据库
  * 如果任务不存在则创建，如果存在则更新配置（保持用户自定义的状态）
+ * 使用分布式锁确保只有一个实例执行同步
  */
 export async function syncSystemTasksToDatabase(): Promise<void> {
-  logger.info("[系统同步]: 开始同步系统任务到数据库");
+  const lockKey = "system:task:sync:lock";
+  const lockTTL = 30; // 30秒锁超时
+  const nodeId = `${env.NODE_ENV || "dev"}-${process.pid}`;
 
   try {
+    // 尝试获取分布式锁
+    const lockAcquired = await redisClient.set(
+      lockKey,
+      nodeId,
+      "EX",
+      lockTTL,
+      "NX",
+    );
+
+    if (!lockAcquired) {
+      logger.info("[系统同步]: 其他实例正在执行任务同步，跳过");
+      return;
+    }
+
+    logger.info("[系统同步]: 获取分布式锁成功，开始同步系统任务到数据库");
+
     let createdCount = 0;
     let updatedCount = 0;
     const registeredTasks: Array<{ name: string; queue: string; job: string }> = [];
@@ -265,6 +285,19 @@ export async function syncSystemTasksToDatabase(): Promise<void> {
     logger.error(`[系统同步]: 系统任务同步失败 - ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
+  finally {
+    // 释放分布式锁（只有锁的持有者才能释放）
+    try {
+      const currentLockHolder = await redisClient.get(lockKey);
+      if (currentLockHolder === nodeId) {
+        await redisClient.del(lockKey);
+        logger.info("[系统同步]: 分布式锁已释放");
+      }
+    }
+    catch (unlockError) {
+      logger.error(`[系统同步]: 释放分布式锁失败 - ${unlockError instanceof Error ? unlockError.message : String(unlockError)}`);
+    }
+  }
 }
 
 /**
@@ -278,15 +311,15 @@ async function registerTaskToBullMQ(task: typeof systemScheduledJob.$inferSelect
       return;
     }
 
-    // 构建调度配置 - 直接作为 RepeatableJobOptions
-    const repeatableOptions: any = {};
+    // 构建重复任务选项
+    const repeatOptions: any = {};
 
     // 确保至少有一个调度选项
     if (task.cronExpression && task.cronExpression.trim()) {
-      repeatableOptions.pattern = task.cronExpression;
+      repeatOptions.pattern = task.cronExpression;
     }
     else if (task.intervalMs && task.intervalMs > 0) {
-      repeatableOptions.every = task.intervalMs;
+      repeatOptions.every = task.intervalMs;
     }
     else {
       logger.error(`[系统同步]: 任务 ${task.name} 缺少有效的调度配置`);
@@ -298,9 +331,10 @@ async function registerTaskToBullMQ(task: typeof systemScheduledJob.$inferSelect
       name: task.jobName,
       data: {
         ...task.jobData,
-        // 添加元数据
+        // 添加元数据供 Worker 使用
         _scheduledJobId: task.id,
-        _taskType: "SYSTEM",
+        _taskType: task.taskType,
+        _taskName: task.name,
         _maxRetries: task.maxRetries ?? 3,
         _timeout: (task.timeoutSeconds ?? 300) * 1000,
       },
@@ -316,10 +350,10 @@ async function registerTaskToBullMQ(task: typeof systemScheduledJob.$inferSelect
       },
     };
 
-    // 注册定时任务 - 使用正确的API签名
+    // 使用 upsertJobScheduler 注册定时任务 - 正确的三参数格式
     await queue.upsertJobScheduler(
-      task.name, // 使用任务名作为 scheduler ID，确保唯一性
-      repeatableOptions,
+      task.name, // 使用任务名作为唯一标识符
+      repeatOptions,
       jobTemplate,
     );
   }

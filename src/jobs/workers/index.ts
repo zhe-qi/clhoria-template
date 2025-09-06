@@ -17,6 +17,9 @@ export const allWorkers = [
   systemWorker,
 ];
 
+// 优雅关闭标志
+let isShuttingDown = false;
+
 // 启动所有Workers
 export async function startAllWorkers(): Promise<void> {
   logger.info("[工作者]: 启动所有Workers");
@@ -25,10 +28,19 @@ export async function startAllWorkers(): Promise<void> {
   const workerNames = allWorkers.map(worker => worker.name);
 
   logger.info({ workers: workerNames }, `[工作者]: Workers启动完成 - 共 ${allWorkers.length} 个`);
+
+  // 注册进程信号处理（只注册一次）
+  registerShutdownHandlers();
 }
 
 // 关闭所有Workers
 export async function stopAllWorkers(): Promise<void> {
+  if (isShuttingDown) {
+    logger.info("[工作者]: 已在关闭过程中，跳过重复调用");
+    return;
+  }
+
+  isShuttingDown = true;
   logger.info("[工作者]: 正在关闭所有Workers");
 
   await Promise.all(
@@ -43,7 +55,7 @@ export async function stopAllWorkers(): Promise<void> {
     }),
   );
 
-  logger.info("[工作者]: 所有已关闭");
+  logger.info("[工作者]: 所有Worker已关闭");
 }
 
 // 获取Workers状态
@@ -87,6 +99,36 @@ export async function resumeAllWorkers(): Promise<void> {
       }
     }),
   );
+}
+
+/**
+ * 注册进程信号处理器（防止重复注册）
+ * 统一处理所有Worker的优雅关闭
+ */
+let handlersRegistered = false;
+
+function registerShutdownHandlers(): void {
+  if (handlersRegistered) {
+    return;
+  }
+
+  handlersRegistered = true;
+
+  // 处理 SIGINT 信号（Ctrl+C）
+  process.once("SIGINT", async () => {
+    logger.info("[工作者]: 收到 SIGINT 信号，开始优雅关闭...");
+    await stopAllWorkers();
+    process.exit(0);
+  });
+
+  // 处理 SIGTERM 信号（系统终止）
+  process.once("SIGTERM", async () => {
+    logger.info("[工作者]: 收到 SIGTERM 信号，开始优雅关闭...");
+    await stopAllWorkers();
+    process.exit(0);
+  });
+
+  logger.info("[工作者]: 进程信号处理器已注册");
 }
 
 // 导出单个Worker
