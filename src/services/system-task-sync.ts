@@ -340,10 +340,7 @@ export async function removeAllSystemTasksFromBullMQ(): Promise<void> {
       if (queue) {
         try {
           // 移除重复任务调度
-          await queue.removeRepeatable(taskDef.name, {
-            pattern: taskDef.cronExpression,
-            every: taskDef.intervalMs,
-          });
+          await queue.removeJobScheduler(taskDef.name);
           logger.info(`[系统同步]: 移除BullMQ任务 ${taskDef.name}`);
         }
         catch (error) {

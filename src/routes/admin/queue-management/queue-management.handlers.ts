@@ -669,10 +669,7 @@ async function unregisterTaskFromBullMQ(task: typeof systemScheduledJob.$inferSe
     }
 
     // 移除重复任务调度
-    await queue.removeRepeatable(task.name, {
-      pattern: task.cronExpression ?? undefined,
-      every: task.intervalMs ?? undefined,
-    });
+    await queue.removeJobScheduler(task.name);
 
     logger.info(`[系统同步]: BullMQ任务移除成功 - ${task.name}`);
   }
