@@ -186,10 +186,10 @@ export async function getScheduledJobs() {
   try {
     // 获取各队列的定时任务
     const [emailJobs, fileJobs, userJobs, systemJobs] = await Promise.all([
-      emailQueue.getRepeatableJobs(),
-      fileQueue.getRepeatableJobs(),
-      userQueue.getRepeatableJobs(),
-      systemQueue.getRepeatableJobs(),
+      emailQueue.getJobSchedulers(),
+      fileQueue.getJobSchedulers(),
+      userQueue.getJobSchedulers(),
+      systemQueue.getJobSchedulers(),
     ]);
 
     scheduledJobs.push(
@@ -209,8 +209,10 @@ export async function getScheduledJobs() {
 
 /**
  * 移除指定的定时任务
+ * @param queueName 队列名称
+ * @param jobName 任务名称（不再是jobKey）
  */
-export async function removeScheduledJob(queueName: string, jobKey: string): Promise<boolean> {
+export async function removeScheduledJob(queueName: string, jobName: string): Promise<boolean> {
   try {
     let queue;
     switch (queueName) {
@@ -230,8 +232,8 @@ export async function removeScheduledJob(queueName: string, jobKey: string): Pro
         throw new Error(`未知队列: ${queueName}`);
     }
 
-    const result = await queue.removeRepeatableByKey(jobKey);
-    logger.info(`[定时任务]: ${result ? "成功" : "失败"}移除定时任务 ${queueName}/${jobKey}`);
+    const result = await queue.removeJobScheduler(jobName);
+    logger.info(`[定时任务]: ${result ? "成功" : "失败"}移除定时任务 ${queueName}/${jobName}`);
     return result;
   }
   catch (error) {
