@@ -6,6 +6,13 @@ import { createRoute, z } from "@hono/zod-openapi";
 
 import type { JobInfo, QueueInfo, QueueStats } from "@/jobs/types";
 
+import {
+  insertSystemScheduledJobSchema,
+  patchSystemScheduledJobSchema,
+  scheduledJobIdSchema,
+  selectSystemJobExecutionLogSchema,
+  selectSystemScheduledJobSchema,
+} from "@/db/schema/system";
 import { RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent } from "@/lib/stoker/openapi/helpers";
@@ -15,10 +22,12 @@ import { respErr } from "@/utils";
 const queueRoutePrefix = "/queues";
 const jobRoutePrefix = "/jobs";
 const healthRoutePrefix = "/queue-health";
+const scheduledJobsRoutePrefix = "/scheduled-jobs";
 
 const queueTags = [`${queueRoutePrefix}（队列管理）`];
 const jobTags = [`${jobRoutePrefix}（任务管理）`];
 const healthTags = [`${healthRoutePrefix}（系统监控）`];
+const scheduledJobsTags = [`${scheduledJobsRoutePrefix}（定时任务管理）`];
 
 // 参数schemas
 const QueueParamsSchema = z.object({
@@ -327,6 +336,216 @@ export const getHealth = createRoute({
       },
       description: "健康状态信息",
     },
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+  },
+});
+
+// ==================== 定时任务管理路由 ====================
+
+export const getScheduledJobs = createRoute({
+  method: "get",
+  path: scheduledJobsRoutePrefix,
+  summary: "获取定时任务列表",
+  description: "返回所有定时任务的配置信息和状态，支持分页和筛选",
+  tags: scheduledJobsTags,
+  request: {
+    query: z.object({
+      taskType: z.enum(["SYSTEM", "BUSINESS"]).optional().openapi({
+        description: "任务类型筛选",
+        example: "SYSTEM",
+      }),
+      status: z.enum(["0", "1"]).optional().openapi({
+        description: "任务状态筛选：1启用 0禁用",
+        example: "1",
+      }),
+      queueName: z.string().optional().openapi({
+        description: "队列名称筛选",
+        example: "system",
+      }),
+      page: z.coerce.number().int().min(1).default(1).openapi({
+        description: "页码",
+        example: 1,
+      }),
+      limit: z.coerce.number().int().min(1).max(100).default(20).openapi({
+        description: "每页数量",
+        example: 20,
+      }),
+    }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(z.array(selectSystemScheduledJobSchema)),
+      "定时任务列表",
+    ),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+  },
+});
+
+export const createScheduledJob = createRoute({
+  method: "post",
+  path: scheduledJobsRoutePrefix,
+  summary: "创建定时任务",
+  description: "创建新的业务定时任务，系统任务只能由代码定义",
+  tags: scheduledJobsTags,
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: insertSystemScheduledJobSchema,
+        },
+      },
+      description: "定时任务配置",
+    },
+  },
+  responses: {
+    [HttpStatusCodes.CREATED]: jsonContent(
+      RefineResultSchema(selectSystemScheduledJobSchema),
+      "创建成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),
+    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "任务名称已存在"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "参数验证失败"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+  },
+});
+
+export const updateScheduledJob = createRoute({
+  method: "put",
+  path: `${scheduledJobsRoutePrefix}/{id}`,
+  summary: "更新定时任务",
+  description: "更新定时任务的配置，系统任务只能修改部分参数",
+  tags: scheduledJobsTags,
+  request: {
+    params: scheduledJobIdSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: patchSystemScheduledJobSchema,
+        },
+      },
+      description: "定时任务更新配置",
+    },
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(selectSystemScheduledJobSchema),
+      "更新成功",
+    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "系统任务修改受限"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "任务不存在"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "参数验证失败"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+  },
+});
+
+export const toggleScheduledJob = createRoute({
+  method: "post",
+  path: `${scheduledJobsRoutePrefix}/{id}/toggle`,
+  summary: "启用/禁用定时任务",
+  description: "切换定时任务的启用状态",
+  tags: scheduledJobsTags,
+  request: {
+    params: scheduledJobIdSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(z.object({
+        id: z.string(),
+        status: z.number(),
+        message: z.string(),
+      })),
+      "操作成功",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "任务不存在"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+  },
+});
+
+export const executeScheduledJob = createRoute({
+  method: "post",
+  path: `${scheduledJobsRoutePrefix}/{id}/execute`,
+  summary: "手动触发定时任务",
+  description: "立即执行指定的定时任务",
+  tags: scheduledJobsTags,
+  request: {
+    params: scheduledJobIdSchema,
+  },
+  responses: {
+    [HttpStatusCodes.ACCEPTED]: jsonContent(
+      RefineResultSchema(z.object({
+        id: z.string(),
+        jobId: z.string(),
+        message: z.string(),
+      })),
+      "任务已提交执行",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "任务不存在"),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "任务状态不允许手动执行"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+  },
+});
+
+export const getScheduledJobLogs = createRoute({
+  method: "get",
+  path: `${scheduledJobsRoutePrefix}/{id}/logs`,
+  summary: "获取定时任务执行历史",
+  description: "返回指定定时任务的执行历史记录",
+  tags: scheduledJobsTags,
+  request: {
+    params: scheduledJobIdSchema,
+    query: z.object({
+      status: z.enum(["pending", "running", "success", "failed", "timeout", "cancelled"]).optional().openapi({
+        description: "执行状态筛选",
+        example: "success",
+      }),
+      startDate: z.string().optional().openapi({
+        description: "开始日期 YYYY-MM-DD",
+        example: "2024-01-01",
+      }),
+      endDate: z.string().optional().openapi({
+        description: "结束日期 YYYY-MM-DD",
+        example: "2024-01-31",
+      }),
+      page: z.coerce.number().int().min(1).default(1).openapi({
+        description: "页码",
+        example: 1,
+      }),
+      limit: z.coerce.number().int().min(1).max(100).default(20).openapi({
+        description: "每页数量",
+        example: 20,
+      }),
+    }),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(z.array(selectSystemJobExecutionLogSchema)),
+      "执行历史记录",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "任务不存在"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+  },
+});
+
+export const deleteScheduledJob = createRoute({
+  method: "delete",
+  path: `${scheduledJobsRoutePrefix}/{id}`,
+  summary: "删除定时任务",
+  description: "删除指定的定时任务（仅限业务任务）",
+  tags: scheduledJobsTags,
+  request: {
+    params: scheduledJobIdSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(z.object({
+        id: z.string(),
+        message: z.string(),
+      })),
+      "删除成功",
+    ),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "系统任务不允许删除"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "任务不存在"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
   },
 });

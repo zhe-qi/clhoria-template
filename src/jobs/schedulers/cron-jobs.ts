@@ -1,7 +1,8 @@
-/* eslint-disable no-console */
 /**
  * 定时任务定义 - 使用 upsertJobScheduler 分布式安全
  */
+
+import logger from "@/lib/logger";
 
 import {
   emailQueue,
@@ -15,9 +16,11 @@ import {
  * 使用 upsertJobScheduler 保证分布式环境下的安全性
  */
 export async function registerCronJobs(): Promise<void> {
-  console.log("⏰ 开始注册定时任务...");
+  logger.info("[定时任务]: 开始注册定时任务");
 
   try {
+    const tasks = [];
+
     // 每天凌晨2点执行系统备份
     await systemQueue.upsertJobScheduler(
       "daily-backup",
@@ -35,7 +38,7 @@ export async function registerCronJobs(): Promise<void> {
         },
       },
     );
-    console.log("✅ 注册定时任务: 每日系统备份 (2:00 AM)");
+    tasks.push({ name: "每日系统备份", schedule: "2:00 AM", queue: "system" });
 
     // 每天凌晨3点执行系统清理
     await systemQueue.upsertJobScheduler(
@@ -54,7 +57,7 @@ export async function registerCronJobs(): Promise<void> {
         },
       },
     );
-    console.log("✅ 注册定时任务: 每日系统清理 (3:00 AM)");
+    tasks.push({ name: "每日系统清理", schedule: "3:00 AM", queue: "system" });
 
     // 每周一上午8点生成周报
     await systemQueue.upsertJobScheduler(
@@ -77,7 +80,7 @@ export async function registerCronJobs(): Promise<void> {
         },
       },
     );
-    console.log("✅ 注册定时任务: 每周报告生成 (周一 8:00 AM)");
+    tasks.push({ name: "每周报告生成", schedule: "周一 8:00 AM", queue: "system" });
 
     // 每月1号凌晨4点执行系统维护
     await systemQueue.upsertJobScheduler(
@@ -96,7 +99,7 @@ export async function registerCronJobs(): Promise<void> {
         },
       },
     );
-    console.log("✅ 注册定时任务: 每月系统维护 (每月1号 4:00 AM)");
+    tasks.push({ name: "每月系统维护", schedule: "每月1号 4:00 AM", queue: "system" });
 
     // 每6小时检查并清理过期用户数据
     await userQueue.upsertJobScheduler(
@@ -116,7 +119,7 @@ export async function registerCronJobs(): Promise<void> {
         },
       },
     );
-    console.log("✅ 注册定时任务: 用户数据清理 (每6小时)");
+    tasks.push({ name: "用户数据清理", schedule: "每6小时", queue: "user" });
 
     // 每天上午9点发送系统状态邮件
     await emailQueue.upsertJobScheduler(
@@ -137,7 +140,7 @@ export async function registerCronJobs(): Promise<void> {
         },
       },
     );
-    console.log("✅ 注册定时任务: 每日状态邮件 (9:00 AM)");
+    tasks.push({ name: "每日状态邮件", schedule: "9:00 AM", queue: "email" });
 
     // 每30分钟清理临时文件
     await fileQueue.upsertJobScheduler(
@@ -158,12 +161,18 @@ export async function registerCronJobs(): Promise<void> {
         },
       },
     );
-    console.log("✅ 注册定时任务: 临时文件清理 (每30分钟)");
+    tasks.push({ name: "临时文件清理", schedule: "每30分钟", queue: "file" });
 
-    console.log("🎯 所有定时任务注册完成");
+    // 汇总日志
+    const taskSummary = tasks.reduce((acc, task) => {
+      acc[task.name] = `${task.schedule} (${task.queue})`;
+      return acc;
+    }, {} as Record<string, string>);
+
+    logger.info(taskSummary, `[定时任务]: 定时任务注册完成 - 共 ${tasks.length} 个任务`);
   }
   catch (error) {
-    console.error("❌ 定时任务注册失败:", error);
+    logger.error(`[定时任务]: 定时任务注册失败 - ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -193,7 +202,7 @@ export async function getScheduledJobs() {
     return scheduledJobs;
   }
   catch (error) {
-    console.error("❌ 获取定时任务失败:", error);
+    logger.error(`[定时任务]: 获取定时任务失败 - ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -222,11 +231,11 @@ export async function removeScheduledJob(queueName: string, jobKey: string): Pro
     }
 
     const result = await queue.removeRepeatableByKey(jobKey);
-    console.log(`${result ? "✅" : "⚠️"} ${result ? "成功" : "失败"}移除定时任务: ${queueName}/${jobKey}`);
+    logger.info(`[定时任务]: ${result ? "成功" : "失败"}移除定时任务 ${queueName}/${jobKey}`);
     return result;
   }
   catch (error) {
-    console.error("❌ 移除定时任务失败:", error);
+    logger.error(`[定时任务]: 移除定时任务失败 - ${error instanceof Error ? error.message : String(error)}`);
     return false;
   }
 }

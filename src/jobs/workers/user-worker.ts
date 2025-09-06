@@ -1,9 +1,10 @@
-/* eslint-disable no-console */
 /**
  * 用户Worker - 任务消费处理
  */
 
 import { Worker } from "bullmq";
+
+import logger from "@/lib/logger";
 
 import { QUEUE_PREFIX, workerConfigs } from "../config";
 import {
@@ -19,7 +20,7 @@ import { QUEUE_NAMES } from "../types";
 export const userWorker = new Worker(
   `${QUEUE_PREFIX}-${QUEUE_NAMES.USER}`,
   async (job) => {
-    console.log(`用户Worker开始处理任务: ${job.name} (ID: ${job.id})`);
+    logger.info(`[用户]: 开始处理任务 ${job.name}, ID: ${job.id}`);
 
     // 根据任务名称路由到不同的处理函数
     switch (job.name) {
@@ -44,41 +45,43 @@ export const userWorker = new Worker(
         break;
 
       default:
-        console.warn(`未知的用户任务类型: ${job.name}`);
+        logger.warn(`[用户]: 未知的任务类型 ${job.name}, ID: ${job.id}`);
         throw new Error(`未支持的任务类型: ${job.name}`);
     }
 
-    console.log(`用户Worker完成任务: ${job.name} (ID: ${job.id})`);
+    logger.info(`[用户]: 完成任务 ${job.name}, ID: ${job.id}`);
   },
   workerConfigs.user,
 );
 
 // Worker事件监听
 userWorker.on("completed", (job) => {
-  console.log(`✅ 用户任务完成: ${job.name} (ID: ${job.id})`);
+  logger.info(`[用户]: 任务完成 ${job.name}, ID: ${job.id}`);
 });
 
 userWorker.on("failed", (job, err) => {
-  console.error(`❌ 用户任务失败: ${job?.name} (ID: ${job?.id})`, err.message);
+  logger.error(`[用户]: 任务失败 ${job?.name}, ID: ${job?.id}, 错误: ${err.message}`);
 });
 
 userWorker.on("progress", (job, progress) => {
-  console.log(`📈 用户任务进度: ${job.name} - ${progress}%`);
+  if (Number(progress) % 25 === 0) { // 只在25%增量时记录进度
+    logger.info(`[用户]: 任务进度 ${job.name} - ${progress}%, ID: ${job.id}`);
+  }
 });
 
 userWorker.on("error", (err) => {
-  console.error("👤 用户Worker错误:", err);
+  logger.error(`[用户]: Worker错误 - ${err.message}`);
 });
 
 // 优雅关闭
 process.on("SIGINT", async () => {
-  console.log("👤 正在关闭用户Worker...");
+  logger.info("[用户]: 正在关闭Worker...");
   await userWorker.close();
-  console.log("👤 用户Worker已关闭");
+  logger.info("[用户]: Worker已关闭");
 });
 
 process.on("SIGTERM", async () => {
-  console.log("👤 正在关闭用户Worker...");
+  logger.info("[用户]: 正在关闭Worker...");
   await userWorker.close();
-  console.log("👤 用户Worker已关闭");
+  logger.info("[用户]: Worker已关闭");
 });

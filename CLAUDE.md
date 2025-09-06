@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+Always respond in Chinese-simplified
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Development Commands
@@ -131,8 +133,37 @@ routes/{tier}/{feature}/
 
 ### Code Quality & Imports
 
-- **Console Output**: Never use emojis in `console.log`, `console.warn`, or `console.error` statements - keep all output plain text
-- **Logging**: Use the structured logger from `@/lib/logger` instead of `console` statements (except for debugging). Logger methods: `logger.info()`, `logger.warn()`, `logger.error()` with proper pino format
+- **Console Output**: Never use `console.log`, `console.warn`, or `console.error` statements in production code - always use structured logger
+- **Logging**: 
+  - Use structured logger from `@/lib/logger` for all logging: `logger.info()`, `logger.warn()`, `logger.error()`
+  - Use Chinese prefixes with brackets: `[模块名]: 描述信息`
+  - Examples:
+    ```typescript
+    logger.info("[邮件]: 开始处理任务 welcome, ID: abc123");
+    logger.error("[系统]: 初始化失败 - 数据库连接超时");
+    logger.warn("[文件]: 未知的任务类型 compress, ID: def456");
+    ```
+  - Prefix conventions:
+    - `[邮件]` - Email-related operations
+    - `[文件]` - File-related operations  
+    - `[系统]` - System operations
+    - `[用户]` - User operations
+    - `[工作者]` - Worker management
+    - `[任务系统]` - Job system operations
+    - `[调度器]` - Scheduler operations
+    - `[定时任务]` - Cron job operations
+    - `[系统同步]` - System sync operations
+  - Never use emojis or English prefixes in production logs
+  - For progress logs, only log at meaningful intervals (e.g., every 25%)
+  - **Pino Log Format**: When logging with additional data, place the data object as the first parameter and the message as the second parameter:
+    ```typescript
+    // Correct - data object first, message second
+    logger.info({ userId: "123", action: "login" }, "[用户]: 登录成功");
+    logger.info(taskMapping, "[系统同步]: BullMQ任务注册完成");
+    
+    // Incorrect - message first, data second (will not display data properly)
+    logger.info("[用户]: 登录成功", { userId: "123", action: "login" });
+    ```
 - **Dynamic Imports**: Always use `await import()` for dynamic imports, never `require()`
 - **Unused Return Values**: Prefix with `void` to explicitly ignore unused function return values
 
@@ -157,6 +188,30 @@ routes/{tier}/{feature}/
 - **Constraints**: Return arrays `table => [unique().on(table.col)]` instead of objects (new Drizzle syntax)
 - **Indexes**: Use `index("name_idx").on(table.col)` for performance, `uniqueIndex()` for uniqueness+performance. Only add necessary indexes after careful consideration
 - **Null Handling**: `undefined` values are automatically converted to `null` when stored in database
+
+#### Zod Schema Inheritance & drizzle-zod Best Practices
+
+- **Zod v4 Syntax**: Use `z.uuid()` instead of `z.string().uuid()` for UUID validation
+- **drizzle-zod Field Descriptions**: Use callback form in `createSelectSchema(table, { field: schema => schema.meta({ description: "描述" }) })` to add descriptions without overriding original schema
+- **Schema Inheritance Chain**: Use proper inheritance to avoid duplication:
+  1. Base schema with descriptions: `createSelectSchema(table, { field: schema => schema.meta(...) })`
+  2. Insert schema: `createInsertSchema(table).omit({...})`
+  3. Derived schemas: `insertSchema.partial()`, `selectSchema.pick({...})`
+- **Field Descriptions**: Define `.meta({ description: "中文描述" })` only once in the `createSelectSchema` callback, then inherit from it
+- **extend vs callback**:
+  - Use callback in `createSelectSchema` for field descriptions (preserves original schema + adds meta)
+  - Use `.extend()` when you need to:
+    - Completely override field properties (e.g., change required to optional: `field: z.string().optional()`)
+    - Change field types or validation rules (e.g., add coercion, different enums)
+    - Add completely new fields not in the original table
+- **When to use extend for field override**:
+  - Query schemas: Convert required fields to optional for filtering
+  - Form schemas: Add client-side validation rules
+  - API schemas: Modify field constraints for specific endpoints
+- **Schema Naming Pattern**:
+  - Base: `selectXxxSchema` (with descriptions via callback), `insertXxxSchema`
+  - Derived: `patchXxxSchema = insertXxxSchema.partial()`
+  - Query: `xxxQuerySchema = selectXxxSchema.pick({...}).extend({...})`
 
 ### Type Safety & Redis
 

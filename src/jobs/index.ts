@@ -1,7 +1,13 @@
-/* eslint-disable no-console */
 /**
  * 任务系统统一入口
  */
+
+import logger from "@/lib/logger";
+// 导入系统任务同步
+import {
+  removeAllSystemTasksFromBullMQ,
+  syncSystemTasksToDatabase,
+} from "@/services/system-task-sync";
 
 // 导入调度器
 import {
@@ -45,20 +51,21 @@ export * from "./types";
  */
 export async function initializeJobSystem(): Promise<void> {
   try {
-    console.log("🚀 初始化任务系统...");
+    logger.info("[任务系统]: 初始化任务系统");
 
     // 1. 启动所有Workers
-    console.log("📡 启动Workers...");
     await startAllWorkers();
 
     // 2. 初始化调度器 (分布式安全)
-    console.log("⏰ 初始化调度器...");
     await initializeScheduler();
 
-    console.log("✅ 任务系统初始化完成");
+    // 3. 同步系统定时任务到数据库
+    await syncSystemTasksToDatabase();
+
+    logger.info("[任务系统]: 初始化完成");
   }
   catch (error) {
-    console.error("❌ 任务系统初始化失败:", error);
+    logger.error(`[任务系统]: 初始化失败 - ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -69,15 +76,18 @@ export async function initializeJobSystem(): Promise<void> {
  */
 export async function shutdownJobSystem(): Promise<void> {
   try {
-    console.log("🛑 正在关闭任务系统...");
+    logger.info("[任务系统]: 正在关闭");
 
-    // 停止所有Workers
+    // 1. 清理系统定时任务的 BullMQ 调度
+    await removeAllSystemTasksFromBullMQ();
+
+    // 2. 停止所有Workers
     await stopAllWorkers();
 
-    console.log("✅ 任务系统已关闭");
+    logger.info("[任务系统]: 已关闭");
   }
   catch (error) {
-    console.error("❌ 任务系统关闭失败:", error);
+    logger.error(`[任务系统]: 关闭失败 - ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -98,7 +108,7 @@ export async function getJobSystemStatus() {
     };
   }
   catch (error) {
-    console.error("❌ 获取任务系统状态失败:", error);
+    logger.error(`[任务系统]: 获取状态失败 - ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }

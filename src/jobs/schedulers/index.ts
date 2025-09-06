@@ -1,7 +1,8 @@
-/* eslint-disable no-console */
 /**
  * 调度器统一入口
  */
+
+import logger from "@/lib/logger";
 
 import {
   getScheduledJobs,
@@ -22,15 +23,15 @@ export {
  */
 export async function initializeScheduler(): Promise<void> {
   try {
-    console.log("🚀 初始化调度系统...");
+    logger.info("[调度器]: 初始化调度系统");
 
     // 注册所有定时任务 - 分布式安全
     await registerCronJobs();
 
-    console.log("✅ 调度系统初始化完成");
+    logger.info("[调度器]: 调度系统初始化完成");
   }
   catch (error) {
-    console.error("❌ 调度系统初始化失败:", error);
+    logger.error(`[调度器]: 调度系统初始化失败 - ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
@@ -57,7 +58,7 @@ export async function getSchedulerStatus() {
     };
   }
   catch (error) {
-    console.error("❌ 获取调度系统状态失败:", error);
+    logger.error(`[调度器]: 获取状态失败 - ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }

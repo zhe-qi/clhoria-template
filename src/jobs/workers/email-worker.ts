@@ -1,9 +1,10 @@
-/* eslint-disable no-console */
 /**
  * 邮件Worker - 任务消费处理
  */
 
 import { Worker } from "bullmq";
+
+import logger from "@/lib/logger";
 
 import { QUEUE_PREFIX, workerConfigs } from "../config";
 import {
@@ -18,7 +19,7 @@ import { QUEUE_NAMES } from "../types";
 export const emailWorker = new Worker(
   `${QUEUE_PREFIX}-${QUEUE_NAMES.EMAIL}`,
   async (job) => {
-    console.log(`邮件Worker开始处理任务: ${job.name} (ID: ${job.id})`);
+    logger.info(`[邮件]: 开始处理任务 ${job.name}, ID: ${job.id}`);
 
     // 根据任务名称路由到不同的处理函数
     switch (job.name) {
@@ -39,41 +40,43 @@ export const emailWorker = new Worker(
         break;
 
       default:
-        console.warn(`未知的邮件任务类型: ${job.name}`);
+        logger.warn(`[邮件]: 未知的任务类型 ${job.name}, ID: ${job.id}`);
         throw new Error(`未支持的任务类型: ${job.name}`);
     }
 
-    console.log(`邮件Worker完成任务: ${job.name} (ID: ${job.id})`);
+    logger.info(`[邮件]: 完成任务 ${job.name}, ID: ${job.id}`);
   },
   workerConfigs.email,
 );
 
 // Worker事件监听
 emailWorker.on("completed", (job) => {
-  console.log(`✅ 邮件任务完成: ${job.name} (ID: ${job.id})`);
+  logger.info(`[邮件]: 任务完成 ${job.name}, ID: ${job.id}`);
 });
 
 emailWorker.on("failed", (job, err) => {
-  console.error(`❌ 邮件任务失败: ${job?.name} (ID: ${job?.id})`, err.message);
+  logger.error(`[邮件]: 任务失败 ${job?.name}, ID: ${job?.id}, 错误: ${err.message}`);
 });
 
 emailWorker.on("progress", (job, progress) => {
-  console.log(`📈 邮件任务进度: ${job.name} - ${progress}%`);
+  if (Number(progress) % 25 === 0) { // 只在25%增量时记录进度
+    logger.info(`[邮件]: 任务进度 ${job.name} - ${progress}%, ID: ${job.id}`);
+  }
 });
 
 emailWorker.on("error", (err) => {
-  console.error("📧 邮件Worker错误:", err);
+  logger.error(`[邮件]: Worker错误 - ${err.message}`);
 });
 
 // 优雅关闭
 process.on("SIGINT", async () => {
-  console.log("📧 正在关闭邮件Worker...");
+  logger.info("[邮件]: 正在关闭Worker...");
   await emailWorker.close();
-  console.log("📧 邮件Worker已关闭");
+  logger.info("[邮件]: Worker已关闭");
 });
 
 process.on("SIGTERM", async () => {
-  console.log("📧 正在关闭邮件Worker...");
+  logger.info("[邮件]: 正在关闭Worker...");
   await emailWorker.close();
-  console.log("📧 邮件Worker已关闭");
+  logger.info("[邮件]: Worker已关闭");
 });

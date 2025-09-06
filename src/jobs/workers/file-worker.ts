@@ -1,9 +1,10 @@
-/* eslint-disable no-console */
 /**
  * 文件Worker - 任务消费处理
  */
 
 import { Worker } from "bullmq";
+
+import logger from "@/lib/logger";
 
 import { QUEUE_PREFIX, workerConfigs } from "../config";
 import {
@@ -19,7 +20,7 @@ import { QUEUE_NAMES } from "../types";
 export const fileWorker = new Worker(
   `${QUEUE_PREFIX}-${QUEUE_NAMES.FILE}`,
   async (job) => {
-    console.log(`文件Worker开始处理任务: ${job.name} (ID: ${job.id})`);
+    logger.info(`[文件]: 开始处理任务 ${job.name}, ID: ${job.id}`);
 
     // 根据任务名称路由到不同的处理函数
     switch (job.name) {
@@ -44,41 +45,43 @@ export const fileWorker = new Worker(
         break;
 
       default:
-        console.warn(`未知的文件任务类型: ${job.name}`);
+        logger.warn(`[文件]: 未知的任务类型 ${job.name}, ID: ${job.id}`);
         throw new Error(`未支持的任务类型: ${job.name}`);
     }
 
-    console.log(`文件Worker完成任务: ${job.name} (ID: ${job.id})`);
+    logger.info(`[文件]: 完成任务 ${job.name}, ID: ${job.id}`);
   },
   workerConfigs.file,
 );
 
 // Worker事件监听
 fileWorker.on("completed", (job) => {
-  console.log(`✅ 文件任务完成: ${job.name} (ID: ${job.id})`);
+  logger.info(`[文件]: 任务完成 ${job.name}, ID: ${job.id}`);
 });
 
 fileWorker.on("failed", (job, err) => {
-  console.error(`❌ 文件任务失败: ${job?.name} (ID: ${job?.id})`, err.message);
+  logger.error(`[文件]: 任务失败 ${job?.name}, ID: ${job?.id}, 错误: ${err.message}`);
 });
 
 fileWorker.on("progress", (job, progress) => {
-  console.log(`📈 文件任务进度: ${job.name} - ${progress}%`);
+  if (Number(progress) % 25 === 0) { // 只在25%增量时记录进度
+    logger.info(`[文件]: 任务进度 ${job.name} - ${progress}%, ID: ${job.id}`);
+  }
 });
 
 fileWorker.on("error", (err) => {
-  console.error("📁 文件Worker错误:", err);
+  logger.error(`[文件]: Worker错误 - ${err.message}`);
 });
 
 // 优雅关闭
 process.on("SIGINT", async () => {
-  console.log("📁 正在关闭文件Worker...");
+  logger.info("[文件]: 正在关闭Worker...");
   await fileWorker.close();
-  console.log("📁 文件Worker已关闭");
+  logger.info("[文件]: Worker已关闭");
 });
 
 process.on("SIGTERM", async () => {
-  console.log("📁 正在关闭文件Worker...");
+  logger.info("[文件]: 正在关闭Worker...");
   await fileWorker.close();
-  console.log("📁 文件Worker已关闭");
+  logger.info("[文件]: Worker已关闭");
 });

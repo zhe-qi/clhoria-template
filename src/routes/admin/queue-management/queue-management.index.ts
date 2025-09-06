@@ -16,7 +16,15 @@ export const queueManagement = createRouter()
   .openapi(routes.retryJob, handlers.retryJob)
   .openapi(routes.removeJob, handlers.removeJob)
   .openapi(routes.promoteJob, handlers.promoteJob)
-  .openapi(routes.getHealth, handlers.getHealth);
+  .openapi(routes.getHealth, handlers.getHealth)
+  // 定时任务管理路由
+  .openapi(routes.getScheduledJobs, handlers.getScheduledJobs)
+  .openapi(routes.createScheduledJob, handlers.createScheduledJob)
+  .openapi(routes.updateScheduledJob, handlers.updateScheduledJob)
+  .openapi(routes.toggleScheduledJob, handlers.toggleScheduledJob)
+  .openapi(routes.executeScheduledJob, handlers.executeScheduledJob)
+  .openapi(routes.getScheduledJobLogs, handlers.getScheduledJobLogs)
+  .openapi(routes.deleteScheduledJob, handlers.deleteScheduledJob);
 
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
