@@ -3,7 +3,7 @@ import * as z from "zod";
 
 import app from "./app";
 import env from "./env";
-import { logServerStart, setupGracefulShutdown } from "./lib/server";
+import { logServerStart } from "./lib/server";
 
 // 配置 Zod 使用中文错误消息
 z.config(z.locales.zhCN());
@@ -13,6 +13,3 @@ serve({ fetch: app.fetch, port: env.PORT });
 
 // 打印启动成功消息
 await logServerStart();
-
-// 设置优雅关闭处理
-setupGracefulShutdown();
