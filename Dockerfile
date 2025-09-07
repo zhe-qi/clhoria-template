@@ -16,9 +16,9 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # 只安装生产依赖，减少镜像大小
-RUN pnpm fetch --prod --frozen-lockfile && \
-    pnpm install --prod --offline --frozen-lockfile --reporter=silent && \
-    pnpm store prune
+# 跳过后续处理脚本以避免 msgpackr-extract 构建问题
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod && \
+    pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # 构建阶段
 FROM base AS builder
@@ -32,8 +32,8 @@ ENV CI=true
 
 # 安装所有依赖用于构建
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm fetch --frozen-lockfile && \
-    pnpm install --offline --frozen-lockfile --reporter=silent
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch && \
+    pnpm install --frozen-lockfile --ignore-scripts
 
 # 复制源码
 COPY . .
@@ -79,8 +79,7 @@ COPY --from=builder --chown=hono:nodejs /app/tsconfig.json ./migrate/tsconfig.js
 # 临时安装迁移依赖并立即清理
 WORKDIR /app/migrate
 COPY --from=builder /app/migrations/migrate/package.json ./package.json
-RUN pnpm install --no-frozen-lockfile --reporter=silent && \
-    pnpm store prune
+RUN pnpm install --no-frozen-lockfile --ignore-scripts
 
 # 返回主目录并设置权限
 WORKDIR /app
