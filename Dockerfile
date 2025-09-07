@@ -59,33 +59,17 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 # 从 deps 阶段复制生产依赖（避免重复安装）
 COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
-COPY --chown=hono:nodejs package.json ./
+COPY --chown=hono:nodejs package.json pnpm-lock.yaml ./
 
-# 从构建阶段复制构建产物
+# 从构建阶段复制构建产物和迁移相关文件
 COPY --from=builder --chown=hono:nodejs /app/dist ./dist
-
-# 复制数据库迁移文件和种子数据
 COPY --from=builder --chown=hono:nodejs /app/migrations ./migrations
-COPY --from=builder --chown=hono:nodejs /app/drizzle.config.ts ./drizzle.config.ts
+COPY --from=builder --chown=hono:nodejs /app/src/db ./src/db
+COPY --chown=hono:nodejs drizzle.config.ts tsconfig.json ./
 
-# 复制脚本目录
-COPY --from=builder --chown=hono:nodejs /app/scripts ./scripts
-RUN chmod +x ./scripts/run.sh
-
-# 安装迁移脚本的依赖（简化版本）
-COPY --from=builder --chown=hono:nodejs /app/migrations/migrate ./migrate
-COPY --from=builder --chown=hono:nodejs /app/tsconfig.json ./migrate/tsconfig.json
-
-# 临时安装迁移依赖并立即清理
-WORKDIR /app/migrate
-COPY --from=builder /app/migrations/migrate/package.json ./package.json
-RUN pnpm install --no-frozen-lockfile --ignore-scripts
-
-# 返回主目录并设置权限
-WORKDIR /app
-RUN chown -R hono:nodejs /app
-
-# 切换到非 root 用户
+# 安装 drizzle-kit 用于生产环境迁移
+USER root
+RUN pnpm add -D drizzle-kit tsx
 USER hono
 
 # 设置默认端口
@@ -94,4 +78,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # 生产阶段入口点
-ENTRYPOINT ["sh", "./scripts/run.sh"]
+CMD ["node", "dist/src/index.js"]

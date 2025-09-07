@@ -42,3 +42,9 @@ dist
 
 # Serena cache
 .serena/
+
+# Claude Settings
+.claude/
+
+# local *
+*.local.*
