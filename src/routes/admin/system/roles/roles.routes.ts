@@ -132,11 +132,10 @@ export const getPermissions = createRoute({
   },
 });
 
-/** 给角色分配权限 */
-export const addPermissions = createRoute({
+export const savePermissions = createRoute({
   tags,
-  summary: "给角色分配权限",
-  method: "post",
+  summary: "保存角色权限（全量更新）",
+  method: "put",
   path: `${routePrefix}/{id}/permissions`,
   request: {
     params: idSystemRoleSchema,
@@ -147,50 +146,22 @@ export const addPermissions = createRoute({
             z.string().min(1).meta({ description: "资源" }),
             z.string().min(1).meta({ description: "操作" }),
           ]),
-        ).min(1).meta({ description: "权限列表" }),
+        ).meta({ description: "权限列表（全量）" }),
       }),
-      "分配权限参数",
-    ),
-  },
-  responses: {
-    [HttpStatusCodes.CREATED]: jsonContent(
-      RefineResultSchema(z.object({ count: z.number().int() })),
-      "分配权限成功",
-    ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在"),
-    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "部分权限已存在"),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "分配权限失败"),
-  },
-});
-
-/** 删除角色权限 */
-export const removePermissions = createRoute({
-  tags,
-  summary: "删除角色权限",
-  method: "delete",
-  path: `${routePrefix}/{id}/permissions`,
-  request: {
-    params: idSystemRoleSchema,
-    body: jsonContentRequired(
-      z.object({
-        permissions: z.array(
-          z.tuple([
-            z.string().min(1).meta({ description: "资源" }),
-            z.string().min(1).meta({ description: "操作" }),
-          ]),
-        ).min(1).meta({ description: "权限列表" }),
-      }),
-      "删除权限参数",
+      "保存权限参数",
     ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({ count: z.number().int() })),
-      "删除权限成功",
+      RefineResultSchema(z.object({
+        added: z.number().int().meta({ description: "新增权限数量" }),
+        removed: z.number().int().meta({ description: "删除权限数量" }),
+        total: z.number().int().meta({ description: "总权限数量" }),
+      })),
+      "保存权限成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在或权限不存在"),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "删除权限失败"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "角色不存在"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "保存权限失败"),
   },
 });

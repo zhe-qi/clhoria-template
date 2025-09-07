@@ -124,7 +124,7 @@ export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = asy
   }
 };
 
-export const addPermissions: SystemRolesRouteHandlerType<"addPermissions"> = async (c) => {
+export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = async (c) => {
   const { id } = c.req.valid("param");
   const { permissions } = c.req.valid("json");
 
@@ -142,56 +142,47 @@ export const addPermissions: SystemRolesRouteHandlerType<"addPermissions"> = asy
 
     const enforcer = await enforcerPromise;
 
-    // 将权限格式转换为 casbin 策略格式: [subject, object, action]
-    const policiesForAdd = permissions.map(([resource, action]) => [id, resource, action]);
+    // 获取角色当前的所有权限
+    const currentPermissions = await enforcer.getPermissionsForUser(id.toString());
 
-    // 批量添加权限
-    const success = await enforcer.addPolicies(policiesForAdd);
+    // 构建旧权限和新权限的数组格式
+    // removePolicies 需要完整的权限数组格式（包括所有字段）
+    const oldPolicies = currentPermissions;
+    // addPolicies 只需要前3个字段：subject, object, action
+    const newPolicies = permissions.map(([resource, action]) => [id.toString(), resource, action]);
 
-    if (success) {
-      return c.json(Resp.ok({ count: permissions.length }), HttpStatusCodes.CREATED);
+    let removedCount = 0;
+    let addedCount = 0;
+
+    // 1. 删除所有现有权限（只有当存在权限时才删除）
+    if (oldPolicies.length > 0) {
+      const removeSuccess = await enforcer.removePolicies(oldPolicies);
+      if (!removeSuccess) {
+        return c.json(Resp.fail("删除旧权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+      }
+      removedCount = oldPolicies.length;
     }
-    else {
-      return c.json(Resp.fail("部分或全部权限已存在"), HttpStatusCodes.CONFLICT);
+
+    // 2. 添加新权限（只有当有新权限时才添加）
+    if (newPolicies.length > 0) {
+      const addSuccess = await enforcer.addPolicies(newPolicies);
+      if (!addSuccess) {
+        // 添加失败，尝试回滚：重新添加旧权限
+        if (oldPolicies.length > 0) {
+          await enforcer.addPolicies(oldPolicies);
+        }
+        return c.json(Resp.fail("添加新权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+      }
+      addedCount = newPolicies.length;
     }
+
+    return c.json(Resp.ok({
+      added: addedCount,
+      removed: removedCount,
+      total: permissions.length,
+    }), HttpStatusCodes.OK);
   }
   catch {
-    return c.json(Resp.fail("添加权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
-  }
-};
-
-export const removePermissions: SystemRolesRouteHandlerType<"removePermissions"> = async (c) => {
-  const { id } = c.req.valid("param");
-  const { permissions } = c.req.valid("json");
-
-  try {
-    // 检查角色是否存在
-    const [role] = await db
-      .select({ id: systemRole.id })
-      .from(systemRole)
-      .where(eq(systemRole.id, id))
-      .limit(1);
-
-    if (!role) {
-      return c.json(Resp.fail("角色不存在"), HttpStatusCodes.NOT_FOUND);
-    }
-
-    const enforcer = await enforcerPromise;
-
-    // 将权限格式转换为 casbin 策略格式: [subject, object, action]
-    const policiesForRemove = permissions.map(([resource, action]) => [id, resource, action]);
-
-    // 批量删除权限
-    const success = await enforcer.removePolicies(policiesForRemove);
-
-    if (success) {
-      return c.json(Resp.ok({ count: permissions.length }), HttpStatusCodes.OK);
-    }
-    else {
-      return c.json(Resp.fail("部分或全部权限不存在"), HttpStatusCodes.NOT_FOUND);
-    }
-  }
-  catch {
-    return c.json(Resp.fail("删除权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+    return c.json(Resp.fail("保存权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };

@@ -115,10 +115,11 @@ export const remove = createRoute({
   },
 }); ;
 
-export const addRole = createRoute({
+/** 保存用户角色（全量更新） */
+export const saveRoles = createRoute({
   tags,
-  summary: "给用户添加角色",
-  method: "post",
+  summary: "保存用户角色（全量更新）",
+  method: "put",
   path: `${routePrefix}/{userId}/roles`,
   request: {
     params: z.object({
@@ -126,44 +127,23 @@ export const addRole = createRoute({
     }),
     body: jsonContentRequired(
       z.object({
-        roleIds: z.array(z.string().min(1).max(64).meta({ example: "admin", description: "角色编码" })),
+        roleIds: z.array(z.string().min(1).max(64).meta({ example: "admin", description: "角色编码" }))
+          .meta({ description: "角色列表（全量）" }),
       }),
-      "添加角色参数",
-    ),
-  },
-  responses: {
-    [HttpStatusCodes.CREATED]: jsonContent(
-      RefineResultSchema(z.object({ count: z.number().int() })),
-      "添加成功",
-    ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户或角色不存在"),
-    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "用户已拥有该角色"),
-  },
-});
-
-export const removeRole = createRoute({
-  tags,
-  summary: "批量删除用户角色",
-  method: "delete",
-  path: `${routePrefix}/{userId}/roles`,
-  request: {
-    params: z.object({
-      userId: z.uuid().meta({ description: "用户id" }),
-    }),
-    body: jsonContentRequired(
-      z.object({
-        roleIds: z.array(z.string().min(1).max(64).meta({ example: "user", description: "角色编码" })),
-      }),
-      "删除角色参数",
+      "保存角色参数",
     ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({ count: z.number().int() })),
-      "删除成功",
+      RefineResultSchema(z.object({
+        added: z.number().int().meta({ description: "新增角色数量" }),
+        removed: z.number().int().meta({ description: "删除角色数量" }),
+        total: z.number().int().meta({ description: "总角色数量" }),
+      })),
+      "保存成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户或角色不存在"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "保存角色失败"),
   },
 });

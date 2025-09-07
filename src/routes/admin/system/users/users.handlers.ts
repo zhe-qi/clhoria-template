@@ -184,7 +184,7 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
 };
 
-export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
+export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => {
   const { userId } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
 
@@ -200,90 +200,75 @@ export const addRole: SystemUsersRouteHandlerType<"addRole"> = async (c) => {
       return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
     }
 
-    // 检查所有角色是否存在
-    const existingRoles = await db
-      .select({ id: systemRole.id })
-      .from(systemRole)
-      .where(inArray(systemRole.id, roleIds));
+    // 检查所有新角色是否存在
+    if (roleIds.length > 0) {
+      const existingRoles = await db
+        .select({ id: systemRole.id })
+        .from(systemRole)
+        .where(inArray(systemRole.id, roleIds));
 
-    if (existingRoles.length !== roleIds.length) {
-      const foundRoles = existingRoles.map(role => role.id);
-      const notFoundRoles = roleIds.filter(roleId => !foundRoles.includes(roleId));
-      return c.json(Resp.fail(`角色不存在: ${notFoundRoles.join(", ")}`), HttpStatusCodes.NOT_FOUND);
+      if (existingRoles.length !== roleIds.length) {
+        const foundRoles = existingRoles.map(role => role.id);
+        const notFoundRoles = roleIds.filter(roleId => !foundRoles.includes(roleId));
+        return c.json(Resp.fail(`角色不存在: ${notFoundRoles.join(", ")}`), HttpStatusCodes.NOT_FOUND);
+      }
     }
 
-    // 检查用户是否已拥有这些角色
-    const existingUserRoles = await db
+    // 获取用户当前的所有角色
+    const currentUserRoles = await db
       .select({ roleId: systemUserRole.roleId })
       .from(systemUserRole)
-      .where(and(
-        eq(systemUserRole.userId, userId),
-        inArray(systemUserRole.roleId, roleIds),
-      ));
+      .where(eq(systemUserRole.userId, userId));
 
-    if (existingUserRoles.length > 0) {
-      const existingRoleIds = existingUserRoles.map(ur => ur.roleId);
-      return c.json(Resp.fail(`用户已拥有角色: ${existingRoleIds.join(", ")}`), HttpStatusCodes.CONFLICT);
-    }
+    const currentRoleIds = currentUserRoles.map(ur => ur.roleId);
+    const currentRoleSet = new Set(currentRoleIds);
+    const newRoleSet = new Set(roleIds);
 
-    // 批量添加用户角色关联
-    const valuesToInsert = roleIds.map(roleId => ({
-      userId,
-      roleId,
-    }));
+    // 计算需要删除的角色（在当前角色中但不在新角色中）
+    const rolesToRemove = currentRoleIds.filter(roleId => !newRoleSet.has(roleId));
 
-    const created = await db
-      .insert(systemUserRole)
-      .values(valuesToInsert)
-      .returning();
+    // 计算需要添加的角色（在新角色中但不在当前角色中）
+    const rolesToAdd = roleIds.filter(roleId => !currentRoleSet.has(roleId));
 
-    return c.json(Resp.ok({ count: created.length }), HttpStatusCodes.CREATED);
+    let removedCount = 0;
+    let addedCount = 0;
+
+    // 使用事务确保数据一致性
+    await db.transaction(async (tx) => {
+      // 删除不需要的角色
+      if (rolesToRemove.length > 0) {
+        const deleteResult = await tx
+          .delete(systemUserRole)
+          .where(and(
+            eq(systemUserRole.userId, userId),
+            inArray(systemUserRole.roleId, rolesToRemove),
+          ))
+          .returning({ roleId: systemUserRole.roleId });
+        removedCount = deleteResult.length;
+      }
+
+      // 添加新的角色
+      if (rolesToAdd.length > 0) {
+        const valuesToInsert = rolesToAdd.map(roleId => ({
+          userId,
+          roleId,
+        }));
+
+        const insertResult = await tx
+          .insert(systemUserRole)
+          .values(valuesToInsert)
+          .returning();
+        addedCount = insertResult.length;
+      }
+    });
+
+    return c.json(Resp.ok({
+      added: addedCount,
+      removed: removedCount,
+      total: roleIds.length,
+    }), HttpStatusCodes.OK);
   }
   catch {
-    return c.json(Resp.fail("添加角色失败"), HttpStatusCodes.UNPROCESSABLE_ENTITY);
-  }
-};
-
-export const removeRole: SystemUsersRouteHandlerType<"removeRole"> = async (c) => {
-  const { userId } = c.req.valid("param");
-  const { roleIds } = c.req.valid("json");
-
-  try {
-    // 检查用户是否存在
-    const [user] = await db
-      .select({ id: systemUser.id })
-      .from(systemUser)
-      .where(eq(systemUser.id, userId))
-      .limit(1);
-
-    if (!user) {
-      return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
-    }
-
-    // 检查所有角色是否存在
-    const existingRoles = await db
-      .select({ id: systemRole.id })
-      .from(systemRole)
-      .where(inArray(systemRole.id, roleIds));
-
-    if (existingRoles.length !== roleIds.length) {
-      const foundRoles = existingRoles.map(role => role.id);
-      const notFoundRoles = roleIds.filter(roleId => !foundRoles.includes(roleId));
-      return c.json(Resp.fail(`角色不存在: ${notFoundRoles.join(", ")}`), HttpStatusCodes.NOT_FOUND);
-    }
-
-    // 批量删除用户角色关联
-    const result = await db
-      .delete(systemUserRole)
-      .where(and(
-        eq(systemUserRole.userId, userId),
-        inArray(systemUserRole.roleId, roleIds),
-      ))
-      .returning({ roleId: systemUserRole.roleId });
-
-    return c.json(Resp.ok({ count: result.length }), HttpStatusCodes.OK);
-  }
-  catch {
-    return c.json(Resp.fail("删除角色失败"), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    return c.json(Resp.fail("保存角色失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };

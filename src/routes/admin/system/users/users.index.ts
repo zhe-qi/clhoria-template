@@ -11,8 +11,7 @@ export const systemUsers = createRouter()
   .openapi(routes.remove, handlers.remove)
   .openapi(routes.create, handlers.create)
   .openapi(routes.list, handlers.list)
-  .openapi(routes.addRole, handlers.addRole)
-  .openapi(routes.removeRole, handlers.removeRole);
+  .openapi(routes.saveRoles, handlers.saveRoles);
 
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];

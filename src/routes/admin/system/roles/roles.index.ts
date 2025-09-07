@@ -12,8 +12,7 @@ export const systemRoles = createRouter()
   .openapi(routes.update, handlers.update)
   .openapi(routes.remove, handlers.remove)
   .openapi(routes.getPermissions, handlers.getPermissions)
-  .openapi(routes.addPermissions, handlers.addPermissions)
-  .openapi(routes.removePermissions, handlers.removePermissions);
+  .openapi(routes.savePermissions, handlers.savePermissions);
 
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
