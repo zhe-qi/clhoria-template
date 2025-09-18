@@ -38,35 +38,6 @@ services:
       retries: 3
     restart: unless-stopped
 
-  # 数据库迁移容器（一次性运行）
-  migrate:
-    image: node:24-alpine
-    container_name: hono-migrate
-    working_dir: /app
-    volumes:
-      - ./package.json:/app/package.json
-      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml
-      - ./drizzle.config.ts:/app/drizzle.config.ts
-      - ./tsconfig.json:/app/tsconfig.json
-      - ./migrations:/app/migrations
-      - ./src/db:/app/src/db
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
-    command: >
-      sh -c "
-        corepack enable &&
-        pnpm install --frozen-lockfile &&
-        pnpm migrate
-      "
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - app_network
-    restart: "no"
-
   # Hono 应用
   app:
     platform: linux/amd64
@@ -92,8 +63,8 @@ services:
       - CLIENT_JWT_SECRET=${CLIENT_JWT_SECRET}
       - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:

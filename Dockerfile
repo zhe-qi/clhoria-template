@@ -61,16 +61,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --chown=hono:nodejs package.json pnpm-lock.yaml ./
 
-# 从构建阶段复制构建产物和迁移相关文件
-COPY --from=builder --chown=hono:nodejs /app/dist ./dist
-COPY --from=builder --chown=hono:nodejs /app/migrations ./migrations
-COPY --from=builder --chown=hono:nodejs /app/src/db ./src/db
-COPY --chown=hono:nodejs drizzle.config.ts tsconfig.json ./
-
-# 安装 drizzle-kit 用于生产环境迁移
-USER root
-RUN pnpm add -D drizzle-kit tsx
-USER hono
+# 从构建阶段复制构建产物
+COPY --from=builder --chown=hono:nodejs /app/dist/index.js ./index.js
 
 # 设置默认端口
 ARG PORT=9999
@@ -78,4 +70,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # 生产阶段入口点
-CMD ["node", "dist/src/index.js"]
+CMD ["node", "index.js"]
