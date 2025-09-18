@@ -21,7 +21,7 @@ export class Resp {
     }
 
     return {
-      message: "未知错误",
+      message: input.message || "未知错误",
     };
   }
 
