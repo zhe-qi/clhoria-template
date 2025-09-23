@@ -1,114 +1,48 @@
 /**
- * 任务系统统一入口
+ * 任务队列系统主入口
+ * 导出所有公共接口
  */
 
-import logger from "@/lib/logger";
-// 导入系统任务同步
-import {
-  removeAllSystemTasksFromBullMQ,
-  syncSystemTasksToDatabase,
-} from "@/services/system-task-sync";
+// 配置
+export * from "./config";
+// 核心功能
+export { QueueManager } from "./core/queue";
+export { TaskScheduler } from "./core/scheduler";
 
-// 导入调度器
-import {
-  getScheduledJobs,
-  getSchedulerStatus,
-  initializeScheduler,
-  removeScheduledJob,
-} from "./schedulers";
-// 导出队列相关
-// 导入Workers管理
-import {
-  getWorkersStatus,
-  pauseAllWorkers,
-  resumeAllWorkers,
-  startAllWorkers,
-  stopAllWorkers,
-} from "./workers";
+export { WorkerManager } from "./core/worker";
 
-// 导出管理器API
-export * from "./manager";
-export * from "./queues";
+export { IdempotencyHelper, withIdempotency } from "./lib/idempotency";
+// 工具库
+export { RedisLock, withLock } from "./lib/redis-lock";
 
-// 重新导出
+// 管理器
 export {
-  getScheduledJobs,
-  getSchedulerStatus,
-  getWorkersStatus,
-  initializeScheduler,
-  pauseAllWorkers,
-  removeScheduledJob,
-  resumeAllWorkers,
-  startAllWorkers,
-  stopAllWorkers,
-};
+  getJobSystemStatus,
+  gracefulShutdownJobSystem,
+  initializeJobSystem,
+  jobSystemHealthCheck,
+  startJobSystem,
+  stopJobSystem,
+} from "./manager";
 
-export * from "./types";
+// 处理器示例（可选导出，用于参考）
+export * as EmailProcessors from "./processors/email.processor";
 
-/**
- * 初始化整个任务系统
- * 在应用启动时调用，每个实例都可以安全调用
- */
-export async function initializeJobSystem(): Promise<void> {
-  try {
-    logger.info("[任务系统]: 初始化任务系统");
+export * as FileProcessors from "./processors/file.processor";
+export * as SystemProcessors from "./processors/system.processor";
+export * as UserProcessors from "./processors/user.processor";
+// 定时任务配置示例（可选导出，用于参考）
+export { allScheduledTasks, dailyScheduledTasks, hourlyScheduledTasks } from "./schedulers";
 
-    // 1. 启动所有Workers
-    await startAllWorkers();
-
-    // 2. 初始化调度器 (分布式安全)
-    await initializeScheduler();
-
-    // 3. 同步系统定时任务到数据库
-    await syncSystemTasksToDatabase();
-
-    logger.info("[任务系统]: 初始化完成");
-  }
-  catch (error) {
-    logger.error(`[任务系统]: 初始化失败 - ${error instanceof Error ? error.message : String(error)}`);
-    throw error;
-  }
-}
-
-/**
- * 优雅关闭任务系统
- * 在应用关闭时调用
- */
-export async function shutdownJobSystem(): Promise<void> {
-  try {
-    logger.info("[任务系统]: 正在关闭");
-
-    // 1. 清理系统定时任务的 BullMQ 调度
-    await removeAllSystemTasksFromBullMQ();
-
-    // 2. 停止所有Workers
-    await stopAllWorkers();
-
-    logger.info("[任务系统]: 已关闭");
-  }
-  catch (error) {
-    logger.error(`[任务系统]: 关闭失败 - ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-
-/**
- * 获取任务系统状态
- */
-export async function getJobSystemStatus() {
-  try {
-    const [workersStatus, schedulerStatus] = await Promise.all([
-      getWorkersStatus(),
-      getSchedulerStatus(),
-    ]);
-
-    return {
-      workers: workersStatus,
-      scheduler: schedulerStatus,
-      timestamp: Date.now(),
-    };
-  }
-  catch (error) {
-    logger.error(`[任务系统]: 获取状态失败 - ${error instanceof Error ? error.message : String(error)}`);
-    throw error;
-  }
-}
+// 类型定义
+export type {
+  DistributedLock,
+  IdempotencyRecord,
+  JobSystemConfig,
+  ProcessorRegistration,
+  ScheduledTaskConfig,
+  TaskData,
+  TaskOptions,
+  TaskProcessor,
+  WorkerConfig,
+} from "./types";

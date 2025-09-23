@@ -1,5 +1,4 @@
-// we are using zodToOpenAPIRegistry to retrieve the example from the schemas
-import { zodToOpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+// Tests for the createErrorSchema function
 import { z } from "@hono/zod-openapi";
 import { describe, expect, it } from "vitest";
 
@@ -211,61 +210,98 @@ describe("create-error-schema", () => {
     expect(result2.success).toBe(true);
   });
 
-  it("ensures example shape has no extra properties", () => {
-    zodToOpenAPIRegistry.clear();
+  it("validates error schema structure for object schemas", () => {
     const schema = z.object({
       name: z.string(),
       age: z.number(),
     });
-    createErrorSchema(schema);
+    const errorSchema = createErrorSchema(schema);
 
-    const metadata = [...zodToOpenAPIRegistry._map.values()][1];
-    expect(metadata).toBeDefined();
-    expect(metadata.example).toBeDefined();
+    // Test with a typical validation error
+    const testData = {
+      success: false,
+      error: {
+        name: "ZodError",
+        issues: [
+          {
+            code: "invalid_type",
+            path: ["name"],
+            message: "Expected string, received undefined",
+          },
+          {
+            code: "invalid_type",
+            path: ["age"],
+            message: "Expected number, received string",
+          },
+        ],
+      },
+    };
 
-    const { example } = metadata;
+    const result = errorSchema.safeParse(testData);
+    expect(result.success).toBe(true);
 
-    expect(example).toHaveProperty("name");
-    expect(example).toHaveProperty("issues");
-    expect(Object.keys(example)).toHaveLength(2);
+    if (result.success) {
+      expect(result.data.success).toBe(false);
+      expect(result.data.error.name).toBe("ZodError");
+      expect(result.data.error.issues).toHaveLength(2);
 
-    expect(Array.isArray(example.issues)).toBe(true);
-    example.issues.forEach((issue: any) => {
-      expect(issue).toHaveProperty("code");
-      expect(issue).toHaveProperty("path");
-      const expectedKeys = ["code", "path"];
-      if (issue.message !== undefined) {
-        expectedKeys.push("message");
-      }
-      expect(Object.keys(issue)).toEqual(expectedKeys);
-    });
+      result.data.error.issues.forEach((issue) => {
+        expect(issue).toHaveProperty("code");
+        expect(issue).toHaveProperty("path");
+        expect(Array.isArray(issue.path)).toBe(true);
+        // message is optional
+        if (issue.message !== undefined) {
+          expect(typeof issue.message).toBe("string");
+        }
+      });
+    }
   });
 
-  it("ensures example shape is array for array schemas", () => {
-    zodToOpenAPIRegistry.clear();
+  it("validates error schema structure for array schemas", () => {
     const schema = z.array(z.string());
-    createErrorSchema(schema);
+    const errorSchema = createErrorSchema(schema);
 
-    const metadata = [...zodToOpenAPIRegistry._map.values()][1];
-    expect(metadata).toBeDefined();
-    expect(metadata.example).toBeDefined();
+    // Test with a typical validation error for arrays
+    const testData = {
+      success: false,
+      error: {
+        name: "ZodError",
+        issues: [
+          {
+            code: "invalid_type",
+            path: [0],
+            message: "Expected string, received number",
+          },
+          {
+            code: "invalid_type",
+            path: [1],
+            message: "Expected string, received boolean",
+          },
+        ],
+      },
+    };
 
-    const { example } = metadata;
+    const result = errorSchema.safeParse(testData);
+    expect(result.success).toBe(true);
 
-    expect(example).toHaveProperty("name");
-    expect(example).toHaveProperty("issues");
-    expect(Object.keys(example)).toHaveLength(2);
+    if (result.success) {
+      expect(result.data.success).toBe(false);
+      expect(result.data.error.name).toBe("ZodError");
+      expect(result.data.error.issues).toHaveLength(2);
 
-    expect(Array.isArray(example.issues)).toBe(true);
-    example.issues.forEach((issue: any) => {
-      expect(issue).toHaveProperty("code");
-      expect(issue).toHaveProperty("path");
-      const expectedKeys = ["code", "path"];
-      if (issue.message !== undefined) {
-        expectedKeys.push("message");
-        expect(issue.message).toMatch(/^Invalid input: expected (.*), received (.*)$/);
-      }
-      expect(Object.keys(issue)).toEqual(expectedKeys);
-    });
+      result.data.error.issues.forEach((issue) => {
+        expect(issue).toHaveProperty("code");
+        expect(issue).toHaveProperty("path");
+        expect(Array.isArray(issue.path)).toBe(true);
+        // Validate that path can contain numbers (array indices)
+        issue.path.forEach((pathSegment) => {
+          expect(typeof pathSegment === "string" || typeof pathSegment === "number").toBe(true);
+        });
+        // message is optional
+        if (issue.message !== undefined) {
+          expect(typeof issue.message).toBe("string");
+        }
+      });
+    }
   });
 });

@@ -73,9 +73,8 @@ const cap = new Cap({
         await redisClient.del(key);
       },
 
-      listExpired: async () => {
-        // Redis自动过期，无需手动清理，保持原逻辑
-        return [];
+      deleteExpired: async () => {
+        // Redis自动过期，无需手动清理
       },
     },
 
@@ -108,8 +107,8 @@ const cap = new Cap({
         await redisClient.del(key);
       },
 
-      listExpired: async () => {
-        return [];
+      deleteExpired: async () => {
+        // Redis自动过期，无需手动清理
       },
     },
   },

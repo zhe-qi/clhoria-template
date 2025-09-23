@@ -1,311 +1,154 @@
+import logger from "@/lib/logger";
+
+import type { JobSystemConfig, ProcessorRegistration, ScheduledTaskConfig } from "./types";
+
+import { QueueManager } from "./core/queue";
+import { TaskScheduler } from "./core/scheduler";
+import { WorkerManager } from "./core/worker";
+import { DEFAULT_QUEUE_NAME } from "./job-system.config";
+
+// 任务系统状态
+let isInitialized = false;
+let jobSystemConfig: JobSystemConfig = {};
+
 /**
- * 队列管理器 - 提供统一的API调用接口
+ * 初始化任务系统
  */
-
-import type { Job } from "bullmq";
-
-import type { JobInfo, JobStatus, QueueInfo, QueueStats } from "./types";
-
-import { allQueues, getQueueByName } from "./queues";
-
-/**
- * 获取所有队列概览
- */
-export async function getAllQueuesInfo(): Promise<QueueInfo[]> {
-  const queuesInfo: QueueInfo[] = [];
-
-  for (const queue of allQueues) {
-    const stats = await getQueueStats(queue.name);
-    const isPaused = await queue.isPaused();
-
-    queuesInfo.push({
-      name: queue.name.split(":").pop() || queue.name,
-      isPaused,
-      stats,
-    });
+export async function initializeJobSystem(config?: JobSystemConfig): Promise<void> {
+  if (isInitialized) {
+    return;
   }
 
-  return queuesInfo;
+  jobSystemConfig = config || {};
+  isInitialized = true;
+
+  logger.info(jobSystemConfig, "[任务系统]: 初始化完成");
 }
 
 /**
- * 获取指定队列详情
+ * 启动任务系统
  */
-export async function getQueueInfo(queueName: string): Promise<QueueInfo | null> {
-  const queue = getQueueByName(queueName);
-  if (!queue) {
-    return null;
+export async function startJobSystem(
+  processors: ProcessorRegistration[],
+  scheduledTasks?: ScheduledTaskConfig[],
+): Promise<void> {
+  if (!isInitialized) {
+    await initializeJobSystem();
   }
 
-  const stats = await getQueueStats(queue.name);
-  const isPaused = await queue.isPaused();
+  logger.info("[任务系统]: 开始启动");
 
-  return {
-    name: queueName,
-    isPaused,
-    stats,
-  };
+  // 注册处理器
+  processors.forEach(({ name, processor }) => {
+    WorkerManager.registerProcessor(name, processor);
+  });
+
+  logger.info(
+    { count: processors.length },
+    "[任务系统]: 处理器注册完成",
+  );
+
+  // 为队列创建单个 Worker
+  const queueName = jobSystemConfig.queueName || DEFAULT_QUEUE_NAME;
+  WorkerManager.createWorker(queueName, jobSystemConfig.workerConfig);
+
+  logger.info(
+    { queueName },
+    "[任务系统]: Worker 创建完成",
+  );
+
+  // 注册定时任务
+  if (scheduledTasks && scheduledTasks.length > 0) {
+    TaskScheduler.registerScheduledTasks(scheduledTasks);
+    logger.info(
+      { count: scheduledTasks.length },
+      "[任务系统]: 定时任务注册完成",
+    );
+  }
+
+  logger.info("[任务系统]: 启动完成");
 }
 
 /**
- * 获取队列统计信息
+ * 停止任务系统
  */
-async function getQueueStats(queueName: string): Promise<QueueStats> {
-  const queue = allQueues.find(q => q.name === queueName);
-  if (!queue) {
-    throw new Error(`队列不存在: ${queueName}`);
-  }
+export async function stopJobSystem(): Promise<void> {
+  logger.info("[任务系统]: 开始停止");
 
-  const [waiting, active, completed, failed, delayed, paused] = await Promise.all([
-    queue.getWaiting(),
-    queue.getActive(),
-    queue.getCompleted(),
-    queue.getFailed(),
-    queue.getDelayed(),
-    queue.isPaused(),
+  // 停止所有定时任务
+  TaskScheduler.stopAll();
+
+  // 优雅关闭所有 Worker
+  await WorkerManager.shutdown();
+
+  // 关闭所有队列连接
+  await QueueManager.closeAll();
+
+  isInitialized = false;
+
+  logger.info("[任务系统]: 停止完成");
+}
+
+/**
+ * 获取系统状态
+ */
+export async function getJobSystemStatus() {
+  const queueName = jobSystemConfig.queueName || DEFAULT_QUEUE_NAME;
+
+  const [queueStatus, workerStatus, schedulerStatus] = await Promise.all([
+    QueueManager.getQueueStatus(queueName),
+    WorkerManager.getAllWorkerStatus(),
+    TaskScheduler.getAllScheduledTasksStatus(),
   ]);
 
   return {
-    waiting: waiting.length,
-    active: active.length,
-    completed: completed.length,
-    failed: failed.length,
-    delayed: delayed.length,
-    paused: paused ? 1 : 0,
-    total: waiting.length + active.length + completed.length + failed.length + delayed.length,
+    initialized: isInitialized,
+    config: jobSystemConfig,
+    queue: queueStatus,
+    workers: workerStatus,
+    schedulers: schedulerStatus,
   };
 }
 
 /**
- * 获取队列任务列表
+ * 健康检查
  */
-export async function getQueueJobs(
-  queueName: string,
-  status?: JobStatus,
-  start = 0,
-  limit = 20,
-): Promise<JobInfo[]> {
-  const queue = getQueueByName(queueName);
-  if (!queue) {
-    throw new Error(`队列不存在: ${queueName}`);
-  }
-
-  let jobs: Job[] = [];
-
-  if (status) {
-    switch (status) {
-      case "waiting":
-        jobs = await queue.getWaiting(start, start + limit - 1);
-        break;
-      case "active":
-        jobs = await queue.getActive(start, start + limit - 1);
-        break;
-      case "completed":
-        jobs = await queue.getCompleted(start, start + limit - 1);
-        break;
-      case "failed":
-        jobs = await queue.getFailed(start, start + limit - 1);
-        break;
-      case "delayed":
-        jobs = await queue.getDelayed(start, start + limit - 1);
-        break;
-      default:
-        jobs = await queue.getJobs([status], start, start + limit - 1);
-    }
-  }
-  else {
-    // 获取所有状态的任务
-    jobs = await queue.getJobs(["waiting", "active", "completed", "failed", "delayed"], start, start + limit - 1);
-  }
-
-  return jobs.map(formatJobInfo);
-}
-
-/**
- * 获取指定任务详情
- */
-export async function getJobInfo(jobId: string): Promise<JobInfo | null> {
-  for (const queue of allQueues) {
-    const job = await queue.getJob(jobId);
-    if (job) {
-      return formatJobInfo(job);
-    }
-  }
-  return null;
-}
-
-/**
- * 重试失败的任务
- */
-export async function retryJob(jobId: string): Promise<boolean> {
-  for (const queue of allQueues) {
-    const job = await queue.getJob(jobId);
-    if (job) {
-      try {
-        await job.retry();
-        return true;
-      }
-      catch (error) {
-        console.error(`重试任务失败 ${jobId}:`, error);
-        return false;
-      }
-    }
-  }
-  return false;
-}
-
-/**
- * 删除任务
- */
-export async function removeJob(jobId: string): Promise<boolean> {
-  for (const queue of allQueues) {
-    const job = await queue.getJob(jobId);
-    if (job) {
-      try {
-        await job.remove();
-        return true;
-      }
-      catch (error) {
-        console.error(`删除任务失败 ${jobId}:`, error);
-        return false;
-      }
-    }
-  }
-  return false;
-}
-
-/**
- * 提升延迟任务
- */
-export async function promoteJob(jobId: string): Promise<boolean> {
-  for (const queue of allQueues) {
-    const job = await queue.getJob(jobId);
-    if (job) {
-      try {
-        await job.promote();
-        return true;
-      }
-      catch (error) {
-        console.error(`提升任务失败 ${jobId}:`, error);
-        return false;
-      }
-    }
-  }
-  return false;
-}
-
-/**
- * 暂停队列
- */
-export async function pauseQueue(queueName: string): Promise<boolean> {
-  const queue = getQueueByName(queueName);
-  if (!queue) {
-    return false;
-  }
-
+export async function jobSystemHealthCheck(): Promise<boolean> {
   try {
-    await queue.pause();
-    return true;
+    const status = await getJobSystemStatus();
+    return isInitialized && status.queue.total >= 0;
   }
   catch (error) {
-    console.error(`暂停队列失败 ${queueName}:`, error);
+    logger.error({ error }, "[任务系统]: 健康检查失败");
     return false;
   }
 }
 
 /**
- * 恢复队列
+ * 优雅关闭
+ * 用于应用退出时调用
  */
-export async function resumeQueue(queueName: string): Promise<boolean> {
-  const queue = getQueueByName(queueName);
-  if (!queue) {
-    return false;
+export async function gracefulShutdownJobSystem(): Promise<void> {
+  logger.info("[任务系统]: 开始优雅关闭");
+
+  // 暂停所有队列，不再接收新任务
+  const queueName = jobSystemConfig.queueName || DEFAULT_QUEUE_NAME;
+  await QueueManager.pauseQueue(queueName);
+
+  // 等待当前任务完成（最多等待30秒）
+  const maxWaitTime = 30000;
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWaitTime) {
+    const status = await QueueManager.getQueueStatus(queueName);
+    if (status.active === 0) {
+      break;
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  try {
-    await queue.resume();
-    return true;
-  }
-  catch (error) {
-    console.error(`恢复队列失败 ${queueName}:`, error);
-    return false;
-  }
-}
+  // 停止系统
+  await stopJobSystem();
 
-/**
- * 清空队列
- */
-export async function cleanQueue(queueName: string, grace = 0): Promise<number[]> {
-  const queue = getQueueByName(queueName);
-  if (!queue) {
-    throw new Error(`队列不存在: ${queueName}`);
-  }
-
-  try {
-    // 清理已完成和失败的任务
-    const [completedCount, failedCount] = await Promise.all([
-      queue.clean(grace, 100, "completed"),
-      queue.clean(grace, 100, "failed"),
-    ]);
-
-    return [completedCount.length, failedCount.length];
-  }
-  catch (error) {
-    console.error(`清空队列失败 ${queueName}:`, error);
-    throw error;
-  }
-}
-
-/**
- * 格式化任务信息
- */
-function formatJobInfo(job: Job): JobInfo {
-  return {
-    id: job.id!,
-    name: job.name,
-    data: job.data,
-    status: getJobStatus(job),
-    progress: job.progress as number || 0,
-    attempts: job.attemptsMade,
-    failedReason: job.failedReason,
-    processedOn: job.processedOn,
-    finishedOn: job.finishedOn,
-    timestamp: job.timestamp,
-  };
-}
-
-/**
- * 获取任务状态
- */
-function getJobStatus(job: Job): JobStatus {
-  if (job.finishedOn) {
-    return job.failedReason ? "failed" : "completed";
-  }
-  if (job.processedOn) {
-    return "active";
-  }
-  if (job.opts.delay && job.opts.delay > Date.now()) {
-    return "delayed";
-  }
-  return "waiting";
-}
-
-/**
- * 获取队列健康状态
- */
-export async function getQueueHealth(): Promise<Record<string, unknown>> {
-  const health: Record<string, unknown> = {};
-
-  for (const queue of allQueues) {
-    const queueName = queue.name.split(":").pop() || queue.name;
-    const stats = await getQueueStats(queue.name);
-
-    health[queueName] = {
-      status: stats.failed > 10 ? "unhealthy" : "healthy",
-      stats,
-      isPaused: await queue.isPaused(),
-    };
-  }
-
-  return health;
+  logger.info("[任务系统]: 优雅关闭完成");
 }
