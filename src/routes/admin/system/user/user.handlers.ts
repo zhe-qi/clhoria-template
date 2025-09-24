@@ -28,7 +28,7 @@ export const list: AdminSystemUserRouteHandlerType<"list"> = async (c) => {
     joinConfig: {
       joins: [
         {
-          table: adminSystemUser,
+          table: adminSystemUserRole,
           type: "left",
           on: eq(adminSystemUser.id, adminSystemUserRole.userId),
         },
@@ -59,7 +59,7 @@ export const list: AdminSystemUserRouteHandlerType<"list"> = async (c) => {
   c.header("x-total-count", result.total.toString());
 
   return c.json(Resp.ok(safeData), HttpStatusCodes.OK);
-};
+}; ;
 
 export const create: AdminSystemUserRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
