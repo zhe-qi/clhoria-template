@@ -103,19 +103,19 @@ async function seedCasbinRules(roles: any) {
   }
 
   const adminRules = [
-    { v1: "/system/roles", v2: "GET" },
-    { v1: "/system/roles", v2: "POST" },
-    { v1: "/system/roles/{id}", v2: "DELETE" },
-    { v1: "/system/roles/{id}", v2: "GET" },
-    { v1: "/system/roles/{id}", v2: "PATCH" },
-    { v1: "/system/roles/{id}/permissions", v2: "GET" },
-    { v1: "/system/roles/{id}/permissions", v2: "PUT" },
-    { v1: "/system/users", v2: "GET" },
-    { v1: "/system/users", v2: "POST" },
-    { v1: "/system/users/{id}", v2: "DELETE" },
-    { v1: "/system/users/{id}", v2: "GET" },
-    { v1: "/system/users/{id}", v2: "PATCH" },
-    { v1: "/system/users/{id}/roles", v2: "PUT" },
+    { v1: "/system/role", v2: "GET" },
+    { v1: "/system/role", v2: "POST" },
+    { v1: "/system/role/{id}", v2: "DELETE" },
+    { v1: "/system/role/{id}", v2: "GET" },
+    { v1: "/system/role/{id}", v2: "PATCH" },
+    { v1: "/system/role/{id}/permissions", v2: "GET" },
+    { v1: "/system/role/{id}/permissions", v2: "PUT" },
+    { v1: "/system/user", v2: "GET" },
+    { v1: "/system/user", v2: "POST" },
+    { v1: "/system/user/{id}", v2: "DELETE" },
+    { v1: "/system/user/{id}", v2: "GET" },
+    { v1: "/system/user/{id}", v2: "PATCH" },
+    { v1: "/system/user/{id}/roles", v2: "PUT" },
   ];
 
   for (const rule of adminRules) {
