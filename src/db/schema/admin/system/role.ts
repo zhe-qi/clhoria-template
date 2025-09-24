@@ -3,31 +3,31 @@ import { pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import z from "zod";
 
-import { defaultColumns } from "@/db/common/default-columns";
+import { baseColumns } from "@/db/schema/_shard/base-columns";
 
-import { statusEnum } from "../../common/enums";
-import { systemUserRole } from "./user-role";
+import { statusEnum } from "../../_shard/enums";
+import { adminSystemUserRole } from "./user-role";
 
-export const systemRole = pgTable("system_role", {
-  ...defaultColumns,
+export const adminSystemRole = pgTable("admin_system_role", {
+  ...baseColumns,
   id: varchar({ length: 64 }).notNull().primaryKey(),
   name: varchar({ length: 64 }).notNull(),
   description: text(),
   status: statusEnum().notNull(),
 });
 
-export const systemRoleRelations = relations(systemRole, ({ many }) => ({
-  userRoles: many(systemUserRole),
+export const adminSystemRoleRelations = relations(adminSystemRole, ({ many }) => ({
+  userRoles: many(adminSystemUserRole),
 }));
 
-export const selectSystemRoleSchema = createSelectSchema(systemRole, {
+export const selectAdminSystemRole = createSelectSchema(adminSystemRole, {
   id: schema => schema.meta({ description: "角色ID" }),
   name: schema => schema.meta({ description: "角色名称" }),
   description: schema => schema.meta({ description: "角色描述" }),
   status: schema => schema.meta({ description: "状态: 1=启用 0=禁用" }),
 });
 
-export const insertSystemRoleSchema = createInsertSchema(systemRole, {
+export const insertAdminSystemRole = createInsertSchema(adminSystemRole, {
   id: schema => schema.min(1).regex(/^[a-z_]+$/),
   name: schema => schema.min(1),
   createdBy: schema => schema.min(1),
@@ -37,9 +37,9 @@ export const insertSystemRoleSchema = createInsertSchema(systemRole, {
   updatedBy: true,
 });
 
-export const patchSystemRoleSchema = insertSystemRoleSchema.partial();
+export const patchAdminSystemRole = insertAdminSystemRole.partial();
 
 // id 查询 schema
-export const idSystemRoleSchema = z.object({
+export const idAdminSystemRole = z.object({
   id: z.string().min(1).regex(/^[a-z_]+$/).meta({ description: "角色ID" }),
 });

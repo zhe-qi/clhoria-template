@@ -7,8 +7,7 @@ import redisClient from "@/lib/redis";
 
 import type { TaskProcessor, WorkerConfig } from "../types";
 
-import { mergeWorkerConfig } from "../config";
-import { DEFAULT_QUEUE_NAME } from "../job-system.config";
+import { DEFAULT_QUEUE_NAME, mergeWorkerConfig } from "../config";
 
 /**
  * Worker 管理器

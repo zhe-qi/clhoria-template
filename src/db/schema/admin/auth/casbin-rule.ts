@@ -1,8 +1,8 @@
 import { z } from "@hono/zod-openapi";
-import { index, pgTable, primaryKey, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { index, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
-export const casbinRule = pgTable("casbin_rule", {
+export const casbinRule = pgTable("admin_casbin_rule", {
   /** 策略类型：p（权限策略）/g（角色继承） */
   ptype: varchar({ length: 8 }).notNull(), // 非空：所有规则必含 ptype
   /** 主体：角色或用户（p策略=sub，g策略=上级角色/用户） */
@@ -18,22 +18,8 @@ export const casbinRule = pgTable("casbin_rule", {
   /** 保留字段（暂不使用，默认空字符串） */
   v5: varchar({ length: 64 }).notNull().default(""),
 }, table => [
-  // 复合主键
-  primaryKey({ name: "casbin_rule_pkey", columns: [table.v0, table.v1, table.v2, table.v3, table.v4, table.v5] }),
-
-  // 核心：唯一约束（防止重复规则，Casbin权限判断的基础）
-  // 规则唯一性逻辑：ptype（p/g）+ 核心字段（v0-v3）组合唯一
-  // 原因：p策略需区分（ptype+v0(sub)+v1(obj)+v2(act)+v3(eft)），g策略需区分（ptype+v0(上级)+v1(下级)）
-  uniqueIndex("casbin_rule_unique_key")
-    .on(table.ptype, table.v0, table.v1, table.v2, table.v3),
-
-  // 1. 角色管理查询索引（高频场景：查某个主体的所有角色继承规则）
-  // 覆盖场景：g策略查询（如 g(r.sub, p.sub) 匹配时，按 ptype='g' + v0 过滤）
-  index("idx_casbin_g_v0").on(table.ptype, table.v0),
-
-  // 2. 资源级权限查询索引（高频场景：查某个资源的所有权限规则）
-  // 覆盖场景：p策略查询（如按 ptype='p' + v1(obj) 过滤资源权限）
-  index("idx_casbin_p_v1").on(table.ptype, table.v1),
+  primaryKey({ name: "casbin_rule_pkey", columns: [table.v0, table.v1, table.v2, table.v3] }),
+  index("idx_casbin_g_v0").on(table.ptype, table.v0, table.v1),
 ]);
 
 // Zod Schema 适配字段非空+默认值约束

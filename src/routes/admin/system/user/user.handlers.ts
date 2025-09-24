@@ -3,18 +3,18 @@ import type { z } from "zod";
 import { hash } from "@node-rs/argon2";
 import { and, eq, inArray, sql } from "drizzle-orm";
 
-import type { responseSystemUserListItemSchema } from "@/db/schema";
+import type { responseAdminSystemUserWithPassword } from "@/db/schema";
 
 import db from "@/db";
-import { systemRole, systemUser, systemUserRole } from "@/db/schema";
+import { adminSystemRole, adminSystemUser, adminSystemUserRole } from "@/db/schema";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { omit, Resp } from "@/utils";
 
-import type { SystemUsersRouteHandlerType } from "./users.index";
+import type { AdminSystemUserRouteHandlerType } from "./user.index";
 
-export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
+export const list: AdminSystemUserRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();
 
   const parseResult = RefineQueryParamsSchema.safeParse(query);
@@ -22,33 +22,33 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
     return c.json(parseResult.error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [error, result] = await executeRefineQuery<z.infer<typeof responseSystemUserListItemSchema>>({
-    table: systemUser,
+  const [error, result] = await executeRefineQuery<z.infer<typeof responseAdminSystemUserWithPassword>>({
+    table: adminSystemUser,
     queryParams: parseResult.data,
     joinConfig: {
       joins: [
         {
-          table: systemUserRole,
+          table: adminSystemUser,
           type: "left",
-          on: eq(systemUser.id, systemUserRole.userId),
+          on: eq(adminSystemUser.id, adminSystemUserRole.userId),
         },
         {
-          table: systemRole,
+          table: adminSystemRole,
           type: "left",
-          on: eq(systemUserRole.roleId, systemRole.id),
+          on: eq(adminSystemUserRole.roleId, adminSystemRole.id),
         },
       ],
       selectFields: {
-        id: systemUser.id,
-        username: systemUser.username,
-        nickName: systemUser.nickName,
-        roles: sql`json_agg(json_build_object('id', ${systemRole.id}, 'name', ${systemRole.name}))`,
-        createdAt: systemUser.createdAt,
-        updatedAt: systemUser.updatedAt,
-        status: systemUser.status,
-        avatar: systemUser.avatar,
+        id: adminSystemUser.id,
+        username: adminSystemUser.username,
+        nickName: adminSystemUser.nickName,
+        roles: sql`json_agg(json_build_object('id', ${adminSystemRole.id}, 'name', ${adminSystemRole.name}))`,
+        createdAt: adminSystemUser.createdAt,
+        updatedAt: adminSystemUser.updatedAt,
+        status: adminSystemUser.status,
+        avatar: adminSystemUser.avatar,
       },
-      groupBy: [systemUser.id],
+      groupBy: [adminSystemUser.id],
     },
   });
   if (error) {
@@ -61,7 +61,7 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   return c.json(Resp.ok(safeData), HttpStatusCodes.OK);
 };
 
-export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
+export const create: AdminSystemUserRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
@@ -69,7 +69,7 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
     const hashedPassword = await hash(body.password);
 
     const [created] = await db
-      .insert(systemUser)
+      .insert(adminSystemUser)
       .values({
         ...body,
         password: hashedPassword,
@@ -97,13 +97,13 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
   }
 };
 
-export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
+export const get: AdminSystemUserRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [user] = await db
     .select()
-    .from(systemUser)
-    .where(eq(systemUser.id, id));
+    .from(adminSystemUser)
+    .where(eq(adminSystemUser.id, id));
 
   if (!user) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -114,16 +114,16 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
   return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
 };
 
-export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
+export const update: AdminSystemUserRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
   // 检查是否为内置用户
   const [existingUser] = await db
-    .select({ builtIn: systemUser.builtIn })
-    .from(systemUser)
-    .where(eq(systemUser.id, id));
+    .select({ builtIn: adminSystemUser.builtIn })
+    .from(adminSystemUser)
+    .where(eq(adminSystemUser.id, id));
 
   if (!existingUser) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -138,12 +138,12 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const updateData = omit(body, ["password"]);
 
   const [updated] = await db
-    .update(systemUser)
+    .update(adminSystemUser)
     .set({
       ...updateData,
       updatedBy: sub,
     })
-    .where(eq(systemUser.id, id))
+    .where(eq(adminSystemUser.id, id))
     .returning();
 
   if (!updated) {
@@ -155,14 +155,14 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
 };
 
-export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
+export const remove: AdminSystemUserRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // 检查是否为内置用户
   const [existingUser] = await db
-    .select({ builtIn: systemUser.builtIn })
-    .from(systemUser)
-    .where(eq(systemUser.id, id));
+    .select({ builtIn: adminSystemUser.builtIn })
+    .from(adminSystemUser)
+    .where(eq(adminSystemUser.id, id));
 
   if (!existingUser) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -173,9 +173,9 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   }
 
   const [deleted] = await db
-    .delete(systemUser)
-    .where(eq(systemUser.id, id))
-    .returning({ id: systemUser.id });
+    .delete(adminSystemUser)
+    .where(eq(adminSystemUser.id, id))
+    .returning({ id: adminSystemUser.id });
 
   if (!deleted) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -184,17 +184,13 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
 };
 
-export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => {
+export const saveRoles: AdminSystemUserRouteHandlerType<"saveRoles"> = async (c) => {
   const { userId } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
 
   try {
     // 检查用户是否存在
-    const [user] = await db
-      .select({ id: systemUser.id })
-      .from(systemUser)
-      .where(eq(systemUser.id, userId))
-      .limit(1);
+    const [user] = await db.select({ id: adminSystemUser.id }).from(adminSystemUser).where(eq(adminSystemUser.id, userId)).limit(1);
 
     if (!user) {
       return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
@@ -202,10 +198,7 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
 
     // 检查所有新角色是否存在
     if (roleIds.length > 0) {
-      const existingRoles = await db
-        .select({ id: systemRole.id })
-        .from(systemRole)
-        .where(inArray(systemRole.id, roleIds));
+      const existingRoles = await db.select({ id: adminSystemRole.id }).from(adminSystemRole).where(inArray(adminSystemRole.id, roleIds));
 
       if (existingRoles.length !== roleIds.length) {
         const foundRoles = existingRoles.map(role => role.id);
@@ -216,9 +209,9 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
 
     // 获取用户当前的所有角色
     const currentUserRoles = await db
-      .select({ roleId: systemUserRole.roleId })
-      .from(systemUserRole)
-      .where(eq(systemUserRole.userId, userId));
+      .select({ roleId: adminSystemUserRole.roleId })
+      .from(adminSystemUserRole)
+      .where(eq(adminSystemUserRole.userId, userId));
 
     const currentRoleIds = currentUserRoles.map(ur => ur.roleId);
     const currentRoleSet = new Set(currentRoleIds);
@@ -237,36 +230,25 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
     await db.transaction(async (tx) => {
       // 删除不需要的角色
       if (rolesToRemove.length > 0) {
-        const deleteResult = await tx
-          .delete(systemUserRole)
-          .where(and(
-            eq(systemUserRole.userId, userId),
-            inArray(systemUserRole.roleId, rolesToRemove),
-          ))
-          .returning({ roleId: systemUserRole.roleId });
+        const deleteResult = await tx.delete(adminSystemUserRole).where(
+          and(
+            eq(adminSystemUserRole.userId, userId),
+            inArray(adminSystemUserRole.roleId, rolesToRemove),
+          ),
+        ).returning({ roleId: adminSystemUserRole.roleId });
+
         removedCount = deleteResult.length;
       }
 
       // 添加新的角色
       if (rolesToAdd.length > 0) {
-        const valuesToInsert = rolesToAdd.map(roleId => ({
-          userId,
-          roleId,
-        }));
-
-        const insertResult = await tx
-          .insert(systemUserRole)
-          .values(valuesToInsert)
-          .returning();
+        const valuesToInsert = rolesToAdd.map(roleId => ({ userId, roleId }));
+        const insertResult = await tx.insert(adminSystemUserRole).values(valuesToInsert).returning();
         addedCount = insertResult.length;
       }
     });
 
-    return c.json(Resp.ok({
-      added: addedCount,
-      removed: removedCount,
-      total: roleIds.length,
-    }), HttpStatusCodes.OK);
+    return c.json(Resp.ok({ added: addedCount, removed: removedCount, total: roleIds.length }), HttpStatusCodes.OK);
   }
   catch {
     return c.json(Resp.fail("保存角色失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);

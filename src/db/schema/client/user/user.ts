@@ -2,13 +2,13 @@ import { index, integer, jsonb, pgTable, text, timestamp, unique, varchar } from
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { defaultColumns } from "@/db/common/default-columns";
+import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxOpenId } from "@/db/schema/_shard/types/app-user";
+
+import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { Gender, UserStatus, VerificationStatus } from "@/lib/enums";
 
-import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxOpenId } from "./types";
-
-export const clientUsers = pgTable("client_users", {
-  ...defaultColumns,
+export const clientUser = pgTable("client_user", {
+  ...baseColumns,
   /** 用户名 */
   username: varchar({ length: 64 }).notNull(),
   /** 密码，加密存储 */
@@ -99,7 +99,7 @@ export const clientUsers = pgTable("client_users", {
   index("client_users_last_login_date_idx").on(table.lastLoginDate.desc()),
 ]);
 
-export const selectClientUsersSchema = createSelectSchema(clientUsers, {
+export const selectClientUserSchema = createSelectSchema(clientUser, {
   username: z.string().meta({ description: "用户名" }),
   password: z.string().meta({ description: "密码" }),
   passwordSecretVersion: z.number().meta({ description: "密码密钥版本" }),
@@ -121,8 +121,8 @@ export const selectClientUsersSchema = createSelectSchema(clientUsers, {
   inviteTime: z.string().optional().meta({ description: "受邀时间" }),
 });
 
-export const insertClientUsersSchema = createInsertSchema(
-  clientUsers,
+export const insertClientUserSchema = createInsertSchema(
+  clientUser,
   {
     username: z.string()
       .min(4, "用户名最少4个字符")
@@ -191,4 +191,4 @@ export const insertClientUsersSchema = createInsertSchema(
   tokens: true,
 });
 
-export const patchClientUsersSchema = insertClientUsersSchema.partial();
+export const patchClientUserSchema = insertClientUserSchema.partial();

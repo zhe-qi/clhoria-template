@@ -41,7 +41,8 @@ export const getUploadToken = createRoute({
     ),
   },
   tags,
-  summary: "获取上传预签名 URL，请在请求头携带 X-Request-Source: admin 或 client",
+  summary: "获取上传预签名 URL",
+  description: "请在请求头携带 X-Request-Source: admin 或 client",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       TokenResponseSchema,
@@ -73,7 +74,8 @@ export const getDownloadToken = createRoute({
     ),
   },
   tags,
-  summary: "获取下载预签名 URL，请在请求头携带 X-Request-Source: admin 或 client",
+  summary: "获取下载预签名 URL",
+  description: "请在请求头携带 X-Request-Source: admin 或 client",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       TokenResponseSchema,

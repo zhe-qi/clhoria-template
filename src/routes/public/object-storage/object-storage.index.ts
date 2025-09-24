@@ -5,7 +5,7 @@ import { createRouter } from "@/lib/create-app";
 import * as handlers from "./object-storage.handlers";
 import * as routes from "./object-storage.routes";
 
-export const objectStorage = createRouter()
+export const objectStorageRouter = createRouter()
   .openapi(routes.getUploadToken, handlers.getUploadToken)
   .openapi(routes.getDownloadToken, handlers.getDownloadToken);
 

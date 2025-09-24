@@ -2,10 +2,10 @@ import type { AppRouteHandler } from "@/types/lib";
 
 import { createRouter } from "@/lib/create-app";
 
-import * as handlers from "./roles.handlers";
-import * as routes from "./roles.routes";
+import * as handlers from "./role.handlers";
+import * as routes from "./role.routes";
 
-export const systemRoles = createRouter()
+export const adminSystemRoleRouter = createRouter()
   .openapi(routes.list, handlers.list)
   .openapi(routes.create, handlers.create)
   .openapi(routes.get, handlers.get)
@@ -18,4 +18,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type SystemRolesRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type AdminSystemRoleRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

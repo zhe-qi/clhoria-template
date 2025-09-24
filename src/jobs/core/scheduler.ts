@@ -4,7 +4,7 @@ import logger from "@/lib/logger";
 
 import type { ScheduledTaskConfig, TaskData } from "../types";
 
-import { DEFAULT_LOCK_TTL, DEFAULT_QUEUE_NAME } from "../job-system.config";
+import { DEFAULT_LOCK_TTL, DEFAULT_QUEUE_NAME } from "../config";
 import { withLock } from "../lib/redis-lock";
 import { QueueManager } from "./queue";
 
@@ -45,8 +45,8 @@ export class TaskScheduler {
             data as TaskData,
             {
               ...options,
-              // 使用时间戳作为 jobId，避免重复
-              jobId: `${name}:${Date.now()}`,
+              // 使用时间戳作为 jobId，避免重复（使用连字符替代冒号）
+              jobId: `${name}-${Date.now()}`,
             },
             DEFAULT_QUEUE_NAME,
           );
@@ -63,25 +63,34 @@ export class TaskScheduler {
             { error, taskName: name },
             "[定时任务]: 添加任务到队列失败",
           );
-          throw error;
+          // 不重新抛出错误，防止定时任务崩溃导致整个程序停止
+          return null;
         }
       };
 
-      // 如果需要分布式锁
-      if (useLock) {
-        const lockKey = `cron:${name}`;
-        const result = await withLock(lockKey, executeTask, { ttl: lockTTL });
+      try {
+        // 如果需要分布式锁
+        if (useLock) {
+          const lockKey = `cron:${name}`;
+          const result = await withLock(lockKey, executeTask, { ttl: lockTTL });
 
-        if (!result) {
-          logger.warn(
-            { taskName: name },
-            "[定时任务]: 无法获取锁，跳过执行",
-          );
+          if (!result) {
+            logger.warn(
+              { taskName: name },
+              "[定时任务]: 无法获取锁，跳过执行",
+            );
+          }
+        }
+        else {
+          // 不使用锁，直接执行
+          await executeTask();
         }
       }
-      else {
-        // 不使用锁，直接执行
-        await executeTask();
+      catch (error) {
+        logger.error(
+          { error, taskName: name },
+          "[定时任务]: 执行失败，但不影响调度器继续运行",
+        );
       }
     });
 

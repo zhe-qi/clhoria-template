@@ -7,8 +7,7 @@ import redisClient from "@/lib/redis";
 
 import type { TaskData, TaskOptions } from "../types";
 
-import { mergeJobOptions } from "../config";
-import { DEFAULT_QUEUE_NAME } from "../job-system.config";
+import { DEFAULT_QUEUE_NAME, mergeJobOptions } from "../config";
 import { IdempotencyHelper } from "../lib/idempotency";
 
 /**

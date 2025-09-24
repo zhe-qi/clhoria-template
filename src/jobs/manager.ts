@@ -2,10 +2,10 @@ import logger from "@/lib/logger";
 
 import type { JobSystemConfig, ProcessorRegistration, ScheduledTaskConfig } from "./types";
 
+import { DEFAULT_QUEUE_NAME } from "./config";
 import { QueueManager } from "./core/queue";
 import { TaskScheduler } from "./core/scheduler";
 import { WorkerManager } from "./core/worker";
-import { DEFAULT_QUEUE_NAME } from "./job-system.config";
 
 // 任务系统状态
 let isInitialized = false;

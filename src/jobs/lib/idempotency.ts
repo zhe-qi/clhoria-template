@@ -4,7 +4,7 @@ import logger from "@/lib/logger";
 import redisClient from "@/lib/redis";
 import { formatDate } from "@/utils/tools/formatter";
 
-import { DEFAULT_IDEMPOTENCY_TTL, REDIS_KEY_PREFIX } from "../job-system.config";
+import { DEFAULT_IDEMPOTENCY_TTL, REDIS_KEY_PREFIX } from "../config";
 
 /**
  * 幂等性辅助工具

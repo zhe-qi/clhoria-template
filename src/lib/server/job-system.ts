@@ -1,5 +1,5 @@
 import { gracefulShutdownJobSystem, initializeJobSystem, startJobSystem } from "@/jobs";
-import { jobSystemConfig } from "@/jobs/job-system.config";
+import { jobSystemConfig } from "@/jobs/config/job-system.config";
 import { taskProcessors } from "@/jobs/processors";
 import { allScheduledTasks } from "@/jobs/schedulers";
 import logger from "@/lib/logger";

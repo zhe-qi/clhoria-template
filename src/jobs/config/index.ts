@@ -8,7 +8,7 @@ import {
   DEFAULT_STALLED_INTERVAL,
   DEFAULT_WORKER_CONCURRENCY,
   jobSystemConfig,
-} from "../job-system.config";
+} from "./job-system.config";
 
 /**
  * 获取默认任务选项
@@ -107,4 +107,4 @@ export {
   DEFAULT_WORKER_CONCURRENCY,
   LOCK_REFRESH_INTERVAL,
   REDIS_KEY_PREFIX,
-} from "../job-system.config";
+} from "./job-system.config";

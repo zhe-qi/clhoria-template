@@ -1,2 +1,2 @@
-export * from "./auth";
+export * from "./auth/auth.index";
 export * from "./system";

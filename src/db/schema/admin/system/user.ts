@@ -3,13 +3,13 @@ import { boolean, index, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { defaultColumns } from "@/db/common/default-columns";
+import { baseColumns } from "@/db/schema/_shard/base-columns";
 
-import { statusEnum } from "../../common/enums";
-import { systemUserRole } from "./user-role";
+import { statusEnum } from "../../_shard/enums";
+import { adminSystemUserRole } from "./user-role";
 
-export const systemUser = pgTable("system_user", {
-  ...defaultColumns,
+export const adminSystemUser = pgTable("admin_system_user", {
+  ...baseColumns,
   username: varchar({ length: 64 }).notNull().unique(),
   password: text().notNull(),
   builtIn: boolean().default(false),
@@ -20,11 +20,11 @@ export const systemUser = pgTable("system_user", {
   index("system_user_username_idx").on(table.username),
 ]);
 
-export const systemUserRelations = relations(systemUser, ({ many }) => ({
-  userRoles: many(systemUserRole),
+export const adminSystemUserRelations = relations(adminSystemUser, ({ many }) => ({
+  userRoles: many(adminSystemUserRole),
 }));
 
-export const selectSystemUserSchema = createSelectSchema(systemUser, {
+export const selectAdminSystemUser = createSelectSchema(adminSystemUser, {
   id: schema => schema.meta({ description: "用户ID" }),
   username: schema => schema.meta({ description: "用户名" }),
   password: schema => schema.meta({ description: "密码" }),
@@ -34,7 +34,7 @@ export const selectSystemUserSchema = createSelectSchema(systemUser, {
   status: schema => schema.meta({ description: "状态: 1=启用 0=禁用 -1=封禁" }),
 });
 
-export const insertSystemUserSchema = createInsertSchema(systemUser, {
+export const insertAdminSystemUser = createInsertSchema(adminSystemUser, {
   username: schema => schema.min(4).max(15).regex(/^\w+$/).meta({ description: "用户名" }),
   password: schema => schema.min(6).max(20).meta({ description: "密码" }),
   nickName: schema => schema.min(1).meta({ description: "昵称" }),
@@ -46,13 +46,13 @@ export const insertSystemUserSchema = createInsertSchema(systemUser, {
   updatedBy: true,
 });
 
-export const patchSystemUserSchema = insertSystemUserSchema.partial();
+export const patchAdminSystemUser = insertAdminSystemUser.partial();
 
 /** 用于响应的 schema（不包含密码） */
-export const responseSystemUserSchema = selectSystemUserSchema.omit({ password: true });
+export const responseAdminSystemUserWithoutPassword = selectAdminSystemUser.omit({ password: true });
 
 /** 用于响应的schema（包含密码） */
-export const responseSystemUserListItemSchema = selectSystemUserSchema.extend({
+export const responseAdminSystemUserWithPassword = selectAdminSystemUser.extend({
   roles: z.array(z.object({
     id: z.string().min(1).max(64).meta({ description: "角色ID" }),
     name: z.string().min(1).max(64).meta({ description: "角色名称" }),
@@ -60,10 +60,10 @@ export const responseSystemUserListItemSchema = selectSystemUserSchema.extend({
 });
 
 /** 用于响应的 列表（不包含密码） */
-export const responseSystemUserListSchema = z.array(responseSystemUserListItemSchema.omit({ password: true }));
+export const responseAdminSystemUserWithList = z.array(responseAdminSystemUserWithPassword.omit({ password: true }));
 
 /** 用于登录的 schema（仅包含 username，password，domain ） */
-export const loginSystemUserSchema = insertSystemUserSchema.pick({
+export const loginAdminSystemUser = insertAdminSystemUser.pick({
   username: true,
   password: true,
 }).extend({
@@ -71,7 +71,7 @@ export const loginSystemUserSchema = insertSystemUserSchema.pick({
 });
 
 /** 用于获取用户信息的 schema，支持拓展，如果后续新增或者联表可以继续拓展 */
-export const getUserInfoSchema = responseSystemUserSchema.pick({
+export const getUserInfoSchema = responseAdminSystemUserWithoutPassword.pick({
   id: true,
   username: true,
   avatar: true,

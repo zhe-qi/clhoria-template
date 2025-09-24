@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
 import db from "@/db";
-import { systemUser, systemUserRole } from "@/db/schema";
+import { adminSystemUser, adminSystemUserRole } from "@/db/schema";
 import env from "@/env";
 import cap from "@/lib/cap";
 import { enforcerPromise } from "@/lib/casbin";
@@ -30,8 +30,8 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const { username, password } = body;
 
   // 2. 查询用户基本信息并验证
-  const user = await db.query.systemUser.findFirst({
-    where: eq(systemUser.username, username),
+  const user = await db.query.adminSystemUser.findFirst({
+    where: eq(adminSystemUser.username, username),
     columns: {
       id: true,
       username: true,
@@ -54,8 +54,8 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   if (!isPasswordValid) {
     return c.json(Resp.fail(HttpStatusPhrases.UNAUTHORIZED), HttpStatusCodes.UNAUTHORIZED);
   }
-  const userRoles = await db.query.systemUserRole.findMany({
-    where: eq(systemUserRole.userId, user.id),
+  const userRoles = await db.query.adminSystemUserRole.findMany({
+    where: eq(adminSystemUserRole.userId, user.id),
   });
 
   const { refreshToken, accessToken } = await generateTokens({
@@ -118,8 +118,8 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   const { sub } = c.get("jwtPayload");
 
   // 查询用户信息
-  const user = await db.query.systemUser.findFirst({
-    where: eq(systemUser.id, sub),
+  const user = await db.query.adminSystemUser.findFirst({
+    where: eq(adminSystemUser.id, sub),
     columns: toColumns(["id", "username", "avatar", "nickName"]),
     with: parseRelations([{ name: "userRoles", fields: ["roleId"] }]),
   });

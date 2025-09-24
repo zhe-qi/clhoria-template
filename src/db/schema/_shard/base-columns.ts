@@ -3,7 +3,7 @@ import { v7 as uuidV7 } from "uuid";
 
 import { formatDate } from "@/utils";
 
-export const defaultColumns = {
+export const baseColumns = {
   /** id，uuid v7 */
   id: uuid().primaryKey().notNull().$defaultFn(() => uuidV7()),
   /** 创建时间 */

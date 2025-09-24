@@ -1,2 +1,1 @@
-export * from "./role/role.index";
 export * from "./user/user.index";

@@ -1,6 +1,6 @@
 import env from "@/env";
 
-import type { JobSystemConfig } from "./types";
+import type { JobSystemConfig } from "../types";
 
 /**
  * 默认配置常量

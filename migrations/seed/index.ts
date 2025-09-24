@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import db from "@/db";
-import { systemUser, systemRole, systemUserRole, casbinRule } from "@/db/schema";
+import { adminSystemUser, adminSystemRole, casbinRule, adminSystemUserRole } from "@/db/schema";
 import { Status } from "@/lib/enums/common";
 
 async function seedUsers() {
@@ -11,7 +11,7 @@ async function seedUsers() {
   const userPasswordHash = await hash("123456");
 
   // Create admin user
-  const [adminUser] = await db.insert(systemUser)
+  const [adminUser] = await db.insert(adminSystemUser)
     .values({
       username: "admin",
       password: adminPasswordHash,
@@ -23,7 +23,7 @@ async function seedUsers() {
     .returning();
 
   // Create regular user
-  const [regularUser] = await db.insert(systemUser)
+  const [regularUser] = await db.insert(adminSystemUser)
     .values({
       username: "user",
       password: userPasswordHash,
@@ -42,7 +42,7 @@ async function seedRoles() {
   console.log("🌱 Seeding roles...");
 
   // Create admin role
-  const [adminRole] = await db.insert(systemRole)
+  const [adminRole] = await db.insert(adminSystemRole)
     .values({
       id: "admin",
       name: "管理员",
@@ -53,7 +53,7 @@ async function seedRoles() {
     .returning();
 
   // Create user role
-  const [userRole] = await db.insert(systemRole)
+  const [userRole] = await db.insert(adminSystemRole)
     .values({
       id: "user",
       name: "普通用户",
@@ -76,7 +76,7 @@ async function seedUserRoles(users: any, roles: any) {
   }
 
   // Associate admin user with admin role
-  await db.insert(systemUserRole)
+  await db.insert(adminSystemUserRole)
     .values({
       userId: users.adminUser.id,
       roleId: roles.adminRole.id,
@@ -84,7 +84,7 @@ async function seedUserRoles(users: any, roles: any) {
     .onConflictDoNothing();
 
   // Associate regular user with user role
-  await db.insert(systemUserRole)
+  await db.insert(adminSystemUserRole)
     .values({
       userId: users.regularUser.id,
       roleId: roles.userRole.id,

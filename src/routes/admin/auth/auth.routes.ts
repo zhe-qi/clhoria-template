@@ -1,8 +1,8 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { jwt } from "hono/jwt";
 
-import { loginSystemUserSchema } from "@/db/schema";
-import { getUserInfoSchema } from "@/db/schema/system/user";
+import { loginAdminSystemUser } from "@/db/schema";
+import { getUserInfoSchema } from "@/db/schema/admin/system/user";
 import env from "@/env";
 import { RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
@@ -18,7 +18,7 @@ export const login = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      loginSystemUserSchema,
+      loginAdminSystemUser,
       "登录请求",
     ),
   },
