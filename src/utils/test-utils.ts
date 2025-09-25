@@ -1,3 +1,5 @@
+import type { JWTPayload } from "hono/utils/jwt/types";
+
 import { addDays, getUnixTime } from "date-fns";
 import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
@@ -23,6 +25,9 @@ async function generateTestToken(username: string): Promise<CachedToken> {
   // 查询用户信息
   const user = await db.query.adminSystemUser.findFirst({
     where: eq(adminSystemUser.username, username),
+    with: {
+      userRoles: true,
+    },
     columns: {
       id: true,
       username: true,
@@ -38,12 +43,12 @@ async function generateTestToken(username: string): Promise<CachedToken> {
   const accessTokenExp = getUnixTime(addDays(new Date(), 7));
   const jti = crypto.randomUUID();
 
-  const tokenPayload = {
-    userId: user.id,
+  const tokenPayload: JWTPayload = {
+    sub: user.id,
     iat: now,
     exp: accessTokenExp,
     jti,
-    roles: [],
+    roles: user.userRoles.map(role => role.roleId),
   };
 
   // 生成token

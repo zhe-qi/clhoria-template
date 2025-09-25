@@ -100,10 +100,9 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
 /** 退出登录 */
 export const logout: AuthRouteHandlerType<"logout"> = async (c) => {
   const payload = c.get("jwtPayload");
-  const userId = payload.sub;
 
   // 清理用户的所有刷新令牌
-  await logoutUtil(userId);
+  await logoutUtil(payload.sub);
 
   // 删除 refreshToken cookie
   deleteCookie(c, "refreshToken", {

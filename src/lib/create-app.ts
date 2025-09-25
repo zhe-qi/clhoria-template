@@ -1,4 +1,3 @@
-import type { Schema } from "hono";
 import type { Store } from "hono-rate-limiter";
 import type { RedisReply } from "rate-limit-redis";
 
@@ -13,7 +12,7 @@ import { trimTrailingSlash } from "hono/trailing-slash";
 import { RedisStore } from "rate-limit-redis";
 import { v7 as uuidV7 } from "uuid";
 
-import type { AppBindings, AppOpenAPI } from "@/types/lib";
+import type { AppBindings } from "@/types/lib";
 
 import redisClient from "@/lib/redis";
 import { notFound, onError, serveEmojiFavicon } from "@/lib/stoker/middlewares";
@@ -73,8 +72,4 @@ export default function createApp() {
   app.onError(onError);
 
   return app;
-}
-
-export function createTestApp<S extends Schema>(router: AppOpenAPI<S>) {
-  return createApp().route("/", router);
 }

@@ -21,9 +21,12 @@ export function authorize(): MiddlewareHandler<AppBindings> {
     }
 
     const { roles } = c.get("jwtPayload");
-    const path = c.req.path.slice(API_ADMIN_PATH.length);
+
+    // 去掉 API_ADMIN_PATH 前缀, 如果有的话
+    const path = c.req.path.replace(API_ADMIN_PATH, "");
 
     const hasPermission = await hasAnyPermission(enforcer, roles, path, c.req.method);
+
     if (!hasPermission) {
       return c.json(Resp.fail(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
     }
@@ -33,10 +36,14 @@ export function authorize(): MiddlewareHandler<AppBindings> {
 }
 
 async function hasAnyPermission(enforcer: Enforcer, roles: string[], path: string, method: string) {
+  if (roles.length === 0) {
+    return Promise.resolve(false);
+  }
+
   // 存储所有未完成的Promise，用于在找到结果后忽略剩余请求
   const pendingPromises: Promise<void>[] = [];
 
-  return new Promise((resolve) => {
+  return new Promise<boolean>((resolve) => {
     for (const role of roles) {
       const promise = enforcer.enforce(role, path, method)
         .then((hasPerm) => {

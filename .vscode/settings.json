@@ -63,6 +63,7 @@
     "rolldown",
     "setex",
     "tryit",
-    "tsdown"
+    "tsdown",
+    "uuidv"
   ]
 }

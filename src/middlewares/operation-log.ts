@@ -46,7 +46,7 @@ export function operationLog(options: { moduleName: string; description: string 
       return;
     }
 
-    const { uid: userId, username } = payload as { uid: string; username: string };
+    const { sub: userId, username } = payload;
 
     // 获取响应信息
     let response: any = null;

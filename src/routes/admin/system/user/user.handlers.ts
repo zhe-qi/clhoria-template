@@ -83,7 +83,13 @@ export const create: AdminSystemUserRouteHandlerType<"create"> = async (c) => {
     return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.CREATED);
   }
   catch (error: any) {
-    if (error?.code === "23505" && error?.constraint === "system_user_username_unique") {
+    // Drizzle ORM 会将 PostgreSQL 错误包装成 DrizzleQueryError
+    // 原始的 PostgreSQL 错误在 cause 属性中
+    const pgError = error?.cause || error;
+
+    // 检查是否为唯一约束冲突（PostgreSQL 错误码 23505）
+    if (pgError?.code === "23505"
+      || pgError?.constraint_name === "admin_system_user_username_unique") {
       return c.json(
         Resp.fail("用户名已存在"),
         HttpStatusCodes.CONFLICT,

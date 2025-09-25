@@ -44,9 +44,13 @@ export const insertAdminSystemUser = createInsertSchema(adminSystemUser, {
   createdBy: true,
   updatedAt: true,
   updatedBy: true,
+  builtIn: true, // 系统字段，不允许用户设置
 });
 
-export const patchAdminSystemUser = insertAdminSystemUser.partial();
+export const patchAdminSystemUser = insertAdminSystemUser.partial().refine(
+  data => Object.keys(data).length > 0,
+  { message: "至少需要提供一个字段进行更新" },
+);
 
 /** 用于响应的 schema（不包含密码） */
 export const responseAdminSystemUserWithoutPassword = selectAdminSystemUser.omit({ password: true });
