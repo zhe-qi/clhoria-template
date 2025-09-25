@@ -50,7 +50,7 @@ services:
     container_name: hono-app
     ports:
       - "9999:9999"
-    image: hono-template
+    image: clhoria-template
     env_file:
       - .env
     environment:

@@ -7,8 +7,6 @@
 
 现代化企业级后端模板，基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式，结合 Hono + OpenAPI + Zod 完整技术体系，实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层，完整的 RBAC 权限体系，提供比传统后台管理系统更稳定、更高效的开发体验。
 
-她是 Claude Code 智慧与 Hono 框架体系力量的完美结合，一位守护现代化开发的技术女神。在她的引领下，AI 驱动的开发不再是梦想，而是触手可及的现实。
-
 Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优雅，每一个功能都如花般绽放。选择 Clhoria，就是选择与未来同行。
 
 ## 功能特性
@@ -84,15 +82,13 @@ Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优
 - PostgreSQL >= 17
 - Redis >= 7
 
-postgres 在 node24 上运行可能偶尔会爆警告参考 [issue](https://github.com/porsager/postgres/issues/1061) 目前看来好像没啥问题，程序还是很稳定的
-
 #### 安装步骤
 
 1. **克隆项目**
 
    ```bash
-   git clone https://github.com/zhe-qi/hono-template
-   cd hono-template
+   git clone https://github.com/zhe-qi/clhoria-template
+   cd clhoria-template
    ```
 
 2. **安装依赖**
@@ -115,9 +111,6 @@ postgres 在 node24 上运行可能偶尔会爆警告参考 [issue](https://gith
 
    # 填充初始数据（可选，应用启动时会自动检查并初始化）
    pnpm seed
-
-   # 同步权限数据
-   pnpm sync:permissions
    ```
 
    **生产环境部署**需要先验证迁移：
@@ -133,29 +126,6 @@ postgres 在 node24 上运行可能偶尔会爆警告参考 [issue](https://gith
    ```
 
 访问 <http://localhost:9999> 查看 API 文档。
-
-### 目录结构
-
-```text
-src/
-├── app.ts                    # 应用入口，路由配置
-├── index.ts                  # 服务器启动文件
-├── db/
-│   ├── schema/              # Drizzle 数据库架构
-│   └── index.ts             # 数据库实例
-├── routes/
-│   ├── public/              # 公共路由（无认证）
-│   ├── client/              # 客户端路由（JWT）
-│   └── admin/               # 管理端路由（JWT + RBAC）
-├── services/                # 业务逻辑层（函数式服务，支持公共服务抽离）
-├── lib/
-│   ├── create-app.ts        # 应用创建和中间件配置
-│   ├── configure-open-api.ts # OpenAPI 配置
-│   ├── pagination/          # 声明式分页器
-│   └── enums/               # 枚举定义
-├── scripts/                 # 脚本文件
-└── types/                   # TypeScript 类型定义
-```
 
 ## 开发规范
 
@@ -190,19 +160,10 @@ src/db/schema/
 
 ```bash
 # 构建镜像
-docker build -t hono-template .
+docker build -t clhoria-template .
 
 # 运行容器
-docker run -p 9999:9999 --env-file .env hono-template
-```
-
-为了更好的服务隔离、独立扩缩容和维护便利性，建议将数据库、缓存和应用服务分别部署
-
-### 生产构建
-
-```bash
-pnpm build
-pnpm start
+docker run -p 9999:9999 --env-file .env clhoria-template
 ```
 
 ## 部署特性
