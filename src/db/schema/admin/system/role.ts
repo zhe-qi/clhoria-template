@@ -30,10 +30,10 @@ export const selectAdminSystemRole = createSelectSchema(adminSystemRole, {
 export const insertAdminSystemRole = createInsertSchema(adminSystemRole, {
   id: schema => schema.min(1).regex(/^[a-z_]+$/),
   name: schema => schema.min(1),
-  createdBy: schema => schema.min(1),
 }).omit({
   createdAt: true,
   updatedAt: true,
+  createdBy: true,
   updatedBy: true,
 });
 
