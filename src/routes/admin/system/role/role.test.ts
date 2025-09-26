@@ -1,7 +1,10 @@
+import { and, eq, like, or } from "drizzle-orm";
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import db from "@/db";
+import { adminSystemRole, adminSystemUserRole, casbinRule } from "@/db/schema";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
@@ -38,13 +41,67 @@ const testRole = {
   status: 1, // 1=启用 0=禁用
 };
 
+/**
+ * 清理测试创建的角色数据
+ * 删除所有以 test_ 开头的角色及其关联数据
+ */
+async function cleanupTestRoles(): Promise<void> {
+  try {
+    await db.transaction(async (tx) => {
+      // 获取所有测试角色
+      const testRoles = await tx
+        .select({ id: adminSystemRole.id })
+        .from(adminSystemRole)
+        .where(like(adminSystemRole.id, "test_%"));
+
+      if (testRoles.length === 0) {
+        return;
+      }
+
+      const roleIds = testRoles.map(r => r.id);
+
+      // 删除用户角色关联
+      await tx
+        .delete(adminSystemUserRole)
+        .where(or(...roleIds.map(id => eq(adminSystemUserRole.roleId, id))));
+
+      // 删除 Casbin 规则
+      await tx
+        .delete(casbinRule)
+        .where(
+          and(
+            eq(casbinRule.ptype, "p"),
+            or(...roleIds.map(id => eq(casbinRule.v0, id))),
+          ),
+        );
+
+      // 删除角色本身
+      await tx
+        .delete(adminSystemRole)
+        .where(like(adminSystemRole.id, "test_%"));
+    });
+  }
+  catch (error) {
+    console.error("清理测试角色失败:", error);
+    throw error;
+  }
+}
+
 describe("system role routes", () => {
   let adminToken: string;
   let userToken: string;
 
   beforeAll(async () => {
+    // 清理可能存在的遗留测试数据
+    await cleanupTestRoles();
+
     adminToken = await getAdminToken();
     userToken = await getUserToken();
+  });
+
+  // 确保测试结束后清理所有测试数据
+  afterAll(async () => {
+    await cleanupTestRoles();
   });
 
   describe("authentication & authorization", () => {
@@ -286,7 +343,6 @@ describe("system role routes", () => {
         expect(json.data.name).toBe(testRole.name);
         expect(json.data.description).toBe(testRole.description);
         expect(json.data.status).toBe(testRole.status);
-        // 此角色将在 delete 测试组中被清理
       }
     });
 
@@ -304,9 +360,7 @@ describe("system role routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      if (response1.status === HttpStatusCodes.CREATED) {
-        // 此角色将在 delete 测试组中被清理
-      }
+      expect(response1.status).toBe(HttpStatusCodes.CREATED);
 
       // Try to create duplicate
       const response2 = await client.system.role.$post(
@@ -344,9 +398,7 @@ describe("system role routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      if (response.status === HttpStatusCodes.CREATED) {
-        // 此角色将在 delete 测试组中被清理
-      }
+      expect(response.status).toBe(HttpStatusCodes.CREATED);
     });
 
     it("should validate id format", async () => {
@@ -403,9 +455,7 @@ describe("system role routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      if (response.status === HttpStatusCodes.CREATED) {
-        // 此角色将在 delete 测试组中被清理
-      }
+      expect(response.status).toBe(HttpStatusCodes.CREATED);
 
       // Get built-in admin role ID
       const adminResponse = await client.system.role.$get(
@@ -550,17 +600,7 @@ describe("system role routes", () => {
       expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
     });
 
-    it("should delete role successfully (cleanup all test roles)", async () => {
-      // 删除所有创建的测试角色
-      const testRolesToDelete = [
-        `${testRoleId}_create`,
-        `${testRoleId}_duplicate`,
-        `${testRoleId}_gettest`,
-        `${testRoleId}_update`,
-        `${testRoleId}_delete`,
-        `${testRoleId}_permissions`,
-      ];
-
+    it("should delete role successfully", async () => {
       // 先创建一个角色用于测试删除功能
       const deleteTestRoleId = `${testRoleId}_delete`;
       const createResponse = await client.system.role.$post(
@@ -573,39 +613,26 @@ describe("system role routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
+      expect(createResponse.status).toBe(HttpStatusCodes.CREATED);
+
       // 测试删除功能
-      if (createResponse.status === HttpStatusCodes.CREATED) {
-        const deleteResponse = await client.system.role[":id"].$delete(
-          { param: { id: deleteTestRoleId } },
-          { headers: getAuthHeaders(adminToken) },
-        );
+      const deleteResponse = await client.system.role[":id"].$delete(
+        { param: { id: deleteTestRoleId } },
+        { headers: getAuthHeaders(adminToken) },
+      );
 
-        expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
-        if (deleteResponse.status === HttpStatusCodes.OK) {
-          const json = await deleteResponse.json();
-          expect(json.data.id).toBe(deleteTestRoleId);
-        }
-
-        // 验证角色已被删除
-        const verifyResponse = await client.system.role[":id"].$get(
-          { param: { id: deleteTestRoleId } },
-          { headers: getAuthHeaders(adminToken) },
-        );
-        expect(verifyResponse.status).toBe(HttpStatusCodes.NOT_FOUND);
+      expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
+      if (deleteResponse.status === HttpStatusCodes.OK) {
+        const json = await deleteResponse.json();
+        expect(json.data.id).toBe(deleteTestRoleId);
       }
 
-      // 清理所有其他测试创建的角色
-      for (const roleIdToDelete of testRolesToDelete) {
-        // 跳过已经删除的 delete 测试角色
-        if (roleIdToDelete === `${testRoleId}_delete`)
-          continue;
-
-        // 直接尝试删除角色（如果不存在会返回404）
-        await client.system.role[":id"].$delete(
-          { param: { id: roleIdToDelete } },
-          { headers: getAuthHeaders(adminToken) },
-        );
-      }
+      // 验证角色已被删除
+      const verifyResponse = await client.system.role[":id"].$get(
+        { param: { id: deleteTestRoleId } },
+        { headers: getAuthHeaders(adminToken) },
+      );
+      expect(verifyResponse.status).toBe(HttpStatusCodes.NOT_FOUND);
     });
   });
 
@@ -625,9 +652,7 @@ describe("system role routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      if (response.status === HttpStatusCodes.CREATED) {
-        // 此角色将在 delete 测试组中被清理
-      }
+      expect(response.status).toBe(HttpStatusCodes.CREATED);
     });
 
     it("should validate id format", async () => {

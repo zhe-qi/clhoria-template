@@ -1,8 +1,11 @@
+import { and, eq, like, or } from "drizzle-orm";
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
 import { v7 as uuidv7 } from "uuid";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import db from "@/db";
+import { adminSystemUser, adminSystemUserRole, casbinRule } from "@/db/schema";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
@@ -34,13 +37,79 @@ const testUser = {
   avatar: "https://example.com/avatar.png",
 };
 
+/**
+ * 清理测试创建的用户数据
+ * 删除所有符合测试用户模式的用户
+ */
+async function cleanupTestUsers(): Promise<void> {
+  try {
+    await db.transaction(async (tx) => {
+      // 查找所有测试用户（以 t 开头，后面跟数字的用户名模式）
+      const testUsers = await tx
+        .select({ id: adminSystemUser.id, username: adminSystemUser.username })
+        .from(adminSystemUser)
+        .where(
+          or(
+            like(adminSystemUser.username, "t123_%"), // 主要的测试用户模式
+            like(adminSystemUser.username, "test_%"), // 其他可能的测试用户
+            like(adminSystemUser.username, "t%_test"), // 其他测试模式
+          ),
+        );
+
+      if (testUsers.length === 0) {
+        return;
+      }
+
+      const userIds = testUsers.map(u => u.id);
+
+      // 删除用户角色关联
+      await tx
+        .delete(adminSystemUserRole)
+        .where(or(...userIds.map(id => eq(adminSystemUserRole.userId, id))));
+
+      // 删除 Casbin 规则（如果有用户相关的规则）
+      await tx
+        .delete(casbinRule)
+        .where(
+          and(
+            eq(casbinRule.ptype, "g"),
+            or(...userIds.map(id => eq(casbinRule.v0, id))),
+          ),
+        );
+
+      // 删除用户本身
+      await tx
+        .delete(adminSystemUser)
+        .where(
+          or(
+            like(adminSystemUser.username, "t123_%"),
+            like(adminSystemUser.username, "test_%"),
+            like(adminSystemUser.username, "t%_test"),
+          ),
+        );
+    });
+  }
+  catch (error) {
+    console.error("清理测试用户失败:", error);
+    throw error;
+  }
+}
+
 describe("system user routes", () => {
   let adminToken: string;
   let userToken: string;
 
   beforeAll(async () => {
+    // 清理可能存在的遗留测试数据
+    await cleanupTestUsers();
+
     adminToken = await getAdminToken();
     userToken = await getUserToken();
+  });
+
+  // 确保测试结束后清理所有测试数据
+  afterAll(async () => {
+    await cleanupTestUsers();
   });
 
   describe("authentication & authorization", () => {
@@ -221,7 +290,6 @@ describe("system user routes", () => {
         expect(json.data.username).toBe(newUsername);
         expect(json.data.nickName).toBe(testUser.nickName);
         expect(json.data).not.toHaveProperty("password"); // Password should not be returned
-        // 此用户将在 delete 测试组中被清理
       }
     });
 
@@ -239,10 +307,7 @@ describe("system user routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      if (response1.status === HttpStatusCodes.CREATED) {
-        // const json = await response1.json();
-        // 此用户将在 delete 测试组中被清理
-      }
+      expect(response1.status).toBe(HttpStatusCodes.CREATED);
 
       // Try to create duplicate
       const response2 = await client.system.user.$post(
@@ -278,10 +343,10 @@ describe("system user routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
+      expect(response.status).toBe(HttpStatusCodes.CREATED);
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
         userId = json.data.id;
-        // 此用户将在 delete 测试组中被清理
       }
     });
 
@@ -338,10 +403,10 @@ describe("system user routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
+      expect(response.status).toBe(HttpStatusCodes.CREATED);
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
         userId = json.data.id;
-        // 此用户将在 delete 测试组中被清理
       }
 
       // Get built-in admin user ID
@@ -496,17 +561,7 @@ describe("system user routes", () => {
       expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
     });
 
-    it("should delete user successfully (cleanup all test users)", async () => {
-      // 删除所有创建的测试用户
-      const testUsersToDelete = [
-        `${testUsername}_create`,
-        `${testUsername}_duplicate`,
-        `${testUsername}_gettest`,
-        `${testUsername}_update`,
-        `${testUsername}_delete`,
-        `${testUsername}_roles`,
-      ];
-
+    it("should delete user successfully", async () => {
       // 先创建一个用户用于测试删除功能
       const createResponse = await client.system.user.$post(
         {
@@ -518,66 +573,31 @@ describe("system user routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      let deleteTestUserId: string | undefined;
-      if (createResponse.status === HttpStatusCodes.CREATED) {
-        const json = await createResponse.json();
-        deleteTestUserId = json.data.id;
+      expect(createResponse.status).toBe(HttpStatusCodes.CREATED);
+      if (createResponse.status !== HttpStatusCodes.CREATED) {
+        throw new Error("Failed to create test user");
       }
+      const json = await createResponse.json();
+      const deleteTestUserId = json.data.id;
 
       // 测试删除功能
-      if (deleteTestUserId) {
-        const deleteResponse = await client.system.user[":id"].$delete(
-          { param: { id: deleteTestUserId } },
-          { headers: getAuthHeaders(adminToken) },
-        );
+      const deleteResponse = await client.system.user[":id"].$delete(
+        { param: { id: deleteTestUserId } },
+        { headers: getAuthHeaders(adminToken) },
+      );
 
-        expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
-        if (deleteResponse.status === HttpStatusCodes.OK) {
-          const json = await deleteResponse.json();
-          expect(json.data.id).toBe(deleteTestUserId);
-        }
-
-        // 验证用户已被删除
-        const verifyResponse = await client.system.user[":id"].$get(
-          { param: { id: deleteTestUserId } },
-          { headers: getAuthHeaders(adminToken) },
-        );
-        expect(verifyResponse.status).toBe(HttpStatusCodes.NOT_FOUND);
+      expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
+      if (deleteResponse.status === HttpStatusCodes.OK) {
+        const deleteJson = await deleteResponse.json();
+        expect(deleteJson.data.id).toBe(deleteTestUserId);
       }
 
-      // 清理所有其他测试创建的用户
-      for (const username of testUsersToDelete) {
-        // 跳过已经删除的 delete 测试用户
-        if (username === `${testUsername}_delete`)
-          continue;
-
-        // 查找用户
-        const searchResponse = await client.system.user.$get(
-          {
-            query: {
-              filters: JSON.stringify([
-                { field: "username", operator: "eq", value: username },
-              ]),
-            },
-          },
-          { headers: getAuthHeaders(adminToken) },
-        );
-
-        if (searchResponse.status === HttpStatusCodes.OK) {
-          const json = await searchResponse.json();
-          const users = Array.isArray(json.data) ? json.data : [];
-
-          // 删除找到的用户
-          for (const user of users) {
-            if (user.id) {
-              await client.system.user[":id"].$delete(
-                { param: { id: user.id } },
-                { headers: getAuthHeaders(adminToken) },
-              );
-            }
-          }
-        }
-      }
+      // 验证用户已被删除
+      const verifyResponse = await client.system.user[":id"].$get(
+        { param: { id: deleteTestUserId } },
+        { headers: getAuthHeaders(adminToken) },
+      );
+      expect(verifyResponse.status).toBe(HttpStatusCodes.NOT_FOUND);
     });
   });
 
@@ -596,10 +616,10 @@ describe("system user routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
+      expect(response.status).toBe(HttpStatusCodes.CREATED);
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
         userId = json.data.id;
-        // 此用户将在 delete 测试组中被清理
       }
     });
 

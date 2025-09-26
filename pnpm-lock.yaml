@@ -39,8 +39,8 @@ importers:
         specifier: ^0.9.19
         version: 0.9.19(hono@4.9.8)
       bullmq:
-        specifier: ^5.58.8
-        version: 5.58.8
+        specifier: ^5.58.9
+        version: 5.58.9
       casbin:
         specifier: ^5.39.0
         version: 5.39.0
@@ -124,8 +124,8 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(eslint@9.36.0(jiti@2.5.1))
       lint-staged:
-        specifier: ^16.2.0
-        version: 16.2.0
+        specifier: ^16.2.1
+        version: 16.2.1
       simple-git-hooks:
         specifier: ^2.13.1
         version: 2.13.1
@@ -133,8 +133,8 @@ importers:
         specifier: ^0.15.4
         version: 0.15.4(@typescript/native-preview@7.0.0-dev.20250925.1)(typescript@5.9.2)
       tsx:
-        specifier: ^4.20.5
-        version: 4.20.5
+        specifier: ^4.20.6
+        version: 4.20.6
       typescript:
         specifier: 5.9.2
         version: 5.9.2
@@ -2023,8 +2023,8 @@ packages:
     resolution: {integrity: sha512-bkXY9WsVpY7CvMhKSR6pZilZu9Ln5WDrKVBUXf2S443etkmEO4V58heTecXcUIsNsi4Rx8JUO4NfX1IcQl4deg==}
     engines: {node: '>=18.20'}
 
-  bullmq@5.58.8:
-    resolution: {integrity: sha512-j7h2JlWs7rOzsLePKtNK+zLOyrH6PRurLLZ6SriSpt9w5fHR128IFSd4gHGwYUb41ycnWmbLDcggp64zNW/p/Q==}
+  bullmq@5.58.9:
+    resolution: {integrity: sha512-z29F6c/Nznl6wmQ/w+T0HIwCdDIY5C8pgyrjGxCgVzhm79IT10+yt3SrW2HFc2WUIYlh3TVtdu2d/kvaw/Awug==}
 
   bytes@3.1.2:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
@@ -3044,8 +3044,8 @@ packages:
     cpu: [x64, arm64, wasm32, arm]
     os: [darwin, linux, win32]
 
-  lint-staged@16.2.0:
-    resolution: {integrity: sha512-spdYSOCQ2MdZ9CM1/bu/kDmaYGsrpNOeu1InFFV8uhv14x6YIubGxbCpSmGILFoxkiheNQPDXSg5Sbb5ZuVnug==}
+  lint-staged@16.2.1:
+    resolution: {integrity: sha512-KMeYmH9wKvHsXdUp+z6w7HN3fHKHXwT1pSTQTYxB9kI6ekK1rlL3kLZEoXZCppRPXFK9PFW/wfQctV7XUqMrPQ==}
     engines: {node: '>=20.17'}
     hasBin: true
 
@@ -3941,8 +3941,8 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  tsx@4.20.5:
-    resolution: {integrity: sha512-+wKjMNU9w/EaQayHXb7WA7ZaHY6hN8WgfvHNQ3t1PnU91/7O8TcTnIhCDYTZwnt8JsO9IBqZ30Ln1r7pPF52Aw==}
+  tsx@4.20.6:
+    resolution: {integrity: sha512-ytQKuwgmrrkDTFP4LjR0ToE2nqgy886GpvRSpU0JAnrdBYppuY5rLkRUYPU1yCryb24SsKBTL/hlDQAEFVwtZg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -6275,7 +6275,7 @@ snapshots:
 
   builtin-modules@5.0.0: {}
 
-  bullmq@5.58.8:
+  bullmq@5.58.9:
     dependencies:
       cron-parser: 4.9.0
       ioredis: 5.8.0
@@ -7295,7 +7295,7 @@ snapshots:
       '@libsql/win32-x64-msvc': 0.5.17
     optional: true
 
-  lint-staged@16.2.0:
+  lint-staged@16.2.1:
     dependencies:
       commander: 14.0.1
       listr2: 9.0.4
@@ -8427,7 +8427,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsx@4.20.5:
+  tsx@4.20.6:
     dependencies:
       esbuild: 0.25.4
       get-tsconfig: 4.10.1
