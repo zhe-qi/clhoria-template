@@ -16,10 +16,12 @@ export async function setupJobSystem(): Promise<void> {
 
   logger.info(
     {
-      queueName: jobSystemConfig.queueName,
-      concurrency: jobSystemConfig.workerConfig?.concurrency,
-      processors: taskProcessors.length,
-      scheduledTasks: allScheduledTasks.length,
+      info: JSON.stringify({
+        queueName: jobSystemConfig.queueName,
+        concurrency: jobSystemConfig.workerConfig?.concurrency,
+        processors: taskProcessors.length,
+        scheduledTasks: allScheduledTasks.length,
+      }),
     },
     "[任务系统]: 已启动",
   );

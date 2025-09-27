@@ -5,74 +5,81 @@ import { Enforcer } from "casbin";
 import type { AppBindings } from "@/types/lib";
 
 import { enforcerPromise } from "@/lib/casbin";
+import logger from "@/lib/logger";
 import { API_ADMIN_PATH } from "@/lib/openapi/config";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";
 
 /**
- * 通用 Casbin 权限验证中间件
+ * Casbin 权限校验中间件
+ * 用于校验当前用户是否有访问指定接口的权限
  */
 export function authorize(): MiddlewareHandler<AppBindings> {
   return async (c, next) => {
+    // 获取 Casbin 权限管理器
     const enforcer = await enforcerPromise;
+
+    // 检查 enforcer 是否有效
     if (!(enforcer instanceof Enforcer)) {
       return c.json(Resp.fail(HttpStatusPhrases.INTERNAL_SERVER_ERROR), HttpStatusCodes.INTERNAL_SERVER_ERROR);
     }
 
+    // 从 JWT 载荷中获取用户角色
     const { roles } = c.get("jwtPayload");
 
-    // 去掉 API_ADMIN_PATH 前缀, 如果有的话
+    // 去除 API 前缀，获取实际请求路径
     const path = c.req.path.replace(API_ADMIN_PATH, "");
 
+    // 检查用户是否有权限访问该路径和方法
     const hasPermission = await hasAnyPermission(enforcer, roles, path, c.req.method);
 
+    // 无权限则返回 403
     if (!hasPermission) {
       return c.json(Resp.fail(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
     }
 
+    // 有权限则继续后续中间件
     await next();
   };
 }
 
-async function hasAnyPermission(enforcer: Enforcer, roles: string[], path: string, method: string) {
+/**
+ * 检查用户是否有任意一个角色有权限访问指定路径和方法
+ * @param enforcer - Casbin 权限管理器
+ * @param roles - 用户角色
+ * @param path - 请求路径
+ * @param method - 请求方法
+ * @returns 是否有权限
+ */
+async function hasAnyPermission(enforcer: Enforcer, roles: string[], path: string, method: string): Promise<boolean> {
+  // 边界情况：空角色直接返回
   if (roles.length === 0) {
-    return Promise.resolve(false);
+    return false;
   }
 
-  // 存储所有未完成的Promise，用于在找到结果后忽略剩余请求
-  const pendingPromises: Promise<void>[] = [];
-
-  return new Promise<boolean>((resolve) => {
-    for (const role of roles) {
-      const promise = enforcer.enforce(role, path, method)
-        .then((hasPerm) => {
-          if (hasPerm) {
-            // 找到有权限的角色，立即返回结果
-            resolve(true);
-          }
-          else {
-            // 过滤已完成的Promise，检查是否全部完成
-            const index = pendingPromises.indexOf(promise);
-            if (index !== -1)
-              pendingPromises.splice(index, 1);
-            if (pendingPromises.length === 0) {
-              // 所有角色都检查完且无权限
-              resolve(false);
-            }
-          }
-        })
-        // 处理单个检查可能的异常（根据业务决定是否视为"无权限"）
-        .catch(() => {
-          const index = pendingPromises.indexOf(promise);
-          if (index !== -1)
-            pendingPromises.splice(index, 1);
-          if (pendingPromises.length === 0) {
-            resolve(false);
-          }
-        });
-
-      pendingPromises.push(promise);
+  // 封装安全的权限检查函数
+  const safeEnforce = async (role: string): Promise<boolean> => {
+    try {
+      return await enforcer.enforce(role, path, method);
     }
-  });
+    catch (error) {
+      // 记录错误但不中断流程
+      logger.error({ error, role, path, method }, "[授权]: Casbin enforce 执行失败");
+      return false;
+    }
+  };
+
+  // 单角色优化路径
+  if (roles.length === 1) {
+    return safeEnforce(roles[0]);
+  }
+
+  // 并发检查所有角色权限
+  const results = await Promise.all(
+    roles.map(role => safeEnforce(role)),
+  );
+
+  // 任意一个有权限即返回 true
+  return results.some(hasPermission => hasPermission);
 }

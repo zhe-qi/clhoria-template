@@ -4,9 +4,6 @@ import { differenceInSeconds, isValid } from "date-fns";
 
 import redisClient from "@/lib/redis";
 
-// --------------------------
-// 1. 封装复用工具函数（消除重复逻辑）
-// --------------------------
 /**
  * 生成带前缀的Redis Key
  * @param {string} type - 存储类型（challenge/token）
@@ -34,9 +31,10 @@ function calculateTtlSeconds(expires: number | Date): number {
   return Math.max(ttl, 0);
 }
 
-// --------------------------
-// 2. 配置Cap.js存储（使用工具函数优化）
-// --------------------------
+/**
+ * Cap.js 配置
+ * @description 使用 Redis 作为存储
+ */
 const cap = new Cap({
   storage: {
     challenges: {

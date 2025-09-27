@@ -1,5 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
+import logger from "@/lib/logger";
+
 /**
  * Refine CRUD 操作符 Schema
  */
@@ -98,6 +100,24 @@ export const PaginationSchema = z.object({
 });
 
 /**
+ * 辅助函数：检查对象深度
+ */
+function getDepth(obj: any, depth = 0): number {
+  if (depth > 10)
+    return depth; // 防止无限递归
+  if (typeof obj !== "object" || obj === null)
+    return depth;
+
+  let maxDepth = depth;
+  for (const value of Object.values(obj)) {
+    if (typeof value === "object" && value !== null) {
+      maxDepth = Math.max(maxDepth, getDepth(value, depth + 1));
+    }
+  }
+  return maxDepth;
+}
+
+/**
  * JSON 字符串预处理函数
  * 安全地解析 JSON 字符串参数
  */
@@ -108,6 +128,14 @@ function safeJsonPreprocess(val: unknown): unknown {
 
   if (typeof val === "string") {
     const trimmed = val.trim();
+
+    // 增加长度限制，防止DoS攻击
+    if (trimmed.length > 10000) {
+      logger.warn("[查询参数]: JSON字符串过长，已截断");
+      return undefined;
+    }
+
+    // 检查基本的安全模式
     if (trimmed === "" || trimmed === "null" || trimmed === "undefined") {
       return undefined;
     }
@@ -119,11 +147,18 @@ function safeJsonPreprocess(val: unknown): unknown {
     }
 
     try {
-      return JSON.parse(trimmed);
+      const parsed = JSON.parse(trimmed);
+      // 递归深度限制，防止深层嵌套攻击
+      if (getDepth(parsed) > 5) {
+        logger.warn("[查询参数]: JSON嵌套层级过深");
+        return undefined;
+      }
+      return parsed;
     }
-    catch {
-      // 如果不是有效的 JSON，返回原字符串（可能是简单的字符串值）
-      return trimmed;
+    catch (error) {
+      // 记录解析错误但不暴露详细信息
+      logger.warn({ error: error instanceof Error ? error.message : String(error) }, "[查询参数]: JSON解析失败");
+      return undefined;
     }
   }
 

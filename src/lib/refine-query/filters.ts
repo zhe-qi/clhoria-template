@@ -3,25 +3,9 @@ import type {
 } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 
-import {
-  and,
-  between,
-  eq,
-  gt,
-  gte,
-  ilike,
-  inArray,
-  isNotNull,
-  isNull,
-  like,
-  lt,
-  lte,
-  ne,
-  not,
-  notInArray,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, between, eq, gt, gte, ilike, inArray, isNotNull, isNull, like, lt, lte, ne, not, notInArray, or, sql } from "drizzle-orm";
+
+import logger from "@/lib/logger";
 
 import type { ConditionalFilter, CrudFilters, LogicalFilter } from "./types";
 
@@ -72,7 +56,7 @@ export class FiltersConverter {
   private convertLogicalFilter(filter: LogicalFilter): SQL<unknown> | undefined {
     const column = this.getColumn(filter.field);
     if (!column) {
-      console.warn(`Unknown field: ${filter.field}`);
+      logger.warn({ field: filter.field }, "[查询过滤]: 未知字段");
       return undefined;
     }
 
@@ -161,24 +145,24 @@ export class FiltersConverter {
         case "ina":
           // 检查列是否包含数组中的所有元素
           if (Array.isArray(value) && value.length > 0) {
-            // 使用 PostgreSQL 的 @> 操作符
-            return sql`${column} @> ${JSON.stringify(value)}`;
+            // 使用参数化查询，防止SQL注入
+            return sql`${column} @> ${value}::jsonb`;
           }
           return undefined;
         case "nina":
           // 检查列是否不包含数组中的所有元素
           if (Array.isArray(value) && value.length > 0) {
-            return not(sql`${column} @> ${JSON.stringify(value)}`);
+            return not(sql`${column} @> ${value}::jsonb`);
           }
           return undefined;
 
         default:
-          console.warn(`Unsupported operator: ${operator}`);
+          logger.warn({ operator }, "[查询过滤]: 不支持的操作符");
           return undefined;
       }
     }
     catch (error) {
-      console.error(`Error converting filter for field ${filter.field}:`, error);
+      logger.error({ field: filter.field, error: error instanceof Error ? error.message : String(error) }, "[查询过滤]: 转换过滤器错误");
       return undefined;
     }
   }
@@ -208,7 +192,7 @@ export class FiltersConverter {
       case "or":
         return or(...conditions);
       default:
-        console.warn(`Unsupported conditional operator: ${operator}`);
+        logger.warn({ operator }, "[查询过滤]: 不支持的条件操作符");
         return undefined;
     }
   }
@@ -217,7 +201,12 @@ export class FiltersConverter {
    * 获取表列
    */
   private getColumn(fieldName: string): PgColumn | undefined {
-    return (this.table as any)[fieldName];
+    // 使用更安全的类型处理
+    const tableColumns = this.table as unknown as Record<string, PgColumn>;
+    if (fieldName in tableColumns) {
+      return tableColumns[fieldName];
+    }
+    return undefined;
   }
 
   /**
@@ -257,15 +246,25 @@ export function validateFilterFields(
   table: PgTable,
   allowedFields?: string[],
 ): { valid: boolean; invalidFields: string[] } {
-  // 如果有白名单，使用白名单；否则使用表的所有列
-  const validColumns = allowedFields || Object.keys(table);
+  const tableColumns = Object.keys(table);
+  // 如果提供了白名单，严格使用白名单
+  const validColumns = allowedFields || tableColumns;
   const invalidFields: string[] = [];
+
+  // 记录访问敏感字段的尝试
+  const sensitiveFields = ["password", "secret", "token", "key"];
 
   function checkFilter(filter: CrudFilters[number]) {
     if ("field" in filter) {
-      // LogicalFilter
-      if (!validColumns.includes(filter.field)) {
-        invalidFields.push(filter.field);
+      const field = filter.field;
+
+      // 检查是否尝试访问敏感字段
+      if (sensitiveFields.some(sf => field.toLowerCase().includes(sf))) {
+        logger.warn({ field }, "[查询过滤]: 尝试访问敏感字段");
+      }
+
+      if (!validColumns.includes(field)) {
+        invalidFields.push(field);
       }
     }
     else if ("value" in filter && Array.isArray(filter.value)) {

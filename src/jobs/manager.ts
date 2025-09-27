@@ -22,7 +22,9 @@ export async function initializeJobSystem(config?: JobSystemConfig): Promise<voi
   jobSystemConfig = config || {};
   isInitialized = true;
 
-  logger.info(jobSystemConfig, "[任务系统]: 初始化完成");
+  logger.info({
+    config: JSON.stringify(jobSystemConfig),
+  }, "[任务系统]: 初始化完成");
 }
 
 /**
