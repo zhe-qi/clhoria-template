@@ -93,7 +93,7 @@ export const update = createRoute({
     [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "内置用户不允许修改状态"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
   },
-}); ;
+});
 
 /** 删除系统用户 */
 export const remove = createRoute({
@@ -113,7 +113,7 @@ export const remove = createRoute({
     [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "内置用户不允许删除"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
   },
-}); ;
+});
 
 /** 保存用户角色（全量更新） */
 export const saveRoles = createRoute({

@@ -18,4 +18,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type AdminSystemRoleRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type SystemRoleRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

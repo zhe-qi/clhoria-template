@@ -1,6 +1,5 @@
-import type { z } from "zod";
-
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 import type { selectAdminSystemRole } from "@/db/schema";
 
@@ -12,15 +11,15 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";
 
-import type { AdminSystemRoleRouteHandlerType } from "./role.index";
+import type { SystemRoleRouteHandlerType } from "./role.index";
 
-export const list: AdminSystemRoleRouteHandlerType<"list"> = async (c) => {
+export const list: SystemRoleRouteHandlerType<"list"> = async (c) => {
   // 获取查询参数
   const rawParams = c.req.query();
 
   const parseResult = RefineQueryParamsSchema.safeParse(rawParams);
   if (!parseResult.success) {
-    return c.json(parseResult.error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    return c.json(Resp.fail(z.prettifyError(parseResult.error)), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
   // 执行查询
@@ -39,7 +38,7 @@ export const list: AdminSystemRoleRouteHandlerType<"list"> = async (c) => {
   return c.json(Resp.ok(result.data), HttpStatusCodes.OK);
 };
 
-export const create: AdminSystemRoleRouteHandlerType<"create"> = async (c) => {
+export const create: SystemRoleRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
@@ -59,7 +58,7 @@ export const create: AdminSystemRoleRouteHandlerType<"create"> = async (c) => {
   }
 };
 
-export const get: AdminSystemRoleRouteHandlerType<"get"> = async (c) => {
+export const get: SystemRoleRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [role] = await db
@@ -74,7 +73,7 @@ export const get: AdminSystemRoleRouteHandlerType<"get"> = async (c) => {
   return c.json(Resp.ok(role), HttpStatusCodes.OK);
 };
 
-export const update: AdminSystemRoleRouteHandlerType<"update"> = async (c) => {
+export const update: SystemRoleRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
@@ -95,7 +94,7 @@ export const update: AdminSystemRoleRouteHandlerType<"update"> = async (c) => {
   return c.json(Resp.ok(updated), HttpStatusCodes.OK);
 };
 
-export const remove: AdminSystemRoleRouteHandlerType<"remove"> = async (c) => {
+export const remove: SystemRoleRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [deleted] = await db
@@ -110,7 +109,7 @@ export const remove: AdminSystemRoleRouteHandlerType<"remove"> = async (c) => {
   return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
 };
 
-export const getPermissions: AdminSystemRoleRouteHandlerType<"getPermissions"> = async (c) => {
+export const getPermissions: SystemRoleRouteHandlerType<"getPermissions"> = async (c) => {
   const { id } = c.req.valid("param");
 
   try {
@@ -124,7 +123,7 @@ export const getPermissions: AdminSystemRoleRouteHandlerType<"getPermissions"> =
   }
 };
 
-export const savePermissions: AdminSystemRoleRouteHandlerType<"savePermissions"> = async (c) => {
+export const savePermissions: SystemRoleRouteHandlerType<"savePermissions"> = async (c) => {
   const { id } = c.req.valid("param");
   const { permissions } = c.req.valid("json");
 

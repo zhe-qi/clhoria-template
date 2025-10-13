@@ -1,7 +1,6 @@
-import type { z } from "zod";
-
 import { hash } from "@node-rs/argon2";
 import { and, eq, inArray, sql } from "drizzle-orm";
+import { z } from "zod";
 
 import type { responseAdminSystemUserWithPassword } from "@/db/schema";
 
@@ -12,14 +11,14 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { omit, Resp } from "@/utils";
 
-import type { AdminSystemUserRouteHandlerType } from "./user.index";
+import type { SystemUserRouteHandlerType } from "./user.index";
 
-export const list: AdminSystemUserRouteHandlerType<"list"> = async (c) => {
+export const list: SystemUserRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();
 
   const parseResult = RefineQueryParamsSchema.safeParse(query);
   if (!parseResult.success) {
-    return c.json(parseResult.error, HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    return c.json(Resp.fail(z.prettifyError(parseResult.error)), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
   const [error, result] = await executeRefineQuery<z.infer<typeof responseAdminSystemUserWithPassword>>({
@@ -59,9 +58,9 @@ export const list: AdminSystemUserRouteHandlerType<"list"> = async (c) => {
   c.header("x-total-count", result.total.toString());
 
   return c.json(Resp.ok(safeData), HttpStatusCodes.OK);
-}; ;
+};
 
-export const create: AdminSystemUserRouteHandlerType<"create"> = async (c) => {
+export const create: SystemUserRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
@@ -90,20 +89,14 @@ export const create: AdminSystemUserRouteHandlerType<"create"> = async (c) => {
     // 检查是否为唯一约束冲突（PostgreSQL 错误码 23505）
     if (pgError?.code === "23505"
       || pgError?.constraint_name === "admin_system_user_username_unique") {
-      return c.json(
-        Resp.fail("用户名已存在"),
-        HttpStatusCodes.CONFLICT,
-      );
+      return c.json(Resp.fail("用户名已存在"), HttpStatusCodes.CONFLICT);
     }
 
-    return c.json(
-      Resp.fail("请求参数验证错误"),
-      HttpStatusCodes.UNPROCESSABLE_ENTITY,
-    );
+    return c.json(Resp.fail("请求参数验证错误"), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 };
 
-export const get: AdminSystemUserRouteHandlerType<"get"> = async (c) => {
+export const get: SystemUserRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [user] = await db
@@ -120,7 +113,7 @@ export const get: AdminSystemUserRouteHandlerType<"get"> = async (c) => {
   return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
 };
 
-export const update: AdminSystemUserRouteHandlerType<"update"> = async (c) => {
+export const update: SystemUserRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
@@ -161,7 +154,7 @@ export const update: AdminSystemUserRouteHandlerType<"update"> = async (c) => {
   return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
 };
 
-export const remove: AdminSystemUserRouteHandlerType<"remove"> = async (c) => {
+export const remove: SystemUserRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // 检查是否为内置用户
@@ -190,7 +183,7 @@ export const remove: AdminSystemUserRouteHandlerType<"remove"> = async (c) => {
   return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
 };
 
-export const saveRoles: AdminSystemUserRouteHandlerType<"saveRoles"> = async (c) => {
+export const saveRoles: SystemUserRouteHandlerType<"saveRoles"> = async (c) => {
   const { userId } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
 

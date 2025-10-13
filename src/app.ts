@@ -20,7 +20,9 @@ const app = createApp();
 // 配置文档主页（非生产环境）
 configureMainDoc?.(app);
 
-app.use("*", sentry({ dsn: env.SENTRY_DSN }));
+if (env.SENTRY_DSN) {
+  app.use("*", sentry({ dsn: env.SENTRY_DSN }));
+}
 
 // #region 公共路由
 const publicRoutes = Object.values(allPublicExports);
@@ -56,9 +58,8 @@ otherAdminRoutes.forEach((route) => {
 // #endregion
 
 /** 路由分组 顺序很重要，直接影响了中间件的执行顺序，公共路由必须放最前面 */
-const appGroups = [publicApp, clientApp, adminApp];
-appGroups.forEach((group) => {
-  app.route("/", group);
-});
+app.route("/", publicApp);
+app.route("/", clientApp);
+app.route("/", adminApp);
 
 export default app;
