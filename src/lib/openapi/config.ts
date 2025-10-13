@@ -1,5 +1,8 @@
 import type { AppConfig } from "./types";
 
+/**
+ * 应用OpenAPI配置
+ */
 export const APP_CONFIG: AppConfig[] = [
   {
     name: "admin",
@@ -17,14 +20,26 @@ export const APP_CONFIG: AppConfig[] = [
   },
 ];
 
+/** 应用OpenAPI版本 */
 export const OPENAPI_VERSION = "3.1.0";
+
+/** 应用OpenAPI文档端点 */
 export const DOC_ENDPOINT = "/doc";
 
+/** 应用OpenAPI基础路径 */
 export const API_BASE_PATH = "/api";
+
+/** 应用OpenAPI管理端路径 */
 export const API_ADMIN_PATH = `${API_BASE_PATH}/admin`;
 
+/**
+ * Scalar配置
+ */
 export const SCALAR_CONFIG = {
+  /** Scalar主题 */
   theme: "kepler",
+  /** Scalar布局 */
   layout: "modern",
+  /** Scalar默认HTTP客户端 */
   defaultHttpClient: { targetKey: "js", clientKey: "fetch" },
 } as const;
