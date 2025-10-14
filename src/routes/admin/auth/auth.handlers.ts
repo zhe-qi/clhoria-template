@@ -21,9 +21,9 @@ import type { AuthRouteHandlerType } from "./auth.index";
 export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const body = c.req.valid("json");
 
-  // 1. 验证验证码token
+  // 1. 验证验证码token（生产环境必须验证）
   const { success } = await cap.validateToken(body.captchaToken);
-  if (!success) {
+  if (!success && env.NODE_ENV === "production") {
     return c.json(Resp.fail("验证码错误"), HttpStatusCodes.BAD_REQUEST);
   }
 

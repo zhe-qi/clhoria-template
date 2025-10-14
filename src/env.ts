@@ -18,7 +18,7 @@ expand(config({
  */
 const EnvSchema = z.object({
   /** 环境变量 */
-  NODE_ENV: z.string().default("development"),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   /** 端口 */
   PORT: z.coerce.number().default(9999),
   /** 日志级别 */
