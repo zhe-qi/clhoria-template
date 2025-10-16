@@ -1,11 +1,12 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { idAdminSystemRole, insertAdminSystemRole, patchAdminSystemRole, selectAdminSystemRole } from "@/db/schema";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErr } from "@/utils";
+
+import { idAdminSystemRole, insertAdminSystemRole, patchAdminSystemRole, selectAdminSystemRole } from "./schema";
 
 const routePrefix = "/system/role";
 const tags = [`${routePrefix}（系统角色）`];

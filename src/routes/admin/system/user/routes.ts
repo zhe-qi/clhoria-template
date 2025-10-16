@@ -1,12 +1,13 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { insertAdminSystemUser, patchAdminSystemUser, responseAdminSystemUserWithList, responseAdminSystemUserWithoutPassword } from "@/db/schema";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 import { respErr } from "@/utils";
+
+import { insertAdminSystemUser, patchAdminSystemUser, responseAdminSystemUserWithList, responseAdminSystemUserWithoutPassword } from "./schema";
 
 const routePrefix = "/system/user";
 const tags = [`${routePrefix}（系统用户）`];

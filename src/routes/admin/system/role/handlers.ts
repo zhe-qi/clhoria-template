@@ -1,8 +1,6 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import type { selectAdminSystemRole } from "@/db/schema";
-
 import db from "@/db";
 import { adminSystemRole } from "@/db/schema";
 import { enforcerPromise } from "@/lib/casbin";
@@ -11,7 +9,8 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";
 
-import type { SystemRoleRouteHandlerType } from "./role.index";
+import type { SystemRoleRouteHandlerType } from ".";
+import type { selectAdminSystemRole } from "./schema";
 
 export const list: SystemRoleRouteHandlerType<"list"> = async (c) => {
   // 获取查询参数

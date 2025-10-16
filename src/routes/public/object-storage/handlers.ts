@@ -1,7 +1,7 @@
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { generateDownloadUrl, generateUploadUrl } from "@/services/object-storage";
 
-import type { ObjectStorageRouteHandlerType } from "./object-storage.index";
+import type { ObjectStorageRouteHandlerType } from ".";
 
 export const getUploadToken: ObjectStorageRouteHandlerType<"getUploadToken"> = async (c) => {
   const { fileName, fileType } = c.req.valid("json");

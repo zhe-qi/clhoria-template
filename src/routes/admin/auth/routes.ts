@@ -1,13 +1,13 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { jwt } from "hono/jwt";
 
-import { loginAdminSystemUser } from "@/db/schema";
-import { getUserInfoSchema } from "@/db/schema/admin/system/user";
 import env from "@/env";
 import { RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErr } from "@/utils";
+
+import { getUserInfoSchema, loginAdminSystemUser } from "../system/user/schema";
 
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];

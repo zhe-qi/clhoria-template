@@ -2,8 +2,8 @@ import type { AppRouteHandler } from "@/types/lib";
 
 import { createRouter } from "@/lib/create-app";
 
-import * as handlers from "./object-storage.handlers";
-import * as routes from "./object-storage.routes";
+import * as handlers from "./handlers";
+import * as routes from "./routes";
 
 export const objectStorageRouter = createRouter()
   .openapi(routes.getUploadToken, handlers.getUploadToken)

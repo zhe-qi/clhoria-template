@@ -2,9 +2,9 @@ import { sentry } from "@hono/sentry";
 import { jwt } from "hono/jwt";
 
 import configureOpenAPI from "@/lib/openapi";
-import * as allAdminExports from "@/routes/admin/admin.index";
-import * as allClientExports from "@/routes/client/client.index";
-import * as allPublicExports from "@/routes/public/public.index";
+import * as allAdminExports from "@/routes/admin";
+import * as allClientExports from "@/routes/client";
+import * as allPublicExports from "@/routes/public";
 
 import env from "./env";
 import createApp from "./lib/create-app";

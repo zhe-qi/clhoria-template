@@ -1,2 +1,2 @@
-export * from "./role/role.index";
-export * from "./user/user.index";
+export * from "./role";
+export * from "./user";

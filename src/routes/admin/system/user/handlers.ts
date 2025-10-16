@@ -2,8 +2,6 @@ import { hash } from "@node-rs/argon2";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
-import type { responseAdminSystemUserWithPassword } from "@/db/schema";
-
 import db from "@/db";
 import { adminSystemRole, adminSystemUser, adminSystemUserRole } from "@/db/schema";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
@@ -11,7 +9,8 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { omit, Resp } from "@/utils";
 
-import type { SystemUserRouteHandlerType } from "./user.index";
+import type { SystemUserRouteHandlerType } from ".";
+import type { responseAdminSystemUserWithPassword } from "./schema";
 
 export const list: SystemUserRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();

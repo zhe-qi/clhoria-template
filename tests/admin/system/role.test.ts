@@ -9,9 +9,9 @@ import env from "@/env";
 import createApp from "@/lib/create-app";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
-import { getAdminToken, getAuthHeaders, getUserToken } from "@/utils/test-utils";
+import { adminSystemRoleRouter } from "@/routes/admin/system/role";
 
-import { adminSystemRoleRouter } from "./role.index";
+import { getAdminToken, getAuthHeaders, getUserToken } from "../../auth-utils";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");

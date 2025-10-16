@@ -15,7 +15,7 @@ import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { parseRelations, Resp, toColumns } from "@/utils";
 import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/utils/tokens/admin";
 
-import type { AuthRouteHandlerType } from "./auth.index";
+import type { AuthRouteHandlerType } from ".";
 
 /** 管理端登录 */
 export const login: AuthRouteHandlerType<"login"> = async (c) => {
