@@ -1,9 +1,12 @@
 import type { SQL } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import type { Writable } from "type-fest";
 
 import { asc, desc } from "drizzle-orm";
 
-import type { CrudSorting } from "./types";
+import logger from "@/lib/logger";
+
+import type { CrudSorting } from "./schemas";
 
 /**
  * 排序转换器类
@@ -42,7 +45,7 @@ export class SortersConverter {
   private convertSorter(sorter: CrudSorting[number]): SQL<unknown> | undefined {
     const column = this.getColumn(sorter.field);
     if (!column) {
-      console.warn(`Unknown sort field: ${sorter.field}`);
+      logger.warn({ field: sorter.field }, "[查询排序]: 未知排序字段");
       return undefined;
     }
 
@@ -53,12 +56,12 @@ export class SortersConverter {
         case "desc":
           return desc(column);
         default:
-          console.warn(`Invalid sort order: ${sorter.order}`);
+          logger.warn({ order: sorter.order }, "[查询排序]: 无效的排序方向");
           return undefined;
       }
     }
     catch (error) {
-      console.error(`Error converting sorter for field ${sorter.field}:`, error);
+      logger.error({ field: sorter.field, error: error instanceof Error ? error.message : String(error) }, "[查询排序]: 转换排序条件错误");
       return undefined;
     }
   }
@@ -67,7 +70,12 @@ export class SortersConverter {
    * 获取表列
    */
   private getColumn(fieldName: string): PgColumn | undefined {
-    return (this.table as any)[fieldName];
+    // 使用 type-fest Writable 类型进行更安全的类型处理
+    const tableColumns = this.table as unknown as Writable<Record<string, PgColumn>>;
+    if (fieldName in tableColumns) {
+      return tableColumns[fieldName];
+    }
+    return undefined;
   }
 }
 
@@ -98,10 +106,10 @@ export function convertSortersToSQL(
 export function validateSorterFields(
   sorters: CrudSorting,
   table: PgTable,
-  allowedFields?: string[],
-): { valid: boolean; invalidFields: string[] } {
+  allowedFields?: readonly string[],
+): Readonly<{ valid: boolean; invalidFields: readonly string[] }> {
   // 如果有白名单，使用白名单；否则使用表的所有列
-  const validColumns = allowedFields || Object.keys(table);
+  const validColumns = allowedFields ? [...allowedFields] : Object.keys(table);
   const invalidFields = sorters
     .map(sorter => sorter.field)
     .filter(field => !validColumns.includes(field));
@@ -117,7 +125,7 @@ export function validateSorterFields(
  * @param sorters 排序条件数组
  * @returns 字段名数组
  */
-export function extractSorterFields(sorters: CrudSorting): string[] {
+export function extractSorterFields(sorters: CrudSorting): readonly string[] {
   return [...new Set(sorters.map(sorter => sorter.field))];
 }
 
@@ -158,7 +166,7 @@ export function addDefaultSorting(
  */
 export function sanitizeSorters(
   sorters: CrudSorting,
-  validFields: string[],
+  validFields: readonly string[],
 ): CrudSorting {
   return sorters.filter(sorter => validFields.includes(sorter.field));
 }

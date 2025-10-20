@@ -1,132 +1,14 @@
 /**
- * Refine 标准数据类型定义
- * 完全按照 Refine 官方文档实现
+ * Refine 查询配置和扩展类型定义
+ * 基础类型(CrudOperators, CrudFilters, CrudSorting等)已迁移到 schemas.ts,通过 Zod 推导生成
+ * 此文件仅保留查询配置、Join相关和工具类型
  */
 
-// Refine 支持的所有 CRUD 操作符
-export type CrudOperators
-  // 相等性操作符
-  = | "eq" // Equal
-    | "ne" // Not equal
+import type { SQL } from "drizzle-orm";
+import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import type { EmptyObject, Simplify, UnknownRecord } from "type-fest";
 
-  // 比较操作符
-    | "lt" // Less than
-    | "gt" // Greater than
-    | "lte" // Less than or equal to
-    | "gte" // Greater than or equal to
-
-  // 数组操作符
-    | "in" // Included in an array
-    | "nin" // Not included in an array
-    | "ina" // Column contains every element in an array
-    | "nina" // Column doesn't contain every element in an array
-
-  // 字符串操作符
-    | "contains" // Contains
-    | "ncontains" // Doesn't contain
-    | "containss" // Contains, case sensitive
-    | "ncontainss" // Doesn't contain, case sensitive
-
-  // 范围操作符
-    | "between" // Between
-    | "nbetween" // Not between
-
-  // 空值操作符
-    | "null" // Is null
-    | "nnull" // Is not null
-
-  // 字符串匹配操作符
-    | "startswith" // Starts with
-    | "nstartswith" // Doesn't start with
-    | "startswiths" // Starts with, case sensitive
-    | "nstartswiths" // Doesn't start with, case sensitive
-    | "endswith" // Ends with
-    | "nendswith" // Doesn't end with
-    | "endswiths" // Ends with, case sensitive
-    | "nendswiths" // Doesn't end with, case sensitive
-
-  // 逻辑操作符
-    | "or" // Logical OR
-    | "and"; // Logical AND
-
-/**
- * 逻辑过滤器接口
- * 用于字段级别的过滤条件
- */
-export interface LogicalFilter {
-  /** 要过滤的字段名 */
-  field: string;
-  /** 过滤操作符，排除逻辑操作符 */
-  operator: Exclude<CrudOperators, "or" | "and">;
-  /** 过滤值 */
-  value: any;
-}
-
-/**
- * 条件过滤器接口
- * 用于组合多个过滤条件（AND/OR）
- */
-export interface ConditionalFilter {
-  /** 可选的键标识符 */
-  key?: string;
-  /** 逻辑操作符 */
-  operator: Extract<CrudOperators, "or" | "and">;
-  /** 子过滤条件数组 */
-  value: (LogicalFilter | ConditionalFilter)[];
-}
-
-/**
- * CRUD 过滤器类型
- * 可以是逻辑过滤器或条件过滤器
- */
-export type CrudFilter = LogicalFilter | ConditionalFilter;
-
-/**
- * CRUD 过滤器数组
- * Refine 标准的过滤条件集合
- */
-export type CrudFilters = CrudFilter[];
-
-/**
- * 排序配置接口
- */
-export interface CrudSort {
-  /** 要排序的字段名 */
-  field: string;
-  /** 排序方向 */
-  order: "asc" | "desc";
-}
-
-/**
- * CRUD 排序数组
- * Refine 标准的排序条件集合
- */
-export type CrudSorting = CrudSort[];
-
-/**
- * 分页配置接口
- */
-export interface Pagination {
-  /** 当前页码 */
-  current?: number;
-  /** 每页大小 */
-  pageSize?: number;
-  /** 分页模式 */
-  mode?: "client" | "server" | "off";
-}
-
-/**
- * Refine 查询参数接口
- * 标准的 useList 钩子参数
- */
-export interface RefineQueryParams {
-  /** 过滤条件 */
-  filters?: CrudFilters;
-  /** 排序条件 */
-  sorters?: CrudSorting;
-  /** 分页配置 */
-  pagination?: Pagination;
-}
+import type { CrudFilters, CrudSorting, Pagination } from "./schemas";
 
 /**
  * Refine 查询结果接口
@@ -136,14 +18,6 @@ export interface RefineQueryResult<T> {
   data: T[];
   /** 总记录数 */
   total: number;
-}
-
-/**
- * 基础记录接口
- */
-export interface BaseRecord {
-  id: string;
-  [key: string]: any;
 }
 
 /**
@@ -164,48 +38,51 @@ export type JoinType = "inner" | "left" | "right";
 /**
  * Join 定义接口
  */
-export interface JoinDefinition {
+export type JoinDefinition = Simplify<{
   /** 要联接的表 */
-  table: any;
+  table: PgTable;
   /** 联接类型 */
   type: JoinType;
   /** 联接条件 */
-  on: any;
-}
+  on: SQL<unknown>;
+}>;
 
 /**
  * Join 查询配置接口
  */
-export interface JoinConfig {
+export type JoinConfig = Simplify<{
   /** Join 定义数组 */
-  joins: JoinDefinition[];
+  joins: readonly JoinDefinition[];
   /** 自定义选择字段 */
-  selectFields?: Record<string, any>;
+  selectFields?: Readonly<Record<string, PgColumn | SQL<unknown>>> | EmptyObject;
   /** 分组字段 */
-  groupBy?: any[];
-}
+  groupBy?: readonly PgColumn[];
+}>;
 
 /**
  * Refine 查询执行配置接口
  */
-// eslint-disable-next-line unused-imports/no-unused-vars
-export interface RefineQueryConfig<T = BaseRecord> {
+export type RefineQueryConfig<_T = UnknownRecord> = Simplify<{
   /** 主表 */
-  table: any;
-  /** 查询参数（来自前端） */
-  queryParams: RefineQueryParams;
-  /** Join 配置（后端控制） */
+  table: PgTable;
+  /** 查询参数(来自前端) */
+  queryParams: Simplify<{
+    filters?: CrudFilters;
+    sorters?: CrudSorting;
+    pagination?: Pagination;
+  }>;
+  /** Join 配置(后端控制) */
   joinConfig?: JoinConfig;
   /** 允许的字段白名单 */
-  allowedFields?: string[];
-}
+  allowedFields?: readonly string[];
+}>;
 
 /**
  * 查询执行参数接口
  */
-export interface QueryExecutionParams<_T = BaseRecord> {
+export type QueryExecutionParams<_T = UnknownRecord> = Simplify<{
   /** 表或查询源 */
-  resource: any;
+  resource: PgTable;
   /** 过滤条件 */
   filters?: CrudFilters;
   /** 排序条件 */
@@ -213,12 +90,12 @@ export interface QueryExecutionParams<_T = BaseRecord> {
   /** 分页配置 */
   pagination?: Pagination;
   /** 表列映射 */
-  tableColumns?: Record<string, any>;
+  tableColumns?: Readonly<Record<string, PgColumn>> | EmptyObject;
   /** Join 配置 */
   joinConfig?: JoinConfig;
   /** 允许的字段白名单 */
-  allowedFields?: string[];
-}
+  allowedFields?: readonly string[];
+}>;
 
 /**
  * 元组结果类型

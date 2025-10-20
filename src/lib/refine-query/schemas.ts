@@ -5,7 +5,7 @@ import logger from "@/lib/logger";
 /**
  * Refine CRUD 操作符 Schema
  */
-const CrudOperatorsSchema = z.enum([
+export const CrudOperatorsSchema = z.enum([
   // 相等性操作符
   "eq",
   "ne",
@@ -47,7 +47,7 @@ const CrudOperatorsSchema = z.enum([
 /**
  * 逻辑过滤器 Schema
  */
-const LogicalFilterSchema = z.object({
+export const LogicalFilterSchema = z.object({
   field: z.string().min(1, "字段名不能为空"),
   operator: CrudOperatorsSchema.exclude(["or", "and"]),
   value: z.any(),
@@ -56,7 +56,7 @@ const LogicalFilterSchema = z.object({
 /**
  * 条件过滤器 Schema (递归定义)
  */
-const ConditionalFilterSchema: z.ZodType<any> = z.lazy(() =>
+export const ConditionalFilterSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
     key: z.string().optional(),
     operator: z.enum(["or", "and"]),
@@ -175,10 +175,12 @@ export const RefineQueryParamsSchema = z.object({
     description: "当前页码",
     example: 1,
   }),
+
   pageSize: z.coerce.number().int().positive().max(100).optional().default(10).openapi({
     description: "每页大小",
     example: 10,
   }),
+
   mode: z.enum(["server", "client", "off"]).optional().default("server").openapi({
     description: "分页模式：server=服务端分页，client=客户端分页，off=不分页",
     example: "server",
@@ -242,6 +244,17 @@ export const QueryMetaSchema = z.object({
   pageCount: z.number().int().nonnegative(),
 });
 
-export type RefineQueryParamsType = z.infer<typeof RefineQueryParamsSchema>;
-export type ProcessedQueryParamsType = z.infer<typeof ProcessedQueryParamsSchema>;
-export type QueryMetaType = z.infer<typeof QueryMetaSchema>;
+/**
+ * 从 Zod schemas 推导的类型定义
+ */
+export type CrudOperators = z.infer<typeof CrudOperatorsSchema>;
+export type LogicalFilter = z.infer<typeof LogicalFilterSchema>;
+export type ConditionalFilter = z.infer<typeof ConditionalFilterSchema>;
+export type CrudFilter = z.infer<typeof CrudFilterSchema>;
+export type CrudFilters = z.infer<typeof CrudFiltersSchema>;
+export type CrudSort = z.infer<typeof CrudSortSchema>;
+export type CrudSorting = z.infer<typeof CrudSortingSchema>;
+export type Pagination = z.infer<typeof PaginationSchema>;
+export type RefineQueryParams = z.infer<typeof RefineQueryParamsSchema>;
+export type ProcessedQueryParams = z.infer<typeof ProcessedQueryParamsSchema>;
+export type QueryMeta = z.infer<typeof QueryMetaSchema>;

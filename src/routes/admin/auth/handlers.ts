@@ -9,7 +9,6 @@ import cap from "@/lib/cap";
 import { enforcerPromise } from "@/lib/casbin";
 import { REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
 import { Status } from "@/lib/enums";
-import logger from "@/lib/logger";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { parseRelations, Resp, toColumns } from "@/utils";
@@ -179,8 +178,7 @@ export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c
     const challenge = await cap.createChallenge();
     return c.json(challenge, HttpStatusCodes.OK);
   }
-  catch (error: any) {
-    logger.error({ error: error.message }, "创建验证码挑战失败");
+  catch {
     return c.json(Resp.fail("创建验证码挑战失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
@@ -193,8 +191,7 @@ export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c
     const result = await cap.redeemChallenge({ token, solutions });
     return c.json(result, HttpStatusCodes.OK);
   }
-  catch (error: any) {
-    logger.error({ error: error.message }, "验证码验证失败");
+  catch {
     return c.json(Resp.fail("验证码验证失败"), HttpStatusCodes.BAD_REQUEST);
   }
 };

@@ -33,22 +33,31 @@ export {
 
 // Zod Schemas
 export {
-  // 过滤和排序 schemas
+  // 从 Zod schemas 推导的类型
+  type ConditionalFilter,
+  // Zod schemas
+  ConditionalFilterSchema,
+  type CrudFilter,
+  type CrudFilters,
   CrudFilterSchema,
   CrudFiltersSchema,
+  type CrudOperators,
+  CrudOperatorsSchema,
+  type CrudSort,
+  type CrudSorting,
   CrudSortingSchema,
   CrudSortSchema,
+
+  type LogicalFilter,
+  LogicalFilterSchema,
+  type Pagination,
   PaginationSchema,
-
+  type ProcessedQueryParams,
   ProcessedQueryParamsSchema,
-  type ProcessedQueryParamsType,
+  type QueryMeta,
   QueryMetaSchema,
-  type QueryMetaType,
-
-  // 查询参数 schemas
+  type RefineQueryParams,
   RefineQueryParamsSchema,
-  // Schema 类型
-  type RefineQueryParamsType,
   RefineResultSchema,
 } from "./schemas";
 
@@ -63,27 +72,14 @@ export {
   validateSorterFields,
 } from "./sorters";
 
+// 配置和工具类型
 export type {
-  BaseRecord,
-  ConditionalFilter,
-  CrudFilter,
-  CrudFilters,
-  // 基础类型
-  CrudOperators,
-  CrudSort,
-  CrudSorting,
-  // Join 相关类型
   JoinConfig,
   JoinDefinition,
   JoinType,
-  LogicalFilter,
-  Pagination,
-
   QueryExecutionParams,
   RefineQueryConfig,
   RefineQueryError,
-  // 查询相关类型
-  RefineQueryParams,
   RefineQueryResult,
   Result,
 } from "./types";

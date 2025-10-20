@@ -1,12 +1,13 @@
 import type { SQL } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
+import type { Simplify, UnknownRecord } from "type-fest";
 
 import { and, count } from "drizzle-orm";
 
 import db from "@/db";
 
+import type { PaginationCalculation } from "./pagination";
 import type {
-  BaseRecord,
   JoinConfig,
   QueryExecutionParams,
   RefineQueryConfig,
@@ -23,7 +24,7 @@ import { RefineQueryError } from "./types";
  * 查询执行器类
  * 整合过滤、排序、分页功能，执行 Refine 标准查询
  */
-export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
+export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   private table: PgTable;
 
   constructor(table: PgTable) {
@@ -82,12 +83,12 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
   }
 
   /**
-   * 执行简单查询（原有逻辑）
+   * 执行简单查询(原有逻辑)
    */
   private async executeSimpleQuery(
     whereCondition: SQL<unknown> | undefined,
     orderByClause: SQL<unknown>[],
-    paginationCalc: any,
+    paginationCalc: PaginationCalculation,
   ): Promise<Result<RefineQueryResult<T>>> {
     // 6. 执行计数查询
     let total = 0;
@@ -154,7 +155,7 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
     params: QueryExecutionParams<T>,
     whereCondition: SQL<unknown> | undefined,
     orderByClause: SQL<unknown>[],
-    paginationCalc: any,
+    paginationCalc: PaginationCalculation,
   ): Promise<Result<RefineQueryResult<T>>> {
     const { joinConfig } = params;
     if (!joinConfig) {
@@ -233,7 +234,7 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
   /**
    * 验证查询参数
    */
-  private validateParams(params: QueryExecutionParams<T>): { valid: boolean; errors: string[] } {
+  private validateParams(params: QueryExecutionParams<T>): Readonly<{ valid: boolean; errors: readonly string[] }> {
     const errors: string[] = [];
 
     // 验证分页参数
@@ -246,7 +247,8 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
 
     // 验证过滤字段
     if (params.filters && params.filters.length > 0) {
-      const filterValidation = validateFilterFields(params.filters, this.table, params.allowedFields);
+      const allowedFieldsArray = params.allowedFields ? [...params.allowedFields] : undefined;
+      const filterValidation = validateFilterFields(params.filters, this.table, allowedFieldsArray);
       if (!filterValidation.valid) {
         errors.push(`无效的过滤字段: ${filterValidation.invalidFields.join(", ")}`);
       }
@@ -254,7 +256,8 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
 
     // 验证排序字段
     if (params.sorters && params.sorters.length > 0) {
-      const sorterValidation = validateSorterFields(params.sorters, this.table, params.allowedFields);
+      const allowedFieldsArray = params.allowedFields ? [...params.allowedFields] : undefined;
+      const sorterValidation = validateSorterFields(params.sorters, this.table, allowedFieldsArray);
       if (!sorterValidation.valid) {
         errors.push(`无效的排序字段: ${sorterValidation.invalidFields.join(", ")}`);
       }
@@ -320,7 +323,7 @@ export class RefineQueryExecutor<T extends BaseRecord = BaseRecord> {
 /**
  * 便捷函数：执行 Refine 查询（新版本，支持配置对象）
  */
-export async function executeRefineQuery<T extends BaseRecord = BaseRecord>(
+export async function executeRefineQuery<T extends UnknownRecord = UnknownRecord>(
   config: RefineQueryConfig<T>,
 ): Promise<Result<RefineQueryResult<T>>> {
   const executor = new RefineQueryExecutor<T>(config.table);
@@ -328,11 +331,7 @@ export async function executeRefineQuery<T extends BaseRecord = BaseRecord>(
     resource: config.table,
     filters: config.queryParams.filters,
     sorters: config.queryParams.sorters,
-    pagination: {
-      current: config.queryParams.pagination?.current,
-      pageSize: config.queryParams.pagination?.pageSize,
-      mode: config.queryParams.pagination?.mode ?? "server",
-    },
+    pagination: config.queryParams.pagination,
     joinConfig: config.joinConfig,
     allowedFields: config.allowedFields,
   });
@@ -342,7 +341,7 @@ export async function executeRefineQuery<T extends BaseRecord = BaseRecord>(
  * 创建查询执行器工厂
  * 用于创建特定表的查询执行器实例
  */
-export function createQueryExecutor<T extends BaseRecord = BaseRecord>(
+export function createQueryExecutor<T extends UnknownRecord = UnknownRecord>(
   table: PgTable,
 ): RefineQueryExecutor<T> {
   return new RefineQueryExecutor<T>(table);
@@ -353,29 +352,29 @@ export function createQueryExecutor<T extends BaseRecord = BaseRecord>(
  * 用于执行多个相关查询
  */
 export class BatchQueryExecutor {
-  private queries: Array<{
+  private queries: Array<Simplify<{
     name: string;
-    executor: RefineQueryExecutor<any>;
-    params: QueryExecutionParams<any>;
-  }> = [];
+    executor: RefineQueryExecutor<UnknownRecord>;
+    params: QueryExecutionParams<UnknownRecord>;
+  }>> = [];
 
   /**
    * 添加查询
    */
-  addQuery(
+  addQuery<T extends UnknownRecord = UnknownRecord>(
     name: string,
-    executor: RefineQueryExecutor<any>,
-    params: QueryExecutionParams<any>,
+    executor: RefineQueryExecutor<T>,
+    params: QueryExecutionParams<T>,
   ): this {
-    this.queries.push({ name, executor, params });
+    this.queries.push({ name, executor: executor as RefineQueryExecutor<UnknownRecord>, params: params as QueryExecutionParams<UnknownRecord> });
     return this;
   }
 
   /**
    * 执行所有查询
    */
-  async executeAll(): Promise<Record<string, RefineQueryResult<any> | RefineQueryError>> {
-    const results: Record<string, RefineQueryResult<any> | RefineQueryError> = {};
+  async executeAll(): Promise<Readonly<Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError>>> {
+    const results: Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError> = {};
 
     for (const query of this.queries) {
       const [error, result] = await query.executor.execute(query.params);
@@ -388,7 +387,7 @@ export class BatchQueryExecutor {
   /**
    * 并行执行所有查询
    */
-  async executeAllParallel(): Promise<Record<string, RefineQueryResult<any> | RefineQueryError>> {
+  async executeAllParallel(): Promise<Readonly<Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError>>> {
     const promises = this.queries.map(async (query) => {
       const [error, result] = await query.executor.execute(query.params);
       return {
@@ -399,10 +398,10 @@ export class BatchQueryExecutor {
 
     const results = await Promise.all(promises);
 
-    return results.reduce((acc, { name, result }) => {
+    return results.reduce<Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError>>((acc, { name, result }) => {
       acc[name] = result;
       return acc;
-    }, {} as Record<string, RefineQueryResult<any> | RefineQueryError>);
+    }, {});
   }
 
   /**

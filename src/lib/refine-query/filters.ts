@@ -2,12 +2,13 @@ import type {
   SQL,
 } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import type { Writable } from "type-fest";
 
 import { and, between, eq, gt, gte, ilike, inArray, isNotNull, isNull, like, lt, lte, ne, not, notInArray, or, sql } from "drizzle-orm";
 
 import logger from "@/lib/logger";
 
-import type { ConditionalFilter, CrudFilters, LogicalFilter } from "./types";
+import type { ConditionalFilter, CrudFilters, LogicalFilter } from "./schemas";
 
 /**
  * 过滤器转换器类
@@ -201,8 +202,8 @@ export class FiltersConverter {
    * 获取表列
    */
   private getColumn(fieldName: string): PgColumn | undefined {
-    // 使用更安全的类型处理
-    const tableColumns = this.table as unknown as Record<string, PgColumn>;
+    // 使用 type-fest Writable 类型进行更安全的类型处理
+    const tableColumns = this.table as unknown as Writable<Record<string, PgColumn>>;
     if (fieldName in tableColumns) {
       return tableColumns[fieldName];
     }
@@ -244,15 +245,15 @@ export function convertFiltersToSQL(
 export function validateFilterFields(
   filters: CrudFilters,
   table: PgTable,
-  allowedFields?: string[],
-): { valid: boolean; invalidFields: string[] } {
+  allowedFields?: readonly string[],
+): Readonly<{ valid: boolean; invalidFields: readonly string[] }> {
   const tableColumns = Object.keys(table);
   // 如果提供了白名单，严格使用白名单
-  const validColumns = allowedFields || tableColumns;
+  const validColumns = allowedFields ? [...allowedFields] : tableColumns;
   const invalidFields: string[] = [];
 
   // 记录访问敏感字段的尝试
-  const sensitiveFields = ["password", "secret", "token", "key"];
+  const sensitiveFields = ["password", "secret", "token", "key"] as const;
 
   function checkFilter(filter: CrudFilters[number]) {
     if ("field" in filter) {
@@ -286,7 +287,7 @@ export function validateFilterFields(
  * @param filters 过滤器数组
  * @returns 字段名数组
  */
-export function extractFilterFields(filters: CrudFilters): string[] {
+export function extractFilterFields(filters: CrudFilters): readonly string[] {
   const fields: string[] = [];
 
   function extractFromFilter(filter: CrudFilters[number]) {

@@ -1,9 +1,11 @@
-import type { Pagination } from "./types";
+import type { Simplify } from "type-fest";
+
+import type { Pagination } from "./schemas";
 
 /**
  * 分页计算结果接口
  */
-export interface PaginationCalculation {
+export type PaginationCalculation = Simplify<{
   /** 偏移量（跳过的记录数） */
   offset: number;
   /** 限制数量（每页记录数） */
@@ -14,12 +16,12 @@ export interface PaginationCalculation {
   pageSize: number;
   /** 分页模式 */
   mode: "client" | "server" | "off";
-}
+}>;
 
 /**
  * 分页元数据接口
  */
-export interface PaginationMeta {
+export type PaginationMeta = Simplify<{
   /** 当前页码 */
   current: number;
   /** 每页大小 */
@@ -32,7 +34,7 @@ export interface PaginationMeta {
   hasPrev: boolean;
   /** 是否有下一页 */
   hasNext: boolean;
-}
+}>;
 
 /**
  * 分页处理器类
@@ -87,7 +89,7 @@ export class PaginationHandler {
   /**
    * 验证分页参数
    */
-  validate(pagination?: Pagination): { valid: boolean; errors: string[] } {
+  validate(pagination?: Pagination): Readonly<{ valid: boolean; errors: readonly string[] }> {
     const errors: string[] = [];
 
     if (pagination) {
@@ -113,7 +115,7 @@ export class PaginationHandler {
       }
 
       if (pagination.mode !== undefined) {
-        const validModes = ["client", "server", "off"];
+        const validModes = ["client", "server", "off"] as const;
         if (!validModes.includes(pagination.mode)) {
           errors.push(`分页模式必须是: ${validModes.join(", ")}`);
         }
@@ -179,7 +181,7 @@ export function generatePaginationMeta(
 /**
  * 便捷函数：验证分页参数
  */
-export function validatePagination(pagination?: Pagination): { valid: boolean; errors: string[] } {
+export function validatePagination(pagination?: Pagination): Readonly<{ valid: boolean; errors: readonly string[] }> {
   return paginationHandler.validate(pagination);
 }
 
@@ -206,7 +208,7 @@ export function applyClientPagination<T>(
 export function getOffsetLimit(
   current: number = 1,
   pageSize: number = 10,
-): { offset: number; limit: number } {
+): Readonly<{ offset: number; limit: number }> {
   const validCurrent = Math.max(1, current);
   const validPageSize = Math.min(100, Math.max(1, pageSize));
 
