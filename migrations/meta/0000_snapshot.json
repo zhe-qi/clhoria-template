@@ -1,5 +1,5 @@
 {
-  "id": "4d27a65f-81f3-4532-892e-cf52b21af1a1",
+  "id": "1cd92682-7e2f-4777-8c5f-2dd40eaa5406",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -171,7 +171,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "uuidv7()"
         },
         "created_at": {
           "name": "created_at",
@@ -309,7 +310,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "uuidv7()"
         },
         "created_at": {
           "name": "created_at",

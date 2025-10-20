@@ -1,7 +1,7 @@
 services:
-  # PostgreSQL 17 数据库
+  # PostgreSQL 18 数据库
   postgres:
-    image: postgres:17
+    image: postgres:18
     container_name: hono-postgres
     environment:
       POSTGRES_DB: ${DB_NAME:-postgres}

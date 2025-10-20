@@ -21,7 +21,7 @@ CREATE TABLE "admin_system_role" (
 );
 --> statement-breakpoint
 CREATE TABLE "admin_system_user" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64),
 	"updated_at" timestamp,
@@ -42,7 +42,7 @@ CREATE TABLE "admin_system_user_role" (
 );
 --> statement-breakpoint
 CREATE TABLE "client_user" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64),
 	"updated_at" timestamp,
