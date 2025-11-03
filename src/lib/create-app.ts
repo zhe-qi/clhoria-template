@@ -14,6 +14,7 @@ import { v7 as uuidV7 } from "uuid";
 
 import type { AppBindings } from "@/types/lib";
 
+import { RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants";
 import redisClient from "@/lib/redis";
 import { notFound, onError, serveEmojiFavicon } from "@/lib/stoker/middlewares";
 import { defaultHook } from "@/lib/stoker/openapi";
@@ -59,8 +60,8 @@ export default function createApp() {
 
   /** 速率限制中间件 */
   app.use(rateLimiter({
-    windowMs: 15 * 60 * 1000,
-    limit: 100,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    limit: RATE_LIMIT_MAX_REQUESTS,
     keyGenerator: c => c.req.header("X-Forwarded-for") + uuidV7(),
     store: ioredisStore,
   }));

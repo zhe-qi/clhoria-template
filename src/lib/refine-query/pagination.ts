@@ -1,5 +1,7 @@
 import type { Simplify } from "type-fest";
 
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/constants";
+
 import type { Pagination } from "./schemas";
 
 /**
@@ -40,8 +42,8 @@ export type PaginationMeta = Simplify<{
  * 分页处理器类
  */
 export class PaginationHandler {
-  private defaultPageSize = 10;
-  private maxPageSize = 100;
+  private defaultPageSize = DEFAULT_PAGE_SIZE;
+  private maxPageSize = MAX_PAGE_SIZE;
 
   /**
    * 计算分页参数
@@ -207,10 +209,10 @@ export function applyClientPagination<T>(
  */
 export function getOffsetLimit(
   current: number = 1,
-  pageSize: number = 10,
+  pageSize: number = DEFAULT_PAGE_SIZE,
 ): Readonly<{ offset: number; limit: number }> {
   const validCurrent = Math.max(1, current);
-  const validPageSize = Math.min(100, Math.max(1, pageSize));
+  const validPageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, pageSize));
 
   return {
     offset: (validCurrent - 1) * validPageSize,
@@ -232,7 +234,7 @@ export function shouldPaginate(pagination?: Pagination): boolean {
 export function normalizePagination(pagination?: Pagination): Pagination {
   return {
     current: Math.max(1, pagination?.current ?? 1),
-    pageSize: Math.min(100, Math.max(1, pagination?.pageSize ?? 10)),
+    pageSize: Math.min(MAX_PAGE_SIZE, Math.max(1, pagination?.pageSize ?? DEFAULT_PAGE_SIZE)),
     mode: pagination?.mode ?? "server",
   };
 }
