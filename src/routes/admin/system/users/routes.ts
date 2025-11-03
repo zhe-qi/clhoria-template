@@ -7,9 +7,9 @@ import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 import { respErr } from "@/utils";
 
-import { insertAdminSystemUser, patchAdminSystemUser, responseAdminSystemUserWithList, responseAdminSystemUserWithoutPassword } from "./schema";
+import { insertSystemUsers, patchSystemUsers, responseSystemUsersWithList, responseSystemUsersWithoutPassword, responseSystemUsersWithoutPasswordAndRoles } from "./schema";
 
-const routePrefix = "/system/user";
+const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];
 
 /** 获取系统用户分页列表 */
@@ -23,7 +23,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(responseAdminSystemUserWithList),
+      RefineResultSchema(responseSystemUsersWithList),
       "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "查询参数验证错误"),
@@ -39,13 +39,13 @@ export const create = createRoute({
   path: routePrefix,
   request: {
     body: jsonContentRequired(
-      insertAdminSystemUser,
+      insertSystemUsers,
       "创建系统用户参数",
     ),
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      RefineResultSchema(responseAdminSystemUserWithoutPassword),
+      RefineResultSchema(responseSystemUsersWithoutPassword),
       "创建成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
@@ -64,7 +64,7 @@ export const get = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(responseAdminSystemUserWithoutPassword),
+      RefineResultSchema(responseSystemUsersWithoutPasswordAndRoles),
       "获取成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
@@ -81,13 +81,13 @@ export const update = createRoute({
   request: {
     params: IdUUIDParamsSchema,
     body: jsonContentRequired(
-      patchAdminSystemUser,
+      patchSystemUsers,
       "更新系统用户参数",
     ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(responseAdminSystemUserWithoutPassword),
+      RefineResultSchema(responseSystemUsersWithoutPassword),
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),

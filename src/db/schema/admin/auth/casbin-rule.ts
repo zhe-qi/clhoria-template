@@ -2,7 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { index, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
-export const casbinRule = pgTable("admin_casbin_rule", {
+export const casbinRule = pgTable("casbin_rule", {
   /** 策略类型：p（权限策略）/g（角色继承） */
   ptype: varchar({ length: 8 }).notNull(), // 非空：所有规则必含 ptype
   /** 主体：角色或用户（p策略=sub，g策略=上级角色/用户） */

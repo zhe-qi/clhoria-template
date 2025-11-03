@@ -1,11 +1,11 @@
 {
-  "id": "1cd92682-7e2f-4777-8c5f-2dd40eaa5406",
+  "id": "71c33f4d-3159-4dde-89f8-ae94576bf4a9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.admin_casbin_rule": {
-      "name": "admin_casbin_rule",
+    "public.casbin_rule": {
+      "name": "casbin_rule",
       "schema": "",
       "columns": {
         "ptype": {
@@ -101,8 +101,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.admin_system_role": {
-      "name": "admin_system_role",
+    "public.system_roles": {
+      "name": "system_roles",
       "schema": "",
       "columns": {
         "id": {
@@ -163,8 +163,41 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.admin_system_user": {
-      "name": "admin_system_user",
+    "public.system_user_roles": {
+      "name": "system_user_roles",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "system_user_roles_user_id_role_id_pk": {
+          "name": "system_user_roles_user_id_role_id_pk",
+          "columns": [
+            "user_id",
+            "role_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.system_users": {
+      "name": "system_users",
       "schema": "",
       "columns": {
         "id": {
@@ -257,8 +290,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "admin_system_user_username_unique": {
-          "name": "admin_system_user_username_unique",
+        "system_users_username_unique": {
+          "name": "system_users_username_unique",
           "nullsNotDistinct": false,
           "columns": [
             "username"
@@ -269,41 +302,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.admin_system_user_role": {
-      "name": "admin_system_user_role",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role_id": {
-          "name": "role_id",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "admin_system_user_role_user_id_role_id_pk": {
-          "name": "admin_system_user_role_user_id_role_id_pk",
-          "columns": [
-            "user_id",
-            "role_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.client_user": {
-      "name": "client_user",
+    "public.client_users": {
+      "name": "client_users",
       "schema": "",
       "columns": {
         "id": {
@@ -656,57 +656,57 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "client_user_username_unique": {
-          "name": "client_user_username_unique",
+        "client_users_username_unique": {
+          "name": "client_users_username_unique",
           "nullsNotDistinct": false,
           "columns": [
             "username"
           ]
         },
-        "client_user_mobile_unique": {
-          "name": "client_user_mobile_unique",
+        "client_users_mobile_unique": {
+          "name": "client_users_mobile_unique",
           "nullsNotDistinct": false,
           "columns": [
             "mobile"
           ]
         },
-        "client_user_email_unique": {
-          "name": "client_user_email_unique",
+        "client_users_email_unique": {
+          "name": "client_users_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
           ]
         },
-        "client_user_wxUnionid_unique": {
-          "name": "client_user_wxUnionid_unique",
+        "client_users_wxUnionid_unique": {
+          "name": "client_users_wxUnionid_unique",
           "nullsNotDistinct": false,
           "columns": [
             "wx_unionid"
           ]
         },
-        "client_user_qqUnionid_unique": {
-          "name": "client_user_qqUnionid_unique",
+        "client_users_qqUnionid_unique": {
+          "name": "client_users_qqUnionid_unique",
           "nullsNotDistinct": false,
           "columns": [
             "qq_unionid"
           ]
         },
-        "client_user_aliOpenid_unique": {
-          "name": "client_user_aliOpenid_unique",
+        "client_users_aliOpenid_unique": {
+          "name": "client_users_aliOpenid_unique",
           "nullsNotDistinct": false,
           "columns": [
             "ali_openid"
           ]
         },
-        "client_user_appleOpenid_unique": {
-          "name": "client_user_appleOpenid_unique",
+        "client_users_appleOpenid_unique": {
+          "name": "client_users_appleOpenid_unique",
           "nullsNotDistinct": false,
           "columns": [
             "apple_openid"
           ]
         },
-        "client_user_myInviteCode_unique": {
-          "name": "client_user_myInviteCode_unique",
+        "client_users_myInviteCode_unique": {
+          "name": "client_users_myInviteCode_unique",
           "nullsNotDistinct": false,
           "columns": [
             "my_invite_code"

@@ -6,9 +6,9 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErr } from "@/utils";
 
-import { idAdminSystemRole, insertAdminSystemRole, patchAdminSystemRole, selectAdminSystemRole } from "./schema";
+import { idSystemRoles, insertSystemRoles, patchSystemRoles, selectSystemRoles } from "./schema";
 
-const routePrefix = "/system/role";
+const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];
 
 /** 获取系统角色分页列表 */
@@ -22,7 +22,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.array(selectAdminSystemRole)),
+      RefineResultSchema(z.array(selectSystemRoles)),
       "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "查询参数验证错误"),
@@ -38,13 +38,13 @@ export const create = createRoute({
   path: routePrefix,
   request: {
     body: jsonContentRequired(
-      insertAdminSystemRole,
+      insertSystemRoles,
       "创建系统角色参数",
     ),
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      RefineResultSchema(selectAdminSystemRole),
+      RefineResultSchema(selectSystemRoles),
       "创建成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
@@ -60,11 +60,11 @@ export const get = createRoute({
   method: "get",
   path: `${routePrefix}/{id}`,
   request: {
-    params: idAdminSystemRole,
+    params: idSystemRoles,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(selectAdminSystemRole),
+      RefineResultSchema(selectSystemRoles),
       "获取成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
@@ -79,15 +79,15 @@ export const update = createRoute({
   method: "patch",
   path: `${routePrefix}/{id}`,
   request: {
-    params: idAdminSystemRole,
+    params: idSystemRoles,
     body: jsonContentRequired(
-      patchAdminSystemRole,
+      patchSystemRoles,
       "更新系统角色参数",
     ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(selectAdminSystemRole),
+      RefineResultSchema(selectSystemRoles),
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
@@ -102,11 +102,11 @@ export const remove = createRoute({
   method: "delete",
   path: `${routePrefix}/{id}`,
   request: {
-    params: idAdminSystemRole,
+    params: idSystemRoles,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(idAdminSystemRole),
+      RefineResultSchema(idSystemRoles),
       "删除成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
@@ -121,7 +121,7 @@ export const getPermissions = createRoute({
   method: "get",
   path: `${routePrefix}/{id}/permissions`,
   request: {
-    params: idAdminSystemRole,
+    params: idSystemRoles,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -139,7 +139,7 @@ export const savePermissions = createRoute({
   method: "put",
   path: `${routePrefix}/{id}/permissions`,
   request: {
-    params: idAdminSystemRole,
+    params: idSystemRoles,
     body: jsonContentRequired(
       z.object({
         permissions: z.array(

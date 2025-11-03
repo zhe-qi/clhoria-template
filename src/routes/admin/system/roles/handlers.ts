@@ -2,17 +2,17 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import db from "@/db";
-import { adminSystemRole } from "@/db/schema";
+import { systemRoles } from "@/db/schema";
 import { enforcerPromise } from "@/lib/casbin";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";
 
-import type { SystemRoleRouteHandlerType } from ".";
-import type { selectAdminSystemRole } from "./schema";
+import type { SystemRolesRouteHandlerType } from ".";
+import type { selectSystemRoles } from "./schema";
 
-export const list: SystemRoleRouteHandlerType<"list"> = async (c) => {
+export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   // 获取查询参数
   const rawParams = c.req.query();
 
@@ -22,8 +22,8 @@ export const list: SystemRoleRouteHandlerType<"list"> = async (c) => {
   }
 
   // 执行查询
-  const [error, result] = await executeRefineQuery<z.infer<typeof selectAdminSystemRole>>({
-    table: adminSystemRole,
+  const [error, result] = await executeRefineQuery<z.infer<typeof selectSystemRoles>>({
+    table: systemRoles,
     queryParams: parseResult.data,
   });
 
@@ -37,12 +37,12 @@ export const list: SystemRoleRouteHandlerType<"list"> = async (c) => {
   return c.json(Resp.ok(result.data), HttpStatusCodes.OK);
 };
 
-export const create: SystemRoleRouteHandlerType<"create"> = async (c) => {
+export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
   try {
-    const [role] = await db.insert(adminSystemRole).values({
+    const [role] = await db.insert(systemRoles).values({
       ...body,
       createdBy: sub,
     }).returning();
@@ -57,13 +57,13 @@ export const create: SystemRoleRouteHandlerType<"create"> = async (c) => {
   }
 };
 
-export const get: SystemRoleRouteHandlerType<"get"> = async (c) => {
+export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [role] = await db
     .select()
-    .from(adminSystemRole)
-    .where(eq(adminSystemRole.id, id));
+    .from(systemRoles)
+    .where(eq(systemRoles.id, id));
 
   if (!role) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -72,18 +72,18 @@ export const get: SystemRoleRouteHandlerType<"get"> = async (c) => {
   return c.json(Resp.ok(role), HttpStatusCodes.OK);
 };
 
-export const update: SystemRoleRouteHandlerType<"update"> = async (c) => {
+export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
   const [updated] = await db
-    .update(adminSystemRole)
+    .update(systemRoles)
     .set({
       ...body,
       updatedBy: sub,
     })
-    .where(eq(adminSystemRole.id, id))
+    .where(eq(systemRoles.id, id))
     .returning();
 
   if (!updated) {
@@ -93,13 +93,13 @@ export const update: SystemRoleRouteHandlerType<"update"> = async (c) => {
   return c.json(Resp.ok(updated), HttpStatusCodes.OK);
 };
 
-export const remove: SystemRoleRouteHandlerType<"remove"> = async (c) => {
+export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const [deleted] = await db
-    .delete(adminSystemRole)
-    .where(eq(adminSystemRole.id, id))
-    .returning({ id: adminSystemRole.id });
+    .delete(systemRoles)
+    .where(eq(systemRoles.id, id))
+    .returning({ id: systemRoles.id });
 
   if (!deleted) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -108,7 +108,7 @@ export const remove: SystemRoleRouteHandlerType<"remove"> = async (c) => {
   return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
 };
 
-export const getPermissions: SystemRoleRouteHandlerType<"getPermissions"> = async (c) => {
+export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = async (c) => {
   const { id } = c.req.valid("param");
 
   try {
@@ -122,13 +122,13 @@ export const getPermissions: SystemRoleRouteHandlerType<"getPermissions"> = asyn
   }
 };
 
-export const savePermissions: SystemRoleRouteHandlerType<"savePermissions"> = async (c) => {
+export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = async (c) => {
   const { id } = c.req.valid("param");
   const { permissions } = c.req.valid("json");
 
   try {
     // 检查角色是否存在
-    const [role] = await db.select({ id: adminSystemRole.id }).from(adminSystemRole).where(eq(adminSystemRole.id, id)).limit(1);
+    const [role] = await db.select({ id: systemRoles.id }).from(systemRoles).where(eq(systemRoles.id, id)).limit(1);
 
     if (!role) {
       return c.json(Resp.fail("角色不存在"), HttpStatusCodes.NOT_FOUND);

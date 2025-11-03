@@ -7,7 +7,7 @@ import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxO
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { Gender, UserStatus, VerificationStatus } from "@/lib/enums";
 
-export const clientUser = pgTable("client_user", {
+export const clientUsers = pgTable("client_users", {
   ...baseColumns,
   /** 用户名 */
   username: varchar({ length: 64 }).notNull(),
@@ -99,7 +99,7 @@ export const clientUser = pgTable("client_user", {
   index("client_users_last_login_date_idx").on(table.lastLoginDate.desc()),
 ]);
 
-export const selectClientUserSchema = createSelectSchema(clientUser, {
+export const selectClientUsersSchema = createSelectSchema(clientUsers, {
   username: z.string().meta({ description: "用户名" }),
   password: z.string().meta({ description: "密码" }),
   passwordSecretVersion: z.number().meta({ description: "密码密钥版本" }),
@@ -121,8 +121,8 @@ export const selectClientUserSchema = createSelectSchema(clientUser, {
   inviteTime: z.string().optional().meta({ description: "受邀时间" }),
 });
 
-export const insertClientUserSchema = createInsertSchema(
-  clientUser,
+export const insertClientUsersSchema = createInsertSchema(
+  clientUsers,
   {
     username: z.string()
       .min(4, "用户名最少4个字符")
@@ -191,4 +191,4 @@ export const insertClientUserSchema = createInsertSchema(
   tokens: true,
 });
 
-export const patchClientUserSchema = insertClientUserSchema.partial();
+export const patchClientUsersSchema = insertClientUsersSchema.partial();

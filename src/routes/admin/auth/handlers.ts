@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
 import db from "@/db";
-import { adminSystemUser, adminSystemUserRole } from "@/db/schema";
+import { systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
 import cap from "@/lib/cap";
 import { enforcerPromise } from "@/lib/casbin";
@@ -29,8 +29,8 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const { username, password } = body;
 
   // 2. 查询用户基本信息并验证
-  const user = await db.query.adminSystemUser.findFirst({
-    where: eq(adminSystemUser.username, username),
+  const user = await db.query.systemUsers.findFirst({
+    where: eq(systemUsers.username, username),
     columns: {
       id: true,
       username: true,
@@ -53,13 +53,13 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   if (!isPasswordValid) {
     return c.json(Resp.fail(HttpStatusPhrases.UNAUTHORIZED), HttpStatusCodes.UNAUTHORIZED);
   }
-  const userRoles = await db.query.adminSystemUserRole.findMany({
-    where: eq(adminSystemUserRole.userId, user.id),
+  const userRoles = await db.query.systemUserRoles.findMany({
+    where: eq(systemUserRoles.userId, user.id),
   });
 
   const { refreshToken, accessToken } = await generateTokens({
     id: user.id,
-    roles: userRoles.map(role => role.roleId),
+    roles: userRoles.map(({ roleId }) => roleId),
   });
 
   // 4. 设置 HttpOnly Refresh Token Cookie
@@ -116,18 +116,18 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   const { sub } = c.get("jwtPayload");
 
   // 查询用户信息
-  const user = await db.query.adminSystemUser.findFirst({
-    where: eq(adminSystemUser.id, sub),
+  const user = await db.query.systemUsers.findFirst({
+    where: eq(systemUsers.id, sub),
     columns: toColumns(["id", "username", "avatar", "nickName"]),
-    with: parseRelations([{ name: "userRoles", fields: ["roleId"] }]),
+    with: parseRelations([{ name: "systemUserRoles", fields: ["roleId"] }]),
   });
 
   if (!user) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  const { userRoles, ...userWithoutRoles } = user;
-  const roles = userRoles.map(({ roleId }) => roleId);
+  const { systemUserRoles, ...userWithoutRoles } = user;
+  const roles = systemUserRoles.map(({ roleId }) => roleId);
 
   return c.json(Resp.ok({ ...userWithoutRoles, roles }), HttpStatusCodes.OK);
 };

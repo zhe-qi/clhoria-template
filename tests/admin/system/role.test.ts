@@ -4,12 +4,12 @@ import { testClient } from "hono/testing";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import db from "@/db";
-import { adminSystemRole, adminSystemUserRole, casbinRule } from "@/db/schema";
+import { casbinRule, systemRoles, systemUserRoles } from "@/db/schema";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
-import { adminSystemRoleRouter } from "@/routes/admin/system/role";
+import { systemRolesRouter } from "@/routes/admin/system/roles";
 
 import { getAdminToken, getAuthHeaders, getUserToken } from "../../auth-utils";
 
@@ -19,9 +19,9 @@ if (env.NODE_ENV !== "test") {
 
 function createSysRolesApp() {
   return createApp()
-    .use("/system/role/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
-    .use("/system/role/*", authorize())
-    .route("/", adminSystemRoleRouter);
+    .use("/system/roles/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/roles/*", authorize())
+    .route("/", systemRolesRouter);
 }
 
 const client = testClient(createSysRolesApp());
@@ -50,9 +50,9 @@ async function cleanupTestRoles(): Promise<void> {
     await db.transaction(async (tx) => {
       // 获取所有测试角色
       const testRoles = await tx
-        .select({ id: adminSystemRole.id })
-        .from(adminSystemRole)
-        .where(like(adminSystemRole.id, "test_%"));
+        .select({ id: systemRoles.id })
+        .from(systemRoles)
+        .where(like(systemRoles.id, "test_%"));
 
       if (testRoles.length === 0) {
         return;
@@ -62,8 +62,8 @@ async function cleanupTestRoles(): Promise<void> {
 
       // 删除用户角色关联
       await tx
-        .delete(adminSystemUserRole)
-        .where(or(...roleIds.map(id => eq(adminSystemUserRole.roleId, id))));
+        .delete(systemUserRoles)
+        .where(or(...roleIds.map(id => eq(systemUserRoles.roleId, id))));
 
       // 删除 Casbin 规则
       await tx
@@ -77,8 +77,8 @@ async function cleanupTestRoles(): Promise<void> {
 
       // 删除角色本身
       await tx
-        .delete(adminSystemRole)
-        .where(like(adminSystemRole.id, "test_%"));
+        .delete(systemRoles)
+        .where(like(systemRoles.id, "test_%"));
     });
   }
   catch (error) {
@@ -106,7 +106,7 @@ describe("system role routes", () => {
 
   describe("authentication & authorization", () => {
     it("should allow authenticated admin requests", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         { query: {} },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -115,7 +115,7 @@ describe("system role routes", () => {
     });
 
     it("should deny access with user token (no admin permissions)", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         { query: {} },
         { headers: getAuthHeaders(userToken) },
       );
@@ -124,7 +124,7 @@ describe("system role routes", () => {
     });
 
     it("should require authentication", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         { query: {} },
         {},
       );
@@ -134,7 +134,7 @@ describe("system role routes", () => {
 
   describe("get /system/role - list roles", () => {
     it("should validate pagination parameters", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         {
           query: {
             current: "invalid" as unknown,
@@ -147,7 +147,7 @@ describe("system role routes", () => {
     });
 
     it("should list roles with default pagination", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         { query: {} },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -161,7 +161,7 @@ describe("system role routes", () => {
     });
 
     it("should support filtering by id", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -185,7 +185,7 @@ describe("system role routes", () => {
     });
 
     it("should support filtering by name", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -209,7 +209,7 @@ describe("system role routes", () => {
     });
 
     it("should support sorting", async () => {
-      const response = await client.system.role.$get(
+      const response = await client.system.roles.$get(
         {
           query: {
             sorters: JSON.stringify([{ field: "createdAt", order: "desc" }]),
@@ -237,7 +237,7 @@ describe("system role routes", () => {
 
   describe("post /system/role - create role", () => {
     it("should validate required fields", async () => {
-      const response = await client.system.role.$post(
+      const response = await client.system.roles.$post(
         {
           json: {
             id: `${testRoleId}_required`,
@@ -253,7 +253,7 @@ describe("system role routes", () => {
     });
 
     it("should validate role id format (lowercase letters and underscore only)", async () => {
-      const response = await client.system.role.$post(
+      const response = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -264,7 +264,7 @@ describe("system role routes", () => {
       );
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response2 = await client.system.role.$post(
+      const response2 = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -275,7 +275,7 @@ describe("system role routes", () => {
       );
       expect(response2.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response3 = await client.system.role.$post(
+      const response3 = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -286,7 +286,7 @@ describe("system role routes", () => {
       );
       expect(response3.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response4 = await client.system.role.$post(
+      const response4 = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -299,7 +299,7 @@ describe("system role routes", () => {
     });
 
     it("should validate role name length (1-64 chars)", async () => {
-      const response = await client.system.role.$post(
+      const response = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -311,7 +311,7 @@ describe("system role routes", () => {
       );
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response2 = await client.system.role.$post(
+      const response2 = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -326,7 +326,7 @@ describe("system role routes", () => {
 
     it("should create a new role", async () => {
       const newRoleId = `${testRoleId}_create`;
-      const response = await client.system.role.$post(
+      const response = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -350,7 +350,7 @@ describe("system role routes", () => {
       const duplicateRoleId = `${testRoleId}_duplicate`;
 
       // Create first role
-      const response1 = await client.system.role.$post(
+      const response1 = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -363,7 +363,7 @@ describe("system role routes", () => {
       expect(response1.status).toBe(HttpStatusCodes.CREATED);
 
       // Try to create duplicate
-      const response2 = await client.system.role.$post(
+      const response2 = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -388,7 +388,7 @@ describe("system role routes", () => {
     beforeAll(async () => {
       // Create a role for testing
       roleId = `${testRoleId}_gettest`;
-      const response = await client.system.role.$post(
+      const response = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -402,7 +402,7 @@ describe("system role routes", () => {
     });
 
     it("should validate id format", async () => {
-      const response = await client.system.role[":id"].$get(
+      const response = await client.system.roles[":id"].$get(
         { param: { id: "Invalid-ID" } }, // Uppercase not allowed
         { headers: getAuthHeaders(adminToken) },
       );
@@ -411,7 +411,7 @@ describe("system role routes", () => {
 
     it("should return 404 for non-existent role", async () => {
       const nonExistentId = "non_existent_role_id";
-      const response = await client.system.role[":id"].$get(
+      const response = await client.system.roles[":id"].$get(
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -423,7 +423,7 @@ describe("system role routes", () => {
     });
 
     it("should get role details", async () => {
-      const response = await client.system.role[":id"].$get(
+      const response = await client.system.roles[":id"].$get(
         { param: { id: roleId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -445,7 +445,7 @@ describe("system role routes", () => {
     beforeAll(async () => {
       // Create a regular role for testing
       roleId = `${testRoleId}_update`;
-      const response = await client.system.role.$post(
+      const response = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -458,7 +458,7 @@ describe("system role routes", () => {
       expect(response.status).toBe(HttpStatusCodes.CREATED);
 
       // Get built-in admin role ID
-      const adminResponse = await client.system.role.$get(
+      const adminResponse = await client.system.roles.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -483,7 +483,7 @@ describe("system role routes", () => {
     });
 
     it("should allow empty body (all fields optional in patch)", async () => {
-      const response = await client.system.role[":id"].$patch(
+      const response = await client.system.roles[":id"].$patch(
         {
           param: { id: roleId },
           json: {},
@@ -495,7 +495,7 @@ describe("system role routes", () => {
     });
 
     it("should update role fields", async () => {
-      const response = await client.system.role[":id"].$patch(
+      const response = await client.system.roles[":id"].$patch(
         {
           param: { id: roleId },
           json: {
@@ -517,7 +517,7 @@ describe("system role routes", () => {
     });
 
     it("should only update allowed fields", async () => {
-      const response = await client.system.role[":id"].$patch(
+      const response = await client.system.roles[":id"].$patch(
         {
           param: { id: roleId },
           json: {
@@ -539,7 +539,7 @@ describe("system role routes", () => {
 
     it("should return 404 for non-existent role", async () => {
       const nonExistentId = "non_existent_role";
-      const response = await client.system.role[":id"].$patch(
+      const response = await client.system.roles[":id"].$patch(
         {
           param: { id: nonExistentId },
           json: {
@@ -558,7 +558,7 @@ describe("system role routes", () => {
 
     beforeAll(async () => {
       // Get built-in admin role ID
-      const adminResponse = await client.system.role.$get(
+      const adminResponse = await client.system.roles.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -583,7 +583,7 @@ describe("system role routes", () => {
     });
 
     it("should validate id format", async () => {
-      const response = await client.system.role[":id"].$delete(
+      const response = await client.system.roles[":id"].$delete(
         { param: { id: "Invalid-ID" } }, // Uppercase not allowed
         { headers: getAuthHeaders(adminToken) },
       );
@@ -592,7 +592,7 @@ describe("system role routes", () => {
 
     it("should return 404 for non-existent role", async () => {
       const nonExistentId = "non_existent_role";
-      const response = await client.system.role[":id"].$delete(
+      const response = await client.system.roles[":id"].$delete(
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -603,7 +603,7 @@ describe("system role routes", () => {
     it("should delete role successfully", async () => {
       // 先创建一个角色用于测试删除功能
       const deleteTestRoleId = `${testRoleId}_delete`;
-      const createResponse = await client.system.role.$post(
+      const createResponse = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -616,7 +616,7 @@ describe("system role routes", () => {
       expect(createResponse.status).toBe(HttpStatusCodes.CREATED);
 
       // 测试删除功能
-      const deleteResponse = await client.system.role[":id"].$delete(
+      const deleteResponse = await client.system.roles[":id"].$delete(
         { param: { id: deleteTestRoleId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -628,7 +628,7 @@ describe("system role routes", () => {
       }
 
       // 验证角色已被删除
-      const verifyResponse = await client.system.role[":id"].$get(
+      const verifyResponse = await client.system.roles[":id"].$get(
         { param: { id: deleteTestRoleId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -642,7 +642,7 @@ describe("system role routes", () => {
     beforeAll(async () => {
       // Create a role for testing permissions
       roleId = `${testRoleId}_permissions`;
-      const response = await client.system.role.$post(
+      const response = await client.system.roles.$post(
         {
           json: {
             ...testRole,
@@ -656,7 +656,7 @@ describe("system role routes", () => {
     });
 
     it("should validate id format", async () => {
-      const response = await client.system.role[":id"].permissions.$get(
+      const response = await client.system.roles[":id"].permissions.$get(
         { param: { id: "Invalid-ID" } }, // Uppercase not allowed
         { headers: getAuthHeaders(adminToken) },
       );
@@ -664,7 +664,7 @@ describe("system role routes", () => {
     });
 
     it("should get role permissions", async () => {
-      const response = await client.system.role[":id"].permissions.$get(
+      const response = await client.system.roles[":id"].permissions.$get(
         { param: { id: roleId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -681,7 +681,7 @@ describe("system role routes", () => {
 
     it("should get admin role permissions", async () => {
       // Get admin role ID
-      const adminResponse = await client.system.role.$get(
+      const adminResponse = await client.system.roles.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -698,7 +698,7 @@ describe("system role routes", () => {
         if (items.length > 0) {
           const adminRoleId = items[0].id;
 
-          const response = await client.system.role[":id"].permissions.$get(
+          const response = await client.system.roles[":id"].permissions.$get(
             { param: { id: adminRoleId } },
             { headers: getAuthHeaders(adminToken) },
           );
@@ -729,7 +729,7 @@ describe("system role routes", () => {
     });
 
     it("should validate id format", async () => {
-      const response = await client.system.role[":id"].permissions.$put(
+      const response = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: "Invalid-ID" }, // Uppercase not allowed
           json: {
@@ -742,7 +742,7 @@ describe("system role routes", () => {
     });
 
     it("should validate permissions array format", async () => {
-      const response = await client.system.role[":id"].permissions.$put(
+      const response = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -754,7 +754,7 @@ describe("system role routes", () => {
       );
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response2 = await client.system.role[":id"].permissions.$put(
+      const response2 = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -765,7 +765,7 @@ describe("system role routes", () => {
       );
       expect(response2.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response3 = await client.system.role[":id"].permissions.$put(
+      const response3 = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -778,7 +778,7 @@ describe("system role routes", () => {
     });
 
     it("should save role permissions successfully", async () => {
-      const response = await client.system.role[":id"].permissions.$put(
+      const response = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -807,7 +807,7 @@ describe("system role routes", () => {
 
     it("should update permissions (replace existing)", async () => {
       // First set some permissions
-      await client.system.role[":id"].permissions.$put(
+      await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -822,7 +822,7 @@ describe("system role routes", () => {
       );
 
       // Then replace with different permissions
-      const response = await client.system.role[":id"].permissions.$put(
+      const response = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -843,7 +843,7 @@ describe("system role routes", () => {
       }
 
       // Verify the permissions were updated
-      const verifyResponse = await client.system.role[":id"].permissions.$get(
+      const verifyResponse = await client.system.roles[":id"].permissions.$get(
         { param: { id: roleId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -859,7 +859,7 @@ describe("system role routes", () => {
 
     it("should clear all permissions when empty array provided", async () => {
       // First set some permissions
-      await client.system.role[":id"].permissions.$put(
+      await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -873,7 +873,7 @@ describe("system role routes", () => {
       );
 
       // Then clear all permissions
-      const response = await client.system.role[":id"].permissions.$put(
+      const response = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: roleId },
           json: {
@@ -891,7 +891,7 @@ describe("system role routes", () => {
       }
 
       // Verify permissions were cleared
-      const verifyResponse = await client.system.role[":id"].permissions.$get(
+      const verifyResponse = await client.system.roles[":id"].permissions.$get(
         { param: { id: roleId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -904,7 +904,7 @@ describe("system role routes", () => {
 
     it("should return 404 for non-existent role", async () => {
       const nonExistentId = "non_existent_role";
-      const response = await client.system.role[":id"].permissions.$put(
+      const response = await client.system.roles[":id"].permissions.$put(
         {
           param: { id: nonExistentId },
           json: {

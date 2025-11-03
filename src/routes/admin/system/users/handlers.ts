@@ -3,16 +3,16 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import db from "@/db";
-import { adminSystemRole, adminSystemUser, adminSystemUserRole } from "@/db/schema";
+import { systemRoles, systemUserRoles, systemUsers } from "@/db/schema";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { omit, Resp } from "@/utils";
 
-import type { SystemUserRouteHandlerType } from ".";
-import type { responseAdminSystemUserWithPassword } from "./schema";
+import type { SystemUsersRouteHandlerType } from ".";
+import type { responseSystemUsersWithPassword } from "./schema";
 
-export const list: SystemUserRouteHandlerType<"list"> = async (c) => {
+export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();
 
   const parseResult = RefineQueryParamsSchema.safeParse(query);
@@ -20,33 +20,33 @@ export const list: SystemUserRouteHandlerType<"list"> = async (c) => {
     return c.json(Resp.fail(z.prettifyError(parseResult.error)), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [error, result] = await executeRefineQuery<z.infer<typeof responseAdminSystemUserWithPassword>>({
-    table: adminSystemUser,
+  const [error, result] = await executeRefineQuery<z.infer<typeof responseSystemUsersWithPassword>>({
+    table: systemUsers,
     queryParams: parseResult.data,
     joinConfig: {
       joins: [
         {
-          table: adminSystemUserRole,
+          table: systemUserRoles,
           type: "left",
-          on: eq(adminSystemUser.id, adminSystemUserRole.userId),
+          on: eq(systemUsers.id, systemUserRoles.userId),
         },
         {
-          table: adminSystemRole,
+          table: systemRoles,
           type: "left",
-          on: eq(adminSystemUserRole.roleId, adminSystemRole.id),
+          on: eq(systemUserRoles.roleId, systemRoles.id),
         },
       ],
       selectFields: {
-        id: adminSystemUser.id,
-        username: adminSystemUser.username,
-        nickName: adminSystemUser.nickName,
-        roles: sql`json_agg(json_build_object('id', ${adminSystemRole.id}, 'name', ${adminSystemRole.name}))`,
-        createdAt: adminSystemUser.createdAt,
-        updatedAt: adminSystemUser.updatedAt,
-        status: adminSystemUser.status,
-        avatar: adminSystemUser.avatar,
+        id: systemUsers.id,
+        username: systemUsers.username,
+        nickName: systemUsers.nickName,
+        roles: sql`json_agg(json_build_object('id', ${systemRoles.id}, 'name', ${systemRoles.name}))`,
+        createdAt: systemUsers.createdAt,
+        updatedAt: systemUsers.updatedAt,
+        status: systemUsers.status,
+        avatar: systemUsers.avatar,
       },
-      groupBy: [adminSystemUser.id],
+      groupBy: [systemUsers.id],
     },
   });
   if (error) {
@@ -59,7 +59,7 @@ export const list: SystemUserRouteHandlerType<"list"> = async (c) => {
   return c.json(Resp.ok(safeData), HttpStatusCodes.OK);
 };
 
-export const create: SystemUserRouteHandlerType<"create"> = async (c) => {
+export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
@@ -67,7 +67,7 @@ export const create: SystemUserRouteHandlerType<"create"> = async (c) => {
     const hashedPassword = await hash(body.password);
 
     const [created] = await db
-      .insert(adminSystemUser)
+      .insert(systemUsers)
       .values({
         ...body,
         password: hashedPassword,
@@ -95,33 +95,40 @@ export const create: SystemUserRouteHandlerType<"create"> = async (c) => {
   }
 };
 
-export const get: SystemUserRouteHandlerType<"get"> = async (c) => {
+export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [user] = await db
-    .select()
-    .from(adminSystemUser)
-    .where(eq(adminSystemUser.id, id));
+  const user = await db.query.systemUsers.findFirst({
+    where: eq(systemUsers.id, id),
+    with: {
+      systemUserRoles: {
+        with: {
+          roles: true,
+        },
+      },
+    },
+  });
 
   if (!user) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  const userWithoutPassword = omit(user, ["password"]);
+  const roles = user.systemUserRoles.map(({ roles: { id, name } }) => ({ id, name }));
+  const userWithoutPassword = omit(user, ["password", "systemUserRoles"]);
 
-  return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
+  return c.json(Resp.ok({ ...userWithoutPassword, roles }), HttpStatusCodes.OK);
 };
 
-export const update: SystemUserRouteHandlerType<"update"> = async (c) => {
+export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const { id } = c.req.valid("param");
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
   // 检查是否为内置用户
   const [existingUser] = await db
-    .select({ builtIn: adminSystemUser.builtIn })
-    .from(adminSystemUser)
-    .where(eq(adminSystemUser.id, id));
+    .select({ builtIn: systemUsers.builtIn })
+    .from(systemUsers)
+    .where(eq(systemUsers.id, id));
 
   if (!existingUser) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -136,12 +143,12 @@ export const update: SystemUserRouteHandlerType<"update"> = async (c) => {
   const updateData = omit(body, ["password"]);
 
   const [updated] = await db
-    .update(adminSystemUser)
+    .update(systemUsers)
     .set({
       ...updateData,
       updatedBy: sub,
     })
-    .where(eq(adminSystemUser.id, id))
+    .where(eq(systemUsers.id, id))
     .returning();
 
   if (!updated) {
@@ -153,14 +160,14 @@ export const update: SystemUserRouteHandlerType<"update"> = async (c) => {
   return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.OK);
 };
 
-export const remove: SystemUserRouteHandlerType<"remove"> = async (c) => {
+export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // 检查是否为内置用户
   const [existingUser] = await db
-    .select({ builtIn: adminSystemUser.builtIn })
-    .from(adminSystemUser)
-    .where(eq(adminSystemUser.id, id));
+    .select({ builtIn: systemUsers.builtIn })
+    .from(systemUsers)
+    .where(eq(systemUsers.id, id));
 
   if (!existingUser) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -171,9 +178,9 @@ export const remove: SystemUserRouteHandlerType<"remove"> = async (c) => {
   }
 
   const [deleted] = await db
-    .delete(adminSystemUser)
-    .where(eq(adminSystemUser.id, id))
-    .returning({ id: adminSystemUser.id });
+    .delete(systemUsers)
+    .where(eq(systemUsers.id, id))
+    .returning({ id: systemUsers.id });
 
   if (!deleted) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -182,13 +189,13 @@ export const remove: SystemUserRouteHandlerType<"remove"> = async (c) => {
   return c.json(Resp.ok(deleted), HttpStatusCodes.OK);
 };
 
-export const saveRoles: SystemUserRouteHandlerType<"saveRoles"> = async (c) => {
+export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => {
   const { userId } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
 
   try {
     // 检查用户是否存在
-    const [user] = await db.select({ id: adminSystemUser.id }).from(adminSystemUser).where(eq(adminSystemUser.id, userId)).limit(1);
+    const [user] = await db.select({ id: systemUsers.id }).from(systemUsers).where(eq(systemUsers.id, userId)).limit(1);
 
     if (!user) {
       return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
@@ -196,7 +203,7 @@ export const saveRoles: SystemUserRouteHandlerType<"saveRoles"> = async (c) => {
 
     // 检查所有新角色是否存在
     if (roleIds.length > 0) {
-      const existingRoles = await db.select({ id: adminSystemRole.id }).from(adminSystemRole).where(inArray(adminSystemRole.id, roleIds));
+      const existingRoles = await db.select({ id: systemRoles.id }).from(systemRoles).where(inArray(systemRoles.id, roleIds));
 
       if (existingRoles.length !== roleIds.length) {
         const foundRoles = existingRoles.map(role => role.id);
@@ -207,9 +214,9 @@ export const saveRoles: SystemUserRouteHandlerType<"saveRoles"> = async (c) => {
 
     // 获取用户当前的所有角色
     const currentUserRoles = await db
-      .select({ roleId: adminSystemUserRole.roleId })
-      .from(adminSystemUserRole)
-      .where(eq(adminSystemUserRole.userId, userId));
+      .select({ roleId: systemUserRoles.roleId })
+      .from(systemUserRoles)
+      .where(eq(systemUserRoles.userId, userId));
 
     const currentRoleIds = currentUserRoles.map(ur => ur.roleId);
     const currentRoleSet = new Set(currentRoleIds);
@@ -228,12 +235,12 @@ export const saveRoles: SystemUserRouteHandlerType<"saveRoles"> = async (c) => {
     await db.transaction(async (tx) => {
       // 删除不需要的角色
       if (rolesToRemove.length > 0) {
-        const deleteResult = await tx.delete(adminSystemUserRole).where(
+        const deleteResult = await tx.delete(systemUserRoles).where(
           and(
-            eq(adminSystemUserRole.userId, userId),
-            inArray(adminSystemUserRole.roleId, rolesToRemove),
+            eq(systemUserRoles.userId, userId),
+            inArray(systemUserRoles.roleId, rolesToRemove),
           ),
-        ).returning({ roleId: adminSystemUserRole.roleId });
+        ).returning({ roleId: systemUserRoles.roleId });
 
         removedCount = deleteResult.length;
       }
@@ -241,7 +248,7 @@ export const saveRoles: SystemUserRouteHandlerType<"saveRoles"> = async (c) => {
       // 添加新的角色
       if (rolesToAdd.length > 0) {
         const valuesToInsert = rolesToAdd.map(roleId => ({ userId, roleId }));
-        const insertResult = await tx.insert(adminSystemUserRole).values(valuesToInsert).returning();
+        const insertResult = await tx.insert(systemUserRoles).values(valuesToInsert).returning();
         addedCount = insertResult.length;
       }
     });

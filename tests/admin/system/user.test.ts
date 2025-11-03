@@ -5,12 +5,12 @@ import { v7 as uuidv7 } from "uuid";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import db from "@/db";
-import { adminSystemUser, adminSystemUserRole, casbinRule } from "@/db/schema";
+import { casbinRule, systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
 import createApp from "@/lib/create-app";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
-import { adminSystemUserRouter } from "@/routes/admin/system/user";
+import { systemUsersRouter } from "@/routes/admin/system/users";
 
 import { getAdminToken, getAuthHeaders, getUserToken } from "../../auth-utils";
 
@@ -20,9 +20,9 @@ if (env.NODE_ENV !== "test") {
 
 function createSysUsersApp() {
   return createApp()
-    .use("/system/user/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
-    .use("/system/user/*", authorize())
-    .route("/", adminSystemUserRouter);
+    .use("/system/users/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/users/*", authorize())
+    .route("/", systemUsersRouter);
 }
 
 const client = testClient(createSysUsersApp());
@@ -46,13 +46,13 @@ async function cleanupTestUsers(): Promise<void> {
     await db.transaction(async (tx) => {
       // 查找所有测试用户（以 t 开头，后面跟数字的用户名模式）
       const testUsers = await tx
-        .select({ id: adminSystemUser.id, username: adminSystemUser.username })
-        .from(adminSystemUser)
+        .select({ id: systemUsers.id, username: systemUsers.username })
+        .from(systemUsers)
         .where(
           or(
-            like(adminSystemUser.username, "t123_%"), // 主要的测试用户模式
-            like(adminSystemUser.username, "test_%"), // 其他可能的测试用户
-            like(adminSystemUser.username, "t%_test"), // 其他测试模式
+            like(systemUsers.username, "t123_%"), // 主要的测试用户模式
+            like(systemUsers.username, "test_%"), // 其他可能的测试用户
+            like(systemUsers.username, "t%_test"), // 其他测试模式
           ),
         );
 
@@ -64,8 +64,8 @@ async function cleanupTestUsers(): Promise<void> {
 
       // 删除用户角色关联
       await tx
-        .delete(adminSystemUserRole)
-        .where(or(...userIds.map(id => eq(adminSystemUserRole.userId, id))));
+        .delete(systemUserRoles)
+        .where(or(...userIds.map(id => eq(systemUserRoles.userId, id))));
 
       // 删除 Casbin 规则（如果有用户相关的规则）
       await tx
@@ -79,12 +79,12 @@ async function cleanupTestUsers(): Promise<void> {
 
       // 删除用户本身
       await tx
-        .delete(adminSystemUser)
+        .delete(systemUsers)
         .where(
           or(
-            like(adminSystemUser.username, "t123_%"),
-            like(adminSystemUser.username, "test_%"),
-            like(adminSystemUser.username, "t%_test"),
+            like(systemUsers.username, "t123_%"),
+            like(systemUsers.username, "test_%"),
+            like(systemUsers.username, "t%_test"),
           ),
         );
     });
@@ -114,7 +114,7 @@ describe("system user routes", () => {
 
   describe("authentication & authorization", () => {
     it("should allow authenticated admin requests", async () => {
-      const response = await client.system.user.$get(
+      const response = await client.system.users.$get(
         { query: {} },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -123,7 +123,7 @@ describe("system user routes", () => {
     });
 
     it("should deny access with user token (no admin permissions)", async () => {
-      const response = await client.system.user.$get(
+      const response = await client.system.users.$get(
         { query: {} },
         { headers: getAuthHeaders(userToken) },
       );
@@ -132,7 +132,7 @@ describe("system user routes", () => {
     });
 
     it("should require authentication", async () => {
-      const response = await client.system.user.$get(
+      const response = await client.system.users.$get(
         { query: {} },
         {},
       );
@@ -142,7 +142,7 @@ describe("system user routes", () => {
 
   describe("get /system/user - list users", () => {
     it("should validate pagination parameters", async () => {
-      const response = await client.system.user.$get(
+      const response = await client.system.users.$get(
         {
           query: {
             current: "invalid" as unknown,
@@ -155,7 +155,7 @@ describe("system user routes", () => {
     });
 
     it("should list users with default pagination", async () => {
-      const response = await client.system.user.$get(
+      const response = await client.system.users.$get(
         { query: {} },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -169,7 +169,7 @@ describe("system user routes", () => {
     });
 
     it("should support filtering by username", async () => {
-      const response = await client.system.user.$get(
+      const response = await client.system.users.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -191,7 +191,7 @@ describe("system user routes", () => {
     });
 
     it("should support sorting", async () => {
-      const response = await client.system.user.$get(
+      const response = await client.system.users.$get(
         {
           query: {
             sorters: JSON.stringify([{ field: "createdAt", order: "desc" }]),
@@ -219,7 +219,7 @@ describe("system user routes", () => {
 
   describe("post /system/user - create user", () => {
     it("should validate required fields", async () => {
-      const response = await client.system.user.$post(
+      const response = await client.system.users.$post(
         {
           json: {
             username: `${testUsername}_required`,
@@ -235,7 +235,7 @@ describe("system user routes", () => {
     });
 
     it("should validate username format (4-15 chars, alphanumeric)", async () => {
-      const response = await client.system.user.$post(
+      const response = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -246,7 +246,7 @@ describe("system user routes", () => {
       );
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response2 = await client.system.user.$post(
+      const response2 = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -259,7 +259,7 @@ describe("system user routes", () => {
     });
 
     it("should validate password length (6-20 chars)", async () => {
-      const response = await client.system.user.$post(
+      const response = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -274,7 +274,7 @@ describe("system user routes", () => {
 
     it("should create a new user", async () => {
       const newUsername = `${testUsername}_create`;
-      const response = await client.system.user.$post(
+      const response = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -297,7 +297,7 @@ describe("system user routes", () => {
       const duplicateUsername = `${testUsername}_duplicate`;
 
       // Create first user
-      const response1 = await client.system.user.$post(
+      const response1 = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -310,7 +310,7 @@ describe("system user routes", () => {
       expect(response1.status).toBe(HttpStatusCodes.CREATED);
 
       // Try to create duplicate
-      const response2 = await client.system.user.$post(
+      const response2 = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -333,7 +333,7 @@ describe("system user routes", () => {
 
     beforeAll(async () => {
       // Create a user for testing
-      const response = await client.system.user.$post(
+      const response = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -351,7 +351,7 @@ describe("system user routes", () => {
     });
 
     it("should validate UUID format", async () => {
-      const response = await client.system.user[":id"].$get(
+      const response = await client.system.users[":id"].$get(
         { param: { id: "invalid-uuid" } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -360,7 +360,7 @@ describe("system user routes", () => {
 
     it("should return 404 for non-existent user", async () => {
       const nonExistentId = uuidv7();
-      const response = await client.system.user[":id"].$get(
+      const response = await client.system.users[":id"].$get(
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -372,7 +372,7 @@ describe("system user routes", () => {
     });
 
     it("should get user details", async () => {
-      const response = await client.system.user[":id"].$get(
+      const response = await client.system.users[":id"].$get(
         { param: { id: userId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -393,7 +393,7 @@ describe("system user routes", () => {
 
     beforeAll(async () => {
       // Create a regular user for testing
-      const response = await client.system.user.$post(
+      const response = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -410,7 +410,7 @@ describe("system user routes", () => {
       }
 
       // Get built-in admin user ID
-      const adminResponse = await client.system.user.$get(
+      const adminResponse = await client.system.users.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -431,7 +431,7 @@ describe("system user routes", () => {
     });
 
     it("should validate empty body", async () => {
-      const response = await client.system.user[":id"].$patch(
+      const response = await client.system.users[":id"].$patch(
         {
           param: { id: userId },
           json: {},
@@ -442,7 +442,7 @@ describe("system user routes", () => {
     });
 
     it("should update user fields", async () => {
-      const response = await client.system.user[":id"].$patch(
+      const response = await client.system.users[":id"].$patch(
         {
           param: { id: userId },
           json: {
@@ -467,7 +467,7 @@ describe("system user routes", () => {
         return;
       }
 
-      const response = await client.system.user[":id"].$patch(
+      const response = await client.system.users[":id"].$patch(
         {
           param: { id: builtInUserId },
           json: {
@@ -486,7 +486,7 @@ describe("system user routes", () => {
 
     it("should return 404 for non-existent user", async () => {
       const nonExistentId = uuidv7();
-      const response = await client.system.user[":id"].$patch(
+      const response = await client.system.users[":id"].$patch(
         {
           param: { id: nonExistentId },
           json: {
@@ -505,7 +505,7 @@ describe("system user routes", () => {
 
     beforeAll(async () => {
       // Get built-in admin user ID
-      const adminResponse = await client.system.user.$get(
+      const adminResponse = await client.system.users.$get(
         {
           query: {
             filters: JSON.stringify([
@@ -526,7 +526,7 @@ describe("system user routes", () => {
     });
 
     it("should validate UUID format", async () => {
-      const response = await client.system.user[":id"].$delete(
+      const response = await client.system.users[":id"].$delete(
         { param: { id: "invalid-uuid" } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -539,7 +539,7 @@ describe("system user routes", () => {
         return;
       }
 
-      const response = await client.system.user[":id"].$delete(
+      const response = await client.system.users[":id"].$delete(
         { param: { id: builtInUserId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -553,7 +553,7 @@ describe("system user routes", () => {
 
     it("should return 404 for non-existent user", async () => {
       const nonExistentId = uuidv7();
-      const response = await client.system.user[":id"].$delete(
+      const response = await client.system.users[":id"].$delete(
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -563,7 +563,7 @@ describe("system user routes", () => {
 
     it("should delete user successfully", async () => {
       // 先创建一个用户用于测试删除功能
-      const createResponse = await client.system.user.$post(
+      const createResponse = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -581,7 +581,7 @@ describe("system user routes", () => {
       const deleteTestUserId = json.data.id;
 
       // 测试删除功能
-      const deleteResponse = await client.system.user[":id"].$delete(
+      const deleteResponse = await client.system.users[":id"].$delete(
         { param: { id: deleteTestUserId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -593,7 +593,7 @@ describe("system user routes", () => {
       }
 
       // 验证用户已被删除
-      const verifyResponse = await client.system.user[":id"].$get(
+      const verifyResponse = await client.system.users[":id"].$get(
         { param: { id: deleteTestUserId } },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -606,7 +606,7 @@ describe("system user routes", () => {
 
     beforeAll(async () => {
       // Create a user for role testing
-      const response = await client.system.user.$post(
+      const response = await client.system.users.$post(
         {
           json: {
             ...testUser,
@@ -624,7 +624,7 @@ describe("system user routes", () => {
     });
 
     it("should validate userId format", async () => {
-      const response = await client.system.user[":userId"].roles.$put(
+      const response = await client.system.users[":userId"].roles.$put(
         {
           param: { userId: "invalid-uuid" },
           json: {
@@ -637,7 +637,7 @@ describe("system user routes", () => {
     });
 
     it("should validate roleIds array", async () => {
-      const response = await client.system.user[":userId"].roles.$put(
+      const response = await client.system.users[":userId"].roles.$put(
         {
           param: { userId },
           json: {
@@ -648,7 +648,7 @@ describe("system user routes", () => {
       );
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
-      const response2 = await client.system.user[":userId"].roles.$put(
+      const response2 = await client.system.users[":userId"].roles.$put(
         {
           param: { userId },
           json: {
@@ -662,7 +662,7 @@ describe("system user routes", () => {
 
     it("should return 404 for non-existent user", async () => {
       const nonExistentId = uuidv7();
-      const response = await client.system.user[":userId"].roles.$put(
+      const response = await client.system.users[":userId"].roles.$put(
         {
           param: { userId: nonExistentId },
           json: {
@@ -676,7 +676,7 @@ describe("system user routes", () => {
     });
 
     it("should save user roles successfully", async () => {
-      const response = await client.system.user[":userId"].roles.$put(
+      const response = await client.system.users[":userId"].roles.$put(
         {
           param: { userId },
           json: {
@@ -700,7 +700,7 @@ describe("system user routes", () => {
 
     it("should update roles (replace existing)", async () => {
       // First set some roles
-      await client.system.user[":userId"].roles.$put(
+      await client.system.users[":userId"].roles.$put(
         {
           param: { userId },
           json: {
@@ -711,7 +711,7 @@ describe("system user routes", () => {
       );
 
       // Then replace with different roles
-      const response = await client.system.user[":userId"].roles.$put(
+      const response = await client.system.users[":userId"].roles.$put(
         {
           param: { userId },
           json: {
@@ -731,7 +731,7 @@ describe("system user routes", () => {
 
     it("should clear all roles when empty array provided", async () => {
       // First set some roles
-      await client.system.user[":userId"].roles.$put(
+      await client.system.users[":userId"].roles.$put(
         {
           param: { userId },
           json: {
@@ -742,7 +742,7 @@ describe("system user routes", () => {
       );
 
       // Then clear all roles
-      const response = await client.system.user[":userId"].roles.$put(
+      const response = await client.system.users[":userId"].roles.$put(
         {
           param: { userId },
           json: {

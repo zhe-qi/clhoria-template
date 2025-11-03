@@ -7,7 +7,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErr } from "@/utils";
 
-import { getUserInfoSchema, loginAdminSystemUser } from "../system/user/schema";
+import { getUserInfoSchema, loginSystemUsers } from "../system/users/schema";
 
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];
@@ -18,7 +18,7 @@ export const login = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      loginAdminSystemUser,
+      loginSystemUsers,
       "登录请求",
     ),
   },

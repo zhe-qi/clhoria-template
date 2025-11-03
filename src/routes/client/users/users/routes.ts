@@ -3,10 +3,10 @@ import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent } from "@/lib/stoker/openapi/helpers";
 
-const tags = ["/client-user (用户端用户)"];
+const tags = ["/client-users (用户端用户)"];
 
-export const getUserInfo = createRoute({
-  path: "/client-user/info",
+export const getUsersInfo = createRoute({
+  path: "/client-users/info",
   method: "get",
   tags,
   summary: "获取用户信息",

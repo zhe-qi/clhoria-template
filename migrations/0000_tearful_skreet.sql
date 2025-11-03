@@ -1,4 +1,4 @@
-CREATE TABLE "admin_casbin_rule" (
+CREATE TABLE "casbin_rule" (
 	"ptype" varchar(8) NOT NULL,
 	"v0" varchar(64) NOT NULL,
 	"v1" varchar(254) NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE "admin_casbin_rule" (
 	CONSTRAINT "casbin_rule_pkey" PRIMARY KEY("v0","v1","v2","v3")
 );
 --> statement-breakpoint
-CREATE TABLE "admin_system_role" (
+CREATE TABLE "system_roles" (
 	"id" varchar(64) PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64),
@@ -20,7 +20,13 @@ CREATE TABLE "admin_system_role" (
 	"status" integer DEFAULT 1 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "admin_system_user" (
+CREATE TABLE "system_user_roles" (
+	"user_id" uuid NOT NULL,
+	"role_id" varchar(64) NOT NULL,
+	CONSTRAINT "system_user_roles_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
+);
+--> statement-breakpoint
+CREATE TABLE "system_users" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64),
@@ -32,16 +38,10 @@ CREATE TABLE "admin_system_user" (
 	"avatar" text,
 	"nick_name" varchar(64) NOT NULL,
 	"status" integer DEFAULT 1 NOT NULL,
-	CONSTRAINT "admin_system_user_username_unique" UNIQUE("username")
+	CONSTRAINT "system_users_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
-CREATE TABLE "admin_system_user_role" (
-	"user_id" uuid NOT NULL,
-	"role_id" varchar(64) NOT NULL,
-	CONSTRAINT "admin_system_user_role_user_id_role_id_pk" PRIMARY KEY("user_id","role_id")
-);
---> statement-breakpoint
-CREATE TABLE "client_user" (
+CREATE TABLE "client_users" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"created_at" timestamp,
 	"created_by" varchar(64),
@@ -82,21 +82,21 @@ CREATE TABLE "client_user" (
 	"invite_time" timestamp,
 	"my_invite_code" varchar(32),
 	"identities" jsonb DEFAULT '[]'::jsonb,
-	CONSTRAINT "client_user_username_unique" UNIQUE("username"),
-	CONSTRAINT "client_user_mobile_unique" UNIQUE("mobile"),
-	CONSTRAINT "client_user_email_unique" UNIQUE("email"),
-	CONSTRAINT "client_user_wxUnionid_unique" UNIQUE("wx_unionid"),
-	CONSTRAINT "client_user_qqUnionid_unique" UNIQUE("qq_unionid"),
-	CONSTRAINT "client_user_aliOpenid_unique" UNIQUE("ali_openid"),
-	CONSTRAINT "client_user_appleOpenid_unique" UNIQUE("apple_openid"),
-	CONSTRAINT "client_user_myInviteCode_unique" UNIQUE("my_invite_code")
+	CONSTRAINT "client_users_username_unique" UNIQUE("username"),
+	CONSTRAINT "client_users_mobile_unique" UNIQUE("mobile"),
+	CONSTRAINT "client_users_email_unique" UNIQUE("email"),
+	CONSTRAINT "client_users_wxUnionid_unique" UNIQUE("wx_unionid"),
+	CONSTRAINT "client_users_qqUnionid_unique" UNIQUE("qq_unionid"),
+	CONSTRAINT "client_users_aliOpenid_unique" UNIQUE("ali_openid"),
+	CONSTRAINT "client_users_appleOpenid_unique" UNIQUE("apple_openid"),
+	CONSTRAINT "client_users_myInviteCode_unique" UNIQUE("my_invite_code")
 );
 --> statement-breakpoint
-CREATE INDEX "idx_casbin_g_v0" ON "admin_casbin_rule" USING btree ("ptype","v0","v1");--> statement-breakpoint
-CREATE INDEX "system_user_username_idx" ON "admin_system_user" USING btree ("username");--> statement-breakpoint
-CREATE INDEX "client_users_username_idx" ON "client_user" USING btree ("username");--> statement-breakpoint
-CREATE INDEX "client_users_mobile_idx" ON "client_user" USING btree ("mobile");--> statement-breakpoint
-CREATE INDEX "client_users_email_idx" ON "client_user" USING btree ("email");--> statement-breakpoint
-CREATE INDEX "client_users_status_idx" ON "client_user" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "client_users_register_date_idx" ON "client_user" USING btree ("register_date" DESC NULLS LAST);--> statement-breakpoint
-CREATE INDEX "client_users_last_login_date_idx" ON "client_user" USING btree ("last_login_date" DESC NULLS LAST);
+CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0","v1");--> statement-breakpoint
+CREATE INDEX "system_user_username_idx" ON "system_users" USING btree ("username");--> statement-breakpoint
+CREATE INDEX "client_users_username_idx" ON "client_users" USING btree ("username");--> statement-breakpoint
+CREATE INDEX "client_users_mobile_idx" ON "client_users" USING btree ("mobile");--> statement-breakpoint
+CREATE INDEX "client_users_email_idx" ON "client_users" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "client_users_status_idx" ON "client_users" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "client_users_register_date_idx" ON "client_users" USING btree ("register_date" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "client_users_last_login_date_idx" ON "client_users" USING btree ("last_login_date" DESC NULLS LAST);

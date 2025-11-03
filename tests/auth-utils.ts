@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
 
 import db from "@/db";
-import { adminSystemUser } from "@/db/schema";
+import { systemUsers } from "@/db/schema";
 import env from "@/env";
 
 /** 缓存的token信息 */
@@ -23,10 +23,10 @@ let userTokenCache: CachedToken | null = null;
  */
 async function generateTestToken(username: string): Promise<CachedToken> {
   // 查询用户信息
-  const user = await db.query.adminSystemUser.findFirst({
-    where: eq(adminSystemUser.username, username),
+  const user = await db.query.systemUsers.findFirst({
+    where: eq(systemUsers.username, username),
     with: {
-      userRoles: true,
+      systemUserRoles: true,
     },
     columns: {
       id: true,
@@ -48,7 +48,7 @@ async function generateTestToken(username: string): Promise<CachedToken> {
     iat: now,
     exp: accessTokenExp,
     jti,
-    roles: user.userRoles.map(role => role.roleId),
+    roles: user.systemUserRoles.map(role => role.roleId),
   };
 
   // 生成token

@@ -4,9 +4,9 @@ import { pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 
 import { statusEnum } from "../../_shard/enums";
-import { adminSystemUserRole } from "./user-role";
+import { systemUserRoles } from "./user-roles";
 
-export const adminSystemRole = pgTable("admin_system_role", {
+export const systemRoles = pgTable("system_roles", {
   ...baseColumns,
   id: varchar({ length: 64 }).notNull().primaryKey(),
   name: varchar({ length: 64 }).notNull(),
@@ -14,6 +14,6 @@ export const adminSystemRole = pgTable("admin_system_role", {
   status: statusEnum().notNull(),
 });
 
-export const adminSystemRoleRelations = relations(adminSystemRole, ({ many }) => ({
-  userRoles: many(adminSystemUserRole),
+export const systemRolesRelations = relations(systemRoles, ({ many }) => ({
+  systemUserRoles: many(systemUserRoles),
 }));

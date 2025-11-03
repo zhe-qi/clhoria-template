@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import db from "@/db";
-import { adminSystemUser, adminSystemRole, casbinRule, adminSystemUserRole } from "@/db/schema";
+import { systemUsers, systemRoles, casbinRule, systemUserRoles } from "@/db/schema";
 import { Status } from "@/lib/enums/common";
 
 async function seedUsers() {
@@ -11,7 +11,7 @@ async function seedUsers() {
   const userPasswordHash = await hash("123456");
 
   // Create admin user
-  const [adminUser] = await db.insert(adminSystemUser)
+  const [adminUser] = await db.insert(systemUsers)
     .values({
       username: "admin",
       password: adminPasswordHash,
@@ -23,7 +23,7 @@ async function seedUsers() {
     .returning();
 
   // Create regular user
-  const [regularUser] = await db.insert(adminSystemUser)
+  const [regularUser] = await db.insert(systemUsers)
     .values({
       username: "user",
       password: userPasswordHash,
@@ -42,7 +42,7 @@ async function seedRoles() {
   console.log("🌱 Seeding roles...");
 
   // Create admin role
-  const [adminRole] = await db.insert(adminSystemRole)
+  const [adminRole] = await db.insert(systemRoles)
     .values({
       id: "admin",
       name: "管理员",
@@ -53,7 +53,7 @@ async function seedRoles() {
     .returning();
 
   // Create user role
-  const [userRole] = await db.insert(adminSystemRole)
+  const [userRole] = await db.insert(systemRoles)
     .values({
       id: "user",
       name: "普通用户",
@@ -76,7 +76,7 @@ async function seedUserRoles(users: any, roles: any) {
   }
 
   // Associate admin user with admin role
-  await db.insert(adminSystemUserRole)
+  await db.insert(systemUserRoles)
     .values({
       userId: users.adminUser.id,
       roleId: roles.adminRole.id,
@@ -84,7 +84,7 @@ async function seedUserRoles(users: any, roles: any) {
     .onConflictDoNothing();
 
   // Associate regular user with user role
-  await db.insert(adminSystemUserRole)
+  await db.insert(systemUserRoles)
     .values({
       userId: users.regularUser.id,
       roleId: roles.userRole.id,
@@ -103,19 +103,19 @@ async function seedCasbinRules(roles: any) {
   }
 
   const adminRules = [
-    { v1: "/system/role", v2: "GET" },
-    { v1: "/system/role", v2: "POST" },
-    { v1: "/system/role/{id}", v2: "DELETE" },
-    { v1: "/system/role/{id}", v2: "GET" },
-    { v1: "/system/role/{id}", v2: "PATCH" },
-    { v1: "/system/role/{id}/permissions", v2: "GET" },
-    { v1: "/system/role/{id}/permissions", v2: "PUT" },
-    { v1: "/system/user", v2: "GET" },
-    { v1: "/system/user", v2: "POST" },
-    { v1: "/system/user/{id}", v2: "DELETE" },
-    { v1: "/system/user/{id}", v2: "GET" },
-    { v1: "/system/user/{id}", v2: "PATCH" },
-    { v1: "/system/user/{id}/roles", v2: "PUT" },
+    { v1: "/system/roles", v2: "GET" },
+    { v1: "/system/roles", v2: "POST" },
+    { v1: "/system/roles/{id}", v2: "DELETE" },
+    { v1: "/system/roles/{id}", v2: "GET" },
+    { v1: "/system/roles/{id}", v2: "PATCH" },
+    { v1: "/system/roles/{id}/permissions", v2: "GET" },
+    { v1: "/system/roles/{id}/permissions", v2: "PUT" },
+    { v1: "/system/users", v2: "GET" },
+    { v1: "/system/users", v2: "POST" },
+    { v1: "/system/users/{id}", v2: "DELETE" },
+    { v1: "/system/users/{id}", v2: "GET" },
+    { v1: "/system/users/{id}", v2: "PATCH" },
+    { v1: "/system/users/{id}/roles", v2: "PUT" },
   ];
 
   for (const rule of adminRules) {
