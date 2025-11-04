@@ -9,6 +9,8 @@
 
 Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优雅，每一个功能都如花般绽放。选择 Clhoria，就是选择与未来同行。
 
+> 模板配套的后台管理前端部分基于 Refine + Shadcn 开发：[https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
+
 ## 功能特性
 
 - **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
@@ -57,21 +59,13 @@ Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优
 ## 项目预览
 
 <div align="center">
-  <img src="https://r2.promptez.cn/drizzle-studio.webp" width="45%" alt="Drizzle Studio">
-  <img src="https://r2.promptez.cn/swagger.webp" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/studio.png" width="45%" alt="Drizzle Studio">
+  <img src="https://r2.promptez.cn/github/test.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/login.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/user.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/studio.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/list.png" width="45%" alt="Swagger API 文档">
 </div>
-<div align="center">
-<img src="https://r2.promptez.cn/test.webp" width="50%" alt="测试覆盖率">
-</div>
-
-## 配套前端项目
-
-本后端模板配套的前端项目基于 Refine 框架开发，提供完整的管理后台界面：
-
-- **前端仓库**: [https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
-- **技术栈**: React + Refine + Ant Design + TypeScript
-- **特性**: 完整的 RBAC 权限管理、用户管理、角色管理等功能界面
-- **集成**: 与本后端 API 完美集成，支持 OpenAPI 规范自动生成类型定义
 
 ## 快速开始
 

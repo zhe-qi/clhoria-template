@@ -1,4 +1,3 @@
-import { sentry } from "@hono/sentry";
 import { jwt } from "hono/jwt";
 
 import configureOpenAPI from "@/lib/openapi";
@@ -21,6 +20,7 @@ const app = createApp();
 configureMainDoc?.(app);
 
 if (env.SENTRY_DSN) {
+  const { sentry } = await import("@hono/sentry");
   app.use("*", sentry({ dsn: env.SENTRY_DSN }));
 }
 
