@@ -1,3 +1,9 @@
+CREATE TYPE "public"."gender" AS ENUM('UNKNOWN', 'MALE', 'FEMALE');--> statement-breakpoint
+CREATE TYPE "public"."real_name_auth_status" AS ENUM('UNAUTHENTICATED', 'PENDING', 'VERIFIED', 'FAILED');--> statement-breakpoint
+CREATE TYPE "public"."real_name_auth_type" AS ENUM('INDIVIDUAL', 'ENTERPRISE');--> statement-breakpoint
+CREATE TYPE "public"."status" AS ENUM('ENABLED', 'DISABLED');--> statement-breakpoint
+CREATE TYPE "public"."user_status" AS ENUM('NORMAL', 'DISABLED', 'PENDING', 'REJECTED');--> statement-breakpoint
+CREATE TYPE "public"."verification_status" AS ENUM('UNVERIFIED', 'VERIFIED');--> statement-breakpoint
 CREATE TABLE "casbin_rule" (
 	"ptype" varchar(8) NOT NULL,
 	"v0" varchar(64) NOT NULL,
@@ -17,7 +23,7 @@ CREATE TABLE "system_roles" (
 	"updated_by" varchar(64),
 	"name" varchar(64) NOT NULL,
 	"description" text,
-	"status" integer DEFAULT 1 NOT NULL
+	"status" "status" DEFAULT 'ENABLED' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "system_user_roles" (
@@ -37,7 +43,7 @@ CREATE TABLE "system_users" (
 	"built_in" boolean DEFAULT false,
 	"avatar" text,
 	"nick_name" varchar(64) NOT NULL,
-	"status" integer DEFAULT 1 NOT NULL,
+	"status" "status" DEFAULT 'ENABLED' NOT NULL,
 	CONSTRAINT "system_users_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
@@ -51,12 +57,12 @@ CREATE TABLE "client_users" (
 	"password" varchar(128) NOT NULL,
 	"password_secret_version" integer DEFAULT 1,
 	"nickname" varchar(64),
-	"gender" integer DEFAULT 0,
-	"status" integer DEFAULT 0,
+	"gender" "gender" DEFAULT 'UNKNOWN',
+	"status" "user_status" DEFAULT 'NORMAL',
 	"mobile" varchar(20),
-	"mobile_confirmed" integer DEFAULT 0,
+	"mobile_confirmed" "verification_status" DEFAULT 'UNVERIFIED',
 	"email" varchar(128),
-	"email_confirmed" integer DEFAULT 0,
+	"email_confirmed" "verification_status" DEFAULT 'UNVERIFIED',
 	"avatar" text,
 	"department_ids" jsonb DEFAULT '[]'::jsonb,
 	"enterprise_ids" jsonb DEFAULT '[]'::jsonb,

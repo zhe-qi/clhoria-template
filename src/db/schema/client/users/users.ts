@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxOpenId } from "@/db/schema/_shard/types/app-user";
 
 import { baseColumns } from "@/db/schema/_shard/base-columns";
+import { genderEnum, userStatusEnum, verificationStatusEnum } from "@/db/schema/_shard/enums";
 import { Gender, UserStatus, VerificationStatus } from "@/lib/enums";
 
 export const clientUsers = pgTable("client_users", {
@@ -17,18 +18,18 @@ export const clientUsers = pgTable("client_users", {
   passwordSecretVersion: integer().default(1),
   /** 用户昵称 */
   nickname: varchar({ length: 64 }),
-  /** 性别：0 未知 1 男性 2 女性 */
-  gender: integer().default(Gender.UNKNOWN),
-  /** 用户状态：0 正常 1 禁用 2 审核中 3 审核拒绝 */
-  status: integer().default(UserStatus.NORMAL),
+  /** 性别 */
+  gender: genderEnum().default(Gender.UNKNOWN),
+  /** 用户状态 */
+  status: userStatusEnum().default(UserStatus.NORMAL),
   /** 手机号码 */
   mobile: varchar({ length: 20 }),
-  /** 手机号验证状态：0 未验证 1 已验证 */
-  mobileConfirmed: integer().default(VerificationStatus.UNVERIFIED),
+  /** 手机号验证状态 */
+  mobileConfirmed: verificationStatusEnum().default(VerificationStatus.UNVERIFIED),
   /** 邮箱地址 */
   email: varchar({ length: 128 }),
-  /** 邮箱验证状态：0 未验证 1 已验证 */
-  emailConfirmed: integer().default(VerificationStatus.UNVERIFIED),
+  /** 邮箱验证状态 */
+  emailConfirmed: verificationStatusEnum().default(VerificationStatus.UNVERIFIED),
   /** 头像地址 */
   avatar: text(),
   /** 部门ID列表 */
@@ -100,25 +101,25 @@ export const clientUsers = pgTable("client_users", {
 ]);
 
 export const selectClientUsersSchema = createSelectSchema(clientUsers, {
-  username: z.string().meta({ description: "用户名" }),
-  password: z.string().meta({ description: "密码" }),
-  passwordSecretVersion: z.number().meta({ description: "密码密钥版本" }),
-  nickname: z.string().optional().meta({ description: "用户昵称" }),
-  gender: z.number().meta({ description: "性别：0 未知 1 男性 2 女性" }),
-  status: z.number().meta({ description: "用户状态：0 正常 1 禁用 2 审核中 3 审核拒绝" }),
-  mobile: z.string().optional().meta({ description: "手机号码" }),
-  mobileConfirmed: z.number().meta({ description: "手机号验证状态：0 未验证 1 已验证" }),
-  email: z.string().optional().meta({ description: "邮箱地址" }),
-  emailConfirmed: z.number().meta({ description: "邮箱验证状态：0 未验证 1 已验证" }),
-  avatar: z.string().optional().meta({ description: "头像地址" }),
-  score: z.number().meta({ description: "用户积分" }),
-  comment: z.string().optional().meta({ description: "备注" }),
-  registerDate: z.string().optional().meta({ description: "注册时间" }),
-  registerIp: z.string().optional().meta({ description: "注册时 IP 地址" }),
-  lastLoginDate: z.string().optional().meta({ description: "最后登录时间" }),
-  lastLoginIp: z.string().optional().meta({ description: "最后登录时 IP 地址" }),
-  myInviteCode: z.string().optional().meta({ description: "用户自身邀请码" }),
-  inviteTime: z.string().optional().meta({ description: "受邀时间" }),
+  username: schema => schema.meta({ description: "用户名" }),
+  password: schema => schema.meta({ description: "密码" }),
+  passwordSecretVersion: schema => schema.meta({ description: "密码密钥版本" }),
+  nickname: schema => schema.meta({ description: "用户昵称" }),
+  gender: schema => schema.meta({ description: "性别 (UNKNOWN=未知, MALE=男性, FEMALE=女性)" }),
+  status: schema => schema.meta({ description: "用户状态 (NORMAL=正常, DISABLED=禁用, PENDING=审核中, REJECTED=审核拒绝)" }),
+  mobile: schema => schema.meta({ description: "手机号码" }),
+  mobileConfirmed: schema => schema.meta({ description: "手机验证状态 (UNVERIFIED=未验证, VERIFIED=已验证)" }),
+  email: schema => schema.meta({ description: "邮箱地址" }),
+  emailConfirmed: schema => schema.meta({ description: "邮箱验证状态 (UNVERIFIED=未验证, VERIFIED=已验证)" }),
+  avatar: schema => schema.meta({ description: "头像地址" }),
+  score: schema => schema.meta({ description: "用户积分" }),
+  comment: schema => schema.meta({ description: "备注" }),
+  registerDate: schema => schema.meta({ description: "注册时间" }),
+  registerIp: schema => schema.meta({ description: "注册时 IP 地址" }),
+  lastLoginDate: schema => schema.meta({ description: "最后登录时间" }),
+  lastLoginIp: schema => schema.meta({ description: "最后登录时 IP 地址" }),
+  myInviteCode: schema => schema.meta({ description: "用户自身邀请码" }),
+  inviteTime: schema => schema.meta({ description: "受邀时间" }),
 });
 
 export const insertClientUsersSchema = createInsertSchema(
@@ -146,16 +147,12 @@ export const insertClientUsersSchema = createInsertSchema(
       .email("邮箱格式不正确")
       .optional()
       .meta({ description: "邮箱地址" }),
-    gender: z.number()
-      .min(0)
-      .max(2)
+    gender: schema => schema
       .optional()
-      .meta({ description: "性别：0 未知 1 男性 2 女性" }),
-    status: z.number()
-      .min(0)
-      .max(3)
+      .meta({ description: "性别 (UNKNOWN=未知, MALE=男性, FEMALE=女性)" }),
+    status: schema => schema
       .optional()
-      .meta({ description: "用户状态：0 正常 1 禁用 2 审核中 3 审核拒绝" }),
+      .meta({ description: "用户状态 (NORMAL=正常, DISABLED=禁用, PENDING=审核中, REJECTED=审核拒绝)" }),
     score: z.number()
       .min(0)
       .optional()

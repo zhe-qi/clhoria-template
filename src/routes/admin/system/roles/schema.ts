@@ -7,7 +7,7 @@ export const selectSystemRoles = createSelectSchema(systemRoles, {
   id: schema => schema.meta({ description: "角色ID" }),
   name: schema => schema.meta({ description: "角色名称" }),
   description: schema => schema.meta({ description: "角色描述" }),
-  status: schema => schema.meta({ description: "状态: 1=启用 0=禁用" }),
+  status: schema => schema.meta({ description: "状态 (ENABLED=启用, DISABLED=禁用)" }),
 });
 
 export const insertSystemRoles = createInsertSchema(systemRoles, {

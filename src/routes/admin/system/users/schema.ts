@@ -10,7 +10,7 @@ export const selectSystemUsers = createSelectSchema(systemUsers, {
   builtIn: schema => schema.meta({ description: "是否内置用户" }),
   avatar: schema => schema.meta({ description: "头像" }),
   nickName: schema => schema.meta({ description: "昵称" }),
-  status: schema => schema.meta({ description: "状态: 1=启用 0=禁用 -1=封禁" }),
+  status: schema => schema.meta({ description: "状态 (ENABLED=启用, DISABLED=禁用)" }),
 });
 
 export const insertSystemUsers = createInsertSchema(systemUsers, {

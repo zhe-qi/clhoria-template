@@ -7,6 +7,7 @@ import db from "@/db";
 import { casbinRule, systemRoles, systemUserRoles } from "@/db/schema";
 import env from "@/env";
 import createApp from "@/lib/create-app";
+import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
 import { systemRolesRouter } from "@/routes/admin/system/roles";
@@ -38,7 +39,7 @@ const testRole = {
   id: testRoleId,
   name: "测试角色",
   description: "这是一个测试角色",
-  status: 1, // 1=启用 0=禁用
+  status: Status.ENABLED,
 };
 
 /**
@@ -239,9 +240,10 @@ describe("system role routes", () => {
     it("should validate required fields", async () => {
       const response = await client.system.roles.$post(
         {
+          // @ts-expect-error - 测试必填字段验证，故意传入不完整的数据
           json: {
             id: `${testRoleId}_required`,
-          } as { id: string; name: string; description?: string; status?: number },
+          },
         },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -501,7 +503,7 @@ describe("system role routes", () => {
           json: {
             name: "更新后的角色名称",
             description: "更新后的角色描述",
-            status: 0, // 禁用
+            status: Status.DISABLED,
           },
         },
         { headers: getAuthHeaders(adminToken) },

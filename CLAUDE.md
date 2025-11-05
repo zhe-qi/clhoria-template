@@ -134,7 +134,7 @@ routes/{tier}/{feature}/
 ### Code Quality & Imports
 
 - **Console Output**: Never use `console.log`, `console.warn`, or `console.error` statements in production code - always use structured logger
-- **Logging**: 
+- **Logging**:
   - Use structured logger from `@/lib/logger` for all logging: `logger.info()`, `logger.warn()`, `logger.error()`
   - Use Chinese prefixes with brackets: `[模块名]: 描述信息`
   - Examples:
@@ -145,7 +145,7 @@ routes/{tier}/{feature}/
     ```
   - Prefix conventions:
     - `[邮件]` - Email-related operations
-    - `[文件]` - File-related operations  
+    - `[文件]` - File-related operations
     - `[系统]` - System operations
     - `[用户]` - User operations
     - `[工作者]` - Worker management
@@ -160,7 +160,7 @@ routes/{tier}/{feature}/
     // Correct - data object first, message second
     logger.info({ userId: "123", action: "login" }, "[用户]: 登录成功");
     logger.info(taskMapping, "[系统同步]: BullMQ任务注册完成");
-    
+
     // Incorrect - message first, data second (will not display data properly)
     logger.info("[用户]: 登录成功", { userId: "123", action: "login" });
     ```
@@ -180,11 +180,31 @@ routes/{tier}/{feature}/
 - **Schema Modes**: Create `selectXxxSchema`, `insertXxxSchema`, `patchXxxSchema` for each table
 - **Field Descriptions**: Only use `.meta({ description: "中文描述" })` for drizzle-zod schemas (not raw Drizzle tables)
 - **Modern Drizzle Syntax**: Use `varchar({ length: 128 })` instead of `varchar("handler_name", { length: 128 })`
+- **Field Naming**: Use camelCase in TypeScript schema keys. Drizzle auto-converts to snake_case in database via `casing: "snake_case"` config
+  ```typescript
+  // TypeScript schema (camelCase key)
+  nickName: varchar({ length: 64 })
+
+  // Database column (auto-converted to snake_case)
+  // → nick_name VARCHAR(64)
+
+  // Don't manually specify column names, let Drizzle handle it
+  // ❌ Bad: varchar("nick_name", { length: 64 })
+  // ✅ Good: varchar({ length: 64 })
+  ```
 - **Default Columns**: Extend `...defaultColumns` from `@/db/common/default-columns` instead of manually defining id, createdAt, updatedAt, createdBy, updatedBy
 - **VARCHAR Length**: Always specify length for varchar fields: `varchar({ length: 128 })`
 - **JSON Fields**: Use `jsonb().$type<Interface>().default([])` with appropriate TypeScript interfaces
 - **Relations**: Define at end of same file, use forward imports to avoid circular dependencies
-- **Status Fields**: Use `integer().default(1)` (1=enabled, 0=disabled)
+- **Enum Fields**: Use `pgEnum()` for enum types, call without parameters in schema (Drizzle auto-maps variable name to column)
+  ```typescript
+  // Define in src/db/schema/_shard/enums.ts using Object.values()
+  export const statusEnum = pgEnum("status", Object.values(Status));
+  // Results in: pgEnum("status", ["ENABLED", "DISABLED"])
+  
+  // Use in table schema - call without parameters
+  status: statusEnum().default(Status.ENABLED).notNull()
+  ```
 - **Constraints**: Return arrays `table => [unique().on(table.col)]` instead of objects (new Drizzle syntax)
 - **Indexes**: Use `index("name_idx").on(table.col)` for performance, `uniqueIndex()` for uniqueness+performance. Only add necessary indexes after careful consideration
 - **Null Handling**: `undefined` values are automatically converted to `null` when stored in database
@@ -217,14 +237,14 @@ routes/{tier}/{feature}/
 
 - **Redis Type Safety**: Always specify return types for Redis operations instead of using `any`
 - **Constant Assertions**: Use pattern `export const EnumName = { OPTION_1: "value1" } as const`
-- **Database Enums**: Use `pgEnum("status", ["ENABLED", "DISABLED", "BANNED"])`
+- **Enum Values**: Always use string values for enums (not numbers) to match PostgreSQL enum types
 
 ### Naming Conventions
 
 - **Classes/Types**: PascalCase names
 - **Enums/Constants**: UPPER_SNAKE_CASE values
 - **Files**: kebab-case strings
-- **Magic Numbers**: Always use enums instead of magic numbers in queries: `eq(table.status, Status.ENABLED)` instead of `eq(table.status, 1)`
+- **Magic Values**: Always use enums instead of magic values in queries: `eq(table.status, Status.ENABLED)` instead of `eq(table.status, "ENABLED")`
 
 ### Route & Service Patterns
 

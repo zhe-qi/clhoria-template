@@ -1,5 +1,5 @@
 {
-  "id": "71c33f4d-3159-4dde-89f8-ae94576bf4a9",
+  "id": "02c310e7-f9c8-46f5-893e-0555ecf12316",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -149,10 +149,11 @@
         },
         "status": {
           "name": "status",
-          "type": "integer",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": 1
+          "default": "'ENABLED'"
         }
       },
       "indexes": {},
@@ -264,10 +265,11 @@
         },
         "status": {
           "name": "status",
-          "type": "integer",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": 1
+          "default": "'ENABLED'"
         }
       },
       "indexes": {
@@ -364,17 +366,19 @@
         },
         "gender": {
           "name": "gender",
-          "type": "integer",
+          "type": "gender",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": "'UNKNOWN'"
         },
         "status": {
           "name": "status",
-          "type": "integer",
+          "type": "user_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": "'NORMAL'"
         },
         "mobile": {
           "name": "mobile",
@@ -384,10 +388,11 @@
         },
         "mobile_confirmed": {
           "name": "mobile_confirmed",
-          "type": "integer",
+          "type": "verification_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": "'UNVERIFIED'"
         },
         "email": {
           "name": "email",
@@ -397,10 +402,11 @@
         },
         "email_confirmed": {
           "name": "email_confirmed",
-          "type": "integer",
+          "type": "verification_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": "'UNVERIFIED'"
         },
         "avatar": {
           "name": "avatar",
@@ -718,7 +724,61 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.gender": {
+      "name": "gender",
+      "schema": "public",
+      "values": [
+        "UNKNOWN",
+        "MALE",
+        "FEMALE"
+      ]
+    },
+    "public.real_name_auth_status": {
+      "name": "real_name_auth_status",
+      "schema": "public",
+      "values": [
+        "UNAUTHENTICATED",
+        "PENDING",
+        "VERIFIED",
+        "FAILED"
+      ]
+    },
+    "public.real_name_auth_type": {
+      "name": "real_name_auth_type",
+      "schema": "public",
+      "values": [
+        "INDIVIDUAL",
+        "ENTERPRISE"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "ENABLED",
+        "DISABLED"
+      ]
+    },
+    "public.user_status": {
+      "name": "user_status",
+      "schema": "public",
+      "values": [
+        "NORMAL",
+        "DISABLED",
+        "PENDING",
+        "REJECTED"
+      ]
+    },
+    "public.verification_status": {
+      "name": "verification_status",
+      "schema": "public",
+      "values": [
+        "UNVERIFIED",
+        "VERIFIED"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

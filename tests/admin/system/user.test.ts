@@ -8,6 +8,7 @@ import db from "@/db";
 import { casbinRule, systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
 import createApp from "@/lib/create-app";
+import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
 import { systemUsersRouter } from "@/routes/admin/system/users";
@@ -33,7 +34,7 @@ const testUser = {
   username: testUsername,
   password: "test123456",
   nickName: "测试用户",
-  status: 1, // 1=启用 0=禁用 -1=封禁
+  status: Status.ENABLED,
   avatar: "https://example.com/avatar.png",
 };
 
@@ -221,9 +222,10 @@ describe("system user routes", () => {
     it("should validate required fields", async () => {
       const response = await client.system.users.$post(
         {
+          // @ts-expect-error - 测试必填字段验证，故意传入不完整的数据
           json: {
             username: `${testUsername}_required`,
-          } as { username: string; password: string; nickName: string; status?: number },
+          },
         },
         { headers: getAuthHeaders(adminToken) },
       );
@@ -471,7 +473,7 @@ describe("system user routes", () => {
         {
           param: { id: builtInUserId },
           json: {
-            status: 0, // 0=禁用
+            status: Status.DISABLED,
           },
         },
         { headers: getAuthHeaders(adminToken) },
