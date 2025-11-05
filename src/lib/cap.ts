@@ -4,21 +4,12 @@ import { differenceInSeconds, isValid } from "date-fns";
 
 import redisClient from "@/lib/redis";
 
-/**
- * 生成带前缀的Redis Key
- * @param {string} type - 存储类型（challenge/token）
- * @param {string} id - 唯一标识（token/tokenKey）
- * @returns {string} 格式化后的Redis Key
- */
+/** 生成带前缀的Redis Key */
 function getRedisKey(type: "challenge" | "token", id: string): string {
   return `cap:${type}:${id}`; // 统一前缀格式：cap:类型:唯一标识
 }
 
-/**
- * 计算TTL秒数（基于date-fns，增强鲁棒性）
- * @param {number | Date} expires - 过期时间（时间戳或Date对象）
- * @returns {number} TTL秒数（若过期则返回0）
- */
+/** 计算TTL秒数（基于date-fns，增强鲁棒性） */
 function calculateTtlSeconds(expires: number | Date): number {
   // 校验expires是否为合法日期（避免无效时间导致的异常）
   const expiresDate = typeof expires === "number" ? new Date(expires) : expires;

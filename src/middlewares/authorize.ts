@@ -46,11 +46,6 @@ export function authorize(): MiddlewareHandler<AppBindings> {
 
 /**
  * 检查用户是否有任意一个角色有权限访问指定路径和方法
- * @param enforcer - Casbin 权限管理器
- * @param roles - 用户角色
- * @param path - 请求路径
- * @param method - 请求方法
- * @returns 是否有权限
  */
 async function hasAnyPermission(enforcer: Enforcer, roles: string[], path: string, method: string): Promise<boolean> {
   // 边界情况：空角色直接返回

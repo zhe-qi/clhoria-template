@@ -79,12 +79,7 @@ export class SortersConverter {
   }
 }
 
-/**
- * 便捷函数：转换排序条件
- * @param sorters CrudSorting 数组
- * @param table 表对象
- * @returns SQL ORDER BY 条件数组
- */
+/** 便捷函数：转换排序条件 */
 export function convertSortersToSQL(
   sorters: CrudSorting | undefined,
   table: PgTable,
@@ -96,13 +91,7 @@ export function convertSortersToSQL(
   return converter.convert(sorters);
 }
 
-/**
- * 验证排序字段
- * @param sorters 排序条件数组
- * @param table 表对象
- * @param allowedFields 允许的字段白名单，如果提供则严格验证
- * @returns 验证结果
- */
+/** 验证排序字段 */
 export function validateSorterFields(
   sorters: CrudSorting,
   table: PgTable,
@@ -120,23 +109,12 @@ export function validateSorterFields(
   };
 }
 
-/**
- * 获取排序中使用的所有字段
- * @param sorters 排序条件数组
- * @returns 字段名数组
- */
+/** 获取排序中使用的所有字段 */
 export function extractSorterFields(sorters: CrudSorting): readonly string[] {
   return [...new Set(sorters.map(sorter => sorter.field))];
 }
 
-/**
- * 添加默认排序
- * 如果没有提供排序条件，添加默认的排序（通常按 ID 或创建时间）
- * @param sorters 现有排序条件
- * @param defaultField 默认排序字段
- * @param defaultOrder 默认排序方向
- * @returns 包含默认排序的排序条件
- */
+/** 添加默认排序，如果没有提供排序条件，添加默认的排序（通常按 ID 或创建时间） */
 export function addDefaultSorting(
   sorters: CrudSorting | undefined,
   defaultField: string = "createdAt",
@@ -157,13 +135,7 @@ export function addDefaultSorting(
   ];
 }
 
-/**
- * 清理无效的排序条件
- * 移除字段不存在的排序条件
- * @param sorters 排序条件数组
- * @param validFields 有效字段列表
- * @returns 清理后的排序条件
- */
+/** 清理无效的排序条件，移除字段不存在的排序条件 */
 export function sanitizeSorters(
   sorters: CrudSorting,
   validFields: readonly string[],
@@ -171,13 +143,7 @@ export function sanitizeSorters(
   return sorters.filter(sorter => validFields.includes(sorter.field));
 }
 
-/**
- * 排序优先级处理
- * 某些字段可能需要优先排序（如状态、优先级等）
- * @param sorters 排序条件数组
- * @param priorityFields 优先字段及其默认排序方向
- * @returns 重新排序的排序条件
- */
+/** 排序优先级处理，某些字段可能需要优先排序（如状态、优先级等） */
 export function applyPrioritySorting(
   sorters: CrudSorting,
   priorityFields: Record<string, "asc" | "desc">,

@@ -10,11 +10,7 @@ interface IPLocationResponse {
   err?: string;
 }
 
-/**
- * 根据IP地址获取城市地址信息
- * @param ip IP地址
- * @returns 城市地址字符串，失败时返回"unknown"
- */
+/** 根据IP地址获取城市地址信息 */
 export async function getIPAddress(ip: string): Promise<string> {
   try {
     // 如果是内网IP或localhost，直接返回本地

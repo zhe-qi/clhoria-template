@@ -218,12 +218,7 @@ export class FiltersConverter {
   }
 }
 
-/**
- * 便捷函数：转换过滤器
- * @param filters CrudFilters 数组
- * @param table 表对象
- * @returns SQL 条件或 undefined
- */
+/** 便捷函数：转换过滤器 */
 export function convertFiltersToSQL(
   filters: CrudFilters | undefined,
   table: PgTable,
@@ -235,13 +230,7 @@ export function convertFiltersToSQL(
   return converter.convert(filters);
 }
 
-/**
- * 验证过滤器字段
- * @param filters 过滤器数组
- * @param table 表对象
- * @param allowedFields 允许的字段白名单，如果提供则严格验证
- * @returns 验证结果
- */
+/** 验证过滤器字段 */
 export function validateFilterFields(
   filters: CrudFilters,
   table: PgTable,
@@ -282,11 +271,7 @@ export function validateFilterFields(
   };
 }
 
-/**
- * 获取过滤器中使用的所有字段
- * @param filters 过滤器数组
- * @returns 字段名数组
- */
+/** 获取过滤器中使用的所有字段 */
 export function extractFilterFields(filters: CrudFilters): readonly string[] {
   const fields: string[] = [];
 

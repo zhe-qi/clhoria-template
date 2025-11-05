@@ -62,10 +62,10 @@
     "eslint-plugin-format": "^1.0.2",
     "lint-staged": "^16.2.6",
     "simple-git-hooks": "^2.13.1",
-    "tsdown": "^0.15.12",
+    "tsdown": "^0.16.0",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
-    "vitest": "^4.0.6"
+    "vitest": "^4.0.7"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
