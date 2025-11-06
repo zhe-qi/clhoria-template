@@ -121,14 +121,23 @@ routes/{tier}/{feature}/
 
 ### API Response & Error Handling
 
-- **Response Format**: Use `Resp.fail()` or `Resp.ok()` from `src/utils/zod/response.ts`
+- **Response Format**: ALWAYS use `Resp.ok()` or `Resp.fail()` from `src/utils/zod/response.ts` to wrap response data in handlers
+  ```typescript
+  // Correct - wrap data with Resp.ok()
+  return c.json(Resp.ok(data), HttpStatusCodes.OK);
+
+  // Correct - wrap error message with Resp.fail()
+  return c.json(Resp.fail("错误信息"), HttpStatusCodes.BAD_REQUEST);
+
+  // Incorrect - returning data directly without wrapper
+  return c.json(data, HttpStatusCodes.OK);
+  ```
 - **OpenAPI Success Responses**: Wrap with `RefineResultSchema` (equivalent to ok data wrapper)
 - **OpenAPI Error Responses**: Use `jsonContent(respErr, "错误描述")` with proper status code, not standalone `respErr`
   ```typescript
   [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "参数错误")
   ```
 - **Status Codes**: Always use `HttpStatusCodes` constants instead of magic numbers
-- **Return Format**: Single-line format: `return c.json(data, HttpStatusCodes.OK)`
 - **Error Handling**: Don't blindly use try-catch. Research error behavior of Drizzle, dependencies, and utility functions before catching exceptions
 
 ### Code Quality & Imports
@@ -201,7 +210,7 @@ routes/{tier}/{feature}/
   // Define in src/db/schema/_shard/enums.ts using Object.values()
   export const statusEnum = pgEnum("status", Object.values(Status));
   // Results in: pgEnum("status", ["ENABLED", "DISABLED"])
-  
+
   // Use in table schema - call without parameters
   status: statusEnum().default(Status.ENABLED).notNull()
   ```
