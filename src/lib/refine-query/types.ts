@@ -24,9 +24,11 @@ export interface RefineQueryResult<T> {
  * 错误类型
  */
 export class RefineQueryError extends Error {
-  constructor(message: string, public code?: string) {
+  code?: string;
+  constructor(message: string, code?: string) {
     super(message);
     this.name = "RefineQueryError";
+    this.code = code;
   }
 }
 

@@ -514,7 +514,7 @@ describe("system role routes", () => {
         const json = await response.json();
         expect(json.data.name).toBe("更新后的角色名称");
         expect(json.data.description).toBe("更新后的角色描述");
-        expect(json.data.status).toBe(0);
+        expect(json.data.status).toBe(Status.DISABLED);
       }
     });
 
@@ -748,7 +748,7 @@ describe("system role routes", () => {
         {
           param: { id: roleId },
           json: {
-            // @ts-expect-error test
+            // @ts-expect-error - 测试必填字段验证，故意传入不完整的数据
             permissions: "not-an-array" as unknown as string[][],
           },
         },

@@ -60,6 +60,7 @@ export function operationLog(options: { moduleName: string; description: string 
     }
 
     // 异步写入，不阻塞响应
+    // @ts-expect-error - 留给用户选择日志上传方式
     // eslint-disable-next-line unused-imports/no-unused-vars
     const logEntry = {
       requestId,

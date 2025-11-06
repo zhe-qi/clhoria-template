@@ -27,6 +27,6 @@ export async function setupGracefulShutdown(server: ServerType): Promise<void> {
   };
 
   // 监听关闭信号
-  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+  process.on("SIGTERM", () => void gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => void gracefulShutdown("SIGINT"));
 }

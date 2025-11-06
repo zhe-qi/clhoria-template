@@ -11,7 +11,7 @@ import { REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
 import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { parseRelations, Resp, toColumns } from "@/utils";
+import { Resp, toColumns, tryit } from "@/utils";
 import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/utils/tokens/admin";
 
 import type { AuthRouteHandlerType } from ".";
@@ -50,9 +50,11 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
 
   // 3. 验证密码和查询角色
   const isPasswordValid = await verify(user.password, password);
+
   if (!isPasswordValid) {
     return c.json(Resp.fail(HttpStatusPhrases.UNAUTHORIZED), HttpStatusCodes.UNAUTHORIZED);
   }
+
   const userRoles = await db.query.systemUserRoles.findMany({
     where: eq(systemUserRoles.userId, user.id),
   });
@@ -119,7 +121,13 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   const user = await db.query.systemUsers.findFirst({
     where: eq(systemUsers.id, sub),
     columns: toColumns(["id", "username", "avatar", "nickName"]),
-    with: parseRelations([{ name: "systemUserRoles", fields: ["roleId"] }]),
+    with: {
+      systemUserRoles: {
+        columns: {
+          roleId: true,
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -139,8 +147,9 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
   if (!roles || roles.length === 0) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
+
   const casbinEnforcer = await enforcerPromise;
-  const permissionsSet = new Set<string>(); // 用Set自动去重
+  const permissionsSet = new Set<string>();
 
   // 遍历角色，逐个处理权限（避免一次性创建大量中间数组）
   for (const role of roles) {
@@ -174,24 +183,25 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
 
 /** 生成验证码挑战 */
 export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c) => {
-  try {
-    const challenge = await cap.createChallenge();
-    return c.json(challenge, HttpStatusCodes.OK);
-  }
-  catch {
+  const [err, challenge] = await tryit(cap.createChallenge)();
+
+  if (err || !challenge) {
     return c.json(Resp.fail("创建验证码挑战失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
+
+  // cap.js 必须直接返回 challenge 对象，不能包装在 Resp.ok() 中
+  return c.json(challenge, HttpStatusCodes.OK);
 };
 
 /** 验证用户解答并生成验证token */
 export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c) => {
   const { token, solutions } = c.req.valid("json");
 
-  try {
-    const result = await cap.redeemChallenge({ token, solutions });
-    return c.json(result, HttpStatusCodes.OK);
-  }
-  catch {
+  const [err, result] = await tryit(cap.redeemChallenge)({ token, solutions });
+
+  if (err || !result) {
     return c.json(Resp.fail("验证码验证失败"), HttpStatusCodes.BAD_REQUEST);
   }
+
+  return c.json(result, HttpStatusCodes.OK);
 };
