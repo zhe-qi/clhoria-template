@@ -41,7 +41,7 @@ Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优
   <img src="https://r2.promptez.cn/github/test.png" width="45%" alt="Swagger API 文档">
   <img src="https://r2.promptez.cn/github/login.png" width="45%" alt="Swagger API 文档">
   <img src="https://r2.promptez.cn/github/user.png" width="45%" alt="Swagger API 文档">
-  <img src="https://r2.promptez.cn/github/studio.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/swagger.png" width="45%" alt="Swagger API 文档">
   <img src="https://r2.promptez.cn/github/list.png" width="45%" alt="Swagger API 文档">
 </div>
 
@@ -51,7 +51,7 @@ Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优
 
 - Node.js >= 22
 - pnpm >= 10
-- PostgreSQL >= 17
+- PostgreSQL >= 18
 - Redis >= 7
 
 #### 安装步骤
@@ -107,6 +107,7 @@ Clhoria 将复杂的技术架构化繁为简，让每一次编码都如诗般优
 routes/{tier}/{feature}/
 ├── {feature}.handlers.ts    # 业务逻辑处理器
 ├── {feature}.routes.ts      # 路由定义和 OpenAPI 架构
+├── {feature}.schema.ts      # Zod 校验 Schema（类型约束与接口文档）
 └── {feature}.index.ts       # 统一导出
 ```
 
@@ -180,20 +181,6 @@ src/routes/admin/users/handlers.ts   # 表示层：调用应用服务编排
 | **字典** | 单一数据源，编译时类型检查，4 字节 Enum 存储 | 数据库字典表，运行时查询，需要 JOIN，容易不同步 |
 | **维护** | 改一处自动同步，TypeScript 编译时报错        | 多处手动同步：数据库 → 后端 → 前端 → 文档       |
 
-#### 实现示例
-
-```typescript
-// 权限：Casbin 策略 + Refine Resource 自动关联
-// p, role:admin, /admin/users*, (GET)|(POST)
-const resources = [{ name: "admin/users", meta: { label: "用户管理" } }];
-
-// 字典：TypeScript 枚举 → PostgreSQL Enum → OpenAPI 自动同步
-export const UserStatus = { NORMAL: "NORMAL", DISABLED: "DISABLED" } as const;
-export const userStatusEnum = pgEnum("user_status", Object.values(UserStatus));
-// 前端运行：npx openapi-typescript http://localhost:9999/admin/doc
-// 自动获取最新类型，编译时检查，改动立即暴露所有不兼容代码
-```
-
 ## 部署
 
 ### Docker 部署
@@ -210,6 +197,15 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 **可选 SaaS 依赖**: sentry、Cloudflare R2 对象存储等第三方服务均为可选，可完全部署在内网环境。技术栈符合信创要求，支持迁移至国产数据库（如人大金仓、华为高斯等）。
 
+## 开发体验对比
+
+| 对比维度     | 本项目 (AI + Modern Stack)                       | 传统代码生成器                             |
+| ------------ | ------------------------------------------------ | ------------------------------------------ |
+| **开发效率** | Claude Code 智能理解需求，秒级生成符合规范的代码 | 手动配置模板麻烦，生成僵化代码，需大量修改 |
+| **接口管理** | OpenAPI + Zod 自动同步，类型安全，文档永不过期   | 手工维护接口文档，容易不同步               |
+| **代码质量** | TypeScript 全链路类型检查，编译时发现问题        | 生成代码缺乏类型约束，运行时错误频发       |
+| **维护成本** | 代码规范统一，AI 理解项目架构，维护简单          | 代码量大不够优雅，不好维护                 |
+
 ## 验证码系统对比
 
 ### 🔐 Cap.js vs svg-captcha
@@ -220,20 +216,11 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 | **用户体验** | 现代化交互界面，快速通过验证，用户体验遥遥领先 | 传统图片验证，识别扭曲文字      |
 | **扩展性**   | 数据库存储，支持分布式部署和自定义挑战类型     | 内存存储，功能固定              |
 
-## 开发体验对比
-
-| 对比维度     | 本项目 (AI + Modern Stack)                       | 传统代码生成器                             |
-| ------------ | ------------------------------------------------ | ------------------------------------------ |
-| **开发效率** | Claude Code 智能理解需求，秒级生成符合规范的代码 | 手动配置模板麻烦，生成僵化代码，需大量修改 |
-| **接口管理** | OpenAPI + Zod 自动同步，类型安全，文档永不过期   | 手工维护接口文档，容易不同步               |
-| **代码质量** | TypeScript 全链路类型检查，编译时发现问题        | 生成代码缺乏类型约束，运行时错误频发       |
-| **维护成本** | 代码规范统一，AI 理解项目架构，维护简单          | 代码量大不够优雅，不好维护                 |
-
 ## 性能对比
 
 ### Hono vs Fastify 性能分析
 
-在 Node.js 环境下，Fastify 依然保持性能优势，但差距已经不大：
+在 Node.js 22 环境下，Fastify 依然保持性能优势，但差距已经不大：
 
 - **Fastify (Node.js)**: 142,695 req/s
 - **Hono (Node.js)**: 129,234 req/s
