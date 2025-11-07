@@ -19,9 +19,7 @@ export async function setupJobSystem(): Promise<void> {
   );
 }
 
-/**
- * 优雅关闭任务系统
- */
+/** 关闭任务系统 */
 export async function shutdownJobSystem(): Promise<void> {
   await gracefulShutdownJobSystem();
   logger.info("[任务系统]: 已关闭");

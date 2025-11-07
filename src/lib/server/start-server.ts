@@ -27,15 +27,31 @@ interface FetchApp {
  * @param retryDelay - 重试延迟毫秒数（默认 1000ms）
  * @returns 服务器实例
  */
-export async function startServerWithRetry(
-  app: FetchApp,
-  port: number,
-  maxRetries = 5,
-  retryDelay = 1000,
-): Promise<ServerType> {
+export async function startServerWithRetry(app: FetchApp, port: number, maxRetries = 5, retryDelay = 1000): Promise<ServerType> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    let serverInstance: ServerType | undefined;
+
     try {
-      const server = serve({ fetch: app.fetch, port });
+      // 创建一个 Promise 来捕获服务器启动错误，捕获服务器启动错误后，会自动重试
+      const server = await new Promise<ServerType>((resolve, reject) => {
+        serverInstance = serve({ fetch: app.fetch, port });
+
+        // 监听端口绑定错误（通过 error 事件）
+        const errorHandler = (error: Error) => {
+          reject(error);
+        };
+
+        // 监听成功启动（listening 事件）
+        const listeningHandler = () => {
+          // 移除错误监听器
+          serverInstance!.removeListener("error", errorHandler);
+          resolve(serverInstance!);
+        };
+
+        serverInstance.once("error", errorHandler);
+        serverInstance.once("listening", listeningHandler);
+      });
+
       return server;
     }
     catch (error: unknown) {

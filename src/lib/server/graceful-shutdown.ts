@@ -4,12 +4,10 @@ import logger from "@/lib/logger";
 
 import { shutdownJobSystem } from "./job-system";
 
-/**
- * 优雅关闭处理器
- */
+/** 关闭处理器 */
 export async function setupGracefulShutdown(server: ServerType): Promise<void> {
   const gracefulShutdown = async (signal: string) => {
-    logger.info({ signal }, "[应用]: 收到关闭信号，开始优雅关闭");
+    logger.info({ signal }, "[应用]: 收到关闭信号，开始关闭系统");
 
     // 关闭 HTTP 服务器
     await new Promise<void>((resolve) => {
@@ -19,10 +17,10 @@ export async function setupGracefulShutdown(server: ServerType): Promise<void> {
       });
     });
 
-    // 优雅关闭任务系统
+    // 关闭任务系统
     await shutdownJobSystem();
 
-    logger.info("[应用]: 优雅关闭完成");
+    logger.info("[应用]: 关闭系统完成，准备退出");
     process.exit(0);
   };
 
