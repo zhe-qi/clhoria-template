@@ -1,6 +1,7 @@
+import type { z } from "zod";
+
 import { hash } from "@node-rs/argon2";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import { z } from "zod";
 
 import db from "@/db";
 import { systemRoles, systemUserRoles, systemUsers } from "@/db/schema";
@@ -17,7 +18,7 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
 
   const parseResult = RefineQueryParamsSchema.safeParse(query);
   if (!parseResult.success) {
-    return c.json(Resp.fail(z.prettifyError(parseResult.error)), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    return c.json(Resp.fail(parseResult.error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
   const [error, result] = await executeRefineQuery<z.infer<typeof responseSystemUsersWithPassword>>({

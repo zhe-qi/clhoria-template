@@ -7,6 +7,7 @@ export const respErr = z.object({
 type RespErr = z.infer<typeof respErr>;
 
 export class Resp {
+  /** 失败响应，支持 字符串、Error、ZodError */
   static fail(input: string | Error | ZodError): RespErr {
     if (typeof input === "string") {
       return {
@@ -25,6 +26,7 @@ export class Resp {
     };
   }
 
+  /** 成功响应 */
   static ok<T = ParamsType>(data: T): {
     data: T;
   } {

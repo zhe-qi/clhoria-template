@@ -1,5 +1,6 @@
+import type { z } from "zod";
+
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
@@ -18,7 +19,7 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
 
   const parseResult = RefineQueryParamsSchema.safeParse(rawParams);
   if (!parseResult.success) {
-    return c.json(Resp.fail(z.prettifyError(parseResult.error)), HttpStatusCodes.UNPROCESSABLE_ENTITY);
+    return c.json(Resp.fail(parseResult.error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
   // 执行查询

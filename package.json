@@ -9,7 +9,7 @@
     "postinstall": "test -f node_modules/.bin/simple-git-hooks && simple-git-hooks || echo 'simple-git-hooks not found, skipping...'",
     "dev": "tsx watch src/index.ts",
     "start": "cross-env NODE_ENV=production node --trace-warnings dist/src/index.js",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "npx tsgo --noEmit",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "cross-env LOG_LEVEL=silent vitest",
@@ -56,6 +56,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^6.2.0",
     "@types/node": "24.10.0",
+    "@typescript/native-preview": "7.0.0-dev.20251107.1",
     "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.6",
     "eslint": "^9.39.1",
