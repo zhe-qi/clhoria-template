@@ -28,6 +28,13 @@
     "skipLibCheck": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["./src/**/*", "./tsdown.config.ts", "./tests/**/*"],
+  "include": [
+    "./src/**/*",
+    "./tsdown.config.ts",
+    "./tests/**/*",
+    "./migrations/**/*.ts",
+    "./drizzle.config.ts",
+    "./vitest.config.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }
