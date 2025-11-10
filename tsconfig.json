@@ -9,7 +9,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "~/*": ["./*"]
     },
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/@types"],

@@ -273,7 +273,7 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 ## 测试
 
-使用 Vitest 测试框架，支持完整的单元测试和集成测试。
+使用 Vitest 测试框架，支持完整的单元测试和集成测试，可以在 tests 下添加端到端测试。
 
 ```bash
 # 运行测试

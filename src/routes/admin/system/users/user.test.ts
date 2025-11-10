@@ -12,8 +12,7 @@ import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
 import { systemUsersRouter } from "@/routes/admin/system/users";
-
-import { getAdminToken, getAuthHeaders, getUserToken } from "../../auth-utils";
+import { getAdminToken, getAuthHeaders, getUserToken } from "~/tests/auth-utils";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");

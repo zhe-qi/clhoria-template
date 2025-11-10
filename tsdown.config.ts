@@ -11,6 +11,7 @@ export default defineConfig({
   minify: false,
   alias: {
     "@": "./src",
+    "~": "./",
   },
   skipNodeModulesBundle: true,
   shims: true,
