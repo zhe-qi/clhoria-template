@@ -31,10 +31,10 @@ export const login = createRoute({
       })),
       "登录成功",
     ),
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErr, "密码错误"),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErr, "用户名或密码错误"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "验证码错误"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
     [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "用户被禁用"),
+    [HttpStatusCodes.TOO_MANY_REQUESTS]: jsonContent(respErr, "登录失败次数过多"),
   },
 });
 

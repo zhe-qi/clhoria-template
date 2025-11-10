@@ -41,7 +41,6 @@ clientRoutes.forEach((route) => {
 
 // #region 后管路由
 // ps: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
-// 如果是大项目就别用 trpc 了，tsgo能最大程度的提升ts类型服务性能
 
 const { auth: authModule, ...otherAdminModules } = allAdminExports;
 const otherAdminRoutes = Object.values(otherAdminModules);

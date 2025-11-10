@@ -1,5 +1,5 @@
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { generateDownloadUrl, generateUploadUrl } from "@/services/object-storage";
+import { generateDownloadUrl, generateUploadUrl } from "@/services/admin";
 import { Resp } from "@/utils";
 
 import type { ObjectStorageRouteHandlerType } from ".";

@@ -7,28 +7,55 @@ import { systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
 import cap from "@/lib/cap";
 import { enforcerPromise } from "@/lib/casbin";
-import { REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
+import { LOGIN_LOCKOUT_DURATION, MAX_LOGIN_ATTEMPTS, REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
 import { Status } from "@/lib/enums";
+import redisClient from "@/lib/redis";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/services/admin";
 import { Resp, toColumns, tryit } from "@/utils";
-import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/utils/tokens/admin";
 
 import type { AuthRouteHandlerType } from ".";
+
+/**
+ * 增加登录失败计数
+ * @param key Redis key
+ */
+async function incrementLoginFailCount(key: string): Promise<void> {
+  const count = await redisClient.incr(key);
+  // 第一次失败时设置过期时间
+  if (count === 1) {
+    await redisClient.expire(key, LOGIN_LOCKOUT_DURATION);
+  }
+}
 
 /** 管理端登录 */
 export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const body = c.req.valid("json");
 
-  // 1. 验证验证码token（生产环境必须验证）
+  const { username, password } = body;
+
+  // 1. 检查登录失败次数
+  const loginFailKey = `login:fail:${username}`;
+  const failCountStr = await redisClient.get(loginFailKey);
+  const failCount = failCountStr ? Number.parseInt(failCountStr, 10) : 0;
+
+  if (failCount >= MAX_LOGIN_ATTEMPTS) {
+    const ttl = await redisClient.ttl(loginFailKey);
+    const remainingMinutes = Math.ceil(ttl / 60);
+    return c.json(
+      Resp.fail(`登录失败次数过多，请 ${remainingMinutes} 分钟后再试`),
+      HttpStatusCodes.TOO_MANY_REQUESTS,
+    );
+  }
+
+  // 2. 验证验证码token（生产环境必须验证）
   const { success } = await cap.validateToken(body.captchaToken);
   if (!success && env.NODE_ENV === "production") {
     return c.json(Resp.fail("验证码错误"), HttpStatusCodes.BAD_REQUEST);
   }
 
-  const { username, password } = body;
-
-  // 2. 查询用户基本信息并验证
+  // 3. 查询用户基本信息并验证
   const user = await db.query.systemUsers.findFirst({
     where: eq(systemUsers.username, username),
     columns: {
@@ -41,19 +68,26 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
 
   // 统一的用户验证逻辑
   if (!user) {
-    return c.json(Resp.fail("未找到用户"), HttpStatusCodes.NOT_FOUND);
+    // 用户不存在时也增加失败计数，防止用户名枚举
+    await incrementLoginFailCount(loginFailKey);
+    return c.json(Resp.fail("用户名或密码错误"), HttpStatusCodes.UNAUTHORIZED);
   }
 
   if (user.status !== Status.ENABLED) {
     return c.json(Resp.fail(HttpStatusPhrases.FORBIDDEN), HttpStatusCodes.FORBIDDEN);
   }
 
-  // 3. 验证密码和查询角色
+  // 4. 验证密码和查询角色
   const isPasswordValid = await verify(user.password, password);
 
   if (!isPasswordValid) {
-    return c.json(Resp.fail(HttpStatusPhrases.UNAUTHORIZED), HttpStatusCodes.UNAUTHORIZED);
+    // 密码错误时增加失败计数
+    await incrementLoginFailCount(loginFailKey);
+    return c.json(Resp.fail("用户名或密码错误"), HttpStatusCodes.UNAUTHORIZED);
   }
+
+  // 5. 登录成功，清除失败计数
+  await redisClient.del(loginFailKey);
 
   const userRoles = await db.query.systemUserRoles.findMany({
     where: eq(systemUserRoles.userId, user.id),
@@ -64,7 +98,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
     roles: userRoles.map(({ roleId }) => roleId),
   });
 
-  // 4. 设置 HttpOnly Refresh Token Cookie
+  // 6. 设置 HttpOnly Refresh Token Cookie
   setCookie(c, "refreshToken", refreshToken, {
     httpOnly: true, // 防止 JS 访问
     secure: env.NODE_ENV === "production", // 生产环境启用 https

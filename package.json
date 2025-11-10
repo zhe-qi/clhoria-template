@@ -2,7 +2,7 @@
   "name": "clhoria-template",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.21.0",
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",
-    "@aws-sdk/client-s3": "^3.926.0",
-    "@aws-sdk/s3-request-presigner": "^3.926.0",
+    "@aws-sdk/client-s3": "^3.927.0",
+    "@aws-sdk/s3-request-presigner": "^3.927.0",
     "@cap.js/server": "^4.0.3",
     "@hono/node-server": "1.19.6",
     "@hono/node-ws": "^1.2.0",
@@ -56,17 +56,17 @@
   "devDependencies": {
     "@antfu/eslint-config": "^6.2.0",
     "@types/node": "24.10.0",
-    "@typescript/native-preview": "7.0.0-dev.20251107.1",
+    "@typescript/native-preview": "7.0.0-dev.20251110.1",
     "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.6",
     "eslint": "^9.39.1",
     "eslint-plugin-format": "^1.0.2",
     "lint-staged": "^16.2.6",
     "simple-git-hooks": "^2.13.1",
-    "tsdown": "^0.16.0",
+    "tsdown": "^0.16.1",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
-    "vitest": "^4.0.7"
+    "vitest": "^4.0.8"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
