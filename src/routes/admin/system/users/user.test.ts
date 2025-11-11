@@ -1,7 +1,6 @@
 import { and, eq, like, or } from "drizzle-orm";
 import { jwt } from "hono/jwt";
 import { testClient } from "hono/testing";
-import { v7 as uuidv7 } from "uuid";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import db from "@/db";
@@ -360,7 +359,7 @@ describe("system user routes", () => {
     });
 
     it("should return 404 for non-existent user", async () => {
-      const nonExistentId = uuidv7();
+      const nonExistentId = crypto.randomUUID();
       const response = await client.system.users[":id"].$get(
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
@@ -486,7 +485,7 @@ describe("system user routes", () => {
     });
 
     it("should return 404 for non-existent user", async () => {
-      const nonExistentId = uuidv7();
+      const nonExistentId = crypto.randomUUID();
       const response = await client.system.users[":id"].$patch(
         {
           param: { id: nonExistentId },
@@ -553,7 +552,7 @@ describe("system user routes", () => {
     });
 
     it("should return 404 for non-existent user", async () => {
-      const nonExistentId = uuidv7();
+      const nonExistentId = crypto.randomUUID();
       const response = await client.system.users[":id"].$delete(
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
@@ -662,7 +661,7 @@ describe("system user routes", () => {
     });
 
     it("should return 404 for non-existent user", async () => {
-      const nonExistentId = uuidv7();
+      const nonExistentId = crypto.randomUUID();
       const response = await client.system.users[":userId"].roles.$put(
         {
           param: { userId: nonExistentId },

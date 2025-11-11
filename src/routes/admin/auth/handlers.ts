@@ -13,7 +13,7 @@ import redisClient from "@/lib/redis";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/services/admin";
-import { Resp, toColumns, tryit } from "@/utils";
+import { Resp, toColumns } from "@/utils";
 
 import type { AuthRouteHandlerType } from ".";
 
@@ -40,6 +40,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const failCountStr = await redisClient.get(loginFailKey);
   const failCount = failCountStr ? Number.parseInt(failCountStr, 10) : 0;
 
+  // 虽然接口请求有速率限制，但是登录接口还是要根据用户名再做一次更严格的速率限制
   if (failCount >= MAX_LOGIN_ATTEMPTS) {
     const ttl = await redisClient.ttl(loginFailKey);
     const remainingMinutes = Math.ceil(ttl / 60);
@@ -217,11 +218,7 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
 
 /** 生成验证码挑战 */
 export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c) => {
-  const [err, challenge] = await tryit(cap.createChallenge)();
-
-  if (err || !challenge) {
-    return c.json(Resp.fail("创建验证码挑战失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
-  }
+  const challenge = await cap.createChallenge();
 
   // cap.js 必须直接返回 challenge 对象，不能包装在 Resp.ok() 中
   return c.json(challenge, HttpStatusCodes.OK);
@@ -231,11 +228,8 @@ export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c
 export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c) => {
   const { token, solutions } = c.req.valid("json");
 
-  const [err, result] = await tryit(cap.redeemChallenge)({ token, solutions });
+  const result = await cap.redeemChallenge({ token, solutions });
 
-  if (err || !result) {
-    return c.json(Resp.fail("验证码验证失败"), HttpStatusCodes.BAD_REQUEST);
-  }
-
+  // cap.js 必须直接返回 challenge 对象，不能包装在 Resp.ok() 中
   return c.json(result, HttpStatusCodes.OK);
 };

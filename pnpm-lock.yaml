@@ -50,9 +50,6 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
-      date-fns-tz:
-        specifier: ^3.2.0
-        version: 3.2.0(date-fns@4.1.0)
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -83,21 +80,12 @@ importers:
       pino:
         specifier: ^10.1.0
         version: 10.1.0
-      pino-pretty:
-        specifier: ^13.1.2
-        version: 13.1.2
       postgres:
         specifier: ^3.4.7
         version: 3.4.7
       rate-limit-redis:
         specifier: ^4.2.3
         version: 4.2.3(express-rate-limit@7.5.1(express@5.1.0))
-      type-fest:
-        specifier: ^5.2.0
-        version: 5.2.0
-      uuid:
-        specifier: ^13.0.0
-        version: 13.0.0
       zod:
         specifier: 4.1.12
         version: 4.1.12
@@ -108,9 +96,6 @@ importers:
       '@types/node':
         specifier: 24.10.0
         version: 24.10.0
-      '@typescript/native-preview':
-        specifier: 7.0.0-dev.20251110.1
-        version: 7.0.0-dev.20251110.1
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
@@ -126,6 +111,9 @@ importers:
       lint-staged:
         specifier: ^16.2.6
         version: 16.2.6
+      pino-pretty:
+        specifier: ^13.1.2
+        version: 13.1.2
       simple-git-hooks:
         specifier: ^2.13.1
         version: 2.13.1
@@ -135,6 +123,9 @@ importers:
       tsx:
         specifier: ^4.20.6
         version: 4.20.6
+      type-fest:
+        specifier: ^5.2.0
+        version: 5.2.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -2012,11 +2003,6 @@ packages:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
     engines: {node: '>= 12'}
 
-  date-fns-tz@3.2.0:
-    resolution: {integrity: sha512-sg8HqoTEulcbbbVXeg84u5UnlsQa8GS5QXMqjjYIhS4abEVVKIUwe0/l/UhrZdKaL/W5eWZNlbTeEIiOXTcsBQ==}
-    peerDependencies:
-      date-fns: ^3.0.0 || ^4.0.0
-
   date-fns@4.1.0:
     resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
@@ -3795,10 +3781,6 @@ packages:
 
   uuid@11.1.0:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
-    hasBin: true
-
-  uuid@13.0.0:
-    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
     hasBin: true
 
   vary@1.1.2:
@@ -5764,6 +5746,7 @@ snapshots:
       '@typescript/native-preview-linux-x64': 7.0.0-dev.20251110.1
       '@typescript/native-preview-win32-arm64': 7.0.0-dev.20251110.1
       '@typescript/native-preview-win32-x64': 7.0.0-dev.20251110.1
+    optional: true
 
   '@vitest/eslint-plugin@1.4.0(eslint@9.39.1(jiti@2.5.1))(typescript@5.9.3)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@24.10.0)(jiti@2.5.1)(tsx@4.20.6)(yaml@2.8.1))':
     dependencies:
@@ -6102,10 +6085,6 @@ snapshots:
 
   data-uri-to-buffer@4.0.1:
     optional: true
-
-  date-fns-tz@3.2.0(date-fns@4.1.0):
-    dependencies:
-      date-fns: 4.1.0
 
   date-fns@4.1.0: {}
 
@@ -8133,8 +8112,6 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   uuid@11.1.0: {}
-
-  uuid@13.0.0: {}
 
   vary@1.1.2: {}
 

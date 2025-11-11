@@ -1,5 +1,6 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
+import { RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent } from "@/lib/stoker/openapi/helpers";
 
@@ -12,9 +13,9 @@ export const getUsersInfo = createRoute({
   summary: "获取用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      z.object({
+      RefineResultSchema(z.object({
         message: z.string().optional(),
-      }),
+      })),
       "列表响应成功",
     ),
   },

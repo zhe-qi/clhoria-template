@@ -98,7 +98,11 @@ CREATE TABLE "client_users" (
 	CONSTRAINT "client_users_myInviteCode_unique" UNIQUE("my_invite_code")
 );
 --> statement-breakpoint
+ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_user_id_system_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."system_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_role_id_system_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."system_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0","v1");--> statement-breakpoint
+CREATE INDEX "idx_user_roles_user_id" ON "system_user_roles" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "idx_user_roles_role_id" ON "system_user_roles" USING btree ("role_id");--> statement-breakpoint
 CREATE INDEX "system_user_username_idx" ON "system_users" USING btree ("username");--> statement-breakpoint
 CREATE INDEX "client_users_username_idx" ON "client_users" USING btree ("username");--> statement-breakpoint
 CREATE INDEX "client_users_mobile_idx" ON "client_users" USING btree ("mobile");--> statement-breakpoint

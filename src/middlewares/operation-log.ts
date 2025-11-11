@@ -2,7 +2,6 @@ import type { Context, MiddlewareHandler } from "hono";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
 import { differenceInMilliseconds, formatISO } from "date-fns";
-import { v7 as uuidV7 } from "uuid";
 
 import logger from "@/lib/logger";
 
@@ -35,7 +34,7 @@ export function operationLog(options: { moduleName: string; description: string 
     // 执行实际的处理
     await next();
 
-    const requestId = c.get("requestId") || uuidV7();
+    const requestId = c.get("requestId");
     const endTime = new Date();
     const duration = differenceInMilliseconds(endTime, startTime);
 

@@ -35,9 +35,9 @@ const EnvSchema = z.object({
     { message: "生产环境下redis连接字符串不能为空" },
   ),
   /** 客户端JWT密钥 */
-  CLIENT_JWT_SECRET: z.string(),
+  CLIENT_JWT_SECRET: z.string().min(32, "JWT密钥长度至少32字符,建议使用强随机字符串"),
   /** 管理端JWT密钥 */
-  ADMIN_JWT_SECRET: z.string(),
+  ADMIN_JWT_SECRET: z.string().min(32, "JWT密钥长度至少32字符,建议使用强随机字符串"),
 
   /** 云服务商R2访问密钥ID */
   ACCESS_KEY_ID: z.string(),
@@ -50,6 +50,9 @@ const EnvSchema = z.object({
 
   /** Sentry错误追踪 */
   SENTRY_DSN: z.string().optional(),
+
+  /** 是否信任反向代理 */
+  TRUST_PROXY: z.enum(["true", "false"]).default("false").transform(val => val === "true"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

@@ -1,8 +1,8 @@
+import { format } from "date-fns";
 import { Buffer } from "node:buffer";
 
 import logger from "@/lib/logger";
 import redisClient from "@/lib/redis";
-import { formatDate } from "@/utils/tools/formatter";
 
 import { DEFAULT_IDEMPOTENCY_TTL, REDIS_KEY_PREFIX } from "../config";
 
@@ -37,8 +37,8 @@ export class IdempotencyHelper {
       const fullKey = `${REDIS_KEY_PREFIX.IDEMPOTENCY}${key}`;
       const record = {
         result,
-        createdAt: formatDate(new Date()),
-        expiresAt: formatDate(new Date(Date.now() + ttl * 1000)),
+        createdAt: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+        expiresAt: format(new Date(Date.now() + ttl * 1000), "yyyy-MM-dd HH:mm:ss"),
       };
 
       await redisClient.setex(fullKey, ttl, JSON.stringify(record));

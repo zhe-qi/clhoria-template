@@ -1,10 +1,16 @@
+import type { PrettyStream } from "pino-pretty";
+
 import pino from "pino";
-import pretty from "pino-pretty";
 
 import env from "@/env";
 
-const logger = pino({
-  level: env.LOG_LEVEL || "info",
-}, env.NODE_ENV === "production" ? undefined : pretty());
+let options: PrettyStream | undefined;
+
+if (env.NODE_ENV === "development") {
+  const pretty = await import("pino-pretty");
+  options = pretty.default();
+}
+
+const logger = pino({ level: env.LOG_LEVEL || "info" }, options);
 
 export default logger;

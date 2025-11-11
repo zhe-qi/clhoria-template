@@ -1,12 +1,13 @@
+import { format } from "date-fns";
+
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { Resp } from "@/utils";
-import { formatDate } from "@/utils/tools/formatter";
 
 import type { HealthRouteHandlerType } from ".";
 
 export const get: HealthRouteHandlerType<"get"> = async (c) => {
   return c.json(Resp.ok({
     status: "ok",
-    timestamp: formatDate(new Date()),
+    timestamp: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
   }), HttpStatusCodes.OK);
 };

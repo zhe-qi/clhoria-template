@@ -1,5 +1,5 @@
 {
-  "id": "02c310e7-f9c8-46f5-893e-0555ecf12316",
+  "id": "91437aff-7537-4639-b966-d9602688f19b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -181,8 +181,66 @@
           "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "idx_user_roles_user_id": {
+          "name": "idx_user_roles_user_id",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_user_roles_role_id": {
+          "name": "idx_user_roles_role_id",
+          "columns": [
+            {
+              "expression": "role_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "system_user_roles_user_id_system_users_id_fk": {
+          "name": "system_user_roles_user_id_system_users_id_fk",
+          "tableFrom": "system_user_roles",
+          "tableTo": "system_users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "system_user_roles_role_id_system_roles_id_fk": {
+          "name": "system_user_roles_role_id_system_roles_id_fk",
+          "tableFrom": "system_user_roles",
+          "tableTo": "system_roles",
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {
         "system_user_roles_user_id_role_id_pk": {
           "name": "system_user_roles_user_id_role_id_pk",
