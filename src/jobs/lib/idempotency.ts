@@ -1,10 +1,24 @@
+import type { Job } from "bullmq";
+
 import { format } from "date-fns";
-import { Buffer } from "node:buffer";
+import { createHash } from "node:crypto";
 
 import logger from "@/lib/logger";
 import redisClient from "@/lib/redis";
 
+import type { IdempotencyRecord } from "../config";
+
 import { DEFAULT_IDEMPOTENCY_TTL, REDIS_KEY_PREFIX } from "../config";
+
+/**
+ * Job 数据结构（用于缓存返回）
+ */
+export interface CachedJobData {
+  jobId: string;
+  taskName: string;
+  addedAt: string;
+  cached: true;
+}
 
 /**
  * 幂等性辅助工具
@@ -26,7 +40,38 @@ export class IdempotencyHelper {
   }
 
   /**
-   * 标记任务已处理
+   * 标记任务已处理（存储完整 Job 信息）
+   */
+  static async markAsProcessedWithJob<T = any>(
+    key: string,
+    job: Job<T>,
+    ttl: number = DEFAULT_IDEMPOTENCY_TTL,
+  ): Promise<boolean> {
+    try {
+      const fullKey = `${REDIS_KEY_PREFIX.IDEMPOTENCY}${key}`;
+      const now = new Date();
+
+      const record: IdempotencyRecord = {
+        jobId: job.id || "",
+        taskName: job.name,
+        result: undefined,
+        addedAt: format(job.timestamp, "yyyy-MM-dd HH:mm:ss"),
+        createdAt: format(now, "yyyy-MM-dd HH:mm:ss"),
+        expiresAt: format(new Date(now.getTime() + ttl * 1000), "yyyy-MM-dd HH:mm:ss"),
+      };
+
+      await redisClient.setex(fullKey, ttl, JSON.stringify(record));
+      logger.info({ key, jobId: job.id, taskName: job.name, ttl }, "[幂等性]: 已标记任务为已处理");
+      return true;
+    }
+    catch (error) {
+      logger.error({ error, key }, "[幂等性]: 标记任务失败");
+      return false;
+    }
+  }
+
+  /**
+   * 标记任务已处理（兼容旧接口）
    */
   static async markAsProcessed(
     key: string,
@@ -35,10 +80,12 @@ export class IdempotencyHelper {
   ): Promise<boolean> {
     try {
       const fullKey = `${REDIS_KEY_PREFIX.IDEMPOTENCY}${key}`;
-      const record = {
+      const now = new Date();
+
+      const record: Partial<IdempotencyRecord> = {
         result,
-        createdAt: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-        expiresAt: format(new Date(Date.now() + ttl * 1000), "yyyy-MM-dd HH:mm:ss"),
+        createdAt: format(now, "yyyy-MM-dd HH:mm:ss"),
+        expiresAt: format(new Date(now.getTime() + ttl * 1000), "yyyy-MM-dd HH:mm:ss"),
       };
 
       await redisClient.setex(fullKey, ttl, JSON.stringify(record));
@@ -48,6 +95,34 @@ export class IdempotencyHelper {
     catch (error) {
       logger.error({ error, key }, "[幂等性]: 标记任务失败");
       return false;
+    }
+  }
+
+  /**
+   * 获取已处理任务的 Job 信息
+   */
+  static async getProcessedJob(key: string): Promise<CachedJobData | null> {
+    try {
+      const fullKey = `${REDIS_KEY_PREFIX.IDEMPOTENCY}${key}`;
+      const data = await redisClient.get(fullKey);
+
+      if (!data) {
+        return null;
+      }
+
+      const record: IdempotencyRecord = JSON.parse(data);
+
+      // 返回缓存的 Job 数据
+      return {
+        jobId: record.jobId,
+        taskName: record.taskName,
+        addedAt: record.addedAt,
+        cached: true,
+      };
+    }
+    catch (error) {
+      logger.error({ error, key }, "[幂等性]: 获取 Job 信息失败");
+      return null;
     }
   }
 
@@ -63,7 +138,7 @@ export class IdempotencyHelper {
         return null;
       }
 
-      const record = JSON.parse(data);
+      const record: IdempotencyRecord = JSON.parse(data);
       return record.result as T;
     }
     catch (error) {
@@ -94,7 +169,7 @@ export class IdempotencyHelper {
   }
 
   /**
-   * 生成幂等性键
+   * 生成幂等性键（使用 SHA256 替代 Base64，更短更安全）
    * 根据任务类型和参数生成唯一的幂等性键
    */
   static generateKey(taskName: string, params: Record<string, any>): string {
@@ -107,7 +182,9 @@ export class IdempotencyHelper {
       }, {} as Record<string, any>);
 
     const paramString = JSON.stringify(sortedParams);
-    return `${taskName}:${Buffer.from(paramString).toString("base64")}`;
+    const hash = createHash("sha256").update(paramString).digest("hex").slice(0, 16);
+
+    return `${taskName}:${hash}`;
   }
 }
 

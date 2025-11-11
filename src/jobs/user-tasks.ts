@@ -1,23 +1,28 @@
 import type { ProcessorRegistration, ScheduledTaskConfig } from "./config";
 
+// 解开相关注释可以查看定时任务和异步任务的示例
+// import { demoScheduledTasks, demoTaskProcessors } from "./examples/demo-tasks";
+
 // ============ 任务处理器注册表 ============
 
 /**
- * 任务处理器注册表
- * 用户应在此文件中注册自定义处理器
+ * 将自定义任务处理器添加到该数组中
  *
  * @example
  * ```typescript
  * import { sendEmailProcessor } from "./processors/email.processor";
- * import { processFileProcessor } from "./processors/file.processor";
  *
- * export const taskProcessors: ProcessorRegistration[] = [
+ * const customTaskProcessors: ProcessorRegistration[] = [
  *   { name: "send-email", processor: sendEmailProcessor },
- *   { name: "process-file", processor: processFileProcessor },
  * ];
  * ```
  */
-export const taskProcessors: ProcessorRegistration[] = [];
+const customTaskProcessors: ProcessorRegistration[] = [];
+
+export const taskProcessors: ProcessorRegistration[] = [
+  // ...demoTaskProcessors,
+  ...customTaskProcessors,
+];
 
 /**
  * 获取所有处理器映射
@@ -42,27 +47,22 @@ export function getProcessor(name: string): ProcessorRegistration["processor"] |
 // ============ 定时任务配置 ============
 
 /**
- * 定时任务配置
- * 用户应在此文件中配置定时任务
+ * 将自定义定时任务添加到该数组中
  *
  * @example
  * ```typescript
- * export const allScheduledTasks: ScheduledTaskConfig[] = [
+ * const customScheduledTasks: ScheduledTaskConfig[] = [
  *   {
  *     name: "system-health-check",
  *     pattern: "0 * * * *", // 每小时执行
  *     data: {},
- *     options: { attempts: 1 },
- *     useLock: true,
- *   },
- *   {
- *     name: "database-backup",
- *     pattern: "0 2 * * *", // 每天凌晨2点执行
- *     data: {},
- *     options: { attempts: 3 },
- *     useLock: true,
  *   },
  * ];
  * ```
  */
-export const allScheduledTasks: ScheduledTaskConfig[] = [];
+const customScheduledTasks: ScheduledTaskConfig[] = [];
+
+export const allScheduledTasks: ScheduledTaskConfig[] = [
+  // ...demoScheduledTasks,
+  ...customScheduledTasks,
+];

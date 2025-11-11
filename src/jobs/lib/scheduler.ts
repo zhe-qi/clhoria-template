@@ -1,6 +1,7 @@
 import type { Cron } from "croner";
 
 import { Cron as Croner } from "croner";
+import { randomUUID } from "node:crypto";
 
 import logger from "@/lib/logger";
 
@@ -28,45 +29,37 @@ export function registerScheduledTask(config: ScheduledTaskConfig): Cron {
     lockTTL = DEFAULT_LOCK_TTL,
   } = config;
 
-  // 如果任务已存在，先停止
+  // 如果任务已存在，先停止（同步操作，Croner 的 stop 是同步的）
   if (cronJobInstances.has(name)) {
     stopScheduledTask(name);
   }
 
   // 创建 Croner 实例
   const cronJob = new Croner(pattern, async () => {
-    logger.info({ taskName: name, pattern }, "[定时任务]: 触发执行");
-
     // 定义执行函数
     const executeTask = async () => {
-      try {
-        // 添加任务到队列
-        const job = await addJob(
-          name,
-          data as TaskData,
-          {
-            ...options,
-            jobId: `${name}-${Date.now()}`,
-          },
-          DEFAULT_QUEUE_NAME,
-        );
+      // 添加任务到队列
+      const job = await addJob(
+        name,
+        data as TaskData,
+        {
+          ...options,
+          jobId: `${name}_${Date.now()}_${randomUUID().slice(0, 8)}`,
+        },
+        DEFAULT_QUEUE_NAME,
+      );
 
-        logger.info({ taskName: name, jobId: job.id }, "[定时任务]: 任务已加入队列");
-        return job;
-      }
-      catch (error) {
-        logger.error({ error, taskName: name }, "[定时任务]: 添加任务到队列失败");
-        return null;
-      }
+      return job;
     };
 
     try {
       // 如果需要分布式锁
       if (useLock) {
-        const lockKey = `cron:${name}`;
+        const lockKey = `cron_${name}`;
         const result = await withLock(lockKey, executeTask, { ttl: lockTTL });
 
-        if (!result) {
+        // withLock 返回 null 表示获取锁失败
+        if (result === null) {
           logger.warn({ taskName: name }, "[定时任务]: 无法获取锁，跳过执行");
         }
       }
@@ -75,7 +68,18 @@ export function registerScheduledTask(config: ScheduledTaskConfig): Cron {
       }
     }
     catch (error) {
-      logger.error({ error, taskName: name }, "[定时任务]: 执行失败，但不影响调度器继续运行");
+      // 改进错误日志：提取 message 和 stack
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      logger.error(
+        {
+          taskName: name,
+          error: errorMessage,
+          stack: errorStack,
+        },
+        "[定时任务]: 添加任务到队列失败",
+      );
     }
   });
 

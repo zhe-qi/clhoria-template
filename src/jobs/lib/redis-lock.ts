@@ -130,8 +130,12 @@ export class RedisLock {
    */
   private startRefresh(): void {
     // 在锁过期前定期刷新
-    this.refreshTimer = setInterval(() => {
-      void this.extend();
+    this.refreshTimer = setInterval(async () => {
+      const success = await this.extend();
+      if (!success) {
+        logger.warn({ key: this.key }, "[分布式锁]: 续期失败，锁可能已丢失");
+        this.stopRefresh();
+      }
     }, LOCK_REFRESH_INTERVAL);
   }
 

@@ -50,7 +50,6 @@ export interface ScheduledTaskConfig {
 export interface ProcessorRegistration {
   name: string; // 任务名称
   processor: TaskProcessor; // 处理器函数
-  workerConfig?: WorkerConfig; // Worker 配置
 }
 
 /**
@@ -75,10 +74,12 @@ export interface DistributedLock {
  * 幂等性记录
  */
 export interface IdempotencyRecord {
-  key: string;
+  jobId: string;
+  taskName: string;
   result?: any;
+  addedAt: string;
   createdAt: string;
-  expiresAt?: string;
+  expiresAt: string;
 }
 
 // ============ 常量定义 ============
@@ -100,7 +101,6 @@ export const DEFAULT_IDEMPOTENCY_TTL = 7 * 24 * 3600; // 7天
 export const REDIS_KEY_PREFIX = {
   LOCK: "job:lock:",
   IDEMPOTENCY: "job:idem:",
-  SCHEDULER: "job:scheduler:",
 } as const;
 
 // ============ 默认配置 ============

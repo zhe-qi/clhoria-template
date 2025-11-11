@@ -1,9 +1,9 @@
-import type { Job, QueueEvents, Worker } from "bullmq";
+import type { Job, JobProgress, QueueEvents, Worker } from "bullmq";
 
 import { QueueEvents as BullQueueEvents, Worker as BullWorker } from "bullmq";
 
 import logger from "@/lib/logger";
-import redisClient from "@/lib/redis";
+import { getBullMQConnection } from "@/lib/redis";
 
 import type { TaskProcessor, WorkerConfig } from "../config";
 
@@ -14,6 +14,46 @@ const workerInstances = new Map<string, Worker>();
 const processorRegistry = new Map<string, TaskProcessor>();
 const queueEventsInstances = new Map<string, QueueEvents>();
 
+// ============ 工具函数 ============
+
+/**
+ * 敏感字段列表
+ */
+const SENSITIVE_KEYS = [
+  "password",
+  "token",
+  "apikey",
+  "secret",
+  "accesstoken",
+  "refreshtoken",
+  "privatekey",
+  "authorization",
+];
+
+/**
+ * 数据脱敏函数
+ */
+function sanitizeData(data: any): any {
+  if (!data || typeof data !== "object") {
+    return data;
+  }
+
+  const sanitized = Array.isArray(data) ? [...data] : { ...data };
+
+  for (const key of Object.keys(sanitized)) {
+    const lowerKey = key.toLowerCase();
+
+    if (SENSITIVE_KEYS.some(sensitiveKey => lowerKey.includes(sensitiveKey))) {
+      sanitized[key] = "***";
+    }
+    else if (typeof sanitized[key] === "object" && sanitized[key] !== null) {
+      sanitized[key] = sanitizeData(sanitized[key]);
+    }
+  }
+
+  return sanitized;
+}
+
 // ============ Worker 管理函数 ============
 
 /**
@@ -21,6 +61,7 @@ const queueEventsInstances = new Map<string, QueueEvents>();
  */
 export function registerProcessor(taskName: string, processor: TaskProcessor): void {
   processorRegistry.set(taskName, processor);
+  logger.debug({ taskName }, "[Worker]: 处理器已注册");
 }
 
 /**
@@ -50,23 +91,57 @@ export function createWorker(
   const worker = new BullWorker(
     queueName,
     async (job: Job) => {
+      const startTime = Date.now();
       const processor = processorRegistry.get(job.name);
 
       if (!processor) {
-        logger.error({ taskName: job.name, jobId: job.id }, "[Worker]: 未找到任务处理器");
-        throw new Error(`未找到任务处理器: ${job.name}`);
+        const error = `未找到任务处理器: ${job.name}`;
+        logger.error(
+          {
+            taskName: job.name,
+            jobId: job.id,
+            availableProcessors: Array.from(processorRegistry.keys()),
+          },
+          "[Worker]: 处理器未注册",
+        );
+        throw new Error(error);
       }
 
       try {
-        return await processor(job, job.token);
+        logger.info(
+          {
+            taskName: job.name,
+            jobId: job.id,
+            attemptsMade: job.attemptsMade,
+            data: sanitizeData(job.data),
+          },
+          "[Worker]: 开始处理任务",
+        );
+
+        const result = await processor(job, job.token);
+
+        return result;
       }
       catch (error) {
-        logger.error({ error, taskName: job.name, jobId: job.id }, "[Worker]: 任务处理失败");
+        const duration = Date.now() - startTime;
+        logger.error(
+          {
+            taskName: job.name,
+            jobId: job.id,
+            duration,
+            attemptsMade: job.attemptsMade,
+            attemptsTotal: job.opts.attempts || 3,
+            data: sanitizeData(job.data),
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          },
+          "[Worker]: 任务处理失败",
+        );
         throw error;
       }
     },
     {
-      connection: redisClient.duplicate(),
+      connection: getBullMQConnection(),
       concurrency: workerConfig.concurrency,
       maxStalledCount: workerConfig.maxStalledCount,
       stalledInterval: workerConfig.stalledInterval,
@@ -78,12 +153,22 @@ export function createWorker(
 
   // 创建 QueueEvents 监听全局事件
   const queueEvents = new BullQueueEvents(queueName, {
-    connection: redisClient.duplicate(),
+    connection: getBullMQConnection(),
   });
   attachQueueEventListeners(queueEvents, queueName);
 
   workerInstances.set(queueName, worker);
   queueEventsInstances.set(queueName, queueEvents);
+
+  logger.info(
+    {
+      queueName,
+      concurrency: workerConfig.concurrency,
+      maxStalledCount: workerConfig.maxStalledCount,
+      stalledInterval: workerConfig.stalledInterval,
+    },
+    "[Worker]: Worker 已创建并启动",
+  );
 
   return worker;
 }
@@ -92,14 +177,97 @@ export function createWorker(
  * 附加 Worker 事件监听器
  */
 function attachWorkerListeners(worker: Worker, queueName: string): void {
+  // 任务完成
+  worker.on("completed", (job: Job, result: any) => {
+    const duration = job.finishedOn ? job.finishedOn - job.processedOn! : 0;
+    logger.info(
+      {
+        queueName,
+        taskName: job.name,
+        jobId: job.id,
+        duration,
+        attemptsMade: job.attemptsMade,
+        resultType: typeof result,
+      },
+      "[Worker]: 任务完成",
+    );
+  });
+
+  // 任务失败（所有重试用尽）
+  worker.on("failed", (job: Job | undefined, error: Error) => {
+    if (job) {
+      logger.error(
+        {
+          queueName,
+          taskName: job.name,
+          jobId: job.id,
+          attemptsMade: job.attemptsMade,
+          attemptsTotal: job.opts.attempts || 3,
+          data: sanitizeData(job.data),
+          error: error.message,
+          stack: error.stack,
+        },
+        "[Worker]: 任务彻底失败（重试已用尽）",
+      );
+    }
+    else {
+      logger.error(
+        {
+          queueName,
+          error: error.message,
+        },
+        "[Worker]: 未知任务失败",
+      );
+    }
+  });
+
   // 任务停滞
-  worker.on("stalled", (jobId, prev) => {
-    logger.warn({ queueName, jobId, previousState: prev }, "[Worker]: 任务停滞");
+  worker.on("stalled", (jobId: string, prev: string) => {
+    logger.warn(
+      {
+        queueName,
+        jobId,
+        previousState: prev,
+      },
+      "[Worker]: 任务停滞（可能处理器崩溃）",
+    );
   });
 
   // Worker 错误
-  worker.on("error", (err) => {
-    logger.error({ error: err, queueName }, "[Worker]: Worker 错误");
+  worker.on("error", (err: Error) => {
+    logger.error(
+      {
+        queueName,
+        error: err.message,
+        stack: err.stack,
+      },
+      "[Worker]: Worker 内部错误",
+    );
+  });
+
+  // Worker 活跃
+  worker.on("active", (job: Job) => {
+    logger.debug(
+      {
+        queueName,
+        taskName: job.name,
+        jobId: job.id,
+      },
+      "[Worker]: 任务激活",
+    );
+  });
+
+  // 任务进度
+  worker.on("progress", (job: Job, progress: JobProgress) => {
+    logger.debug(
+      {
+        queueName,
+        taskName: job.name,
+        jobId: job.id,
+        progress,
+      },
+      "[Worker]: 任务进度更新",
+    );
   });
 }
 
@@ -107,9 +275,16 @@ function attachWorkerListeners(worker: Worker, queueName: string): void {
  * 附加队列事件监听器
  */
 function attachQueueEventListeners(queueEvents: QueueEvents, queueName: string): void {
-  // 任务失败
-  queueEvents.on("failed", ({ jobId, failedReason }) => {
-    logger.error({ queueName, jobId, failedReason }, "[队列事件]: 任务失败");
+  // 任务重试
+  queueEvents.on("retries-exhausted", ({ jobId, attemptsMade }) => {
+    logger.error(
+      {
+        queueName,
+        jobId,
+        attemptsMade,
+      },
+      "[队列事件]: 任务重试已用尽",
+    );
   });
 }
 
@@ -129,6 +304,8 @@ export async function stopWorker(queueName: string = DEFAULT_QUEUE_NAME): Promis
     await queueEvents.close();
     queueEventsInstances.delete(queueName);
   }
+
+  logger.info({ queueName }, "[Worker]: Worker 和 QueueEvents 已停止");
 }
 
 /**
@@ -141,6 +318,7 @@ export async function pauseWorker(
   const worker = workerInstances.get(queueName);
   if (worker) {
     await worker.pause(force);
+    logger.info({ queueName, force }, "[Worker]: Worker 已暂停");
   }
 }
 
@@ -151,6 +329,7 @@ export async function resumeWorker(queueName: string = DEFAULT_QUEUE_NAME): Prom
   const worker = workerInstances.get(queueName);
   if (worker) {
     await worker.resume();
+    logger.info({ queueName }, "[Worker]: Worker 已恢复");
   }
 }
 
@@ -162,6 +341,8 @@ export async function shutdownWorkers(): Promise<void> {
     stopWorker(queueName),
   );
   await Promise.all(promises);
+
+  logger.info("[Worker]: 所有 Worker 已关闭");
 }
 
 /**
