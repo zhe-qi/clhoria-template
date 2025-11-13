@@ -1,5 +1,6 @@
 import type { ProcessorRegistration, ScheduledTaskConfig } from "./config";
 
+// Uncomment the following lines to see the examples of scheduled tasks and asynchronous tasks
 // 解开相关注释可以查看定时任务和异步任务的示例
 // import { demoScheduledTasks, demoTaskProcessors } from "./examples/demo-tasks";
 

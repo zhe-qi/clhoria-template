@@ -1,138 +1,138 @@
-# Clhoria - Hono-based Rapid Development Template
+# Clhoria 基于 Hono 的快速开发模板
 
-[简体中文](./readme.zh-CN.md) | English
+简体中文 | [English](./readme.en.md)
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-A modern enterprise-grade backend template built on the Hono framework. Designed with AI-driven development in mind, combining Hono + OpenAPI + Zod for complete type safety and enhanced development efficiency. Features Drizzle ORM + PostgreSQL data layer and comprehensive RBAC permission system, providing a more stable and efficient development experience than traditional backend management systems.
+现代化企业级后端模板,基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式,结合 Hono + OpenAPI + Zod 完整技术体系,实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层,完整的 RBAC 权限体系,提供比传统后台管理系统更稳定、更高效的开发体验。
 
-Clhoria simplifies complex technical architectures, making every coding session elegant and every feature bloom beautifully. Choose Clhoria, choose to move forward with the future.
+Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优雅,每一个功能都如花般绽放。选择 Clhoria,就是选择与未来同行。
 
-> Frontend admin panel based on Refine + Shadcn: [https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
+> 模板配套的后台管理前端部分基于 Refine + Shadcn 开发:[https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
 
-## Features
+## 功能特性
 
-- **Modern Tech Stack**: Hono + TypeScript + Drizzle ORM + PostgreSQL
-- **Hybrid Architecture**: Functional development standards, multi-tier routing structure, optional DDD for complex business
-- **Automated Documentation**: OpenAPI 3.1 spec + Scalar UI, code as documentation with online debugging and type generation
-- **Multi-layer Auth**: Dual JWT keys (Admin/Client isolation) + Casbin RBAC
-- **Declarative Paginator**: Secure declarative queries based on Refine spec, extended Refine query with backend-only JOIN support
-- **Complete RBAC**: User management + Role management + Casbin policies + Refine Resource menus
-- **Intelligent Permission System**: Casbin KeyMatch3 + RESTful + Refine Resource, no backend permission identifier storage needed
-- **High-performance Menu**: Based on Refine best practices for menus and routing, better performance than traditional dynamic routing
-- **Type-safe Dictionary**: PostgreSQL Enum + Drizzle-Zod + OpenAPI manual frontend enum sync, compile-time type checking
-- **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
-- **High-performance Cache**: Redis caching + multi-layer rate limiting + permission caching + session management + distributed locks
-- **Task Queue**: BullMQ-based scheduled tasks and background task queue management
-- **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, Alibaba Cloud OSS, AWS S3, etc.)
-- **Smart CAPTCHA**: Integrated Cap.js with modern CAPTCHA system supporting multiple challenge types
-- **AI-native Development**: Claude Code + OpenAPI auto-generation, say goodbye to manual API documentation maintenance
-- **Type-safe System**: Hono + Zod + TypeScript full-chain type inference, catch issues at compile time
-- **Smart Test Coverage**: Vitest + AI assistance, auto-generate test cases ensuring API stability
-- **Instant Feedback Development**: Hot-reload dev environment, code changes take effect instantly without restart
-- **Claude Code Optimized**: Complete CLAUDE.md configuration, MCP plugin ecosystem, AI understands project architecture
-- **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
+- **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
+- **混合架构**: 函数式开发规范、多层级路由结构、复杂业务可选DDD
+- **自动化文档**: OpenAPI 3.1 规范 + Scalar UI,代码即文档,支持在线调试和类型生成
+- **多层认证授权**: JWT 双密钥(Admin/Client 隔离)+ Casbin RBAC
+- **声明式分页器**: 基于 Refine 规范的安全声明式查询,拓展 refine 查询支持仅后端联表查询
+- **完整 RBAC**: 用户管理 + 角色管理 + Casbin 权限策略 + Refine Resource 菜单
+- **智能权限系统**: Casbin KeyMatch3 + RESTful + Refine Resource,无需后端存储权限标识
+- **高性能菜单**: 基于 Refine 的菜单和路由最佳实践,相比传统动态路由性能更优
+- **类型安全字典**: PostgreSQL Enum + Drizzle-Zod + OpenAPI 手动同步前端枚举,编译时类型检查
+- **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
+- **高性能缓存**: Redis 缓存 + 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
+- **任务队列**: 基于 BullMQ 的定时任务和后台任务队列管理
+- **对象存储**: 集成 S3 兼容对象存储(支持 Cloudflare R2、阿里云 OSS、AWS S3 等)
+- **智能验证码**: 集成 Cap.js,支持多种挑战类型的现代化验证码系统
+- **AI 原生开发**: Claude Code + OpenAPI 自动生成,告别手工维护接口文档的痛苦
+- **类型安全体系**: Hono + Zod + TypeScript 全链路类型推导,编译时发现问题
+- **智能测试覆盖**: Vitest + AI 辅助,自动生成测试用例,确保接口稳定性
+- **即时反馈开发**: 热重载开发环境,代码变更实时生效,无需重启服务
+- **Claude Code 深度优化**: 完整 CLAUDE.md 配置,MCP 插件生态,AI 理解项目架构
+- **监控系统**: 集成 Sentry 错误追踪,支持自建或云原生方案(小团队推荐云服务,免运维)
 
-## Project Preview
+## 项目预览
 
 <div align="center">
   <img src="https://r2.promptez.cn/github/studio.png" width="45%" alt="Drizzle Studio">
-  <img src="https://r2.promptez.cn/github/test.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/login.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/user.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/swagger.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/list.png" width="45%" alt="Swagger API Documentation">
+  <img src="https://r2.promptez.cn/github/test.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/login.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/user.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/swagger.png" width="45%" alt="Swagger API 文档">
+  <img src="https://r2.promptez.cn/github/list.png" width="45%" alt="Swagger API 文档">
 </div>
 
-## Quick Start
+## 快速开始
 
-### Local Development Environment
+### 本地开发环境
 
 - Node.js >= 24
 - pnpm >= 10
 - PostgreSQL >= 18
 - Redis >= 7
 
-#### Installation Steps
+#### 安装步骤
 
-1. **Clone the repository**
+1. **克隆项目**
 
    ```bash
    git clone https://github.com/zhe-qi/clhoria-template
    cd clhoria-template
    ```
 
-2. **Install dependencies**
+2. **安装依赖**
 
    ```bash
    npm i -g corepack
    pnpm install
    ```
 
-3. **Configure environment variables**
+3. **配置环境变量**
 
    ```bash
    cp .env.example .env
    ```
 
-4. **Initialize database**
+4. **初始化数据库**
 
    ```bash
-   # Push database schema to development environment
+   # 推送数据库架构到开发环境
    pnpm push
 
-   # Seed initial data (optional, will auto-initialize on app startup)
+   # 填充初始数据(可选,应用启动时会自动检查并初始化)
    pnpm seed
    ```
 
-   **For production deployment**, verify migrations first:
+   **生产环境部署**需要先验证迁移:
 
    ```bash
-   pnpm generate  # Generate migration files
-   pnpm migrate   # Execute migrations
+   pnpm generate  # 生成迁移文件
+   pnpm migrate   # 执行迁移
    ```
 
-5. **Start development server**
+5. **启动开发服务器**
    ```bash
    pnpm dev
    ```
 
-Visit <http://localhost:9999> to view the API documentation.
+访问 <http://localhost:9999> 查看 API 文档。
 
-## Development Guidelines
+## 开发规范
 
-### Route Module Structure
+### 路由模块结构
 
 ```text
 routes/{tier}/{feature}/
-├── {feature}.handlers.ts    # Business logic handlers
-├── {feature}.routes.ts      # Route definitions and OpenAPI schema
-├── {feature}.schema.ts      # Zod validation schema (type constraints and API docs)
-└── {feature}.index.ts       # Unified exports
+├── {feature}.handlers.ts    # 业务逻辑处理器
+├── {feature}.routes.ts      # 路由定义和 OpenAPI 架构
+├── {feature}.schema.ts      # Zod 校验 Schema(类型约束与接口文档)
+└── {feature}.index.ts       # 统一导出
 ```
 
-### Database Schema
+### 数据库架构
 
 ```text
 src/db/schema/
-├── {entity}.ts             # Drizzle table definitions
-└── index.ts                # Unified exports
+├── {entity}.ts             # Drizzle 表定义
+└── index.ts                # 统一导出
 ```
 
-**Architecture Principles**:
+**架构原则**:
 
-- **Extract on Demand**: Only create service layer when business logic is reused across multiple routes, avoid over-abstraction
-- **Functional Design**: Use named exports with pure/async functions, support standard prefixes like `create*`, `get*`, `update*`, `delete*`
-- **Hybrid Implementation**: Simple CRUD operations directly in handlers, complex business logic extracted as service functions
-- **Transaction Management**: Complex business operations use `db.transaction()` to ensure data consistency
-- **Cache Integration**: Service layer integrates Redis caching for data caching and permission cache management
+- **按需抽离**: 仅当业务逻辑在多个路由间复用时才创建服务层,避免过度抽象
+- **函数式设计**: 采用命名导出的纯函数/异步函数,支持 `create*`、`get*`、`update*`、`delete*` 等标准前缀
+- **混合实现**: 简单 CRUD 操作直接在 handler 中实现,复杂业务逻辑抽离为服务函数
+- **事务管理**: 复杂业务操作使用 `db.transaction()` 确保数据一致性
+- **缓存集成**: 服务层集成 Redis 缓存,提供数据缓存和权限缓存管理
 
-### Hybrid Architecture Strategy (Optional)
+### 混合架构策略(可选)
 
-**Simple CRUD (80%)**: Implement directly in handlers, keep it lightweight
+**简单 CRUD(80%)**:直接在 handler 实现,保持轻量
 
 ```typescript
 // routes/admin/posts/handlers.ts
@@ -142,132 +142,132 @@ export const list: PostRouteHandlerType<"list"> = async (c) => {
 };
 ```
 
-**Complex Business (20%)**: Adopt lightweight DDD layering
+**复杂业务(20%)**:采用轻量 DDD 分层
 
 ```text
-src/domain/user/                      # Domain layer
-├── user.application.ts               # Application service: orchestrates multiple domain services
-├── user.entity.ts                    # Domain entity: core business logic and rule validation
-└── user.repository.ts                # Repository interface: defines data access abstraction
+src/domain/user/                      # 领域层
+├── user.application.ts               # 应用服务:编排多个领域服务
+├── user.entity.ts                    # 领域实体:核心业务逻辑和规则验证
+└── user.repository.ts                # 仓储接口:定义数据访问抽象
 
-src/infrastructure/persistence/       # Infrastructure layer
-└── user.repository.impl.ts           # Repository implementation: Drizzle ORM data access
+src/infrastructure/persistence/       # 基础设施层
+└── user.repository.impl.ts           # 仓储实现:Drizzle ORM 数据访问
 
-src/routes/admin/users/handlers.ts   # Presentation layer: calls application service orchestration
+src/routes/admin/users/handlers.ts   # 表示层:调用应用服务编排
 ```
 
-**Layer Responsibilities**:
+**分层职责**:
 
-- **Handler**: HTTP request/response, parameter validation, call application services, error code mapping
-- **Application**: Business process orchestration, transaction boundary control, cross-aggregate coordination
-- **Entity**: Domain object modeling, business rule validation, state change logic
-- **Repository**: Separation of data access abstraction and implementation
+- **Handler**:HTTP 请求响应、参数验证、调用应用服务、错误码映射
+- **Application**:业务流程编排、事务边界控制、跨聚合根协调
+- **Entity**:领域对象建模、业务规则验证、状态变更逻辑
+- **Repository**:数据访问抽象与实现分离
 
-## Core Architecture Features
+## 核心架构特性
 
-### 🎯 Integrated Permission + Menu + Dictionary Solution
+### 🎯 权限 + 菜单 + 字典一体化方案
 
-Modern architecture based on **Casbin + Refine + PostgreSQL Enum + OpenAPI**, thoroughly simplifying traditional backend management system complexity.
+基于 **Casbin + Refine + PostgreSQL Enum + OpenAPI** 的现代化架构,彻底简化传统后台管理系统的复杂度。
 
-#### Core Concept
+#### 核心思路
 
-**Permission System**: Based on RESTful API paths + Casbin KeyMatch3, code as permissions, no database permission identifier storage needed
-**Menu System**: Refine Resource compile-time routing, zero runtime overhead, code as menus
-**Dictionary System**: TypeScript enum → PostgreSQL Enum → OpenAPI auto-generation, 100% frontend-backend sync
+**权限系统**:基于 RESTful API 路径 + Casbin KeyMatch3,代码即权限,无需数据库存储权限标识
+**菜单系统**:Refine Resource 编译时路由,运行时零开销,代码即菜单
+**字典系统**:TypeScript 枚举 → PostgreSQL Enum → OpenAPI 自动生成,前后端 100% 同步
 
-#### Comparison with Traditional Solutions
+#### 对比传统方案
 
-| Dimension       | This Project                                                            | Traditional Solution                                                                    |
-| --------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Permission**  | OpenAPI route definition, Casbin policy matching, auto-sync             | Database permission tables + association tables, manual maintenance, easy inconsistency |
-| **Menu**        | Compile-time route tree generation, type-safe, zero runtime overhead    | Database-stored menus, runtime query parsing, needs admin interface                     |
-| **Dictionary**  | Single source of truth, compile-time type checking, 4-byte Enum storage | Database dictionary tables, runtime queries, needs JOIN, easy inconsistency             |
-| **Maintenance** | Change once auto-sync everywhere, TypeScript compile-time errors        | Multiple manual syncs: database → backend → frontend → docs                             |
+| 维度     | 本项目方案                                 | 传统方案                                     |
+| -------- | ------------------------------------------ | -------------------------------------------- |
+| **权限** | OpenAPI 路由定义,Casbin 策略匹配,自动同步  | 数据库权限表 + 关联表,手动维护,容易不一致    |
+| **菜单** | 编译时生成路由树,类型安全,零运行时开销     | 数据库存储菜单,运行时查询解析,需要管理界面   |
+| **字典** | 单一数据源,编译时类型检查,4 字节 Enum 存储 | 数据库字典表,运行时查询,需要 JOIN,容易不同步 |
+| **维护** | 改一处自动同步,TypeScript 编译时报错       | 多处手动同步:数据库 → 后端 → 前端 → 文档     |
 
-## Deployment
+## 部署
 
-### Docker Deployment
+### Docker 部署
 
 ```bash
-# Build image
+# 构建镜像
 docker build -t clhoria-template .
 
-# Run container
+# 运行容器
 docker run -p 9999:9999 --env-file .env clhoria-template
 ```
 
-## Deployment Features
+## 部署特性
 
-**Optional SaaS Dependencies**: Sentry, Cloudflare R2 object storage and other third-party services are all optional, can be fully deployed in intranet environments. Tech stack meets localization requirements, supports migration to domestic databases (e.g., Kingbase, Huawei GaussDB, etc.).
+**可选 SaaS 依赖**: sentry、Cloudflare R2 对象存储等第三方服务均为可选,可完全部署在内网环境。技术栈符合信创要求,支持迁移至国产数据库(如人大金仓、华为高斯等)。
 
-## Development Experience Comparison
+## 开发体验对比
 
-| Comparison           | This Project (AI + Modern Stack)                                                        | Traditional Code Generators                                                             |
-| -------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Efficiency**       | Claude Code intelligently understands requirements, generates compliant code in seconds | Manual template configuration tedious, generates rigid code needing heavy modifications |
-| **API Management**   | OpenAPI + Zod auto-sync, type-safe, docs never outdated                                 | Manual API documentation maintenance, easy inconsistency                                |
-| **Code Quality**     | TypeScript full-chain type checking, catch issues at compile time                       | Generated code lacks type constraints, runtime errors frequent                          |
-| **Maintenance Cost** | Unified code standards, AI understands project architecture, simple maintenance         | Large codebase not elegant enough, hard to maintain                                     |
+| 对比维度     | 本项目 (AI + Modern Stack)                      | 传统代码生成器                           |
+| ------------ | ----------------------------------------------- | ---------------------------------------- |
+| **开发效率** | Claude Code 智能理解需求,秒级生成符合规范的代码 | 手动配置模板麻烦,生成僵化代码,需大量修改 |
+| **接口管理** | OpenAPI + Zod 自动同步,类型安全,文档永不过期    | 手工维护接口文档,容易不同步              |
+| **代码质量** | TypeScript 全链路类型检查,编译时发现问题        | 生成代码缺乏类型约束,运行时错误频发      |
+| **维护成本** | 代码规范统一,AI 理解项目架构,维护简单           | 代码量大不够优雅,不好维护                |
 
-## CAPTCHA System Comparison
+## 验证码系统对比
 
 ### 🔐 Cap.js vs svg-captcha
 
-| Comparison          | Cap.js (Used in This Project)                                                  | svg-captcha                                              |
-| ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------- |
-| **Security**        | Multiple challenge types, hard to break by automated tools                     | Image-based recognition, easily cracked by OCR tools     |
-| **User Experience** | Modern interactive interface, quick verification, far superior user experience | Traditional image verification, recognize distorted text |
-| **Extensibility**   | Database storage, supports distributed deployment and custom challenge types   | Memory storage, fixed functionality                      |
+| 对比维度     | Cap.js (本项目采用)                          | svg-captcha                    |
+| ------------ | -------------------------------------------- | ------------------------------ |
+| **安全性**   | 多种挑战类型,难以被自动化工具破解            | 基于图像识别,易被 OCR 工具破解 |
+| **用户体验** | 现代化交互界面,快速通过验证,用户体验遥遥领先 | 传统图片验证,识别扭曲文字      |
+| **扩展性**   | 数据库存储,支持分布式部署和自定义挑战类型    | 内存存储,功能固定              |
 
-## Performance Comparison
+## 性能对比
 
-### Hono vs Fastify Performance Analysis
+### Hono vs Fastify 性能分析
 
-In Node.js 22 environment, Fastify still maintains performance advantage, but the gap is small:
+在 Node.js 22 环境下,Fastify 依然保持性能优势,但差距已经不大:
 
 - **Fastify (Node.js)**: 142,695 req/s
 - **Hono (Node.js)**: 129,234 req/s
 
-Detailed benchmark: [bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
+详细基准测试:[bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
 
-### 🚀 High Concurrency & Performance Optimization Solutions
+### 🚀 高并发与性能优化方案
 
-**High Concurrency Solution**: K8s cluster + load balancing + Redis distributed sessions + database master-slave read-write separation, enabling stateless horizontal scaling
+**高并发解决方案**:K8s 集群 + 负载均衡 + Redis 分布式会话 + 数据库主从读写分离,实现无状态水平扩展
 
-**CPU-intensive Optimization**:
+**CPU 密集型优化**:
 
-| Scenario                  | Recommended Solution  | Use Case                                                       |
-| ------------------------- | --------------------- | -------------------------------------------------------------- |
-| **Repeated Calls**        | N-API (Native Module) | Image processing, encryption/decryption, data compression      |
-| **Single Intensive Calc** | WASM                  | Complex algorithms, scientific computing, single recalculation |
-| **Parallel Multi-task**   | Worker Threads        | Many independent tasks, concurrent data processing             |
+| 场景             | 推荐方案         | 适用场景                       |
+| ---------------- | ---------------- | ------------------------------ |
+| **多次重复调用** | N-API (原生模块) | 图像处理、加密解密、数据压缩   |
+| **单次密集计算** | WASM             | 复杂算法、科学计算、单次重计算 |
+| **并行多任务**   | Worker Threads   | 大量独立任务、并发数据处理     |
 
-## Claude Code Deep Integration (Optional)
+## Claude Code 深度集成(可选)
 
-This project is designed for AI-driven development, providing complete CLAUDE.md configuration for deep AI understanding of project architecture.
+本项目专为 AI 驱动开发而设计,提供完整的 CLAUDE.md 配置,让 AI 深度理解项目架构。
 
-**Recommended MCP Plugins**:
+**推荐 MCP 插件**:
 
-- **[Serena](https://github.com/SerenaAI/serena-mcp)**: Intelligent code analysis and refactoring suggestions
-- **[Context7](https://github.com/context7/mcp-plugin)**: Real-time technical documentation queries and code examples
+- **[Serena](https://github.com/SerenaAI/serena-mcp)**:智能代码分析和重构建议
+- **[Context7](https://github.com/context7/mcp-plugin)**:实时技术文档查询和代码示例
 
-## Testing
+## 测试
 
-Uses Vitest testing framework, supports complete unit testing and integration testing, can add end-to-end tests under tests directory.
+使用 Vitest 测试框架,支持完整的单元测试和集成测试,可以在 tests 下添加端到端测试。
 
 ```bash
-# Run tests
+# 运行测试
 pnpm test
 ```
 
-## Support
+## 支持
 
-For questions or suggestions, please create an [Issue](https://github.com/zhe-qi/clhoria-template/issues) or contact the maintainer.
+如有问题或建议,请创建 [Issue](https://github.com/zhe-qi/clhoria-template/issues) 或联系维护者。
 
-## Contributing Guidelines
+## 贡献指南
 
-Contributions welcome! Please follow [Conventional Commits](https://www.conventionalcommits.org/) specifications, ensure `pnpm test` and `pnpm lint` pass before submitting PR.
+欢迎贡献!请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范,提交 PR 前确保 `pnpm test` 和 `pnpm lint` 通过。
 
-## License
+## 许可证
 
-MIT License - see [LICENSE](https://github.com/zhe-qi/clhoria-template/blob/main/LICENSE) file for details.
+MIT License - 查看 [LICENSE](https://github.com/zhe-qi/clhoria-template/blob/main/LICENSE) 文件了解详情。
