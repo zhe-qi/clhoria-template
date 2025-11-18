@@ -5,11 +5,6 @@ import env from "@/env";
 // ============ 类型定义 ============
 
 /**
- * 任务处理器函数类型
- */
-export type TaskProcessor<T = any, R = any> = Processor<T, R>;
-
-/**
  * 任务数据基础接口
  */
 export interface TaskData {
@@ -49,7 +44,7 @@ export interface ScheduledTaskConfig {
  */
 export interface ProcessorRegistration {
   name: string; // 任务名称
-  processor: TaskProcessor; // 处理器函数
+  processor: Processor; // 处理器函数
 }
 
 /**
@@ -59,15 +54,6 @@ export interface JobSystemConfig {
   queueName?: string; // 队列名称，默认 'default'
   defaultJobOptions?: TaskOptions; // 默认任务选项
   workerConfig?: WorkerConfig; // 默认 Worker 配置
-}
-
-/**
- * 分布式锁接口
- */
-export interface DistributedLock {
-  key: string;
-  ttl: number;
-  value: string;
 }
 
 /**
@@ -151,16 +137,4 @@ export function mergeJobOptions(
   }
 
   return { ...defaults, ...custom, backoff: mergedBackoff };
-}
-
-/**
- * 合并 Worker 配置
- */
-export function mergeWorkerConfig(
-  custom?: WorkerConfig,
-  defaults: WorkerConfig = jobSystemConfig.workerConfig!,
-): WorkerConfig {
-  if (!custom)
-    return defaults;
-  return { ...defaults, ...custom };
 }

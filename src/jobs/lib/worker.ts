@@ -1,65 +1,25 @@
-import type { Job, JobProgress, QueueEvents, Worker } from "bullmq";
+import type { Job, JobProgress, Processor, QueueEvents, Worker } from "bullmq";
 
 import { QueueEvents as BullQueueEvents, Worker as BullWorker } from "bullmq";
 
 import logger from "@/lib/logger";
 import { getBullMQConnection } from "@/lib/redis";
 
-import type { TaskProcessor, WorkerConfig } from "../config";
+import type { WorkerConfig } from "../config";
 
-import { DEFAULT_QUEUE_NAME, mergeWorkerConfig } from "../config";
+import { DEFAULT_QUEUE_NAME, jobSystemConfig } from "../config";
 
 // ============ 模块级变量 ============
 const workerInstances = new Map<string, Worker>();
-const processorRegistry = new Map<string, TaskProcessor>();
+const processorRegistry = new Map<string, Processor>();
 const queueEventsInstances = new Map<string, QueueEvents>();
-
-// ============ 工具函数 ============
-
-/**
- * 敏感字段列表
- */
-const SENSITIVE_KEYS = [
-  "password",
-  "token",
-  "apikey",
-  "secret",
-  "accesstoken",
-  "refreshtoken",
-  "privatekey",
-  "authorization",
-];
-
-/**
- * 数据脱敏函数
- */
-function sanitizeData(data: any): any {
-  if (!data || typeof data !== "object") {
-    return data;
-  }
-
-  const sanitized = Array.isArray(data) ? [...data] : { ...data };
-
-  for (const key of Object.keys(sanitized)) {
-    const lowerKey = key.toLowerCase();
-
-    if (SENSITIVE_KEYS.some(sensitiveKey => lowerKey.includes(sensitiveKey))) {
-      sanitized[key] = "***";
-    }
-    else if (typeof sanitized[key] === "object" && sanitized[key] !== null) {
-      sanitized[key] = sanitizeData(sanitized[key]);
-    }
-  }
-
-  return sanitized;
-}
 
 // ============ Worker 管理函数 ============
 
 /**
  * 注册任务处理器
  */
-export function registerProcessor(taskName: string, processor: TaskProcessor): void {
+export function registerProcessor(taskName: string, processor: Processor): void {
   processorRegistry.set(taskName, processor);
   logger.debug({ taskName }, "[Worker]: 处理器已注册");
 }
@@ -67,7 +27,7 @@ export function registerProcessor(taskName: string, processor: TaskProcessor): v
 /**
  * 批量注册处理器
  */
-export function registerProcessors(processors: Record<string, TaskProcessor>): void {
+export function registerProcessors(processors: Record<string, Processor>): void {
   for (const [name, processor] of Object.entries(processors)) {
     registerProcessor(name, processor);
   }
@@ -85,7 +45,7 @@ export function createWorker(
     void stopWorker(queueName);
   }
 
-  const workerConfig = mergeWorkerConfig(config);
+  const workerConfig = config ? { ...jobSystemConfig.workerConfig!, ...config } : jobSystemConfig.workerConfig!;
 
   // 创建 Worker
   const worker = new BullWorker(
@@ -113,7 +73,7 @@ export function createWorker(
             taskName: job.name,
             jobId: job.id,
             attemptsMade: job.attemptsMade,
-            data: sanitizeData(job.data),
+            data: job.data,
           },
           "[Worker]: 开始处理任务",
         );
@@ -131,7 +91,7 @@ export function createWorker(
             duration,
             attemptsMade: job.attemptsMade,
             attemptsTotal: job.opts.attempts || 3,
-            data: sanitizeData(job.data),
+            data: job.data,
             error: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
           },
@@ -203,7 +163,7 @@ function attachWorkerListeners(worker: Worker, queueName: string): void {
           jobId: job.id,
           attemptsMade: job.attemptsMade,
           attemptsTotal: job.opts.attempts || 3,
-          data: sanitizeData(job.data),
+          data: job.data,
           error: error.message,
           stack: error.stack,
         },

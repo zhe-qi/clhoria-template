@@ -25,26 +25,6 @@ export const taskProcessors: ProcessorRegistration[] = [
   ...customTaskProcessors,
 ];
 
-/**
- * 获取所有处理器映射
- * 用于快速查找处理器
- */
-export function getProcessorMap(): Map<string, ProcessorRegistration["processor"]> {
-  const map = new Map();
-  for (const { name, processor } of taskProcessors) {
-    map.set(name, processor);
-  }
-  return map;
-}
-
-/**
- * 根据名称获取处理器
- */
-export function getProcessor(name: string): ProcessorRegistration["processor"] | undefined {
-  const registration = taskProcessors.find(p => p.name === name);
-  return registration?.processor;
-}
-
 // ============ 定时任务配置 ============
 
 /**

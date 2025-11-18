@@ -8,7 +8,6 @@ import { z } from "zod";
 
 import type { AppBindings } from "@/types/lib";
 
-import env from "@/env";
 import redisClient from "@/lib/redis";
 
 /**
@@ -51,28 +50,30 @@ function validateIp(ip: string): string | null {
  * 根据环境变量 TRUST_PROXY 决定是否信任代理头部
  */
 function getClientIdentifier(c: Context<AppBindings>) {
-  // 如果信任反向代理,按优先级读取代理头部
-  if (env.TRUST_PROXY) {
-    // 1. X-Forwarded-For (标准代理头,取第一个IP - 最接近客户端)
-    const forwardedFor = c.req.header("X-Forwarded-For");
-    if (forwardedFor) {
-      const clientIp = forwardedFor.split(",")[0].trim();
-      const validatedIp = validateIp(clientIp);
-      if (validatedIp)
-        return validatedIp;
-    }
-
-    // 2. X-Real-IP (Nginx 等常用)
-    const realIp = c.req.header("X-Real-IP");
-    if (realIp) {
-      const validatedIp = validateIp(realIp);
-      if (validatedIp)
-        return validatedIp;
-    }
+  // 1. X-Forwarded-For
+  const xff = c.req.header("X-Forwarded-For");
+  if (xff) {
+    const ip = xff.split(",")[0].trim();
+    if (validateIp(ip))
+      return ip;
   }
 
-  // 不信任代理或无代理头,使用未知标识
-  return "unknown";
+  // 2. X-Real-IP
+  const real = c.req.header("X-Real-IP");
+  if (real && validateIp(real))
+    return real;
+
+  // 3. Node.js socket
+  // @ts-expect-error: Node.js adapter adds `incoming` but TS defs don’t include it
+  const incoming = c.req.raw?.incoming;
+  const socketIp
+    = incoming?.socket?.remoteAddress
+      || incoming?.connection?.remoteAddress;
+
+  if (socketIp && validateIp(socketIp))
+    return socketIp;
+
+  return "0.0.0.0";
 }
 
 /**
@@ -108,8 +109,8 @@ export function createRateLimiter(options: RateLimitOptions) {
   });
 }
 
-/** 默认全局速率限制配置 (每15分钟300次) */
+/** 默认全局速率限制配置 (每1分钟100次) */
 export const DEFAULT_RATE_LIMIT: RateLimitOptions = {
-  windowMs: 15 * 60 * 1000,
-  limit: 300,
+  windowMs: 1 * 60 * 1000,
+  limit: 100,
 };

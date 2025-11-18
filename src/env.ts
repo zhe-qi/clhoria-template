@@ -50,9 +50,6 @@ const EnvSchema = z.object({
 
   /** Sentry错误追踪 */
   SENTRY_DSN: z.string().optional(),
-
-  /** 是否信任反向代理 */
-  TRUST_PROXY: z.enum(["true", "false"]).default("false").transform(val => val === "true"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

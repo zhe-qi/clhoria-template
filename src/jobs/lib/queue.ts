@@ -14,48 +14,6 @@ import { IdempotencyHelper } from "./idempotency";
 // ============ 模块级变量 ============
 const queueInstances = new Map<string, Queue>();
 
-// ============ 工具函数 ============
-
-/**
- * 敏感字段列表
- */
-const SENSITIVE_KEYS = [
-  "password",
-  "token",
-  "apikey",
-  "secret",
-  "accesstoken",
-  "refreshtoken",
-  "privatekey",
-  "authorization",
-];
-
-/**
- * 数据脱敏函数
- */
-function sanitizeData(data: any): any {
-  if (!data || typeof data !== "object") {
-    return data;
-  }
-
-  const sanitized = Array.isArray(data) ? [...data] : { ...data };
-
-  for (const key of Object.keys(sanitized)) {
-    const lowerKey = key.toLowerCase();
-
-    // 检查是否为敏感字段
-    if (SENSITIVE_KEYS.some(sensitiveKey => lowerKey.includes(sensitiveKey))) {
-      sanitized[key] = "***";
-    }
-    // 递归处理嵌套对象
-    else if (typeof sanitized[key] === "object" && sanitized[key] !== null) {
-      sanitized[key] = sanitizeData(sanitized[key]);
-    }
-  }
-
-  return sanitized;
-}
-
 // ============ 队列管理函数 ============
 
 /**
@@ -113,7 +71,7 @@ export async function addJob<T extends TaskData>(
         taskName,
         jobId: job.id,
         queueName,
-        data: sanitizeData(data),
+        data,
         hasIdempotencyKey: !!options?.idempotencyKey,
       },
       "[队列]: 任务已添加",
@@ -131,7 +89,7 @@ export async function addJob<T extends TaskData>(
       {
         taskName,
         queueName,
-        data: sanitizeData(data),
+        data,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       },

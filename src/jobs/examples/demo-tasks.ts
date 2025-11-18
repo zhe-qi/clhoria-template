@@ -1,4 +1,4 @@
-import type { Job } from "bullmq";
+import type { Job, Processor } from "bullmq";
 
 import logger from "@/lib/logger";
 
@@ -6,7 +6,6 @@ import type {
   ProcessorRegistration,
   ScheduledTaskConfig,
   TaskData,
-  TaskProcessor,
 } from "../config";
 
 import { addJob } from "../lib/queue";
@@ -22,7 +21,7 @@ export interface DemoWelcomeEmailPayload extends TaskData {
   displayName?: string;
 }
 
-export const demoWelcomeEmailProcessor: TaskProcessor<DemoWelcomeEmailPayload> = async (
+export const demoWelcomeEmailProcessor: Processor<DemoWelcomeEmailPayload> = async (
   job: Job<DemoWelcomeEmailPayload>,
 ) => {
   const { userId, email, displayName } = job.data;
@@ -68,7 +67,7 @@ export interface DemoSystemHeartbeatPayload extends TaskData {
   note?: string;
 }
 
-export const demoSystemHeartbeatProcessor: TaskProcessor<DemoSystemHeartbeatPayload> = async (
+export const demoSystemHeartbeatProcessor: Processor<DemoSystemHeartbeatPayload> = async (
   job: Job<DemoSystemHeartbeatPayload>,
 ) => {
   logger.info(

@@ -71,34 +71,6 @@ export class IdempotencyHelper {
   }
 
   /**
-   * 标记任务已处理（兼容旧接口）
-   */
-  static async markAsProcessed(
-    key: string,
-    result?: any,
-    ttl: number = DEFAULT_IDEMPOTENCY_TTL,
-  ): Promise<boolean> {
-    try {
-      const fullKey = `${REDIS_KEY_PREFIX.IDEMPOTENCY}${key}`;
-      const now = new Date();
-
-      const record: Partial<IdempotencyRecord> = {
-        result,
-        createdAt: format(now, "yyyy-MM-dd HH:mm:ss"),
-        expiresAt: format(new Date(now.getTime() + ttl * 1000), "yyyy-MM-dd HH:mm:ss"),
-      };
-
-      await redisClient.setex(fullKey, ttl, JSON.stringify(record));
-      logger.info({ key, ttl }, "[幂等性]: 已标记任务为已处理");
-      return true;
-    }
-    catch (error) {
-      logger.error({ error, key }, "[幂等性]: 标记任务失败");
-      return false;
-    }
-  }
-
-  /**
    * 获取已处理任务的 Job 信息
    */
   static async getProcessedJob(key: string): Promise<CachedJobData | null> {
@@ -186,37 +158,4 @@ export class IdempotencyHelper {
 
     return `${taskName}:${hash}`;
   }
-}
-
-/**
- * 幂等性装饰器（用于包装任务处理函数）
- */
-export function withIdempotency<T extends (...args: any[]) => Promise<any>>(
-  generateKey: (...args: Parameters<T>) => string,
-  options: { ttl?: number; skipOnExists?: boolean } = {},
-): (fn: T) => T {
-  const { ttl = DEFAULT_IDEMPOTENCY_TTL, skipOnExists = true } = options;
-
-  return (fn: T): T => {
-    return (async (...args: Parameters<T>) => {
-      const key = generateKey(...args);
-
-      // 检查是否已处理
-      if (await IdempotencyHelper.isProcessed(key)) {
-        if (skipOnExists) {
-          const result = await IdempotencyHelper.getProcessedResult(key);
-          logger.info({ key }, "[幂等性]: 任务已处理，跳过执行");
-          return result;
-        }
-      }
-
-      // 执行任务
-      const result = await fn(...args);
-
-      // 标记为已处理
-      await IdempotencyHelper.markAsProcessed(key, result, ttl);
-
-      return result;
-    }) as T;
-  };
 }
