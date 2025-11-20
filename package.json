@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "test -f node_modules/.bin/simple-git-hooks && simple-git-hooks || echo 'simple-git-hooks not found, skipping...'",
+    "postinstall": "test -f node_modules/.bin/simple-git-hooks && simple-git-hooks",
     "dev": "tsx watch src/index.ts",
     "start": "cross-env NODE_ENV=production node --trace-warnings dist/src/index.js",
     "typecheck": "tsc --noEmit",
@@ -24,16 +24,16 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",
-    "@aws-sdk/client-s3": "^3.933.0",
-    "@aws-sdk/s3-request-presigner": "^3.933.0",
+    "@aws-sdk/client-s3": "^3.936.0",
+    "@aws-sdk/s3-request-presigner": "^3.936.0",
     "@cap.js/server": "^4.0.3",
     "@hono/node-server": "1.19.6",
     "@hono/node-ws": "^1.2.0",
     "@hono/sentry": "^1.2.2",
-    "@hono/zod-openapi": "^1.1.4",
+    "@hono/zod-openapi": "^1.1.5",
     "@node-rs/argon2": "^2.0.2",
-    "@scalar/hono-api-reference": "^0.9.24",
-    "bullmq": "^5.63.2",
+    "@scalar/hono-api-reference": "^0.9.25",
+    "bullmq": "^5.64.0",
     "casbin": "^5.41.0",
     "croner": "^9.1.0",
     "date-fns": "^4.1.0",
@@ -48,7 +48,7 @@
     "ioredis": "5.8.2",
     "pino": "^10.1.0",
     "postgres": "^3.4.7",
-    "rate-limit-redis": "^4.2.3",
+    "rate-limit-redis": "^4.3.0",
     "zod": "4.1.12"
   },
   "devDependencies": {
@@ -58,14 +58,14 @@
     "drizzle-kit": "^0.31.7",
     "eslint": "^9.39.1",
     "eslint-plugin-format": "^1.0.2",
-    "lint-staged": "^16.2.6",
+    "lint-staged": "^16.2.7",
     "pino-pretty": "^13.1.2",
     "simple-git-hooks": "^2.13.1",
-    "tsdown": "^0.16.5",
+    "tsdown": "^0.16.6",
     "tsx": "^4.20.6",
     "type-fest": "^5.2.0",
     "typescript": "5.9.3",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.11"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"

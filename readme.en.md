@@ -260,6 +260,11 @@ Uses Vitest testing framework, supports complete unit testing and integration te
 pnpm test
 ```
 
+## References
+
+- [hono-open-api-starter](https://github.com/w3cj/hono-open-api-starter)
+- [stoker](https://github.com/w3cj/stoker)
+
 ## Support
 
 For questions or suggestions, please create an [Issue](https://github.com/zhe-qi/clhoria-template/issues) or contact the maintainer.

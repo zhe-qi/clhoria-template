@@ -260,6 +260,11 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 pnpm test
 ```
 
+## 引用
+
+- [hono-open-api-starter](https://github.com/w3cj/hono-open-api-starter)
+- [stoker](https://github.com/w3cj/stoker)
+
 ## 支持
 
 如有问题或建议,请创建 [Issue](https://github.com/zhe-qi/clhoria-template/issues) 或联系维护者。

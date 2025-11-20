@@ -3,7 +3,6 @@ import { createRoute } from "@hono/zod-openapi";
 import { RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
-import { createErrorSchema } from "@/lib/stoker/openapi/schemas";
 import { respErr } from "@/utils";
 
 import { DownloadTokenRequestSchema, TokenResponseSchema, UploadTokenRequestSchema } from "./schema";
@@ -29,14 +28,8 @@ export const getUploadToken = createRoute({
       RefineResultSchema(TokenResponseSchema),
       "获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      respErr,
-      "请求参数错误",
-    ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(UploadTokenRequestSchema),
-      "参数验证失败",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "参数验证失败"),
   },
 });
 
@@ -58,13 +51,7 @@ export const getDownloadToken = createRoute({
       RefineResultSchema(TokenResponseSchema),
       "获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      respErr,
-      "请求参数错误",
-    ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(DownloadTokenRequestSchema),
-      "参数验证失败",
-    ),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "参数验证失败"),
   },
 });
