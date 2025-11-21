@@ -38,7 +38,7 @@ export default function createApp() {
   app.use(secureHeaders());
 
   /** 4. 超时控制 - 尽早设置，控制整个请求链 */
-  app.use(timeout(15000)); // 建议改为15秒
+  app.use(timeout(30000));
 
   /** 5. 速率限制 - 在解析请求体之前拦截 */
   app.use(createRateLimiter(DEFAULT_RATE_LIMIT));
@@ -49,9 +49,9 @@ export default function createApp() {
 
   /** 7. 请求体限制 - 在实际解析前限制 */
   app.use(bodyLimit({
-    maxSize: 50 * 1024,
+    maxSize: 1 * 1024 * 1024,
     onError: (c) => {
-      return c.json(Resp.fail("请求体过大"), HttpStatusCodes.REQUEST_TOO_LONG);
+      return c.json(Resp.fail("请求体过大（超过 1MB）"), HttpStatusCodes.REQUEST_TOO_LONG);
     },
   }));
 
@@ -63,5 +63,14 @@ export default function createApp() {
   app.notFound(notFound);
   app.onError(onError);
 
+  return app;
+}
+
+export function createTestApp() {
+  const app = createRouter();
+  app.use(requestId())
+    .use(pinoLogger({ pino: logger }));
+  app.notFound(notFound);
+  app.onError(onError);
   return app;
 }

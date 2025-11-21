@@ -143,8 +143,8 @@ export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = a
     // 构建旧权限和新权限的数组格式
     // removePolicies 需要完整的权限数组格式（包括所有字段）
     const oldPolicies = currentPermissions;
-    // addPolicies 只需要前3个字段：subject, object, action
-    const newPolicies = permissions.map(([resource, action]) => [id.toString(), resource, action]);
+    // addPolicies 需要 4 个字段：subject, object, action, effect
+    const newPolicies = permissions.map(([resource, action]) => [id.toString(), resource, action, "allow"]);
 
     let removedCount = 0;
     let addedCount = 0;

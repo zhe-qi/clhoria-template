@@ -11,7 +11,6 @@ import logger from "@/lib/logger";
 export function operationLog(options: { moduleName: string; description: string }): MiddlewareHandler {
   return async (c: Context, next) => {
     const startTime = new Date();
-
     // 获取请求信息
     const method = c.req.method;
     const urlPath = new URL(c.req.url).pathname;

@@ -5,7 +5,8 @@ import { casbinRule } from "@/db/schema";
 
 import { DrizzleCasbinAdapter } from "./adapter";
 
-const model = newModel(`
+// Casbin 模型配置
+export const casbinModelText = `
 [request_definition]
 r = sub, obj, act
 
@@ -20,8 +21,18 @@ e = some(where (p.eft == allow)) && !some(where (p.eft == deny))
 
 [matchers]
 m = g(r.sub, p.sub) && keyMatch3(r.obj, p.obj) && regexMatch(r.act, p.act)
-`);
+`;
+
+const model = newModel(casbinModelText);
 
 const adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule);
 
 export const enforcerPromise = newEnforcer(model, adapter);
+
+/**
+ * 重新加载 Casbin 策略（用于测试环境）
+ */
+export async function reloadCasbinPolicy(): Promise<void> {
+  const enforcer = await enforcerPromise;
+  await enforcer.loadPolicy();
+}

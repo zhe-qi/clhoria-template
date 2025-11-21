@@ -18,7 +18,7 @@ export const casbinRule = pgTable("casbin_rule", {
   /** 保留字段（暂不使用，默认空字符串） */
   v5: varchar({ length: 64 }).notNull().default(""),
 }, table => [
-  primaryKey({ name: "casbin_rule_pkey", columns: [table.v0, table.v1, table.v2, table.v3] }),
+  primaryKey({ name: "casbin_rule_pkey", columns: [table.ptype, table.v0, table.v1, table.v2, table.v3] }),
   index("idx_casbin_g_v0").on(table.ptype, table.v0, table.v1),
 ]);
 

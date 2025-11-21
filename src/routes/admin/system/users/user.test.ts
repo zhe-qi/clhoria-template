@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import db from "@/db";
 import { casbinRule, systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
-import createApp from "@/lib/create-app";
+import { createTestApp } from "@/lib/create-app";
 import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
@@ -18,7 +18,7 @@ if (env.NODE_ENV !== "test") {
 }
 
 function createSysUsersApp() {
-  return createApp()
+  return createTestApp()
     .use("/system/users/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/users/*", authorize())
     .route("/", systemUsersRouter);

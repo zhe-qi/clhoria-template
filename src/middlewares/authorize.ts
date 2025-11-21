@@ -10,6 +10,7 @@ import { API_ADMIN_PATH } from "@/lib/openapi/config";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";
+import { stripPrefix } from "@/utils/tools";
 
 /**
  * Casbin 权限校验中间件
@@ -29,7 +30,7 @@ export function authorize(): MiddlewareHandler<AppBindings> {
     const { roles } = c.get("jwtPayload");
 
     // 去除 API 前缀，获取实际请求路径
-    const path = c.req.path.replace(API_ADMIN_PATH, "");
+    const path = stripPrefix(c.req.path, API_ADMIN_PATH);
 
     // 检查用户是否有权限访问该路径和方法
     const hasPermission = await hasAnyPermission(enforcer, roles, path, c.req.method);
@@ -70,7 +71,7 @@ async function hasAnyPermission(enforcer: Enforcer, roles: string[], path: strin
     return safeEnforce(roles[0]);
   }
 
-  // 并发检查所有角色权限
+  // 并行检查所有角色权限
   const results = await Promise.all(
     roles.map(role => safeEnforce(role)),
   );

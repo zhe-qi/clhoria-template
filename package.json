@@ -2,7 +2,7 @@
   "name": "clhoria-template",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@10.23.0",
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",
-    "@aws-sdk/client-s3": "^3.936.0",
-    "@aws-sdk/s3-request-presigner": "^3.936.0",
+    "@aws-sdk/client-s3": "^3.937.0",
+    "@aws-sdk/s3-request-presigner": "^3.937.0",
     "@cap.js/server": "^4.0.3",
     "@hono/node-server": "1.19.6",
     "@hono/node-ws": "^1.2.0",
@@ -33,7 +33,7 @@
     "@hono/zod-openapi": "^1.1.5",
     "@node-rs/argon2": "^2.0.2",
     "@scalar/hono-api-reference": "^0.9.25",
-    "bullmq": "^5.64.0",
+    "bullmq": "^5.64.1",
     "casbin": "^5.41.0",
     "croner": "^9.1.0",
     "date-fns": "^4.1.0",
@@ -65,7 +65,7 @@
     "tsx": "^4.20.6",
     "type-fest": "^5.2.0",
     "typescript": "5.9.3",
-    "vitest": "^4.0.11"
+    "vitest": "^4.0.12"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"

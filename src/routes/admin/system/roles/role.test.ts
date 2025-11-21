@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import db from "@/db";
 import { casbinRule, systemRoles, systemUserRoles } from "@/db/schema";
 import env from "@/env";
-import createApp from "@/lib/create-app";
+import { createTestApp } from "@/lib/create-app";
 import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
@@ -18,7 +18,7 @@ if (env.NODE_ENV !== "test") {
 }
 
 function createSysRolesApp() {
-  return createApp()
+  return createTestApp()
     .use("/system/roles/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
     .use("/system/roles/*", authorize())
     .route("/", systemRolesRouter);
@@ -784,9 +784,9 @@ describe("system role routes", () => {
           param: { id: roleId },
           json: {
             permissions: [
-              ["/api/admin/system/user", "read"],
-              ["/api/admin/system/user", "write"],
-              ["/api/admin/system/role", "read"],
+              ["/system/users", "GET"],
+              ["/system/users", "POST"],
+              ["/system/roles", "GET"],
             ],
           },
         },
@@ -813,9 +813,9 @@ describe("system role routes", () => {
           param: { id: roleId },
           json: {
             permissions: [
-              ["/api/admin/system/user", "read"],
-              ["/api/admin/system/user", "write"],
-              ["/api/admin/system/role", "read"],
+              ["/system/users", "GET"],
+              ["/system/users", "POST"],
+              ["/system/roles", "GET"],
             ],
           },
         },
@@ -828,8 +828,8 @@ describe("system role routes", () => {
           param: { id: roleId },
           json: {
             permissions: [
-              ["/api/admin/system/role", "write"], // New permission
-              ["/api/admin/system/role", "delete"], // New permission
+              ["/system/roles", "POST"], // New permission
+              ["/system/roles", "DELETE"], // New permission
             ],
           },
         },
@@ -852,9 +852,9 @@ describe("system role routes", () => {
       if (verifyResponse.status === HttpStatusCodes.OK) {
         const verifyJson = await verifyResponse.json();
         expect(verifyJson.data.length).toBe(2);
-        // Casbin 权限格式包含角色ID作为第一个字段
-        expect(verifyJson.data).toContainEqual([roleId, "/api/admin/system/role", "write"]);
-        expect(verifyJson.data).toContainEqual([roleId, "/api/admin/system/role", "delete"]);
+        // Casbin 权限格式: [角色ID, 资源路径, 操作, 效果]
+        expect(verifyJson.data).toContainEqual([roleId, "/system/roles", "POST", "allow"]);
+        expect(verifyJson.data).toContainEqual([roleId, "/system/roles", "DELETE", "allow"]);
       }
     });
 
@@ -865,8 +865,8 @@ describe("system role routes", () => {
           param: { id: roleId },
           json: {
             permissions: [
-              ["/api/admin/system/user", "read"],
-              ["/api/admin/system/role", "read"],
+              ["/system/users", "GET"],
+              ["/system/roles", "GET"],
             ],
           },
         },

@@ -1,5 +1,5 @@
 {
-  "id": "91437aff-7537-4639-b966-d9602688f19b",
+  "id": "2facf58b-77c2-4dcb-9f71-e6d627dd4e55",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -89,6 +89,7 @@
         "casbin_rule_pkey": {
           "name": "casbin_rule_pkey",
           "columns": [
+            "ptype",
             "v0",
             "v1",
             "v2",
