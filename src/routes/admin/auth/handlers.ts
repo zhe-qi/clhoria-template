@@ -12,7 +12,7 @@ import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/services/admin";
-import { Resp, toColumns } from "@/utils";
+import { Resp, toColumns, tryit } from "@/utils";
 
 import type { AuthRouteHandlerType } from ".";
 
@@ -84,7 +84,13 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
     return c.json(Resp.fail("刷新令牌不存在"), HttpStatusCodes.UNAUTHORIZED);
   }
 
-  const { accessToken, refreshToken: newRefreshToken } = await refreshAccessToken(refreshTokenFromCookie);
+  const [err, res] = await tryit(refreshAccessToken)(refreshTokenFromCookie);
+
+  if (err) {
+    return c.json(Resp.fail(err.message), HttpStatusCodes.UNAUTHORIZED);
+  }
+
+  const { accessToken, refreshToken: newRefreshToken } = res;
 
   // 设置新的 HttpOnly Refresh Token Cookie
   setCookie(c, "refreshToken", newRefreshToken, {

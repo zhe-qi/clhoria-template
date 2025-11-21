@@ -9,12 +9,12 @@ export const APP_CONFIG: AppConfig[] = [
   {
     name: "admin",
     title: "管理端API文档",
-    token: "",
+    token: "your-admin-token",
   },
   {
     name: "client",
     title: "客户端API文档",
-    token: "",
+    token: "your-client-token",
   },
   {
     name: "public",
