@@ -128,6 +128,7 @@ describe("system role routes", () => {
         { query: {} },
         {},
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
     });
   });
@@ -143,6 +144,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -153,8 +155,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data).toBeDefined();
         expect(Array.isArray(json.data)).toBe(true);
       }
@@ -173,6 +177,7 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
         const items = Array.isArray(json.data) ? json.data : [];
@@ -197,6 +202,7 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
         const items = Array.isArray(json.data) ? json.data : [];
@@ -219,6 +225,7 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
         const items = Array.isArray(json.data) ? json.data : [];
@@ -228,6 +235,7 @@ describe("system role routes", () => {
           if (firstCreatedAt && secondCreatedAt) {
             const first = new Date(firstCreatedAt).getTime();
             const second = new Date(secondCreatedAt).getTime();
+
             expect(first).toBeGreaterThanOrEqual(second);
           }
         }
@@ -246,9 +254,12 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
+
       if (response.status === HttpStatusCodes.UNPROCESSABLE_ENTITY) {
         const json = await response.json() as { message?: string; error?: { issues?: unknown } };
+
         expect(json.error?.issues).toBeDefined();
       }
     });
@@ -263,6 +274,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response2 = await client.system.roles.$post(
@@ -274,6 +286,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response2.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response3 = await client.system.roles.$post(
@@ -285,6 +298,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response3.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response4 = await client.system.roles.$post(
@@ -296,6 +310,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response4.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -310,6 +325,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response2 = await client.system.roles.$post(
@@ -322,6 +338,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response2.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -338,8 +355,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.CREATED);
+
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
+
         expect(json.data.id).toBe(newRoleId);
         expect(json.data.name).toBe(testRole.name);
         expect(json.data.description).toBe(testRole.description);
@@ -376,8 +395,10 @@ describe("system role routes", () => {
 
       // 可能返回 409 或 500（取决于数据库驱动和错误处理）
       expect([HttpStatusCodes.CONFLICT, HttpStatusCodes.INTERNAL_SERVER_ERROR]).toContain(response2.status);
+
       if (response2.status === HttpStatusCodes.CONFLICT) {
         const json = await response2.json() as { message: string };
+
         expect(json.message).toBeDefined();
       }
     });
@@ -407,6 +428,7 @@ describe("system role routes", () => {
         { param: { id: "Invalid-ID" } }, // Uppercase not allowed
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -416,9 +438,12 @@ describe("system role routes", () => {
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+
       if (response.status === HttpStatusCodes.NOT_FOUND) {
         const json = await response.json() as { message: string };
+
         expect(json.message).toBeDefined();
       }
     });
@@ -430,8 +455,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.id).toBe(roleId);
         expect(json.data.id).toBe(roleId);
         expect(json.data.name).toBe(testRole.name);
@@ -491,6 +518,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       // patchAdminSystemRole 是 partial，所以空对象是有效的
       expect(response.status).toBe(HttpStatusCodes.OK);
     });
@@ -509,8 +537,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.name).toBe("更新后的角色名称");
         expect(json.data.description).toBe("更新后的角色描述");
         expect(json.data.status).toBe(Status.DISABLED);
@@ -530,8 +560,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.id).toBe(roleId); // ID 应该保持不变
         expect(json.data.name).toBe("测试名称");
         expect(json.data.description).toBe("测试描述");
@@ -588,6 +620,7 @@ describe("system role routes", () => {
         { param: { id: "Invalid-ID" } }, // Uppercase not allowed
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -623,8 +656,10 @@ describe("system role routes", () => {
       );
 
       expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
+
       if (deleteResponse.status === HttpStatusCodes.OK) {
         const json = await deleteResponse.json();
+
         expect(json.data.id).toBe(deleteTestRoleId);
       }
 
@@ -633,6 +668,7 @@ describe("system role routes", () => {
         { param: { id: deleteTestRoleId } },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(verifyResponse.status).toBe(HttpStatusCodes.NOT_FOUND);
     });
   });
@@ -661,6 +697,7 @@ describe("system role routes", () => {
         { param: { id: "Invalid-ID" } }, // Uppercase not allowed
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -671,8 +708,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data).toBeDefined();
         expect(Array.isArray(json.data)).toBe(true);
         // 新创建的角色应该没有权限
@@ -705,11 +744,14 @@ describe("system role routes", () => {
           );
 
           expect(response.status).toBe(HttpStatusCodes.OK);
+
           if (response.status === HttpStatusCodes.OK) {
             const permJson = await response.json();
+
             expect(Array.isArray(permJson.data)).toBe(true);
             // Admin role should have permissions
             expect(permJson.data.length).toBeGreaterThan(0);
+
             // Each permission should be an array (Casbin format may have more fields)
             if (permJson.data.length > 0) {
               expect(Array.isArray(permJson.data[0])).toBe(true);
@@ -739,6 +781,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -753,6 +796,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response2 = await client.system.roles[":id"].permissions.$put(
@@ -764,6 +808,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response2.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response3 = await client.system.roles[":id"].permissions.$put(
@@ -775,6 +820,7 @@ describe("system role routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response3.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -794,8 +840,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data).toHaveProperty("added");
         expect(json.data).toHaveProperty("removed");
         expect(json.data).toHaveProperty("total");
@@ -837,8 +885,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.total).toBe(2);
         expect(json.data.removed).toBeGreaterThan(0); // Should have removed previous permissions
       }
@@ -851,6 +901,7 @@ describe("system role routes", () => {
 
       if (verifyResponse.status === HttpStatusCodes.OK) {
         const verifyJson = await verifyResponse.json();
+
         expect(verifyJson.data.length).toBe(2);
         // Casbin 权限格式: [角色ID, 资源路径, 操作, 效果]
         expect(verifyJson.data).toContainEqual([roleId, "/system/roles", "POST", "allow"]);
@@ -885,8 +936,10 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.total).toBe(0);
         expect(json.data.removed).toBeGreaterThan(0);
       }
@@ -899,6 +952,7 @@ describe("system role routes", () => {
 
       if (verifyResponse.status === HttpStatusCodes.OK) {
         const verifyJson = await verifyResponse.json();
+
         expect(verifyJson.data.length).toBe(0);
       }
     });

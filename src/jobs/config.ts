@@ -7,66 +7,66 @@ import env from "@/env";
 /**
  * 任务数据基础接口
  */
-export interface TaskData {
+export type TaskData = {
   [key: string]: any;
-}
+};
 
 /**
  * 任务选项
  */
-export interface TaskOptions extends JobsOptions {
+export type TaskOptions = {
   idempotencyKey?: string; // 幂等性键
-}
+} & JobsOptions;
 
 /**
  * Worker 配置
  */
-export interface WorkerConfig {
+export type WorkerConfig = {
   concurrency?: number; // 并发数，默认 1
   maxStalledCount?: number; // 最大停滞次数，默认 1
   stalledInterval?: number; // 停滞检查间隔（毫秒），默认 30000
-}
+};
 
 /**
  * 定时任务配置
  */
-export interface ScheduledTaskConfig {
+export type ScheduledTaskConfig = {
   name: string; // 任务名称
   pattern: string; // Cron 表达式
   data?: TaskData; // 任务数据
   options?: TaskOptions; // 任务选项
   useLock?: boolean; // 是否使用分布式锁，默认 true
   lockTTL?: number; // 锁过期时间（秒），默认 60
-}
+};
 
 /**
  * 任务处理器注册项
  */
-export interface ProcessorRegistration {
+export type ProcessorRegistration = {
   name: string; // 任务名称
   processor: Processor; // 处理器函数
-}
+};
 
 /**
  * 任务系统配置
  */
-export interface JobSystemConfig {
+export type JobSystemConfig = {
   queueName?: string; // 队列名称，默认 'default'
   defaultJobOptions?: TaskOptions; // 默认任务选项
   workerConfig?: WorkerConfig; // 默认 Worker 配置
-}
+};
 
 /**
  * 幂等性记录
  */
-export interface IdempotencyRecord {
+export type IdempotencyRecord = {
   jobId: string;
   taskName: string;
   result?: any;
   addedAt: string;
   createdAt: string;
   expiresAt: string;
-}
+};
 
 // ============ 常量定义 ============
 

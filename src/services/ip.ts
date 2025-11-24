@@ -3,12 +3,12 @@ import { Buffer } from "node:buffer";
 
 import { tryit } from "@/utils";
 
-interface IPLocationResponse {
+type IPLocationResponse = {
   addr: string;
   pro: string;
   city: string;
   err?: string;
-}
+};
 
 /** 根据IP地址获取城市地址信息 */
 export async function getIPAddress(ip: string): Promise<string> {

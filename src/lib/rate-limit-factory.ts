@@ -79,7 +79,7 @@ function getClientIdentifier(c: Context<AppBindings>) {
 /**
  * 速率限制配置选项
  */
-export interface RateLimitOptions {
+export type RateLimitOptions = {
   /** 时间窗口(毫秒) */
   windowMs: number;
   /** 最大请求数 */
@@ -90,7 +90,7 @@ export interface RateLimitOptions {
   skipSuccessfulRequests?: boolean;
   /** 是否跳过失败的请求计数 (默认false) */
   skipFailedRequests?: boolean;
-}
+};
 
 /**
  * 创建速率限制中间件

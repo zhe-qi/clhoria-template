@@ -27,6 +27,7 @@ const array2DEqualsIgnoreOrder = (a: string[][], b: string[][]): boolean => {
  */
 const testGetPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
   const myRes = await e.getPolicy();
+
   expect(array2DEqualsIgnoreOrder(res, myRes)).toBe(true);
 };
 
@@ -35,6 +36,7 @@ const testGetPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
  */
 const testGetGroupingPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
   const myRes = await e.getGroupingPolicy();
+
   expect(array2DEqualsIgnoreOrder(res, myRes)).toBe(true);
 };
 
@@ -157,6 +159,7 @@ describe("drizzle casbin adapter", () => {
 
       const e = await newEnforcer(model, adapter);
       const policies = await e.getPolicy();
+
       expect(policies.some(p => p[0] === "user1" && p[1] === "/api/resource1")).toBe(true);
       expect(policies.some(p => p[0] === "user2" && p[1] === "/api/resource2")).toBe(true);
       expect(policies.some(p => p[0] === "user3" && p[1] === "/api/resource3")).toBe(true);
@@ -171,6 +174,7 @@ describe("drizzle casbin adapter", () => {
 
       const e = await newEnforcer(model, adapter);
       const policies = await e.getPolicy();
+
       expect(policies.some(p => p[0] === "user1")).toBe(false);
       expect(policies.some(p => p[0] === "user2")).toBe(false);
       expect(policies.some(p => p[0] === "user3")).toBe(false);
@@ -205,18 +209,21 @@ describe("drizzle casbin adapter", () => {
     it("应该删除用户的所有角色", async () => {
       await enforcer.deleteUser("alice");
       const groupingPolicies = await enforcer.getGroupingPolicy();
+
       expect(groupingPolicies.some(p => p[0] === "alice")).toBe(false);
     });
 
     it("应该添加角色继承", async () => {
       await enforcer.addGroupingPolicy("charlie", "data2_admin");
       const groupingPolicies = await enforcer.getGroupingPolicy();
+
       expect(groupingPolicies.some(p => p[0] === "charlie" && p[1] === "data2_admin")).toBe(true);
     });
 
     it("应该删除角色继承", async () => {
       await enforcer.removeGroupingPolicy("charlie", "data2_admin");
       const groupingPolicies = await enforcer.getGroupingPolicy();
+
       expect(groupingPolicies.some(p => p[0] === "charlie")).toBe(false);
     });
   });
@@ -247,6 +254,7 @@ describe("drizzle casbin adapter", () => {
       });
 
       const policies = testModel.getPolicy("p", "p");
+
       expect(policies).toHaveLength(1);
       expect(policies[0]).toEqual(["alice", "data1", "read", "allow"]);
       expect(adapter.isFiltered()).toBe(true);
@@ -264,6 +272,7 @@ describe("drizzle casbin adapter", () => {
       });
 
       const policies = testModel.getPolicy("p", "p");
+
       expect(policies).toHaveLength(2);
       expect(policies.every(p => p[0] === "data2_admin" && p[1] === "data2")).toBe(true);
     });
@@ -290,28 +299,35 @@ describe("drizzle casbin adapter", () => {
         enforcer = await newEnforcer(testModel, adapter);
       }
     });
+
     it("应该正确判断用户权限", async () => {
       const result1 = await enforcer.enforce("alice", "data1", "read");
+
       expect(result1).toBe(true);
 
       const result2 = await enforcer.enforce("bob", "data2", "write");
+
       expect(result2).toBe(true);
 
       // alice 有 data2_admin 角色，所以也有 data2 的 write 权限
       const result3 = await enforcer.enforce("alice", "data2", "write");
+
       expect(result3).toBe(true);
 
       // alice 没有 data1 的 write 权限
       const result4 = await enforcer.enforce("alice", "data1", "write");
+
       expect(result4).toBe(false);
     });
 
     it("应该支持角色继承的权限判断", async () => {
       // alice 有 data2_admin 角色，data2_admin 有 data2 的读写权限
       const result1 = await enforcer.enforce("alice", "data2", "read");
+
       expect(result1).toBe(true);
 
       const result2 = await enforcer.enforce("alice", "data2", "write");
+
       expect(result2).toBe(true);
     });
 
@@ -319,12 +335,15 @@ describe("drizzle casbin adapter", () => {
       await enforcer.addPolicy("user", "/api/v1/users/*", "GET", "allow");
 
       const result1 = await enforcer.enforce("user", "/api/v1/users/123", "GET");
+
       expect(result1).toBe(true);
 
       const result2 = await enforcer.enforce("user", "/api/v1/users/123/profile", "GET");
+
       expect(result2).toBe(true);
 
       const result3 = await enforcer.enforce("user", "/api/v2/users/123", "GET");
+
       expect(result3).toBe(false);
     });
 
@@ -332,12 +351,15 @@ describe("drizzle casbin adapter", () => {
       await enforcer.addPolicy("user", "/api/admin", "(GET)|(POST)", "allow");
 
       const result1 = await enforcer.enforce("user", "/api/admin", "GET");
+
       expect(result1).toBe(true);
 
       const result2 = await enforcer.enforce("user", "/api/admin", "POST");
+
       expect(result2).toBe(true);
 
       const result3 = await enforcer.enforce("user", "/api/admin", "DELETE");
+
       expect(result3).toBe(false);
     });
 
@@ -345,6 +367,7 @@ describe("drizzle casbin adapter", () => {
       await enforcer.addPolicy("user", "/api/sensitive", "GET", "deny");
 
       const result = await enforcer.enforce("user", "/api/sensitive", "GET");
+
       expect(result).toBe(false);
     });
   });
@@ -374,15 +397,18 @@ describe("drizzle casbin adapter", () => {
       testModel.addPolicy("g", "g", ["new_user", "admin"]);
 
       const result = await adapter.savePolicy(testModel);
+
       expect(result).toBe(true);
 
       // 验证已保存
       const e = await newEnforcer(testModel, adapter);
       const policies = await e.getPolicy();
+
       expect(policies.some(p => p[0] === "new_user")).toBe(true);
       expect(policies.some(p => p[0] === "new_user2")).toBe(true);
 
       const roles = await e.getGroupingPolicy();
+
       expect(roles.some(r => r[0] === "new_user" && r[1] === "admin")).toBe(true);
     });
 
@@ -397,6 +423,7 @@ describe("drizzle casbin adapter", () => {
       // 验证只有新策略存在
       const e = await newEnforcer(testModel, adapter);
       const policies = await e.getPolicy();
+
       expect(policies).toHaveLength(1);
       expect(policies[0]).toEqual(["final_user", "/api/final", "GET", "allow"]);
     });
@@ -437,6 +464,7 @@ describe("drizzle casbin adapter", () => {
     it("应该获取用户的所有权限", async () => {
       const e = await newEnforcer(model, adapter);
       const permissions = await e.getPermissionsForUser("alice");
+
       expect(permissions).toHaveLength(2);
       expect(permissions).toContainEqual(["alice", "/api/user", "GET", "allow"]);
       expect(permissions).toContainEqual(["alice", "/api/user", "POST", "allow"]);
@@ -445,21 +473,25 @@ describe("drizzle casbin adapter", () => {
     it("应该获取用户的所有角色", async () => {
       const e = await newEnforcer(model, adapter);
       const roles = await e.getRolesForUser("alice");
+
       expect(roles).toContain("user_role");
     });
 
     it("应该获取拥有角色的所有用户", async () => {
       const e = await newEnforcer(model, adapter);
       const users = await e.getUsersForRole("admin_role");
+
       expect(users).toContain("bob");
     });
 
     it("应该检查用户是否拥有角色", async () => {
       const e = await newEnforcer(model, adapter);
       const hasRole = await e.hasRoleForUser("alice", "user_role");
+
       expect(hasRole).toBe(true);
 
       const noRole = await e.hasRoleForUser("alice", "admin_role");
+
       expect(noRole).toBe(false);
     });
   });

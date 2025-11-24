@@ -135,6 +135,7 @@ describe("system user routes", () => {
         { query: {} },
         {},
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNAUTHORIZED);
     });
   });
@@ -150,6 +151,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -160,8 +162,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data).toBeDefined();
         expect(Array.isArray(json.data)).toBe(true);
       }
@@ -180,9 +184,11 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
         const items = Array.isArray(json.data) ? json.data : [];
+
         expect(items.some((user: { username: string }) =>
           user.username.includes("admin"),
         )).toBe(true);
@@ -200,6 +206,7 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
         const items = Array.isArray(json.data) ? json.data : [];
@@ -209,6 +216,7 @@ describe("system user routes", () => {
           if (firstCreatedAt && secondCreatedAt) {
             const first = new Date(firstCreatedAt).getTime();
             const second = new Date(secondCreatedAt).getTime();
+
             expect(first).toBeGreaterThanOrEqual(second);
           }
         }
@@ -227,9 +235,12 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
+
       if (response.status === HttpStatusCodes.UNPROCESSABLE_ENTITY) {
         const json = await response.json() as { message?: string; error?: { issues?: unknown } };
+
         expect(json.error?.issues).toBeDefined();
       }
     });
@@ -244,6 +255,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response2 = await client.system.users.$post(
@@ -255,6 +267,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response2.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -269,6 +282,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -285,8 +299,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.CREATED);
+
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
+
         expect(json.data.username).toBe(newUsername);
         expect(json.data.nickName).toBe(testUser.nickName);
         expect(json.data).not.toHaveProperty("password"); // Password should not be returned
@@ -321,8 +337,10 @@ describe("system user routes", () => {
       );
 
       expect(response2.status).toBe(HttpStatusCodes.CONFLICT);
+
       if (response2.status === HttpStatusCodes.CONFLICT) {
         const json = await response2.json() as { message: string };
+
         expect(json.message).toBeDefined();
       }
     });
@@ -344,6 +362,7 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.CREATED);
+
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
         userId = json.data.id;
@@ -355,6 +374,7 @@ describe("system user routes", () => {
         { param: { id: "invalid-uuid" } },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -364,9 +384,12 @@ describe("system user routes", () => {
         { param: { id: nonExistentId } },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+
       if (response.status === HttpStatusCodes.NOT_FOUND) {
         const json = await response.json() as { message: string };
+
         expect(json.message).toBeDefined();
       }
     });
@@ -378,8 +401,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.id).toBe(userId);
         expect(json.data.username).toBe(`${testUsername}_gettest`);
         expect(json.data).not.toHaveProperty("password"); // Password should not be returned
@@ -404,6 +429,7 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.CREATED);
+
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
         userId = json.data.id;
@@ -438,6 +464,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -454,8 +481,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.nickName).toBe("更新后的昵称");
         expect(json.data.avatar).toBe("https://example.com/new-avatar.png");
       }
@@ -478,8 +507,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.FORBIDDEN);
+
       if (response.status === HttpStatusCodes.FORBIDDEN) {
         const json = await response.json() as { message: string };
+
         expect(json.message).toBeDefined();
       }
     });
@@ -530,6 +561,7 @@ describe("system user routes", () => {
         { param: { id: "invalid-uuid" } },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -545,8 +577,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.FORBIDDEN);
+
       if (response.status === HttpStatusCodes.FORBIDDEN) {
         const json = await response.json() as { message: string };
+
         expect(json.message).toBeDefined();
       }
     });
@@ -574,6 +608,7 @@ describe("system user routes", () => {
       );
 
       expect(createResponse.status).toBe(HttpStatusCodes.CREATED);
+
       if (createResponse.status !== HttpStatusCodes.CREATED) {
         throw new Error("Failed to create test user");
       }
@@ -587,8 +622,10 @@ describe("system user routes", () => {
       );
 
       expect(deleteResponse.status).toBe(HttpStatusCodes.OK);
+
       if (deleteResponse.status === HttpStatusCodes.OK) {
         const deleteJson = await deleteResponse.json();
+
         expect(deleteJson.data.id).toBe(deleteTestUserId);
       }
 
@@ -597,6 +634,7 @@ describe("system user routes", () => {
         { param: { id: deleteTestUserId } },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(verifyResponse.status).toBe(HttpStatusCodes.NOT_FOUND);
     });
   });
@@ -617,6 +655,7 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.CREATED);
+
       if (response.status === HttpStatusCodes.CREATED) {
         const json = await response.json();
         userId = json.data.id;
@@ -633,6 +672,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -646,6 +686,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
 
       const response2 = await client.system.users[":userId"].roles.$put(
@@ -657,6 +698,7 @@ describe("system user routes", () => {
         },
         { headers: getAuthHeaders(adminToken) },
       );
+
       expect(response2.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
     });
 
@@ -687,8 +729,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data).toHaveProperty("added");
         expect(json.data).toHaveProperty("removed");
         expect(json.data).toHaveProperty("total");
@@ -722,8 +766,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.total).toBe(1);
         expect(json.data.removed).toBeGreaterThan(0); // Should have removed previous roles
       }
@@ -753,8 +799,10 @@ describe("system user routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.OK);
+
       if (response.status === HttpStatusCodes.OK) {
         const json = await response.json();
+
         expect(json.data.total).toBe(0);
         expect(json.data.removed).toBeGreaterThan(0);
       }

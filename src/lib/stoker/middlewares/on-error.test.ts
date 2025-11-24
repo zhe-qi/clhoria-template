@@ -17,8 +17,11 @@ describe("onError", () => {
       new Error("Test error"),
       context,
     );
+
     expect(response.status).toBe(500);
+
     const json = await response.json();
+
     expect(json).toEqual({
       message: "Test error",
       stack: undefined,
@@ -34,8 +37,11 @@ describe("onError", () => {
       new Error("Test error"),
       context,
     );
+
     expect(response.status).toBe(500);
+
     const json = await response.json();
+
     expect(json).toEqual({
       message: "Test error",
       stack: undefined,

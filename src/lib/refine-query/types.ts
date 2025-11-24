@@ -13,12 +13,12 @@ import type { CrudFilters, CrudSorting, Pagination } from "./schemas";
 /**
  * Refine 查询结果接口
  */
-export interface RefineQueryResult<T> {
+export type RefineQueryResult<T> = {
   /** 数据数组 */
   data: T[];
   /** 总记录数 */
   total: number;
-}
+};
 
 /**
  * 错误类型

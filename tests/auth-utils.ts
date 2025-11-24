@@ -9,10 +9,10 @@ import { systemUsers } from "@/db/schema";
 import env from "@/env";
 
 /** 缓存的token信息 */
-interface CachedToken {
+type CachedToken = {
   token: string;
   userId: string;
-}
+};
 
 /** 单例缓存 */
 let adminTokenCache: CachedToken | null = null;

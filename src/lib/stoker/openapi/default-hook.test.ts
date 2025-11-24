@@ -55,8 +55,11 @@ describe("default-hook", () => {
       body: JSON.stringify({ name: 123, age: "not-a-number" }),
       headers: { "content-type": "application/json" },
     });
+
     expect(res.status).toBe(HttpStatusCodes.UNPROCESSABLE_ENTITY);
+
     const json = await res.json() as any;
+
     expect(json.success).toBe(false);
     expect(json.error).toBeDefined();
     expect(json.error.name).toBe("ZodError");
@@ -102,8 +105,11 @@ describe("default-hook", () => {
       body: JSON.stringify({ name: "Alice", age: 30 }),
       headers: { "content-type": "application/json" },
     });
+
     expect(res.status).toBe(HttpStatusCodes.OK);
+
     const json = await res.json() as any;
+
     expect(json.name).toBe("Alice");
     expect(json.age).toBe(30);
   });

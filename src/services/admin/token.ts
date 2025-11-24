@@ -27,10 +27,10 @@ function calculateExpiration(duration: { minutes?: number; days?: number; hours?
   throw new Error("Invalid duration configuration");
 }
 
-interface UserTokenInfo {
+type UserTokenInfo = {
   id: string | number;
   roles: string[];
-}
+};
 
 // 计算 TTL 秒数
 const REFRESH_TTL_SECONDS = differenceInSeconds(

@@ -2,10 +2,10 @@ import { z } from "@hono/zod-openapi";
 
 type Validator = "uuid" | "nanoid" | "cuid" | "cuid2" | "ulid";
 
-export interface ParamsSchema {
+export type ParamsSchema = {
   name?: string;
   validator?: Validator | undefined;
-}
+};
 
 const examples: Record<Validator, string> = {
   uuid: "4651e634-a530-4484-9b09-9616a28f35e3",

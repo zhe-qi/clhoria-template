@@ -13,12 +13,12 @@ import { DEFAULT_IDEMPOTENCY_TTL, REDIS_KEY_PREFIX } from "../config";
 /**
  * Job 数据结构（用于缓存返回）
  */
-export interface CachedJobData {
+export type CachedJobData = {
   jobId: string;
   taskName: string;
   addedAt: string;
   cached: true;
-}
+};
 
 /**
  * 幂等性辅助工具

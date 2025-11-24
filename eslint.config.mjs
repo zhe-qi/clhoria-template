@@ -10,7 +10,7 @@ export default antfu({
     quotes: "double",
   },
   ignores: [
-    "**/migrations/*",
+    "migrations/**/*",
     "CLAUDE.md",
     "CLAUDE.local.md",
     "./.claude/**/*",
@@ -30,7 +30,9 @@ export default antfu({
       case: "kebabCase",
       ignore: ["README.md"],
     }],
-    // 顶层函数允许使用箭头函数
     "antfu/top-level-function": "off",
+    "ts/consistent-type-definitions": ["error", "type"],
+    "test/padding-around-all": "error",
+    "test/prefer-lowercase-title": "off",
   },
 });

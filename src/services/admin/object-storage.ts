@@ -14,21 +14,21 @@ const s3Client = new S3Client({
   },
 });
 
-export interface GenerateUploadUrlParams {
+export type GenerateUploadUrlParams = {
   fileName: string;
   fileType?: string;
   expiresIn?: number;
-}
+};
 
-export interface GenerateDownloadUrlParams {
+export type GenerateDownloadUrlParams = {
   fileName: string;
   expiresIn?: number;
-}
+};
 
-export interface PresignedUrlResult {
+export type PresignedUrlResult = {
   url: string;
   expiresAt: string;
-}
+};
 
 /**
  * 生成上传预签名 URL

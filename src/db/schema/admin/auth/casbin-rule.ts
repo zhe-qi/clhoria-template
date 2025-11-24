@@ -64,14 +64,14 @@ export const insertCasbinRuleSchema = selectCasbinRuleSchema
     return true;
   });
 
-interface FromOriginalRuleType {
+type FromOriginalRuleType = {
   ptype: InsertCasbinRuleType["ptype"];
-}
+};
 type UpdateDataInput = z.infer<typeof insertCasbinRuleSchema>;
-interface PatchCasbinRuleInput {
+type PatchCasbinRuleInput = {
   fromOriginalRule: FromOriginalRuleType;
   updateData: Partial<UpdateDataInput>;
-}
+};
 
 export const patchCasbinRuleSchema = z
   .object({

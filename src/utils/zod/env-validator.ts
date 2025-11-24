@@ -2,11 +2,11 @@ import type { z } from "zod";
 
 import { env as processEnv } from "node:process";
 
-export interface ValidationResult<T> {
+export type ValidationResult<T> = {
   success: boolean;
   data?: T;
   fieldErrors?: Record<string, string[]>;
-}
+};
 
 /**
  * 安全解析环境变量schema

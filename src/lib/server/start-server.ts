@@ -14,9 +14,9 @@ function sleep(ms: number): Promise<void> {
 /**
  * 具有 fetch 方法的应用类型（支持 Hono 和 OpenAPIHono）
  */
-interface FetchApp {
+type FetchApp = {
   fetch: (...args: any[]) => Response | Promise<Response>;
-}
+};
 
 /**
  * 启动服务器并处理端口占用重试

@@ -15,11 +15,11 @@ import { addJob } from "../lib/queue";
  */
 export const DEMO_WELCOME_EMAIL_TASK = "demo_send_welcome_email";
 
-export interface DemoWelcomeEmailPayload extends TaskData {
+export type DemoWelcomeEmailPayload = {
   userId: string;
   email: string;
   displayName?: string;
-}
+} & TaskData;
 
 export const demoWelcomeEmailProcessor: Processor<DemoWelcomeEmailPayload> = async (
   job: Job<DemoWelcomeEmailPayload>,
@@ -62,10 +62,10 @@ export async function enqueueDemoWelcomeEmailJob(
  */
 export const DEMO_SYSTEM_HEARTBEAT_TASK = "demo_system_heartbeat";
 
-export interface DemoSystemHeartbeatPayload extends TaskData {
+export type DemoSystemHeartbeatPayload = {
   triggeredBy: string;
   note?: string;
-}
+} & TaskData;
 
 export const demoSystemHeartbeatProcessor: Processor<DemoSystemHeartbeatPayload> = async (
   job: Job<DemoSystemHeartbeatPayload>,

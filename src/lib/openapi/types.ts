@@ -1,7 +1,7 @@
 /**
  * 应用OpenAPI配置
  */
-export interface AppConfig {
+export type AppConfig = {
   /**
    * 应用名称
    */
@@ -14,12 +14,12 @@ export interface AppConfig {
    * 应用令牌
    */
   token?: string;
-}
+};
 
 /**
  * Scalar源配置
  */
-export interface ScalarSource {
+export type ScalarSource = {
   /**
    * 应用标题
    */
@@ -36,14 +36,14 @@ export interface ScalarSource {
    * 是否默认
    */
   default: boolean;
-}
+};
 
 /**
  * Scalar认证配置
  */
-export interface ScalarAuthentication {
+export type ScalarAuthentication = {
   /**
    * 应用安全方案
    */
   securitySchemes: Record<string, { token: string }>;
-}
+};

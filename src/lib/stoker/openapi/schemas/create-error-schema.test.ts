@@ -238,6 +238,7 @@ describe("create-error-schema", () => {
     };
 
     const result = errorSchema.safeParse(testData);
+
     expect(result.success).toBe(true);
 
     if (result.success) {
@@ -249,6 +250,7 @@ describe("create-error-schema", () => {
         expect(issue).toHaveProperty("code");
         expect(issue).toHaveProperty("path");
         expect(Array.isArray(issue.path)).toBe(true);
+
         // message is optional
         if (issue.message !== undefined) {
           expect(typeof issue.message).toBe("string");
@@ -282,6 +284,7 @@ describe("create-error-schema", () => {
     };
 
     const result = errorSchema.safeParse(testData);
+
     expect(result.success).toBe(true);
 
     if (result.success) {
@@ -293,6 +296,7 @@ describe("create-error-schema", () => {
         expect(issue).toHaveProperty("code");
         expect(issue).toHaveProperty("path");
         expect(Array.isArray(issue.path)).toBe(true);
+
         // Validate that path can contain numbers (array indices)
         issue.path.forEach((pathSegment) => {
           expect(typeof pathSegment === "string" || typeof pathSegment === "number").toBe(true);

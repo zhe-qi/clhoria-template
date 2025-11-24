@@ -3,7 +3,7 @@ import type { Schema } from "hono";
 import type { PinoLogger } from "hono-pino";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-export interface AppBindings {
+export type AppBindings = {
   Variables: {
     /** 日志记录器 */
     logger: PinoLogger;
