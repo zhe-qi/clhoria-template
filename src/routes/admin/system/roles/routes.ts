@@ -6,7 +6,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErr } from "@/utils";
 
-import { idSystemRoles, insertSystemRoles, patchSystemRoles, selectSystemRoles } from "./schema";
+import { idSystemRoles, insertSystemRoles, patchSystemRoles, permissionItemSchema, selectSystemRoles } from "./schema";
 
 const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];
@@ -125,7 +125,7 @@ export const getPermissions = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.array(z.array(z.string()))),
+      RefineResultSchema(z.array(permissionItemSchema)),
       "获取权限成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),

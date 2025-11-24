@@ -494,5 +494,37 @@ describe("drizzle casbin adapter", () => {
 
       expect(noRole).toBe(false);
     });
+
+    it("应该获取用户的所有隐式权限(包括角色继承)", async () => {
+      // 清空并准备测试数据
+      await cleanupTestData();
+      const e = await newEnforcer(model, adapter);
+
+      // 添加一个角色的权限
+      await e.addPolicy("admin_role", "/api/admin", "GET", "allow");
+      await e.addPolicy("admin_role", "/api/admin", "POST", "allow");
+      await e.addPolicy("user_role", "/api/user", "GET", "allow");
+
+      // alice 直接有一个权限
+      await e.addPolicy("alice", "/api/profile", "GET", "allow");
+
+      // alice 拥有 user_role 角色
+      await e.addGroupingPolicy("alice", "user_role");
+
+      // 重新加载 enforcer
+      const testModel = newModel();
+      testModel.loadModelFromText(casbinModelText);
+      const enforcer = await newEnforcer(testModel, adapter);
+
+      // 获取隐式权限(包括通过角色继承得到的权限)
+      const implicitPermissions = await enforcer.getImplicitPermissionsForUser("alice");
+
+      // alice 应该有 2 个权限:
+      // 1. 自己直接的权限: ["alice", "/api/profile", "GET", "allow"]
+      // 2. 从 user_role 继承的权限: ["user_role", "/api/user", "GET", "allow"]
+      expect(implicitPermissions.length).toBeGreaterThanOrEqual(2);
+      expect(implicitPermissions).toContainEqual(["alice", "/api/profile", "GET", "allow"]);
+      expect(implicitPermissions).toContainEqual(["user_role", "/api/user", "GET", "allow"]);
+    });
   });
 });

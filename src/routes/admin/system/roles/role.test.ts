@@ -65,13 +65,26 @@ async function cleanupTestRoles(): Promise<void> {
         .delete(systemUserRoles)
         .where(or(...roleIds.map(id => eq(systemUserRoles.roleId, id))));
 
-      // 删除 Casbin 规则
+      // 删除 Casbin 权限规则 (ptype = "p")
       await tx
         .delete(casbinRule)
         .where(
           and(
             eq(casbinRule.ptype, "p"),
             or(...roleIds.map(id => eq(casbinRule.v0, id))),
+          ),
+        );
+
+      // 删除 Casbin 角色继承规则 (ptype = "g")
+      await tx
+        .delete(casbinRule)
+        .where(
+          and(
+            eq(casbinRule.ptype, "g"),
+            or(
+              ...roleIds.map(id => eq(casbinRule.v0, id)), // 作为子角色
+              ...roleIds.map(id => eq(casbinRule.v1, id)), // 作为父角色
+            ),
           ),
         );
 
@@ -210,6 +223,64 @@ describe("system role routes", () => {
           expect(items.some((role: { name: string }) =>
             role.name.includes("管理"),
           )).toBe(true);
+        }
+      }
+    });
+
+    it("should list roles with parent roles information", async () => {
+      // 创建带有父角色的角色用于测试
+      const parentRoleId = `${testRoleId}_list_parent`;
+      const childRoleId = `${testRoleId}_list_child`;
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRoleId,
+            name: "列表测试父角色",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: childRoleId,
+            name: "列表测试子角色",
+            parentRoleIds: [parentRoleId],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      const response = await client.system.roles.$get(
+        {
+          query: {
+            filters: JSON.stringify([
+              { field: "id", operator: "eq", value: childRoleId },
+            ]),
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.OK);
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+        const items = Array.isArray(json.data) ? json.data : [];
+
+        expect(items.length).toBeGreaterThan(0);
+
+        const childRole = items.find(r => r.id === childRoleId);
+
+        expect(childRole).toBeDefined();
+
+        if (childRole) {
+          expect(childRole.parentRoles).toBeInstanceOf(Array);
+          expect(childRole.parentRoles).toContain(parentRoleId);
         }
       }
     });
@@ -366,6 +437,86 @@ describe("system role routes", () => {
       }
     });
 
+    it("should create a new role with parent roles", async () => {
+      // 先创建父角色
+      const parentRole1Id = `${testRoleId}_parent1`;
+      const parentRole2Id = `${testRoleId}_parent2`;
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRole1Id,
+            name: "父角色1",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRole2Id,
+            name: "父角色2",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      // 创建带有父角色的新角色
+      const childRoleId = `${testRoleId}_child`;
+      const response = await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: childRoleId,
+            name: "子角色",
+            parentRoleIds: [parentRole1Id, parentRole2Id],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.CREATED);
+
+      if (response.status === HttpStatusCodes.CREATED) {
+        const json = await response.json();
+
+        expect(json.data.id).toBe(childRoleId);
+        expect(json.data.name).toBe("子角色");
+        expect(json.data.parentRoles).toBeInstanceOf(Array);
+
+        if (json.data.parentRoles) {
+          expect(json.data.parentRoles).toContain(parentRole1Id);
+          expect(json.data.parentRoles).toContain(parentRole2Id);
+          expect(json.data.parentRoles.length).toBe(2);
+        }
+      }
+    });
+
+    it("should return 400 for non-existent parent role", async () => {
+      const newRoleId = `${testRoleId}_invalid_parent`;
+      const response = await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: newRoleId,
+            parentRoleIds: ["non_existent_parent_role"],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.BAD_REQUEST);
+
+      if (response.status === HttpStatusCodes.BAD_REQUEST) {
+        const json = await response.json() as { message: string };
+
+        expect(json.message).toContain("上级角色不存在");
+      }
+    });
+
     it("should return 409 for duplicate role id", async () => {
       const duplicateRoleId = `${testRoleId}_duplicate`;
 
@@ -462,6 +613,51 @@ describe("system role routes", () => {
         expect(json.data.id).toBe(roleId);
         expect(json.data.id).toBe(roleId);
         expect(json.data.name).toBe(testRole.name);
+      }
+    });
+
+    it("should get role details with parent roles", async () => {
+      // 创建带有父角色的角色
+      const parentRoleId = `${testRoleId}_gettest_parent`;
+      const childRoleId = `${testRoleId}_gettest_child`;
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRoleId,
+            name: "获取测试父角色",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: childRoleId,
+            name: "获取测试子角色",
+            parentRoleIds: [parentRoleId],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      const response = await client.system.roles[":id"].$get(
+        { param: { id: childRoleId } },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.OK);
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+
+        expect(json.data.id).toBe(childRoleId);
+        expect(json.data.name).toBe("获取测试子角色");
+        expect(json.data.parentRoles).toBeInstanceOf(Array);
+        expect(json.data.parentRoles).toContain(parentRoleId);
       }
     });
   });
@@ -583,6 +779,173 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+    });
+
+    it("should update role with parent roles", async () => {
+      // 创建父角色
+      const parentRole1Id = `${testRoleId}_update_parent1`;
+      const parentRole2Id = `${testRoleId}_update_parent2`;
+      const updateRoleId = `${testRoleId}_update_hierarchy`;
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRole1Id,
+            name: "更新测试父角色1",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRole2Id,
+            name: "更新测试父角色2",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: updateRoleId,
+            name: "更新测试角色",
+            parentRoleIds: [parentRole1Id], // 初始只有一个父角色
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      // 更新父角色关系
+      const response = await client.system.roles[":id"].$patch(
+        {
+          param: { id: updateRoleId },
+          json: {
+            parentRoleIds: [parentRole1Id, parentRole2Id], // 更新为两个父角色
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.OK);
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+
+        expect(json.data.id).toBe(updateRoleId);
+        expect(json.data.parentRoles).toBeInstanceOf(Array);
+
+        if (json.data.parentRoles) {
+          expect(json.data.parentRoles).toContain(parentRole1Id);
+          expect(json.data.parentRoles).toContain(parentRole2Id);
+          expect(json.data.parentRoles.length).toBe(2);
+        }
+      }
+    });
+
+    it("should prevent circular inheritance when updating parent roles", async () => {
+      // 创建两个角色
+      const roleAId = `${testRoleId}_circular_a`;
+      const roleBId = `${testRoleId}_circular_b`;
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: roleAId,
+            name: "循环测试角色A",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: roleBId,
+            name: "循环测试角色B",
+            parentRoleIds: [roleAId], // B 继承自 A
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      // 尝试让 A 继承自 B，这会形成循环
+      const response = await client.system.roles[":id"].$patch(
+        {
+          param: { id: roleAId },
+          json: {
+            parentRoleIds: [roleBId],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.BAD_REQUEST);
+
+      if (response.status === HttpStatusCodes.BAD_REQUEST) {
+        const json = await response.json() as { message: string };
+
+        expect(json.message).toContain("循环继承");
+      }
+    });
+
+    it("should clear parent roles when empty array provided", async () => {
+      const clearRoleId = `${testRoleId}_clear_parents`;
+      const parentRoleId = `${testRoleId}_clear_parent`;
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRoleId,
+            name: "清除测试父角色",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: clearRoleId,
+            name: "清除测试角色",
+            parentRoleIds: [parentRoleId],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      // 清除所有父角色
+      const response = await client.system.roles[":id"].$patch(
+        {
+          param: { id: clearRoleId },
+          json: {
+            parentRoleIds: [],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.OK);
+
+      if (response.status === HttpStatusCodes.OK) {
+        const json = await response.json();
+
+        expect(json.data.id).toBe(clearRoleId);
+        expect(json.data.parentRoles).toBeInstanceOf(Array);
+
+        if (json.data.parentRoles) {
+          expect(json.data.parentRoles.length).toBe(0);
+        }
+      }
     });
   });
 
@@ -752,10 +1115,14 @@ describe("system role routes", () => {
             // Admin role should have permissions
             expect(permJson.data.length).toBeGreaterThan(0);
 
-            // Each permission should be an array (Casbin format may have more fields)
+            // Each permission should be an object with resource, action, inherited fields
             if (permJson.data.length > 0) {
-              expect(Array.isArray(permJson.data[0])).toBe(true);
-              expect(permJson.data[0].length).toBeGreaterThanOrEqual(2);
+              const firstPerm = permJson.data[0];
+
+              expect(firstPerm).toHaveProperty("resource");
+              expect(firstPerm).toHaveProperty("action");
+              expect(firstPerm).toHaveProperty("inherited");
+              expect(typeof firstPerm.inherited).toBe("boolean");
             }
           }
         }
@@ -903,9 +1270,9 @@ describe("system role routes", () => {
         const verifyJson = await verifyResponse.json();
 
         expect(verifyJson.data.length).toBe(2);
-        // Casbin 权限格式: [角色ID, 资源路径, 操作, 效果]
-        expect(verifyJson.data).toContainEqual([roleId, "/system/roles", "POST", "allow"]);
-        expect(verifyJson.data).toContainEqual([roleId, "/system/roles", "DELETE", "allow"]);
+        // 新格式: { resource, action, inherited }
+        expect(verifyJson.data).toContainEqual({ resource: "/system/roles", action: "POST", inherited: false });
+        expect(verifyJson.data).toContainEqual({ resource: "/system/roles", action: "DELETE", inherited: false });
       }
     });
 
@@ -970,6 +1337,171 @@ describe("system role routes", () => {
       );
 
       expect(response.status).toBe(HttpStatusCodes.NOT_FOUND);
+    });
+
+    it("should prevent removing inherited permissions", async () => {
+      // 创建父角色和子角色
+      const parentRoleId = `${testRoleId}_perm_parent`;
+      const childRoleId = `${testRoleId}_perm_child`;
+
+      // 创建父角色
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: parentRoleId,
+            name: "权限测试父角色",
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      // 为父角色添加权限
+      const addParentPermsResponse = await client.system.roles[":id"].permissions.$put(
+        {
+          param: { id: parentRoleId },
+          json: {
+            permissions: [
+              ["/system/users", "GET"],
+              ["/system/users", "POST"],
+            ],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(addParentPermsResponse.status).toBe(HttpStatusCodes.OK);
+
+      // 创建子角色（继承父角色）
+      await client.system.roles.$post(
+        {
+          json: {
+            ...testRole,
+            id: childRoleId,
+            name: "权限测试子角色",
+            parentRoleIds: [parentRoleId],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      // 为子角色添加直接权限（需要包含所有继承的权限）
+      const addChildPermsResponse = await client.system.roles[":id"].permissions.$put(
+        {
+          param: { id: childRoleId },
+          json: {
+            permissions: [
+              ["/system/roles", "GET"], // 子角色直接权限
+              ["/system/users", "GET"], // 继承自父角色（必须包含）
+              ["/system/users", "POST"], // 继承自父角色（必须包含）
+            ],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(addChildPermsResponse.status).toBe(HttpStatusCodes.OK);
+
+      // 验证子角色有3个权限（1个直接的 + 2个继承的）
+      const getPermsResponse = await client.system.roles[":id"].permissions.$get(
+        { param: { id: childRoleId } },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(getPermsResponse.status).toBe(HttpStatusCodes.OK);
+
+      if (getPermsResponse.status === HttpStatusCodes.OK) {
+        const json = await getPermsResponse.json();
+
+        expect(json.data.length).toBe(3);
+
+        // 验证权限类型
+        const directPerms = json.data.filter((p: any) => !p.inherited);
+        const inheritedPerms = json.data.filter((p: any) => p.inherited);
+
+        expect(directPerms.length).toBe(1); // 1个直接权限
+        expect(inheritedPerms.length).toBe(2); // 2个继承权限
+
+        // 验证直接权限
+        expect(directPerms).toContainEqual({ resource: "/system/roles", action: "GET", inherited: false });
+
+        // 验证继承权限
+        expect(inheritedPerms).toContainEqual({ resource: "/system/users", action: "GET", inherited: true });
+        expect(inheritedPerms).toContainEqual({ resource: "/system/users", action: "POST", inherited: true });
+      }
+
+      // 尝试取消继承的权限（只保留直接权限，不包括继承的权限）
+      // 这应该失败，因为不能取消继承的权限
+      const response = await client.system.roles[":id"].permissions.$put(
+        {
+          param: { id: childRoleId },
+          json: {
+            permissions: [
+              ["/system/roles", "GET"], // 只保留直接权限
+              // 没有包含继承的 ["/system/users", "GET"] 和 ["/system/users", "POST"]
+            ],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(response.status).toBe(HttpStatusCodes.BAD_REQUEST);
+
+      if (response.status === HttpStatusCodes.BAD_REQUEST) {
+        const json = await response.json() as { message: string };
+
+        expect(json.message).toContain("不能取消继承的权限");
+      }
+
+      // 验证正确的做法：包含所有继承的权限 + 直接权限
+      const correctResponse = await client.system.roles[":id"].permissions.$put(
+        {
+          param: { id: childRoleId },
+          json: {
+            permissions: [
+              ["/system/roles", "GET"], // 直接权限
+              ["/system/users", "GET"], // 继承的权限（必须包含）
+              ["/system/users", "POST"], // 继承的权限（必须包含）
+              ["/system/roles", "POST"], // 新增的直接权限
+            ],
+          },
+        },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      expect(correctResponse.status).toBe(HttpStatusCodes.OK);
+
+      if (correctResponse.status === HttpStatusCodes.OK) {
+        const json = await correctResponse.json();
+
+        // total 应该是直接权限的数量（不包括继承的）：2个
+        expect(json.data.total).toBe(2);
+      }
+
+      // 验证子角色现在有4个权限（2个直接的 + 2个继承的）
+      const verifyResponse = await client.system.roles[":id"].permissions.$get(
+        { param: { id: childRoleId } },
+        { headers: getAuthHeaders(adminToken) },
+      );
+
+      if (verifyResponse.status === HttpStatusCodes.OK) {
+        const verifyJson = await verifyResponse.json();
+
+        expect(verifyJson.data.length).toBe(4);
+
+        // 验证直接权限
+        const directPerms = verifyJson.data.filter((p: any) => !p.inherited);
+        const inheritedPerms = verifyJson.data.filter((p: any) => p.inherited);
+
+        expect(directPerms.length).toBe(2); // 2个直接权限
+        expect(inheritedPerms.length).toBe(2); // 2个继承权限
+
+        // 验证包含所有权限
+        expect(directPerms).toContainEqual({ resource: "/system/roles", action: "GET", inherited: false });
+        expect(directPerms).toContainEqual({ resource: "/system/roles", action: "POST", inherited: false });
+        expect(inheritedPerms).toContainEqual({ resource: "/system/users", action: "GET", inherited: true });
+        expect(inheritedPerms).toContainEqual({ resource: "/system/users", action: "POST", inherited: true });
+      }
     });
   });
 });
