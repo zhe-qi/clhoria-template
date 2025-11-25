@@ -97,7 +97,8 @@ export const getPermissions = createRoute({
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
       RefineResultSchema(z.object({
-        permissions: z.array(z.string()).meta({ description: "权限列表" }),
+        permissions: z.array(z.string()).meta({ description: "权限策略列表（p策略）" }),
+        groupings: z.array(z.string()).meta({ description: "角色继承关系列表（g策略）" }),
       })),
       "获取成功",
     ),

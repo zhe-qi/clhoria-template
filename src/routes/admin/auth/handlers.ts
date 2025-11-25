@@ -156,15 +156,16 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
 
   const casbinEnforcer = await enforcerPromise;
   const permissionsSet = new Set<string>();
+  const groupingsSet = new Set<string>();
 
   // 遍历角色，逐个处理权限（避免一次性创建大量中间数组）
   for (const role of roles) {
-  // 获取当前角色的所有权限（包括通过角色继承获得的权限）
+    // 获取当前角色的所有权限（包括通过角色继承获得的权限）
     const perms = await casbinEnforcer.getImplicitPermissionsForUser(role);
 
     // 处理当前角色的每一项权限
     for (const perm of perms) {
-    // 过滤空数组
+      // 过滤空数组
       if (!perm || perm.length === 0)
         continue;
 
@@ -181,10 +182,27 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
     }
   }
 
+  // 获取所有角色继承关系（g 策略）
+  const allGroupings = await casbinEnforcer.getGroupingPolicy();
+  for (const grouping of allGroupings) {
+    // 过滤空数组和空字符串
+    if (!grouping || grouping.length === 0)
+      continue;
+
+    const filteredGrouping = grouping.filter(item => item && item.trim() !== "");
+    if (filteredGrouping.length === 0)
+      continue;
+
+    // 转换为Casbin g策略字符串
+    const groupingStr = `g, ${filteredGrouping.join(", ")}`;
+    groupingsSet.add(groupingStr);
+  }
+
   // 转换为最终数组
   const permissions = Array.from(permissionsSet);
+  const groupings = Array.from(groupingsSet);
 
-  return c.json(Resp.ok({ permissions }), HttpStatusCodes.OK);
+  return c.json(Resp.ok({ permissions, groupings }), HttpStatusCodes.OK);
 };
 
 /** 生成验证码挑战 */

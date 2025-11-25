@@ -125,7 +125,13 @@ export const getPermissions = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.array(permissionItemSchema)),
+      RefineResultSchema(z.object({
+        permissions: z.array(permissionItemSchema).meta({ description: "权限列表" }),
+        groupings: z.array(z.object({
+          child: z.string().meta({ description: "子角色ID" }),
+          parent: z.string().meta({ description: "父角色ID" }),
+        })).meta({ description: "角色继承关系列表" }),
+      })),
       "获取权限成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
@@ -148,6 +154,7 @@ export const savePermissions = createRoute({
             z.string().min(1).meta({ description: "操作" }),
           ]),
         ).meta({ description: "权限列表（全量）" }),
+        parentRoleIds: z.array(z.string().min(1).regex(/^[a-z0-9_]+$/)).optional().meta({ description: "上级角色ID列表（可选）" }),
       }),
       "保存权限参数",
     ),

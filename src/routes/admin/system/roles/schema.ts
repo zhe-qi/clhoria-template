@@ -35,5 +35,4 @@ export const idSystemRoles = z.object({
 export const permissionItemSchema = z.object({
   resource: z.string().min(1).meta({ description: "资源路径" }),
   action: z.string().min(1).meta({ description: "操作" }),
-  inherited: z.boolean().meta({ description: "是否为继承权限" }),
 });

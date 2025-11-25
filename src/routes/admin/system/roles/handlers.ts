@@ -195,33 +195,23 @@ export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = asy
   try {
     const enforcer = await enforcerPromise;
 
-    // 获取直接权限（只属于该角色的）
-    const directPermissions = await enforcer.getPermissionsForUser(id.toString());
-
     // 获取所有隐式权限（包括继承的）
     const allImplicitPermissions = await enforcer.getImplicitPermissionsForUser(id.toString());
 
-    // 标记直接权限
-    const directPerms = directPermissions.map(p => ({
+    // 转换为简单的权限对象数组
+    const permissions = allImplicitPermissions.map(p => ({
       resource: p[1],
       action: p[2],
-      inherited: false,
     }));
 
-    // 过滤出继承的权限（在 allImplicitPermissions 中但不在 directPermissions 中）
-    const directPermSet = new Set(directPermissions.map(p => `${p[1]}|${p[2]}`));
-    const inheritedPerms = allImplicitPermissions
-      .filter(p => !directPermSet.has(`${p[1]}|${p[2]}`))
-      .map(p => ({
-        resource: p[1],
-        action: p[2],
-        inherited: true,
-      }));
+    // 获取所有角色继承关系（g 策略）
+    const allGroupings = await enforcer.getGroupingPolicy();
+    const groupings = allGroupings.map(g => ({
+      child: g[0],
+      parent: g[1],
+    }));
 
-    // 合并所有权限
-    const allPerms = [...directPerms, ...inheritedPerms];
-
-    return c.json(Resp.ok(allPerms), HttpStatusCodes.OK);
+    return c.json(Resp.ok({ permissions, groupings }), HttpStatusCodes.OK);
   }
   catch {
     return c.json(Resp.fail("获取角色权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
@@ -230,7 +220,7 @@ export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = asy
 
 export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = async (c) => {
   const { id } = c.req.valid("param");
-  const { permissions } = c.req.valid("json");
+  const { permissions, parentRoleIds } = c.req.valid("json");
 
   try {
     // 检查角色是否存在
@@ -242,56 +232,60 @@ export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = a
 
     const enforcer = await enforcerPromise;
 
+    // 1. 处理角色继承关系（g 策略）
+    if (parentRoleIds !== undefined) {
+      // 检查循环继承
+      const hasCircular = await checkCircularInheritance(id, parentRoleIds);
+      if (hasCircular) {
+        return c.json(
+          Resp.fail("不能设置循环继承的角色关系"),
+          HttpStatusCodes.BAD_REQUEST,
+        );
+      }
+
+      // 保存上级角色
+      await setRoleParents(id, parentRoleIds);
+    }
+
+    // 2. 处理权限（p 策略）
     // 获取角色的直接权限（不包括继承的）
     const directPermissions = await enforcer.getPermissionsForUser(id.toString());
 
     // 获取所有隐式权限（包括继承的）
     const allImplicitPermissions = await enforcer.getImplicitPermissionsForUser(id.toString());
-
-    // 计算继承的权限：在 allImplicitPermissions 中但不在 directPermissions 中
-    const directPermissionSet = new Set(directPermissions.map(p => JSON.stringify(p)));
-    const inheritedPermissions = allImplicitPermissions.filter(p => !directPermissionSet.has(JSON.stringify(p)));
-
-    // 将提交的权限转换为 Set，用于快速查找（格式：resource|action）
-    const submittedPermissionSet = new Set(
-      permissions.map(([resource, action]) => `${resource}|${action}`),
+    const directPermSet = new Set(
+      directPermissions.map(p => `${p[1]}:${p[2]}`),
+    );
+    const inheritedPermSet = new Set(
+      allImplicitPermissions
+        .filter(p => !directPermSet.has(`${p[1]}:${p[2]}`))
+        .map(p => `${p[1]}:${p[2]}`),
     );
 
-    // 检查是否有继承的权限被取消了
-    // 继承的权限格式：[parentRoleId, resource, action, "allow"]
-    // 我们只需要检查 resource 和 action 是否在提交的权限中
-    const missingInheritedPermissions = inheritedPermissions.filter(
-      p => !submittedPermissionSet.has(`${p[1]}|${p[2]}`),
-    );
+    // 检查是否尝试添加已经继承的权限
+    const duplicateInheritedPerms: string[] = [];
+    for (const [resource, action] of permissions) {
+      const key = `${resource}:${action}`;
+      if (inheritedPermSet.has(key)) {
+        duplicateInheritedPerms.push(key);
+      }
+    }
 
-    if (missingInheritedPermissions.length > 0) {
-      const missingInfo = missingInheritedPermissions
-        .map(p => `${p[1]} - ${p[2]} (来自角色: ${p[0]})`)
-        .join(", ");
+    if (duplicateInheritedPerms.length > 0) {
       return c.json(
-        Resp.fail(`不能取消继承的权限: ${missingInfo}`),
+        Resp.fail(`不能重复添加已继承的权限: ${duplicateInheritedPerms.join(", ")}`),
         HttpStatusCodes.BAD_REQUEST,
       );
     }
 
-    // 将继承的权限转换为 Set（格式：resource|action）
-    const inheritedPermissionSet = new Set(
-      inheritedPermissions.map(p => `${p[1]}|${p[2]}`),
-    );
-
-    // 过滤出真正的直接权限：排除继承的权限
-    const newDirectPermissions = permissions.filter(
-      ([resource, action]) => !inheritedPermissionSet.has(`${resource}|${action}`),
-    );
-
-    // 构建旧权限和新权限的数组格式
+    // 构建新权限的数组格式（所有权限都是直接权限）
     const oldPolicies = directPermissions;
-    const newPolicies = newDirectPermissions.map(([resource, action]) => [id.toString(), resource, action, "allow"]);
+    const newPolicies = permissions.map(([resource, action]) => [id.toString(), resource, action, "allow"]);
 
     let removedCount = 0;
     let addedCount = 0;
 
-    // 1. 删除所有现有直接权限（只有当存在权限时才删除）
+    // 删除所有现有直接权限
     if (oldPolicies.length > 0) {
       const removeSuccess = await enforcer.removePolicies(oldPolicies);
       if (!removeSuccess) {
@@ -300,7 +294,7 @@ export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = a
       removedCount = oldPolicies.length;
     }
 
-    // 2. 添加新权限（只有当有新权限时才添加）
+    // 添加新权限
     if (newPolicies.length > 0) {
       const addSuccess = await enforcer.addPolicies(newPolicies);
       if (!addSuccess) {
@@ -313,7 +307,7 @@ export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = a
       addedCount = newPolicies.length;
     }
 
-    return c.json(Resp.ok({ added: addedCount, removed: removedCount, total: newDirectPermissions.length }), HttpStatusCodes.OK);
+    return c.json(Resp.ok({ added: addedCount, removed: removedCount, total: newPolicies.length }), HttpStatusCodes.OK);
   }
   catch {
     return c.json(Resp.fail("保存权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
