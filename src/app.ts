@@ -50,7 +50,7 @@ adminApp.route("/", authModule);
 
 adminApp.use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
 adminApp.use("/*", authorize());
-adminApp.use("/*", operationLog({ moduleName: "后台管理", description: "后台管理操作" }));
+adminApp.use("/*", operationLog({ moduleName: "后台管理", description: "后台管理操作日志" }));
 
 otherAdminRoutes.forEach((route) => {
   adminApp.route("/", route);

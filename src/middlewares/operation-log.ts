@@ -1,8 +1,10 @@
 import type { Context, MiddlewareHandler } from "hono";
 import type { JWTPayload } from "hono/utils/jwt/types";
 
-import { differenceInMilliseconds, formatISO } from "date-fns";
+import { differenceInMilliseconds, format } from "date-fns";
 
+import env from "@/env";
+import { LogType } from "@/lib/enums";
 import logger from "@/lib/logger";
 
 /**
@@ -18,11 +20,11 @@ export function operationLog(options: { moduleName: string; description: string 
     const userAgent = c.req.header("user-agent") || "";
 
     // 获取请求体和参数
-    let [body, params] = [null, null] as [any, any];
+    let [body, params]: [unknown | null, ParamsType | null] = [null, null];
 
     try {
       if (method !== "GET" && method !== "DELETE") {
-        body = await c.req.json().catch(() => null);
+        body = await c.req.json<unknown>().catch(() => null);
       }
       params = c.req.query();
     }
@@ -35,7 +37,7 @@ export function operationLog(options: { moduleName: string; description: string 
 
     const requestId = c.get("requestId");
     const endTime = new Date();
-    const duration = differenceInMilliseconds(endTime, startTime);
+    const durationMs = differenceInMilliseconds(endTime, startTime);
 
     // 获取用户信息
     const payload: JWTPayload | undefined = c.get("jwtPayload");
@@ -47,7 +49,7 @@ export function operationLog(options: { moduleName: string; description: string 
     const { sub: userId, username } = payload;
 
     // 获取响应信息
-    let response: any = null;
+    let response: unknown = null;
     try {
       // 尝试获取响应体（如果是 JSON）
       const resClone = c.res.clone();
@@ -57,10 +59,9 @@ export function operationLog(options: { moduleName: string; description: string 
       logger.warn({ error }, "响应体解析失败");
     }
 
-    // 异步写入，不阻塞响应
-    // @ts-expect-error - 留给用户选择日志上传方式
-    // eslint-disable-next-line unused-imports/no-unused-vars
+    // 异步写入
     const logEntry = {
+      type: LogType.OPERATION,
       requestId,
       moduleName: options.moduleName,
       description: options.description,
@@ -73,11 +74,14 @@ export function operationLog(options: { moduleName: string; description: string 
       body,
       params,
       response,
-      startTime: formatISO(startTime),
-      endTime: formatISO(endTime),
-      duration,
+      startTime: format(startTime, "yyyy-MM-dd HH:mm:ss"),
+      endTime: format(endTime, "yyyy-MM-dd HH:mm:ss"),
+      durationMs, // 单位：毫秒
     };
 
-    // 你可以选择你自己的日志写入方式 比如 阿里云 sls
+    // 你可以选择你自己的日志写入方式 比如 阿里云 sls，并移除这个控制台输出日志
+    if (env.NODE_ENV === "production") {
+      logger.info(logEntry, "操作日志");
+    }
   };
 }

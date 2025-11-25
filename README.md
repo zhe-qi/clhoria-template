@@ -122,6 +122,27 @@ src/db/schema/
 └── index.ts                # 统一导出
 ```
 
+**PostgreSQL 版本说明**:
+
+- **PostgreSQL 18 及以上**: 无需任何修改,直接使用即可。项目默认使用 PostgreSQL 18 的 `uuidv7()` 函数。
+- **PostgreSQL 18 以下**: 需要手动修改 `src/db/schema/_shard/base-columns.ts` 文件:
+  1. 安装 `uuid` 库:
+     ```bash
+     pnpm add uuid
+     pnpm add -D @types/uuid
+     ```
+  2. 修改 `base-columns.ts` 文件,在文件顶部添加导入:
+     ```typescript
+     import { uuidV7 } from "uuid";
+     ```
+  3. 修改 `id` 字段定义:
+     ```typescript
+     // 将
+     uuid().primaryKey().notNull().default(sql`uuidv7()`);
+     // 改为
+     uuid().primaryKey().notNull().$defaultFn(() => uuidV7());
+     ```
+
 **架构原则**:
 
 - **按需抽离**: 仅当业务逻辑在多个路由间复用时才创建服务层,避免过度抽象

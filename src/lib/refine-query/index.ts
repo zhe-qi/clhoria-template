@@ -1,3 +1,8 @@
+/**
+ * Refine List Query
+ * 不建议用于没经过认证的接口和c端接口
+ */
+
 // 过滤器功能
 export {
   convertFiltersToSQL,

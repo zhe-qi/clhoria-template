@@ -10,6 +10,18 @@ export const Status = {
 /** 状态类型 */
 export type StatusType = (typeof Status)[keyof typeof Status];
 
+/** 日志类型枚举 */
+export const LogType = {
+  /** 操作日志 */
+  OPERATION: "OPERATION",
+
+  /** 登录日志 */
+  LOGIN: "LOGIN",
+} as const;
+
+/** 日志类型类型 */
+export type LogTypeType = (typeof LogType)[keyof typeof LogType];
+
 /** 性别枚举 */
 export const Gender = {
   /** 未知 */

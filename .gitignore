@@ -4,6 +4,7 @@
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
+!.vscode/extensions.json
 !.vscode/settings.json
 .idea/workspace.xml
 .idea/usage.statistics.xml

@@ -8,7 +8,9 @@ let options: PrettyStream | undefined;
 
 if (env.NODE_ENV === "development") {
   const pretty = await import("pino-pretty");
-  options = pretty.default();
+  options = pretty.default({
+    colorize: true,
+  });
 }
 
 const logger = pino({ level: env.LOG_LEVEL || "info" }, options);
