@@ -12,7 +12,7 @@ pnpm generate/push/migrate/studio/seed  # Database
 
 ## Stack
 
-Hono + Node.js + PostgreSQL(Drizzle snake_case) + Redis(ioredis) + JWT(admin/client) + Casbin RBAC + Zod(Chinese errors) + OpenAPI 3.1.0(Scalar) + Vitest + tsdown
+Hono + Node.js 25 + PostgreSQL(Drizzle snake_case) + Redis(ioredis) + JWT(admin/client) + Casbin RBAC + Zod(Chinese errors) + OpenAPI 3.1.0(Scalar) + Vitest + tsdown
 
 ## Architecture
 

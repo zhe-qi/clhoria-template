@@ -1,7 +1,7 @@
 services:
   # PostgreSQL 18 数据库
   postgres:
-    image: postgres:18
+    image: postgres:latest
     container_name: hono-postgres
     environment:
       POSTGRES_DB: ${DB_NAME:-postgres}
@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - app_network
     healthcheck:
@@ -23,7 +23,7 @@ services:
 
   # Redis 缓存
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     container_name: hono-redis
     ports:
       - "${REDIS_PORT:-6379}:6379"

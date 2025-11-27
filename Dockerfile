@@ -1,11 +1,11 @@
 # syntax=docker.io/docker/dockerfile:1
 
-FROM node:24-alpine AS base
+FROM node:25-alpine AS base
 # 配置 pnpm 环境
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-# 启用 corepack 以使用 pnpm
-RUN corepack enable
+
+RUN npm install -g pnpm
 
 # 生产依赖安装阶段
 FROM base AS deps
@@ -62,7 +62,7 @@ COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --chown=hono:nodejs package.json pnpm-lock.yaml ./
 
 # 从构建阶段复制构建产物
-COPY --from=builder --chown=hono:nodejs /app/dist/index.js ./index.js
+COPY --from=builder --chown=hono:nodejs /app/dist/index.mjs ./index.mjs
 
 # 设置默认端口
 ARG PORT=9999
@@ -70,4 +70,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # 生产阶段入口点
-CMD ["node", "index.js"]
+CMD ["node", "index.mjs"]
