@@ -6,19 +6,9 @@ import { createHash } from "node:crypto";
 import logger from "@/lib/logger";
 import redisClient from "@/lib/redis";
 
-import type { IdempotencyRecord } from "../config";
+import type { IdempotencyRecord } from "./config";
 
-import { DEFAULT_IDEMPOTENCY_TTL, REDIS_KEY_PREFIX } from "../config";
-
-/**
- * Job 数据结构（用于缓存返回）
- */
-export type CachedJobData = {
-  jobId: string;
-  taskName: string;
-  addedAt: string;
-  cached: true;
-};
+import { DEFAULT_IDEMPOTENCY_TTL, REDIS_KEY_PREFIX } from "./config";
 
 /**
  * 幂等性辅助工具
@@ -159,3 +149,13 @@ export class IdempotencyHelper {
     return `${taskName}:${hash}`;
   }
 }
+
+/**
+ * Job 数据结构（用于缓存返回）
+ */
+export type CachedJobData = {
+  jobId: string;
+  taskName: string;
+  addedAt: string;
+  cached: true;
+};

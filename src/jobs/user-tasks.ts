@@ -1,10 +1,8 @@
-import type { ProcessorRegistration, ScheduledTaskConfig } from "./config";
+import type { ProcessorRegistration, ScheduledTaskConfig } from "./lib/config";
 
 // Uncomment the following lines to see the examples of scheduled tasks and asynchronous tasks
 // 解开相关注释可以查看定时任务和异步任务的示例
 // import { demoScheduledTasks, demoTaskProcessors } from "./examples/demo-tasks";
-
-// ============ 任务处理器注册表 ============
 
 /**
  * 将自定义任务处理器添加到该数组中
@@ -24,8 +22,6 @@ export const taskProcessors: ProcessorRegistration[] = [
   // ...demoTaskProcessors,
   ...customTaskProcessors,
 ];
-
-// ============ 定时任务配置 ============
 
 /**
  * 将自定义定时任务添加到该数组中

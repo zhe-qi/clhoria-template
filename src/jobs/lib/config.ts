@@ -2,7 +2,46 @@ import type { JobsOptions, Processor } from "bullmq";
 
 import env from "@/env";
 
-// ============ 类型定义 ============
+export const DEFAULT_QUEUE_NAME = "default";
+export const DEFAULT_WORKER_CONCURRENCY = 5;
+export const DEFAULT_MAX_STALLED_COUNT = 1;
+export const DEFAULT_STALLED_INTERVAL = 30000; // 30秒
+
+export const DEFAULT_JOB_ATTEMPTS = 3;
+export const DEFAULT_BACKOFF_TYPE = "exponential";
+export const DEFAULT_BACKOFF_DELAY = 5000; // 5秒
+
+export const DEFAULT_LOCK_TTL = 60; // 60秒
+export const LOCK_REFRESH_INTERVAL = 10000; // 10秒
+
+export const DEFAULT_IDEMPOTENCY_TTL = 7 * 24 * 3600; // 7天
+
+export const REDIS_KEY_PREFIX = {
+  LOCK: "job:lock:",
+  IDEMPOTENCY: "job:idem:",
+} as const;
+
+/**
+ * 任务系统配置
+ * 可以根据环境变量或其他条件动态调整
+ */
+export const jobSystemConfig: JobSystemConfig = {
+  queueName: DEFAULT_QUEUE_NAME,
+  workerConfig: {
+    concurrency: env.NODE_ENV === "production" ? 10 : DEFAULT_WORKER_CONCURRENCY,
+    maxStalledCount: DEFAULT_MAX_STALLED_COUNT,
+    stalledInterval: DEFAULT_STALLED_INTERVAL,
+  },
+  defaultJobOptions: {
+    attempts: DEFAULT_JOB_ATTEMPTS,
+    backoff: {
+      type: DEFAULT_BACKOFF_TYPE,
+      delay: DEFAULT_BACKOFF_DELAY,
+    },
+    removeOnComplete: { age: 3600, count: 100 },
+    removeOnFail: { age: 24 * 3600, count: 500 },
+  },
+};
 
 /**
  * 任务数据基础接口
@@ -67,53 +106,6 @@ export type IdempotencyRecord = {
   createdAt: string;
   expiresAt: string;
 };
-
-// ============ 常量定义 ============
-
-export const DEFAULT_QUEUE_NAME = "default";
-export const DEFAULT_WORKER_CONCURRENCY = 5;
-export const DEFAULT_MAX_STALLED_COUNT = 1;
-export const DEFAULT_STALLED_INTERVAL = 30000; // 30秒
-
-export const DEFAULT_JOB_ATTEMPTS = 3;
-export const DEFAULT_BACKOFF_TYPE = "exponential";
-export const DEFAULT_BACKOFF_DELAY = 5000; // 5秒
-
-export const DEFAULT_LOCK_TTL = 60; // 60秒
-export const LOCK_REFRESH_INTERVAL = 10000; // 10秒
-
-export const DEFAULT_IDEMPOTENCY_TTL = 7 * 24 * 3600; // 7天
-
-export const REDIS_KEY_PREFIX = {
-  LOCK: "job:lock:",
-  IDEMPOTENCY: "job:idem:",
-} as const;
-
-// ============ 默认配置 ============
-
-/**
- * 任务系统配置
- * 可以根据环境变量或其他条件动态调整
- */
-export const jobSystemConfig: JobSystemConfig = {
-  queueName: DEFAULT_QUEUE_NAME,
-  workerConfig: {
-    concurrency: env.NODE_ENV === "production" ? 10 : DEFAULT_WORKER_CONCURRENCY,
-    maxStalledCount: DEFAULT_MAX_STALLED_COUNT,
-    stalledInterval: DEFAULT_STALLED_INTERVAL,
-  },
-  defaultJobOptions: {
-    attempts: DEFAULT_JOB_ATTEMPTS,
-    backoff: {
-      type: DEFAULT_BACKOFF_TYPE,
-      delay: DEFAULT_BACKOFF_DELAY,
-    },
-    removeOnComplete: { age: 3600, count: 100 },
-    removeOnFail: { age: 24 * 3600, count: 500 },
-  },
-};
-
-// ============ 配置合并函数 ============
 
 /**
  * 合并任务选项

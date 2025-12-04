@@ -5,16 +5,13 @@ import { QueueEvents as BullQueueEvents, Worker as BullWorker } from "bullmq";
 import logger from "@/lib/logger";
 import { getBullMQConnection } from "@/lib/redis";
 
-import type { WorkerConfig } from "../config";
+import type { WorkerConfig } from "./config";
 
-import { DEFAULT_QUEUE_NAME, jobSystemConfig } from "../config";
+import { DEFAULT_QUEUE_NAME, jobSystemConfig } from "./config";
 
-// ============ 模块级变量 ============
 const workerInstances = new Map<string, Worker>();
 const processorRegistry = new Map<string, Processor>();
 const queueEventsInstances = new Map<string, QueueEvents>();
-
-// ============ Worker 管理函数 ============
 
 /**
  * 注册任务处理器
@@ -48,65 +45,61 @@ export function createWorker(
   const workerConfig = config ? { ...jobSystemConfig.workerConfig!, ...config } : jobSystemConfig.workerConfig!;
 
   // 创建 Worker
-  const worker = new BullWorker(
-    queueName,
-    async (job: Job) => {
-      const startTime = Date.now();
-      const processor = processorRegistry.get(job.name);
+  const worker = new BullWorker(queueName, async (job: Job) => {
+    const startTime = Date.now();
+    const processor = processorRegistry.get(job.name);
 
-      if (!processor) {
-        const error = `未找到任务处理器: ${job.name}`;
-        logger.error(
-          {
-            taskName: job.name,
-            jobId: job.id,
-            availableProcessors: Array.from(processorRegistry.keys()),
-          },
-          "[Worker]: 处理器未注册",
-        );
-        throw new Error(error);
-      }
+    if (!processor) {
+      const error = `未找到任务处理器: ${job.name}`;
+      logger.error(
+        {
+          taskName: job.name,
+          jobId: job.id,
+          availableProcessors: Array.from(processorRegistry.keys()),
+        },
+        "[Worker]: 处理器未注册",
+      );
+      throw new Error(error);
+    }
 
-      try {
-        logger.info(
-          {
-            taskName: job.name,
-            jobId: job.id,
-            attemptsMade: job.attemptsMade,
-            data: job.data,
-          },
-          "[Worker]: 开始处理任务",
-        );
+    try {
+      logger.info(
+        {
+          taskName: job.name,
+          jobId: job.id,
+          attemptsMade: job.attemptsMade,
+          data: job.data,
+        },
+        "[Worker]: 开始处理任务",
+      );
 
-        const result = await processor(job, job.token);
+      const result = await processor(job, job.token);
 
-        return result;
-      }
-      catch (error) {
-        const duration = Date.now() - startTime;
-        logger.error(
-          {
-            taskName: job.name,
-            jobId: job.id,
-            duration,
-            attemptsMade: job.attemptsMade,
-            attemptsTotal: job.opts.attempts || 3,
-            data: job.data,
-            error: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined,
-          },
-          "[Worker]: 任务处理失败",
-        );
-        throw error;
-      }
-    },
-    {
-      connection: getBullMQConnection(),
-      concurrency: workerConfig.concurrency,
-      maxStalledCount: workerConfig.maxStalledCount,
-      stalledInterval: workerConfig.stalledInterval,
-    },
-  );
+      return result;
+    }
+    catch (error) {
+      const duration = Date.now() - startTime;
+      logger.error(
+        {
+          taskName: job.name,
+          jobId: job.id,
+          duration,
+          attemptsMade: job.attemptsMade,
+          attemptsTotal: job.opts.attempts || 3,
+          data: job.data,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+        "[Worker]: 任务处理失败",
+      );
+      throw error;
+    }
+  }, {
+    connection: getBullMQConnection(),
+    concurrency: workerConfig.concurrency,
+    maxStalledCount: workerConfig.maxStalledCount,
+    stalledInterval: workerConfig.stalledInterval,
+  });
 
   // 监听 Worker 事件
   attachWorkerListeners(worker, queueName);
@@ -288,7 +281,7 @@ export async function pauseWorker(
 export async function resumeWorker(queueName: string = DEFAULT_QUEUE_NAME): Promise<void> {
   const worker = workerInstances.get(queueName);
   if (worker) {
-    await worker.resume();
+    void worker.resume();
     logger.info({ queueName }, "[Worker]: Worker 已恢复");
   }
 }

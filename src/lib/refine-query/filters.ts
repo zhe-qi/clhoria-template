@@ -219,10 +219,7 @@ export class FiltersConverter {
 }
 
 /** 便捷函数：转换过滤器 */
-export function convertFiltersToSQL(
-  filters: CrudFilters | undefined,
-  table: PgTable,
-): SQL<unknown> | undefined {
+export function convertFiltersToSQL(filters: CrudFilters | undefined, table: PgTable): SQL<unknown> | undefined {
   if (!filters)
     return undefined;
 

@@ -40,7 +40,7 @@ clientRoutes.forEach((route) => {
 // #endregion
 
 // #region 后管路由
-// ps: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
+// tip: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
 
 const { auth: authModule, ...otherAdminModules } = allAdminExports;
 const otherAdminRoutes = Object.values(otherAdminModules);

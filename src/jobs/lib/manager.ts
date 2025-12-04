@@ -4,14 +4,11 @@ import { closeBullMQConnection } from "@/lib/redis";
 import type { ProcessorRegistration, ScheduledTaskConfig } from "./config";
 
 import { DEFAULT_QUEUE_NAME, jobSystemConfig } from "./config";
-import { closeAllQueues, getQueueStatus, pauseQueue, resumeQueue } from "./lib/queue";
-import { getAllScheduledTasksStatus, registerScheduledTasks, stopAllSchedulers } from "./lib/scheduler";
-import { createWorker, getAllWorkerStatus, registerProcessor, shutdownWorkers } from "./lib/worker";
+import { closeAllQueues, getQueueStatus, pauseQueue, resumeQueue } from "./queue";
+import { getAllScheduledTasksStatus, registerScheduledTasks, stopAllSchedulers } from "./scheduler";
+import { createWorker, getAllWorkerStatus, registerProcessor, shutdownWorkers } from "./worker";
 
-// ============ 系统状态 ============
 let isInitialized = false;
-
-// ============ 生命周期管理 ============
 
 /**
  * 启动任务系统

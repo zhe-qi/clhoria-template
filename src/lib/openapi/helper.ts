@@ -17,7 +17,7 @@ export function createApps(): Record<AppNameType, AppOpenAPI> {
   }, {} as Record<AppNameType, AppOpenAPI>);
 }
 
-export function registerSecurityScheme(router: AppOpenAPI, config: AppConfig): string {
+export function registerSecurityScheme(router: AppOpenAPI, config: AppConfig) {
   const securityName = `${config.name}Bearer`;
   router.openAPIRegistry.registerComponent("securitySchemes", securityName, {
     type: "http",
@@ -26,7 +26,7 @@ export function registerSecurityScheme(router: AppOpenAPI, config: AppConfig): s
   return securityName;
 }
 
-export function configureAppDocumentation(router: AppOpenAPI, config: AppConfig): void {
+export function configureAppDocumentation(router: AppOpenAPI, config: AppConfig) {
   const docConfig = {
     openapi: OPENAPI_VERSION,
     info: { version: packageJSON.version, title: config.title },
@@ -64,14 +64,14 @@ export function createScalarAuthentication(): ScalarAuthentication {
   };
 }
 
-export function configureSubApplications(apps: Record<AppNameType, AppOpenAPI>): void {
+export function configureSubApplications(apps: Record<AppNameType, AppOpenAPI>) {
   APP_CONFIG.forEach((config) => {
     const router = apps[`${config.name}App` as AppNameType];
     configureAppDocumentation(router, config);
   });
 }
 
-export function configureMainDocumentation(app: AppOpenAPI): void {
+export function configureMainDocumentation(app: AppOpenAPI) {
   app.get("/", Scalar({
     ...SCALAR_CONFIG,
     sources: createScalarSources(),

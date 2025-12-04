@@ -6,7 +6,7 @@ import type {
   ProcessorRegistration,
   ScheduledTaskConfig,
   TaskData,
-} from "../config";
+} from "../lib/config";
 
 import { addJob } from "../lib/queue";
 

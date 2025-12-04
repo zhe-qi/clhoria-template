@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import logger from "@/lib/logger";
 import redisClient from "@/lib/redis";
 
-import { DEFAULT_LOCK_TTL, LOCK_REFRESH_INTERVAL, REDIS_KEY_PREFIX } from "../config";
+import { DEFAULT_LOCK_TTL, LOCK_REFRESH_INTERVAL, REDIS_KEY_PREFIX } from "./config";
 
 /**
  * 分布式锁实现

@@ -5,29 +5,19 @@ import { randomUUID } from "node:crypto";
 
 import logger from "@/lib/logger";
 
-import type { ScheduledTaskConfig, TaskData } from "../config";
+import type { ScheduledTaskConfig, TaskData } from "./config";
 
-import { DEFAULT_LOCK_TTL, DEFAULT_QUEUE_NAME } from "../config";
+import { DEFAULT_LOCK_TTL, DEFAULT_QUEUE_NAME } from "./config";
 import { addJob } from "./queue";
 import { withLock } from "./redis-lock";
 
-// ============ 模块级变量 ============
 const cronJobInstances = new Map<string, Cron>();
-
-// ============ 定时任务调度函数 ============
 
 /**
  * 注册定时任务
  */
 export function registerScheduledTask(config: ScheduledTaskConfig): Cron {
-  const {
-    name,
-    pattern,
-    data = {},
-    options = {},
-    useLock = true,
-    lockTTL = DEFAULT_LOCK_TTL,
-  } = config;
+  const { name, pattern, data = {}, options = {}, useLock = true, lockTTL = DEFAULT_LOCK_TTL } = config;
 
   // 如果任务已存在，先停止（同步操作，Croner 的 stop 是同步的）
   if (cronJobInstances.has(name)) {
@@ -39,15 +29,10 @@ export function registerScheduledTask(config: ScheduledTaskConfig): Cron {
     // 定义执行函数
     const executeTask = async () => {
       // 添加任务到队列
-      const job = await addJob(
-        name,
-        data as TaskData,
-        {
-          ...options,
-          jobId: `${name}_${Date.now()}_${randomUUID().slice(0, 8)}`,
-        },
-        DEFAULT_QUEUE_NAME,
-      );
+      const job = await addJob(name, data as TaskData, {
+        ...options,
+        jobId: `${name}_${Date.now()}_${randomUUID().slice(0, 8)}`,
+      }, DEFAULT_QUEUE_NAME);
 
       return job;
     };

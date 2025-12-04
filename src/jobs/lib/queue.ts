@@ -5,16 +5,13 @@ import { Queue as BullQueue } from "bullmq";
 import logger from "@/lib/logger";
 import { getBullMQConnection } from "@/lib/redis";
 
-import type { TaskData, TaskOptions } from "../config";
+import type { TaskData, TaskOptions } from "./config";
 import type { CachedJobData } from "./idempotency";
 
-import { DEFAULT_QUEUE_NAME, mergeJobOptions } from "../config";
+import { DEFAULT_QUEUE_NAME, mergeJobOptions } from "./config";
 import { IdempotencyHelper } from "./idempotency";
 
-// ============ 模块级变量 ============
 const queueInstances = new Map<string, Queue>();
-
-// ============ 队列管理函数 ============
 
 /**
  * 获取或创建队列实例（单例）
