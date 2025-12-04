@@ -5,7 +5,6 @@ import { Enforcer } from "casbin";
 import type { AppBindings } from "@/types/lib";
 
 import { enforcerPromise } from "@/lib/casbin";
-import logger from "@/lib/logger";
 import { API_ADMIN_PATH } from "@/lib/openapi/config";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
@@ -32,8 +31,11 @@ export function authorize(): MiddlewareHandler<AppBindings> {
     // 去除 API 前缀，获取实际请求路径
     const path = stripPrefix(c.req.path, API_ADMIN_PATH);
 
-    // 检查用户是否有权限访问该路径和方法
-    const hasPermission = await hasAnyPermission(enforcer, roles, path, c.req.method);
+    // 并行检查所有角色权限
+    const results = await Promise.all(
+      roles.map(role => enforcer.enforce(role, path, c.req.method)),
+    );
+    const hasPermission = results.some(hasPermission => hasPermission);
 
     // 无权限则返回 403
     if (!hasPermission) {
@@ -43,39 +45,4 @@ export function authorize(): MiddlewareHandler<AppBindings> {
     // 有权限则继续后续中间件
     await next();
   };
-}
-
-/**
- * 检查用户是否有任意一个角色有权限访问指定路径和方法
- */
-async function hasAnyPermission(enforcer: Enforcer, roles: string[], path: string, method: string): Promise<boolean> {
-  // 边界情况：空角色直接返回
-  if (roles.length === 0) {
-    return false;
-  }
-
-  // 封装安全的权限检查函数
-  const safeEnforce = async (role: string): Promise<boolean> => {
-    try {
-      return await enforcer.enforce(role, path, method);
-    }
-    catch (error) {
-      // 记录错误但不中断流程
-      logger.error({ error, role, path, method }, "[授权]: Casbin enforce 执行失败");
-      return false;
-    }
-  };
-
-  // 单角色优化路径
-  if (roles.length === 1) {
-    return safeEnforce(roles[0]);
-  }
-
-  // 并行检查所有角色权限
-  const results = await Promise.all(
-    roles.map(role => safeEnforce(role)),
-  );
-
-  // 任意一个有权限即返回 true
-  return results.some(hasPermission => hasPermission);
 }

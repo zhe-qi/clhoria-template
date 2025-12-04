@@ -1,7 +1,6 @@
 import type { z } from "zod";
 
 import { enforcerPromise } from "@/lib/casbin";
-import logger from "@/lib/logger";
 
 import type { selectSystemRoles } from "./schema";
 
@@ -34,8 +33,6 @@ export async function setRoleParents(roleId: string, parentIds: string[]): Promi
     const rules = parentIds.map(parentId => [roleId, parentId]);
     await enforcer.addGroupingPolicies(rules);
   }
-
-  logger.info({ roleId, parentIds }, "[角色]: 更新上级角色");
 }
 
 /**
@@ -54,7 +51,6 @@ export async function checkCircularInheritance(
   for (const parentId of parentIds) {
     // 自己不能是自己的上级
     if (parentId === roleId) {
-      logger.warn({ roleId, parentId }, "[角色]: 检测到自循环");
       return true;
     }
 
@@ -68,7 +64,6 @@ export async function checkCircularInheritance(
 
       const ancestors = await enforcer.getRolesForUser(currentId);
       if (ancestors.includes(roleId)) {
-        logger.warn({ roleId, parentId, ancestors }, "[角色]: 检测到循环继承");
         return true;
       }
 
@@ -141,6 +136,4 @@ export async function cleanRoleInheritance(roleId: string): Promise<void> {
 
   // 删除作为父角色的关系（其他角色继承自roleId）
   await enforcer.removeFilteredGroupingPolicy(1, roleId);
-
-  logger.info({ roleId }, "[角色]: 清理继承关系");
 }
