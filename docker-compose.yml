@@ -54,14 +54,18 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PORT}
-      # 数据库连接（直连 PostgreSQL）
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${PORT:-9999}
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
       - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
-      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
       - CLIENT_JWT_SECRET=${CLIENT_JWT_SECRET}
       - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+      - ACCESS_KEY_ID=${ACCESS_KEY_ID}
+      - SECRET_ACCESS_KEY=${SECRET_ACCESS_KEY}
+      - ENDPOINT=${ENDPOINT}
+      - BUCKET_NAME=${BUCKET_NAME}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       postgres:
         condition: service_healthy

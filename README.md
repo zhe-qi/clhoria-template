@@ -26,7 +26,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **类型安全字典**: PostgreSQL Enum + Drizzle-Zod + OpenAPI 手动同步前端枚举,编译时类型检查
 - **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
 - **高性能缓存**: Redis 缓存 + 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
-- **任务队列**: 基于 BullMQ 的定时任务和后台任务队列管理
+- **任务队列和定时任务**: 基于 pg-boss 的后台任务队列管理，基于 croner 的定时任务
 - **对象存储**: 集成 S3 兼容对象存储(支持 Cloudflare R2、阿里云 OSS、AWS S3 等)
 - **智能验证码**: 集成 Cap.js,支持多种挑战类型的现代化验证码系统
 - **AI 原生开发**: Claude Code + OpenAPI 自动生成,告别手工维护接口文档的痛苦
@@ -35,17 +35,6 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **即时反馈开发**: 热重载开发环境,代码变更实时生效,无需重启服务
 - **Claude Code 深度优化**: 完整 CLAUDE.md 配置,MCP 插件生态,AI 理解项目架构
 - **监控系统**: 集成 Sentry 错误追踪,支持自建或云原生方案(小团队推荐云服务,免运维)
-
-## 项目预览
-
-<div align="center">
-  <img src="https://r2.promptez.cn/github/studio.png" width="45%" alt="Drizzle Studio">
-  <img src="https://r2.promptez.cn/github/test.png" width="45%" alt="Swagger API 文档">
-  <img src="https://r2.promptez.cn/github/login.png" width="45%" alt="Swagger API 文档">
-  <img src="https://r2.promptez.cn/github/user.png" width="45%" alt="Swagger API 文档">
-  <img src="https://r2.promptez.cn/github/swagger.png" width="45%" alt="Swagger API 文档">
-  <img src="https://r2.promptez.cn/github/list.png" width="45%" alt="Swagger API 文档">
-</div>
 
 ## 快速开始
 

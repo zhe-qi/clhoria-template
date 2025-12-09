@@ -178,15 +178,3 @@ export const list = createRoute({
 
 **Testing**
 - Developer must manually run and test project for debugging
-
-**Job System (BullMQ)**
-- Task naming: Use underscores or hyphens, NEVER colons (BullMQ uses colon as internal delimiter)
-  - ✓ Correct: `send_email`, `daily_report`, `user-sync`
-  - ✗ Wrong: `send:email`, `daily:report`, `user:sync`
-- Lock keys: Use format `{taskName}` without additional prefixes (will be auto-prefixed by REDIS_KEY_PREFIX)
-- Idempotency keys: Use descriptive names without colons
-- Distributed deployment: Enable `useLock: true` for scheduled tasks to prevent duplicate execution
-- Production: Remove demo tasks from `src/jobs/user-tasks.ts` before deployment
-- Task registration: Add custom processors to `customTaskProcessors` array in `user-tasks.ts`
-- Scheduled tasks: Add cron tasks to `customScheduledTasks` array in `user-tasks.ts`
-- Reference: Check `src/jobs/examples/` for implementation examples

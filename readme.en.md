@@ -26,7 +26,7 @@ Clhoria simplifies complex technical architectures, making every coding session 
 - **Type-safe Dictionary**: PostgreSQL Enum + Drizzle-Zod + OpenAPI manual frontend enum sync, compile-time type checking
 - **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
 - **High-performance Cache**: Redis caching + multi-layer rate limiting + permission caching + session management + distributed locks
-- **Task Queue**: BullMQ-based scheduled tasks and background task queue management
+- **Task Queue**: Scheduled tasks and background task queue management based on pg-boss
 - **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, Alibaba Cloud OSS, AWS S3, etc.)
 - **Smart CAPTCHA**: Integrated Cap.js with modern CAPTCHA system supporting multiple challenge types
 - **AI-native Development**: Claude Code + OpenAPI auto-generation, say goodbye to manual API documentation maintenance
