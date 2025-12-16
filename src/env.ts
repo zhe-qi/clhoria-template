@@ -1,17 +1,16 @@
 /* eslint-disable node/no-process-env */
-import { config } from "dotenv";
-import { expand } from "dotenv-expand";
+import { config } from "@dotenvx/dotenvx";
 import path from "node:path";
 import { z } from "zod";
 
 import { parseEnvOrExit } from "@/utils/zod";
 
-expand(config({
+config({
   path: path.resolve(
     process.cwd(),
     process.env.NODE_ENV === "test" ? ".env.test" : ".env",
   ),
-}));
+});
 
 /**
  * 环境变量验证模式，包含对于环境变量的校验，转换，默认值，类型等

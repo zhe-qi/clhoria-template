@@ -50,8 +50,11 @@ ENV NODE_ENV=production
 ENV LOG_LEVEL=info
 
 # 安装运行时依赖并清理缓存
-RUN apk add --no-cache openssl && \
+RUN apk add --no-cache openssl curl && \
     rm -rf /var/cache/apk/*
+
+# 安装 dotenvx
+RUN curl -sfS https://dotenvx.sh/install.sh | sh
 
 # 创建非 root 用户
 RUN addgroup --system --gid 1001 nodejs && \
@@ -70,4 +73,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # 生产阶段入口点
-CMD ["node", "index.mjs"]
+CMD ["dotenvx", "run", "--", "node", "index.mjs"]
