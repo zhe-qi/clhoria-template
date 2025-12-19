@@ -5,12 +5,10 @@ import { z } from "zod";
 
 import { parseEnvOrExit } from "@/utils/zod";
 
-config({
-  path: path.resolve(
-    process.cwd(),
-    process.env.NODE_ENV === "test" ? ".env.test" : ".env",
-  ),
-});
+config({ path: path.resolve(
+  process.cwd(),
+  process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+) });
 
 /**
  * 环境变量验证模式，包含对于环境变量的校验，转换，默认值，类型等

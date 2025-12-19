@@ -1,3 +1,7 @@
+import type { SQL } from "drizzle-orm";
+import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import type { EmptyObject, Simplify, UnknownRecord } from "type-fest";
+
 import { z } from "@hono/zod-openapi";
 
 import logger from "@/lib/logger";
@@ -94,9 +98,9 @@ export const CrudSortingSchema = z.array(CrudSortSchema);
  * 分页 Schema
  */
 export const PaginationSchema = z.object({
-  current: z.coerce.number().int().positive().optional().default(1),
-  pageSize: z.coerce.number().int().positive().max(100).optional().default(10),
-  mode: z.enum(["client", "server", "off"]).optional().default("server"),
+  current: z.coerce.number().int().positive().optional(),
+  pageSize: z.coerce.number().int().positive().max(100).optional(),
+  mode: z.enum(["client", "server", "off"]).optional(),
 });
 
 /**
@@ -224,27 +228,6 @@ export function RefineResultSchema<T extends z.ZodTypeAny>(dataSchema: T) {
 }
 
 /**
- * 简化的查询参数 Schema（用于内部处理）
- */
-export const ProcessedQueryParamsSchema = z.object({
-  current: z.number().int().positive().default(1),
-  pageSize: z.number().int().positive().max(100).default(10),
-  filters: CrudFiltersSchema.optional(),
-  sorters: CrudSortingSchema.optional(),
-  domain: z.string().min(1),
-});
-
-/**
- * 查询结果元数据 Schema
- */
-export const QueryMetaSchema = z.object({
-  current: z.number().int().positive(),
-  pageSize: z.number().int().positive(),
-  total: z.number().int().nonnegative(),
-  pageCount: z.number().int().nonnegative(),
-});
-
-/**
  * 从 Zod schemas 推导的类型定义
  */
 export type CrudOperators = z.infer<typeof CrudOperatorsSchema>;
@@ -256,5 +239,66 @@ export type CrudSort = z.infer<typeof CrudSortSchema>;
 export type CrudSorting = z.infer<typeof CrudSortingSchema>;
 export type Pagination = z.infer<typeof PaginationSchema>;
 export type RefineQueryParams = z.infer<typeof RefineQueryParamsSchema>;
-export type ProcessedQueryParams = z.infer<typeof ProcessedQueryParamsSchema>;
-export type QueryMeta = z.infer<typeof QueryMetaSchema>;
+
+// ============================================================================
+// 查询配置和工具类型
+// ============================================================================
+
+/** Refine 查询结果接口 */
+export type RefineQueryResult<T> = {
+  data: T[];
+  total: number;
+};
+
+/** 查询错误类型 */
+export class RefineQueryError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = "RefineQueryError";
+    this.code = code;
+  }
+}
+
+/** Join 类型 */
+export type JoinType = "inner" | "left" | "right";
+
+/** Join 定义接口 */
+export type JoinDefinition = Simplify<{
+  table: PgTable;
+  type: JoinType;
+  on: SQL<unknown>;
+}>;
+
+/** Join 查询配置接口 */
+export type JoinConfig = Simplify<{
+  joins: readonly JoinDefinition[];
+  selectFields?: Readonly<Record<string, PgColumn | SQL<unknown>>> | EmptyObject;
+  groupBy?: readonly PgColumn[];
+}>;
+
+/** Refine 查询执行配置接口 */
+export type RefineQueryConfig<_T = UnknownRecord> = Simplify<{
+  table: PgTable;
+  queryParams: Simplify<{
+    filters?: CrudFilters;
+    sorters?: CrudSorting;
+    pagination?: Pagination;
+  }>;
+  joinConfig?: JoinConfig;
+  allowedFields?: readonly string[];
+}>;
+
+/** 查询执行参数接口 */
+export type QueryExecutionParams<_T = UnknownRecord> = Simplify<{
+  resource: PgTable;
+  filters?: CrudFilters;
+  sorters?: CrudSorting;
+  pagination?: Pagination;
+  tableColumns?: Readonly<Record<string, PgColumn>> | EmptyObject;
+  joinConfig?: JoinConfig;
+  allowedFields?: readonly string[];
+}>;
+
+/** 元组结果类型，用于错误处理 */
+export type Result<T, E = RefineQueryError> = [E, null] | [null, T];

@@ -50,6 +50,7 @@
     "bullmq",
     "casbin",
     "Clhoria",
+    "dotenvx",
     "Hono",
     "ilike",
     "openapi",

@@ -1,10 +1,6 @@
-import { API_ADMIN_PATH, API_BASE_PATH, DOC_ENDPOINT } from "@/lib/constants";
-
 import type { AppConfig } from "./types";
 
-/**
- * 应用OpenAPI配置
- */
+/** 应用OpenAPI配置 */
 export const APP_CONFIG: AppConfig[] = [
   {
     name: "admin",
@@ -25,9 +21,7 @@ export const APP_CONFIG: AppConfig[] = [
 /** 应用OpenAPI版本 */
 export const OPENAPI_VERSION = "3.1.0";
 
-/**
- * Scalar配置
- */
+/** Scalar配置 */
 export const SCALAR_CONFIG = {
   /** Scalar主题 */
   theme: "kepler",
@@ -38,4 +32,4 @@ export const SCALAR_CONFIG = {
 } as const;
 
 // 重新导出路径配置
-export { API_ADMIN_PATH, API_BASE_PATH, DOC_ENDPOINT };
+export * from "@/lib/constants/api";

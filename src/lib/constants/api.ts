@@ -6,3 +6,6 @@ export const API_ADMIN_PATH = "/api/admin";
 
 /** 文档端点路径 */
 export const DOC_ENDPOINT = "/doc";
+
+/** 公共API名称 */
+export const API_PUBLIC_NAME = "public";

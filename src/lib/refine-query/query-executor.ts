@@ -1,24 +1,20 @@
 import type { SQL } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
-import type { Simplify, UnknownRecord } from "type-fest";
+import type { UnknownRecord } from "type-fest";
 
 import { and, count } from "drizzle-orm";
 
-import db from "@/db";
+import defaultDb from "@/db";
 
 import type { PaginationCalculation } from "./pagination";
-import type {
-  JoinConfig,
-  QueryExecutionParams,
-  RefineQueryConfig,
-  RefineQueryResult,
-  Result,
-} from "./types";
+import type { JoinConfig, QueryExecutionParams, RefineQueryConfig, RefineQueryResult, Result } from "./schemas";
 
-import { convertFiltersToSQL, validateFilterFields } from "./filters";
+import { addDefaultSorting, convertFiltersToSQL, convertSortersToSQL, validateFilterFields, validateSorterFields } from "./converters";
 import { calculatePagination, validatePagination } from "./pagination";
-import { addDefaultSorting, convertSortersToSQL, validateSorterFields } from "./sorters";
-import { RefineQueryError } from "./types";
+import { RefineQueryError } from "./schemas";
+
+/** 数据库实例类型 */
+export type DbInstance = typeof defaultDb;
 
 /**
  * 查询执行器类
@@ -26,9 +22,11 @@ import { RefineQueryError } from "./types";
  */
 export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   private table: PgTable;
+  private db: DbInstance;
 
-  constructor(table: PgTable) {
+  constructor(table: PgTable, db: DbInstance = defaultDb) {
     this.table = table;
+    this.db = db;
   }
 
   /**
@@ -93,7 +91,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
     // 6. 执行计数查询
     let total = 0;
     if (paginationCalc.mode === "server") {
-      const countQuery = db
+      const countQuery = this.db
         .select({ count: count() })
         .from(this.table);
 
@@ -106,7 +104,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
     }
 
     // 7. 构建数据查询
-    let dataQuery = db.select().from(this.table);
+    let dataQuery = this.db.select().from(this.table);
 
     // 应用 WHERE 条件
     if (whereCondition) {
@@ -273,7 +271,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
    * 构建 Join 查询
    */
   private buildJoinQuery(joinConfig: JoinConfig) {
-    let query = db.select(joinConfig.selectFields || {}).from(this.table);
+    let query = this.db.select(joinConfig.selectFields || {}).from(this.table);
 
     // 应用所有 joins
     for (const join of joinConfig.joins) {
@@ -298,7 +296,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
    * 构建 Join 计数查询
    */
   private buildJoinCountQuery(joinConfig: JoinConfig) {
-    let query = db.select({ count: count() }).from(this.table);
+    let query = this.db.select({ count: count() }).from(this.table);
 
     // 应用所有 joins
     for (const join of joinConfig.joins) {
@@ -321,12 +319,15 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
 }
 
 /**
- * 便捷函数：执行 Refine 查询（新版本，支持配置对象）
+ * 便捷函数：执行 Refine 查询
+ * @param config 查询配置
+ * @param db 可选的数据库实例，用于测试时注入 mock
  */
 export async function executeRefineQuery<T extends UnknownRecord = UnknownRecord>(
   config: RefineQueryConfig<T>,
+  db?: DbInstance,
 ): Promise<Result<RefineQueryResult<T>>> {
-  const executor = new RefineQueryExecutor<T>(config.table);
+  const executor = new RefineQueryExecutor<T>(config.table, db);
   return executor.execute({
     resource: config.table,
     filters: config.queryParams.filters,
@@ -335,79 +336,4 @@ export async function executeRefineQuery<T extends UnknownRecord = UnknownRecord
     joinConfig: config.joinConfig,
     allowedFields: config.allowedFields,
   });
-}
-
-/**
- * 创建查询执行器工厂
- * 用于创建特定表的查询执行器实例
- */
-export function createQueryExecutor<T extends UnknownRecord = UnknownRecord>(
-  table: PgTable,
-): RefineQueryExecutor<T> {
-  return new RefineQueryExecutor<T>(table);
-}
-
-/**
- * 批量查询执行器
- * 用于执行多个相关查询
- */
-export class BatchQueryExecutor {
-  private queries: Array<Simplify<{
-    name: string;
-    executor: RefineQueryExecutor<UnknownRecord>;
-    params: QueryExecutionParams<UnknownRecord>;
-  }>> = [];
-
-  /**
-   * 添加查询
-   */
-  addQuery<T extends UnknownRecord = UnknownRecord>(
-    name: string,
-    executor: RefineQueryExecutor<T>,
-    params: QueryExecutionParams<T>,
-  ): this {
-    this.queries.push({ name, executor: executor as RefineQueryExecutor<UnknownRecord>, params: params as QueryExecutionParams<UnknownRecord> });
-    return this;
-  }
-
-  /**
-   * 执行所有查询
-   */
-  async executeAll(): Promise<Readonly<Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError>>> {
-    const results: Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError> = {};
-
-    for (const query of this.queries) {
-      const [error, result] = await query.executor.execute(query.params);
-      results[query.name] = error || result!;
-    }
-
-    return results;
-  }
-
-  /**
-   * 并行执行所有查询
-   */
-  async executeAllParallel(): Promise<Readonly<Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError>>> {
-    const promises = this.queries.map(async (query) => {
-      const [error, result] = await query.executor.execute(query.params);
-      return {
-        name: query.name,
-        result: error || result!,
-      };
-    });
-
-    const results = await Promise.all(promises);
-
-    return results.reduce<Record<string, RefineQueryResult<UnknownRecord> | RefineQueryError>>((acc, { name, result }) => {
-      acc[name] = result;
-      return acc;
-    }, {});
-  }
-
-  /**
-   * 清空查询队列
-   */
-  clear(): void {
-    this.queries = [];
-  }
 }
