@@ -15,7 +15,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 
 ## 功能特性
 
-- **现代化技术栈**: Hono + TypeScript + Drizzle ORM + PostgreSQL
+- **现代化技术栈**: Hono + TypeScript + Vite + Drizzle ORM + PostgreSQL
 - **混合架构**: 函数式开发规范、多层级路由结构、复杂业务可选DDD
 - **自动化文档**: OpenAPI 3.1 规范 + Scalar UI,代码即文档,支持在线调试和类型生成
 - **多层认证授权**: JWT 双密钥(Admin/Client 隔离)+ Casbin RBAC
@@ -32,7 +32,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **AI 原生开发**: Claude Code + OpenAPI 自动生成,告别手工维护接口文档的痛苦
 - **类型安全体系**: Hono + Zod + TypeScript 全链路类型推导,编译时发现问题
 - **智能测试覆盖**: Vitest + AI 辅助,自动生成测试用例,确保接口稳定性
-- **即时反馈开发**: 热重载开发环境,代码变更实时生效,无需重启服务
+- **即时反馈开发**: 基于 Vite 的热重载开发环境,代码变更毫秒级生效,开发体验极致流畅
 - **Claude Code 深度优化**: 完整 CLAUDE.md 配置,MCP 插件生态,AI 理解项目架构
 - **监控系统**: 集成 Sentry 错误追踪,支持自建或云原生方案(小团队推荐云服务,免运维)
 

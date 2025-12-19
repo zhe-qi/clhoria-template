@@ -15,7 +15,7 @@ Clhoria simplifies complex technical architectures, making every coding session 
 
 ## Features
 
-- **Modern Tech Stack**: Hono + TypeScript + Drizzle ORM + PostgreSQL
+- **Modern Tech Stack**: Hono + TypeScript + Vite + Drizzle ORM + PostgreSQL
 - **Hybrid Architecture**: Functional development standards, multi-tier routing structure, optional DDD for complex business
 - **Automated Documentation**: OpenAPI 3.1 spec + Scalar UI, code as documentation with online debugging and type generation
 - **Multi-layer Auth**: Dual JWT keys (Admin/Client isolation) + Casbin RBAC
@@ -32,7 +32,7 @@ Clhoria simplifies complex technical architectures, making every coding session 
 - **AI-native Development**: Claude Code + OpenAPI auto-generation, say goodbye to manual API documentation maintenance
 - **Type-safe System**: Hono + Zod + TypeScript full-chain type inference, catch issues at compile time
 - **Smart Test Coverage**: Vitest + AI assistance, auto-generate test cases ensuring API stability
-- **Instant Feedback Development**: Hot-reload dev environment, code changes take effect instantly without restart
+- **Instant Feedback Development**: Vite-powered hot-reload dev environment, millisecond-level code updates for ultimate development experience
 - **Claude Code Optimized**: Complete CLAUDE.md configuration, MCP plugin ecosystem, AI understands project architecture
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
 

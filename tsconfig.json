@@ -31,11 +31,11 @@
   },
   "include": [
     "./src/**/*",
-    "./tsdown.config.ts",
+    "./vite.config.ts",
+    "./vitest.config.ts",
     "./tests/**/*",
     "./migrations/**/*.ts",
-    "./drizzle.config.ts",
-    "./vitest.config.ts"
+    "./drizzle.config.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
