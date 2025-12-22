@@ -8,22 +8,27 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      port: Number(env.PORT),
+      port: Number(env.PORT) || 9999,
     },
     build: {
       ssr: "src/index.ts",
       outDir: "dist",
       minify: false,
+      sourcemap: true,
       target: "esnext",
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           entryFileNames: "index.mjs",
           format: "esm",
+          inlineDynamicImports: true,
+        },
+        treeshake: true,
+      },
+      oxc: {
+        transform: {
+          target: "esnext",
         },
       },
-    },
-    define: {
-      "import.meta.env": env,
     },
     resolve: {
       alias: {
