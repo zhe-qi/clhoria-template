@@ -5,7 +5,7 @@ import type { AppOpenAPI } from "@/types/lib";
 
 import type { AppConfig, ScalarAuthentication, ScalarSource } from "./types";
 
-import packageJSON from "../../../package.json" with { type: "json" };
+import packageJSON from "../../../../package.json" with { type: "json" };
 import { createRouter } from "../create-app";
 import { API_BASE_PATH, API_PUBLIC_NAME, APP_CONFIG, DOC_ENDPOINT, OPENAPI_VERSION, SCALAR_CONFIG } from "./config";
 

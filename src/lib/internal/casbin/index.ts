@@ -3,6 +3,7 @@ import { newEnforcer, newModel } from "casbin";
 import db from "@/db";
 import { casbinRule } from "@/db/schema";
 
+import { createAsyncSingleton } from "../singleton";
 import { DrizzleCasbinAdapter } from "./adapter";
 
 // Casbin 模型配置
@@ -23,11 +24,11 @@ e = some(where (p.eft == allow)) && !some(where (p.eft == deny))
 m = g(r.sub, p.sub) && keyMatch3(r.obj, p.obj) && regexMatch(r.act, p.act)
 `;
 
-const model = newModel(casbinModelText);
-
-const adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule);
-
-export const enforcerPromise = newEnforcer(model, adapter);
+export const enforcerPromise = createAsyncSingleton("casbin", async () => {
+  const model = newModel(casbinModelText);
+  const adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule);
+  return newEnforcer(model, adapter);
+});
 
 /**
  * 重新加载 Casbin 策略（用于测试环境）

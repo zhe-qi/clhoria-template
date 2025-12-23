@@ -10,15 +10,17 @@ import type { AppBindings } from "@/types/lib";
 
 import redisClient from "@/lib/redis";
 
-/**
- * Redis 存储实例 (全局单例)
- */
-const ioredisStore = new RedisStore({
-  sendCommand: (...args) => {
-    const [command, ...commandArgs] = args;
-    return redisClient.call(command, ...commandArgs) as Promise<RedisReply>;
-  },
-}) as unknown as Store<AppBindings>;
+import { createSingleton } from "./singleton";
+
+const ioredisStore = createSingleton(
+  "rate-limit-store",
+  () => new RedisStore({
+    sendCommand: (...args) => {
+      const [command, ...commandArgs] = args;
+      return redisClient.call(command, ...commandArgs) as Promise<RedisReply>;
+    },
+  }) as unknown as Store<AppBindings>,
+);
 
 /**
  * IP地址验证器 (Zod v4 - 支持 IPv4 和 IPv6)

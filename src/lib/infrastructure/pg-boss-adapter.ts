@@ -4,6 +4,7 @@ import type { Sql } from "postgres";
 import { PgBoss } from "pg-boss";
 
 import { getQueryClient } from "@/db/postgres";
+import { createSingleton } from "@/lib/internal/singleton";
 
 export const postgresAdapter: (sql: Sql) => IDatabase = (sql: Sql) => ({
   executeSql: async (query: string, values?: any[]) => {
@@ -34,8 +35,10 @@ export const postgresAdapter: (sql: Sql) => IDatabase = (sql: Sql) => ({
   },
 });
 
-const boss = new PgBoss({
-  db: postgresAdapter(getQueryClient()),
-});
+const boss = createSingleton(
+  "pg-boss",
+  () => new PgBoss({ db: postgresAdapter(getQueryClient()) }),
+  { destroy: instance => instance.stop() },
+);
 
 export default boss;

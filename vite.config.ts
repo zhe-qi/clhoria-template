@@ -1,14 +1,14 @@
+import devServer from "@hono/vite-dev-server";
+import nodeAdapter from "@hono/vite-dev-server/node";
 import path from "node:path";
 import { defineConfig, loadEnv } from "vite";
-
-import { honoDevServer } from "./plugins/hono-dev-server";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
 
   return {
     server: {
-      port: Number(env.PORT) || 9999,
+      port: Number.parseInt(env.PORT, 10),
     },
     build: {
       ssr: "src/index.ts",
@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
       target: "esnext",
       rolldownOptions: {
         output: {
-          entryFileNames: "index.mjs",
+          entryFileNames: "index.js",
           format: "esm",
           inlineDynamicImports: true,
         },
@@ -37,8 +37,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
-      honoDevServer({
+      devServer({
         entry: "src/index.ts",
+        adapter: nodeAdapter(),
       }),
     ],
   };

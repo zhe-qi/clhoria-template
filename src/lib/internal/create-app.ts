@@ -10,13 +10,13 @@ import { trimTrailingSlash } from "hono/trailing-slash";
 
 import type { AppBindings } from "@/types/lib";
 
-import { createRateLimiter, DEFAULT_RATE_LIMIT } from "@/lib/rate-limit-factory";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { notFound, onError, serveEmojiFavicon } from "@/lib/stoker/middlewares";
 import { defaultHook } from "@/lib/stoker/openapi";
 import { Resp } from "@/utils";
 
-import logger from "./logger";
+import logger from "../logger";
+import { createRateLimiter, DEFAULT_RATE_LIMIT } from "./rate-limit-factory";
 
 export function createRouter() {
   return new OpenAPIHono<AppBindings>({

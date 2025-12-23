@@ -2,7 +2,8 @@ import Cap from "@cap.js/server";
 // 导入date-fns核心函数
 import { differenceInSeconds, isValid } from "date-fns";
 
-import redisClient from "@/lib/redis";
+import redisClient from "../redis";
+import { createSingleton } from "./singleton";
 
 /** 生成带前缀的Redis Key */
 function getRedisKey(type: "challenge" | "token", id: string): string {
@@ -22,11 +23,7 @@ function calculateTtlSeconds(expires: number | Date): number {
   return Math.max(ttl, 0);
 }
 
-/**
- * Cap.js 配置
- * @description 使用 Redis 作为存储
- */
-const cap = new Cap({
+const cap = createSingleton("cap", () => new Cap({
   storage: {
     challenges: {
       store: async (token, challengeData) => {
@@ -101,6 +98,6 @@ const cap = new Cap({
       },
     },
   },
-});
+}));
 
 export default cap;

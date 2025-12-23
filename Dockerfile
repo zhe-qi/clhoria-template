@@ -65,7 +65,7 @@ COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --chown=hono:nodejs package.json pnpm-lock.yaml ./
 
 # 从构建阶段复制构建产物
-COPY --from=builder --chown=hono:nodejs /app/dist/index.mjs ./index.mjs
+COPY --from=builder --chown=hono:nodejs /app/dist/index.js ./index.js
 
 # 设置默认端口
 ARG PORT=9999
@@ -73,4 +73,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # 生产阶段入口点
-CMD ["dotenvx", "run", "--", "node", "index.mjs"]
+CMD ["dotenvx", "run", "--", "node", "index.js"]

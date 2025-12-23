@@ -97,7 +97,7 @@ describe("drizzle casbin adapter", () => {
     }
 
     // 重新加载策略，让其他测试能看到恢复的规则
-    const { reloadCasbinPolicy } = await import("@/lib/casbin");
+    const { reloadCasbinPolicy } = await import(".");
     await reloadCasbinPolicy();
   });
 

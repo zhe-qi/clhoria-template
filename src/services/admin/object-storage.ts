@@ -3,16 +3,20 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { addSeconds, formatISO } from "date-fns";
 
 import env from "@/env";
+import { createSingleton } from "@/lib/internal/singleton";
 
-// 创建 S3 客户端实例
-const s3Client = new S3Client({
-  region: "auto",
-  endpoint: env.ENDPOINT,
-  credentials: {
-    accessKeyId: env.ACCESS_KEY_ID,
-    secretAccessKey: env.SECRET_ACCESS_KEY,
-  },
-});
+const s3Client = createSingleton(
+  "s3-client",
+  () => new S3Client({
+    region: "auto",
+    endpoint: env.ENDPOINT,
+    credentials: {
+      accessKeyId: env.ACCESS_KEY_ID,
+      secretAccessKey: env.SECRET_ACCESS_KEY,
+    },
+  }),
+  { destroy: client => client.destroy() },
+);
 
 export type GenerateUploadUrlParams = {
   fileName: string;

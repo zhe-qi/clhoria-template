@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { enforcerPromise } from "@/lib/casbin";
+import { enforcerPromise } from "@/lib/internal/casbin";
 
 import type { selectSystemRoles } from "./schema";
 

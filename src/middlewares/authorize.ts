@@ -4,8 +4,8 @@ import { Enforcer } from "casbin";
 
 import type { AppBindings } from "@/types/lib";
 
-import { enforcerPromise } from "@/lib/casbin";
-import { API_ADMIN_PATH } from "@/lib/openapi/config";
+import { enforcerPromise } from "@/lib/internal/casbin";
+import { API_ADMIN_PATH } from "@/lib/internal/openapi/config";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";

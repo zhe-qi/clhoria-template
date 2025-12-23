@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
-import { enforcerPromise } from "@/lib/casbin";
+import { enforcerPromise } from "@/lib/internal/casbin";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";

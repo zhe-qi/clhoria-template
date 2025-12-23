@@ -3,10 +3,10 @@ import * as z from "zod";
 
 import type { RouteModule } from "@/types/lib";
 
-import configureOpenAPI from "@/lib/openapi";
+import configureOpenAPI from "@/lib/internal/openapi";
 
 import env from "./env";
-import createApp from "./lib/create-app";
+import createApp from "./lib/internal/create-app";
 import { authorize } from "./middlewares/authorize";
 import { operationLog } from "./middlewares/operation-log";
 
