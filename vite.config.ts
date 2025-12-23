@@ -1,7 +1,7 @@
-import devServer from "@hono/vite-dev-server";
-import nodeAdapter from "@hono/vite-dev-server/node";
 import path from "node:path";
 import { defineConfig, loadEnv } from "vite";
+
+import { honoDevServer } from "./plugins/hono-dev-server";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
@@ -37,9 +37,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
-      devServer({
+      honoDevServer({
         entry: "src/index.ts",
-        adapter: nodeAdapter,
       }),
     ],
   };

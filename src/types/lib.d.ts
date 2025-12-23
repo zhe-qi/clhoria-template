@@ -23,3 +23,11 @@ export type AppBindings = {
 export type AppOpenAPI<S extends Schema = {}> = OpenAPIHono<AppBindings, S>;
 
 export type AppRouteHandler<R extends HonoRouteConfig> = RouteHandler<R, AppBindings>;
+
+/** 路由模块导出结构 */
+export type RouteModule = {
+  /** 路由实例 */
+  default: AppOpenAPI;
+  /** 跳过全局认证中间件（模块内部自己处理） */
+  skipGlobalAuth?: boolean;
+};

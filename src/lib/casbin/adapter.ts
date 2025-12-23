@@ -6,11 +6,20 @@ import { Helper } from "casbin";
 import { and, eq, inArray, not, or, sql } from "drizzle-orm";
 
 import type * as schema from "@/db/schema";
+import type { casbinRule } from "@/db/schema";
 
-import { casbinRule, insertCasbinRuleSchema } from "@/db/schema";
+import { insertCasbinRuleSchema } from "@/db/schema";
 
 type TCasbinTable = InferInsertModel<typeof casbinRule>;
 type PostgresJsDatabaseSchema = PostgresJsDatabase<typeof schema>;
+
+/** 策略过滤器类型，支持单条或多条规则模式匹配 */
+export type PolicyFilter = {
+  /** p 策略过滤：单条规则 string[] 或多条规则 string[][] */
+  p?: string[] | string[][];
+  /** g 角色继承过滤：单条规则 string[] 或多条规则 string[][] */
+  g?: string[] | string[][];
+};
 
 export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
   private readonly db: PostgresJsDatabaseSchema;
@@ -51,7 +60,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       return;
     }
 
-    for (const [ptype, val] of Object.entries(filter as Record<string, any>)) {
+    for (const [ptype, val] of Object.entries(filter as PolicyFilter)) {
       if (val == null)
         continue;
       if (!Array.isArray(val))
@@ -183,11 +192,11 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       .values(policy)
       .onConflictDoNothing({
         target: [
-          casbinRule.ptype,
-          casbinRule.v0,
-          casbinRule.v1,
-          casbinRule.v2,
-          casbinRule.v3,
+          this.schema.ptype,
+          this.schema.v0,
+          this.schema.v1,
+          this.schema.v2,
+          this.schema.v3,
         ],
       });
   }
@@ -213,11 +222,11 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       .values(policies)
       .onConflictDoNothing({
         target: [
-          casbinRule.ptype,
-          casbinRule.v0,
-          casbinRule.v1,
-          casbinRule.v2,
-          casbinRule.v3,
+          this.schema.ptype,
+          this.schema.v0,
+          this.schema.v1,
+          this.schema.v2,
+          this.schema.v3,
         ],
       });
   }
@@ -286,11 +295,11 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
         .values(newPolicy)
         .onConflictDoNothing({
           target: [
-            casbinRule.ptype,
-            casbinRule.v0,
-            casbinRule.v1,
-            casbinRule.v2,
-            casbinRule.v3,
+            this.schema.ptype,
+            this.schema.v0,
+            this.schema.v1,
+            this.schema.v2,
+            this.schema.v3,
           ],
         });
     });
@@ -329,11 +338,11 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
         .values(newPolicies)
         .onConflictDoNothing({
           target: [
-            casbinRule.ptype,
-            casbinRule.v0,
-            casbinRule.v1,
-            casbinRule.v2,
-            casbinRule.v3,
+            this.schema.ptype,
+            this.schema.v0,
+            this.schema.v1,
+            this.schema.v2,
+            this.schema.v3,
           ],
         });
     });
@@ -370,7 +379,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
 
   // ---------- createPolicyObject ----------
   private createPolicyObject(ptype: string, rule: string[]): TCasbinTable {
-    return {
+    const policy: TCasbinTable = {
       ptype,
       v0: rule[0] ?? "",
       v1: rule[1] ?? "",
@@ -378,7 +387,8 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       v3: rule[3] ?? "",
       v4: rule[4] ?? "",
       v5: rule[5] ?? "",
-    } as unknown as TCasbinTable;
+    };
+    return policy;
   }
 
   // ---------- buildRuleConditions ----------
