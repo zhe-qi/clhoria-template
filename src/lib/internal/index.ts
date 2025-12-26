@@ -3,7 +3,7 @@ export { createRouter, createTestApp } from "./create-app";
 
 export { default as createApp } from "./create-app";
 // 速率限制
-export { createRateLimiter, DEFAULT_RATE_LIMIT } from "./rate-limit-factory";
+export { createRateLimiter } from "./rate-limit-factory";
 
 export type { RateLimitOptions } from "./rate-limit-factory";
 // 单例管理
