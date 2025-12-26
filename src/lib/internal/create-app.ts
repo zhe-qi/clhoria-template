@@ -10,13 +10,14 @@ import { trimTrailingSlash } from "hono/trailing-slash";
 
 import type { AppBindings } from "@/types/lib";
 
+import { RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants/rate-limit";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { notFound, onError, serveEmojiFavicon } from "@/lib/stoker/middlewares";
 import { defaultHook } from "@/lib/stoker/openapi";
 import { Resp } from "@/utils";
 
 import logger from "../logger";
-import { createRateLimiter, DEFAULT_RATE_LIMIT } from "./rate-limit-factory";
+import { createRateLimiter } from "./rate-limit-factory";
 
 export function createRouter() {
   return new OpenAPIHono<AppBindings>({
@@ -41,7 +42,10 @@ export default function createApp() {
   app.use(timeout(30000));
 
   /** 5. 速率限制 - 在解析请求体之前拦截 */
-  app.use(createRateLimiter(DEFAULT_RATE_LIMIT));
+  app.use(createRateLimiter({
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    limit: RATE_LIMIT_MAX_REQUESTS,
+  }));
 
   /** 6. 基础功能 */
   app.use(trimTrailingSlash());

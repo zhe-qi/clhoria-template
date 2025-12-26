@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import type { AppBindings } from "@/types/lib";
 
+import env from "@/env";
 import redisClient from "@/lib/redis";
 
 import { createSingleton } from "./singleton";
@@ -47,33 +48,114 @@ function validateIp(ip: string): string | null {
   return null;
 }
 
-/**
- * 获取客户端真实标识
- * 根据环境变量 TRUST_PROXY 决定是否信任代理头部
- */
-function getClientIdentifier(c: Context<AppBindings>) {
-  // 1. X-Forwarded-For
-  const xff = c.req.header("X-Forwarded-For");
-  if (xff) {
-    const ip = xff.split(",")[0].trim();
-    if (validateIp(ip))
-      return ip;
-  }
+function normalizeIp(ip: string) {
+  // Node 经常给出 IPv4-mapped IPv6
+  if (ip.startsWith("::ffff:"))
+    return ip.slice(7);
+  return ip;
+}
 
-  // 2. X-Real-IP
-  const real = c.req.header("X-Real-IP");
-  if (real && validateIp(real))
-    return real;
-
-  // 3. Node.js socket
+function getSocketIp(c: Context<AppBindings>) {
   // @ts-expect-error: Node.js adapter adds `incoming` but TS defs don’t include it
   const incoming = c.req.raw?.incoming;
-  const socketIp
-    = incoming?.socket?.remoteAddress
-      || incoming?.connection?.remoteAddress;
+  const ip = incoming?.socket?.remoteAddress || incoming?.connection?.remoteAddress;
+  return ip ? normalizeIp(ip) : null;
+}
 
-  if (socketIp && validateIp(socketIp))
-    return socketIp;
+const TRUSTED_PROXY_IPS = (env.TRUSTED_PROXY_IPS)
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
+
+function isPrivateIpv4(ip: string) {
+  const parts = ip.split(".");
+  if (parts.length !== 4)
+    return false;
+
+  const nums = parts.map(n => Number(n));
+  if (nums.some(n => !Number.isInteger(n) || n < 0 || n > 255))
+    return false;
+
+  const [a, b] = nums;
+
+  // RFC1918 + loopback
+  if (a === 10)
+    return true;
+  if (a === 172 && b !== undefined && b >= 16 && b <= 31)
+    return true;
+  if (a === 192 && b === 168)
+    return true;
+  if (a === 127)
+    return true;
+
+  return false;
+}
+
+function isPrivateIpv6(ip: string) {
+  const lower = ip.toLowerCase();
+  // loopback
+  if (lower === "::1")
+    return true;
+
+  // Unique local addresses: fc00::/7
+  if (lower.startsWith("fc") || lower.startsWith("fd"))
+    return true;
+
+  // Link-local: fe80::/10
+  if (lower.startsWith("fe8") || lower.startsWith("fe9") || lower.startsWith("fea") || lower.startsWith("feb"))
+    return true;
+
+  return false;
+}
+
+function isPrivateIp(ip: string) {
+  // 注意：normalizeIp 已把 ::ffff:x.x.x.x 转成 IPv4
+  return ip.includes(".") ? isPrivateIpv4(ip) : isPrivateIpv6(ip);
+}
+
+function isTrustedProxy(ip: string | null) {
+  if (!ip)
+    return false;
+
+  // 显式配置优先：只有在白名单内才信任
+  if (TRUSTED_PROXY_IPS.length > 0)
+    return TRUSTED_PROXY_IPS.includes(ip);
+
+  // 默认行为（省心但尽量安全）：
+  // 未配置时，仅在请求来源是内网/本机地址时才信任代理头（覆盖大多数 Nginx/SLB 场景）
+  return isPrivateIp(ip);
+}
+
+/**
+ * 获取客户端真实标识
+ */
+function getClientIdentifier(c: Context<AppBindings>) {
+  const remoteRaw = getSocketIp(c);
+  const remote = remoteRaw ? validateIp(remoteRaw) : null;
+
+  // 只有来自可信代理（SLB、Nginx等）才读取头部
+  if (remote && isTrustedProxy(remote)) {
+    // 1) SLB 会覆盖 X-Real-IP：优先用它（防伪造关键点：只在 trusted proxy 下读取）
+    const real = c.req.header("X-Real-IP");
+    const realIp = real ? validateIp(normalizeIp(real.trim())) : null;
+    if (realIp)
+      return realIp;
+
+    // 2) 可选：再兜底 XFF（不建议取第一个；除非你能保证链路已被 SLB 清洗）
+    const xff = c.req.header("X-Forwarded-For");
+    if (xff) {
+      const parts = xff.split(",").map(s => normalizeIp(s.trim()));
+      // 多层代理时，最右侧一般是“离你最近的代理”；但如果你没维护完整可信代理列表，这里很难绝对正确
+      // 最保守做法：只在你确认 SLB 已清洗/重写 XFF 的情况下，才用 parts[0]
+      const ip = validateIp(parts[0] ?? "");
+      if (ip)
+        return ip;
+    }
+  }
+
+  // 非可信来源：忽略头部，直接用 socket remoteAddress（至少不可由 Header 伪造）
+  if (remote)
+    return remote;
 
   return "0.0.0.0";
 }
@@ -110,9 +192,3 @@ export function createRateLimiter(options: RateLimitOptions) {
     skipFailedRequests: options.skipFailedRequests ?? false,
   });
 }
-
-/** 默认全局速率限制配置 (每1分钟100次) */
-export const DEFAULT_RATE_LIMIT: RateLimitOptions = {
-  windowMs: 1 * 60 * 1000,
-  limit: 100,
-};

@@ -25,22 +25,22 @@ importers:
         version: 1.51.2
       '@hono/node-server':
         specifier: 1.19.7
-        version: 1.19.7(hono@4.11.2)
+        version: 1.19.7(hono@4.11.3)
       '@hono/node-ws':
         specifier: ^1.2.0
-        version: 1.2.0(@hono/node-server@1.19.7(hono@4.11.2))(hono@4.11.2)
+        version: 1.2.0(@hono/node-server@1.19.7(hono@4.11.3))(hono@4.11.3)
       '@hono/sentry':
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.11.2)
+        version: 1.2.2(hono@4.11.3)
       '@hono/zod-openapi':
         specifier: ^1.2.0
-        version: 1.2.0(hono@4.11.2)(zod@4.2.1)
+        version: 1.2.0(hono@4.11.3)(zod@4.2.1)
       '@node-rs/argon2':
         specifier: ^2.0.2
         version: 2.0.2
       '@scalar/hono-api-reference':
         specifier: ^0.9.30
-        version: 0.9.30(hono@4.11.2)
+        version: 0.9.30(hono@4.11.3)
       casbin:
         specifier: ^5.45.1
         version: 5.45.1
@@ -57,14 +57,14 @@ importers:
         specifier: ^0.8.3
         version: 0.8.3(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20250820.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(pg@8.16.3)(postgres@3.4.7))(zod@4.2.1)
       hono:
-        specifier: ^4.11.2
-        version: 4.11.2
+        specifier: ^4.11.3
+        version: 4.11.3
       hono-pino:
         specifier: ^0.10.3
-        version: 0.10.3(hono@4.11.2)(pino@10.1.0)
+        version: 0.10.3(hono@4.11.3)(pino@10.1.0)
       hono-rate-limiter:
         specifier: ^0.5.2
-        version: 0.5.2(hono@4.11.2)(unstorage@1.17.3(ioredis@5.8.2))
+        version: 0.5.2(hono@4.11.3)(unstorage@1.17.3(ioredis@5.8.2))
       iconv-lite:
         specifier: ^0.7.1
         version: 0.7.1
@@ -92,7 +92,7 @@ importers:
         version: 6.7.3(@vue/compiler-sfc@3.5.11)(eslint-plugin-format@1.1.0(eslint@9.39.2(jiti@2.5.1)))(eslint@9.39.2(jiti@2.5.1))(typescript@5.9.3)(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(jiti@2.5.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.2))
       '@hono/vite-dev-server':
         specifier: ^0.23.0
-        version: 0.23.0(hono@4.11.2)
+        version: 0.23.0(hono@4.11.3)
       '@types/node':
         specifier: 25.0.3
         version: 25.0.3
@@ -2811,8 +2811,8 @@ packages:
       unstorage:
         optional: true
 
-  hono@4.11.2:
-    resolution: {integrity: sha512-o+avdUAD1v94oHkjGBhiMhBV4WBHxhbu0+CUVH78hhphKy/OKQLxtKjkmmNcrMlbYAhAbsM/9F+l3KnYxyD3Lg==}
+  hono@4.11.3:
+    resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
     engines: {node: '>=16.9.0'}
 
   html-entities@2.6.0:
@@ -5237,41 +5237,41 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@hono/node-server@1.19.7(hono@4.11.2)':
+  '@hono/node-server@1.19.7(hono@4.11.3)':
     dependencies:
-      hono: 4.11.2
+      hono: 4.11.3
 
-  '@hono/node-ws@1.2.0(@hono/node-server@1.19.7(hono@4.11.2))(hono@4.11.2)':
+  '@hono/node-ws@1.2.0(@hono/node-server@1.19.7(hono@4.11.3))(hono@4.11.3)':
     dependencies:
-      '@hono/node-server': 1.19.7(hono@4.11.2)
-      hono: 4.11.2
+      '@hono/node-server': 1.19.7(hono@4.11.3)
+      hono: 4.11.3
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@hono/sentry@1.2.2(hono@4.11.2)':
+  '@hono/sentry@1.2.2(hono@4.11.3)':
     dependencies:
-      hono: 4.11.2
+      hono: 4.11.3
       toucan-js: 4.1.1
 
-  '@hono/vite-dev-server@0.23.0(hono@4.11.2)':
+  '@hono/vite-dev-server@0.23.0(hono@4.11.3)':
     dependencies:
-      '@hono/node-server': 1.19.7(hono@4.11.2)
-      hono: 4.11.2
+      '@hono/node-server': 1.19.7(hono@4.11.3)
+      hono: 4.11.3
       minimatch: 9.0.5
 
-  '@hono/zod-openapi@1.2.0(hono@4.11.2)(zod@4.2.1)':
+  '@hono/zod-openapi@1.2.0(hono@4.11.3)(zod@4.2.1)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.2.0(zod@4.2.1)
-      '@hono/zod-validator': 0.7.6(hono@4.11.2)(zod@4.2.1)
-      hono: 4.11.2
+      '@hono/zod-validator': 0.7.6(hono@4.11.3)(zod@4.2.1)
+      hono: 4.11.3
       openapi3-ts: 4.5.0
       zod: 4.2.1
 
-  '@hono/zod-validator@0.7.6(hono@4.11.2)(zod@4.2.1)':
+  '@hono/zod-validator@0.7.6(hono@4.11.3)(zod@4.2.1)':
     dependencies:
-      hono: 4.11.2
+      hono: 4.11.3
       zod: 4.2.1
 
   '@humanfs/core@0.19.1': {}
@@ -5570,10 +5570,10 @@ snapshots:
 
   '@scalar/helpers@0.2.4': {}
 
-  '@scalar/hono-api-reference@0.9.30(hono@4.11.2)':
+  '@scalar/hono-api-reference@0.9.30(hono@4.11.3)':
     dependencies:
       '@scalar/core': 0.3.28
-      hono: 4.11.2
+      hono: 4.11.3
 
   '@scalar/types@0.5.4':
     dependencies:
@@ -7203,19 +7203,19 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono-pino@0.10.3(hono@4.11.2)(pino@10.1.0):
+  hono-pino@0.10.3(hono@4.11.3)(pino@10.1.0):
     dependencies:
       defu: 6.1.4
-      hono: 4.11.2
+      hono: 4.11.3
       pino: 10.1.0
 
-  hono-rate-limiter@0.5.2(hono@4.11.2)(unstorage@1.17.3(ioredis@5.8.2)):
+  hono-rate-limiter@0.5.2(hono@4.11.3)(unstorage@1.17.3(ioredis@5.8.2)):
     dependencies:
-      hono: 4.11.2
+      hono: 4.11.3
     optionalDependencies:
       unstorage: 1.17.3(ioredis@5.8.2)
 
-  hono@4.11.2: {}
+  hono@4.11.3: {}
 
   html-entities@2.6.0: {}
 

@@ -47,6 +47,9 @@ const EnvSchema = z.object({
 
   /** Sentry错误追踪 */
   SENTRY_DSN: z.string().optional(),
+
+  /** 信任的代理IP */
+  TRUSTED_PROXY_IPS: z.string().default(""),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

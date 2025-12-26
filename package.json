@@ -39,7 +39,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
-    "hono": "^4.11.2",
+    "hono": "^4.11.3",
     "hono-pino": "^0.10.3",
     "hono-rate-limiter": "^0.5.2",
     "iconv-lite": "^0.7.1",
