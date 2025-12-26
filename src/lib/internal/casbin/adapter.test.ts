@@ -70,10 +70,10 @@ describe("drizzle casbin adapter", () => {
     const initialEnforcer = await newEnforcer(model, adapter);
 
     // 添加初始策略
-    await initialEnforcer.addPolicy("alice", "data1", "read", "allow");
-    await initialEnforcer.addPolicy("bob", "data2", "write", "allow");
-    await initialEnforcer.addPolicy("data2_admin", "data2", "read", "allow");
-    await initialEnforcer.addPolicy("data2_admin", "data2", "write", "allow");
+    await initialEnforcer.addPolicy("alice", "data1", "read");
+    await initialEnforcer.addPolicy("bob", "data2", "write");
+    await initialEnforcer.addPolicy("data2_admin", "data2", "read");
+    await initialEnforcer.addPolicy("data2_admin", "data2", "write");
 
     // 添加角色继承
     await initialEnforcer.addGroupingPolicy("alice", "data2_admin");
@@ -110,51 +110,51 @@ describe("drizzle casbin adapter", () => {
     it("应该从数据库加载策略", async () => {
       // beforeEach 已经加载了策略，这里直接验证
       await testGetPolicy(enforcer, [
-        ["alice", "data1", "read", "allow"],
-        ["bob", "data2", "write", "allow"],
-        ["data2_admin", "data2", "read", "allow"],
-        ["data2_admin", "data2", "write", "allow"],
+        ["alice", "data1", "read"],
+        ["bob", "data2", "write"],
+        ["data2_admin", "data2", "read"],
+        ["data2_admin", "data2", "write"],
       ]);
     });
 
     it("应该使用适配器加载策略", async () => {
       const e = await newEnforcer(model, adapter);
       await testGetPolicy(e, [
-        ["alice", "data1", "read", "allow"],
-        ["bob", "data2", "write", "allow"],
-        ["data2_admin", "data2", "read", "allow"],
-        ["data2_admin", "data2", "write", "allow"],
+        ["alice", "data1", "read"],
+        ["bob", "data2", "write"],
+        ["data2_admin", "data2", "read"],
+        ["data2_admin", "data2", "write"],
       ]);
     });
 
     it("应该添加策略到数据库", async () => {
-      await adapter.addPolicy("", "p", ["role", "res", "action", "allow"]);
+      await adapter.addPolicy("", "p", ["role", "res", "action"]);
       const e = await newEnforcer(model, adapter);
       await testGetPolicy(e, [
-        ["alice", "data1", "read", "allow"],
-        ["bob", "data2", "write", "allow"],
-        ["data2_admin", "data2", "read", "allow"],
-        ["data2_admin", "data2", "write", "allow"],
-        ["role", "res", "action", "allow"],
+        ["alice", "data1", "read"],
+        ["bob", "data2", "write"],
+        ["data2_admin", "data2", "read"],
+        ["data2_admin", "data2", "write"],
+        ["role", "res", "action"],
       ]);
     });
 
     it("应该删除策略", async () => {
-      await adapter.removePolicy("", "p", ["role", "res", "action", "allow"]);
+      await adapter.removePolicy("", "p", ["role", "res", "action"]);
       const e = await newEnforcer(model, adapter);
       await testGetPolicy(e, [
-        ["alice", "data1", "read", "allow"],
-        ["bob", "data2", "write", "allow"],
-        ["data2_admin", "data2", "read", "allow"],
-        ["data2_admin", "data2", "write", "allow"],
+        ["alice", "data1", "read"],
+        ["bob", "data2", "write"],
+        ["data2_admin", "data2", "read"],
+        ["data2_admin", "data2", "write"],
       ]);
     });
 
     it("应该批量添加策略", async () => {
       await adapter.addPolicies("", "p", [
-        ["user1", "/api/resource1", "GET", "allow"],
-        ["user2", "/api/resource2", "POST", "allow"],
-        ["user3", "/api/resource3", "DELETE", "deny"],
+        ["user1", "/api/resource1", "GET"],
+        ["user2", "/api/resource2", "POST"],
+        ["user3", "/api/resource3", "DELETE"],
       ]);
 
       const e = await newEnforcer(model, adapter);
@@ -167,9 +167,9 @@ describe("drizzle casbin adapter", () => {
 
     it("应该批量删除策略", async () => {
       await adapter.removePolicies("", "p", [
-        ["user1", "/api/resource1", "GET", "allow"],
-        ["user2", "/api/resource2", "POST", "allow"],
-        ["user3", "/api/resource3", "DELETE", "deny"],
+        ["user1", "/api/resource1", "GET"],
+        ["user2", "/api/resource2", "POST"],
+        ["user3", "/api/resource3", "DELETE"],
       ]);
 
       const e = await newEnforcer(model, adapter);
@@ -184,8 +184,8 @@ describe("drizzle casbin adapter", () => {
       await adapter.removeFilteredPolicy("", "p", 0, "data2_admin");
       const e = await newEnforcer(model, adapter);
       await testGetPolicy(e, [
-        ["alice", "data1", "read", "allow"],
-        ["bob", "data2", "write", "allow"],
+        ["alice", "data1", "read"],
+        ["bob", "data2", "write"],
       ]);
     });
   });
@@ -236,10 +236,10 @@ describe("drizzle casbin adapter", () => {
         // 重新初始化测试数据
         await cleanupTestData();
         const e = await newEnforcer(model, adapter);
-        await e.addPolicy("alice", "data1", "read", "allow");
-        await e.addPolicy("bob", "data2", "write", "allow");
-        await e.addPolicy("data2_admin", "data2", "read", "allow");
-        await e.addPolicy("data2_admin", "data2", "write", "allow");
+        await e.addPolicy("alice", "data1", "read");
+        await e.addPolicy("bob", "data2", "write");
+        await e.addPolicy("data2_admin", "data2", "read");
+        await e.addPolicy("data2_admin", "data2", "write");
         await e.addGroupingPolicy("alice", "data2_admin");
         await e.addGroupingPolicy("bob", "data1_admin");
       }
@@ -250,13 +250,13 @@ describe("drizzle casbin adapter", () => {
       testModel.loadModelFromText(casbinModelText);
 
       await adapter.loadFilteredPolicy(testModel, {
-        p: ["alice", "data1", "read", "allow"],
+        p: ["alice", "data1", "read"],
       });
 
       const policies = testModel.getPolicy("p", "p");
 
       expect(policies).toHaveLength(1);
-      expect(policies[0]).toEqual(["alice", "data1", "read", "allow"]);
+      expect(policies[0]).toEqual(["alice", "data1", "read"]);
       expect(adapter.isFiltered()).toBe(true);
     });
 
@@ -266,8 +266,8 @@ describe("drizzle casbin adapter", () => {
 
       await adapter.loadFilteredPolicy(testModel, {
         p: [
-          ["data2_admin", "data2", "read", "allow"],
-          ["data2_admin", "data2", "write", "allow"],
+          ["data2_admin", "data2", "read"],
+          ["data2_admin", "data2", "write"],
         ],
       });
 
@@ -286,10 +286,10 @@ describe("drizzle casbin adapter", () => {
         // 重新初始化测试数据
         await cleanupTestData();
         const e = await newEnforcer(model, adapter);
-        await e.addPolicy("alice", "data1", "read", "allow");
-        await e.addPolicy("bob", "data2", "write", "allow");
-        await e.addPolicy("data2_admin", "data2", "read", "allow");
-        await e.addPolicy("data2_admin", "data2", "write", "allow");
+        await e.addPolicy("alice", "data1", "read");
+        await e.addPolicy("bob", "data2", "write");
+        await e.addPolicy("data2_admin", "data2", "read");
+        await e.addPolicy("data2_admin", "data2", "write");
         await e.addGroupingPolicy("alice", "data2_admin");
         await e.addGroupingPolicy("bob", "data1_admin");
 
@@ -332,7 +332,7 @@ describe("drizzle casbin adapter", () => {
     });
 
     it("应该支持 keyMatch3 路径匹配", async () => {
-      await enforcer.addPolicy("user", "/api/v1/users/*", "GET", "allow");
+      await enforcer.addPolicy("user", "/api/v1/users/*", "GET");
 
       const result1 = await enforcer.enforce("user", "/api/v1/users/123", "GET");
 
@@ -348,7 +348,7 @@ describe("drizzle casbin adapter", () => {
     });
 
     it("应该支持 regexMatch 动作匹配", async () => {
-      await enforcer.addPolicy("user", "/api/admin", "(GET)|(POST)", "allow");
+      await enforcer.addPolicy("user", "/api/admin", "(GET)|(POST)");
 
       const result1 = await enforcer.enforce("user", "/api/admin", "GET");
 
@@ -361,14 +361,6 @@ describe("drizzle casbin adapter", () => {
       const result3 = await enforcer.enforce("user", "/api/admin", "DELETE");
 
       expect(result3).toBe(false);
-    });
-
-    it("应该正确处理 deny 策略", async () => {
-      await enforcer.addPolicy("user", "/api/sensitive", "GET", "deny");
-
-      const result = await enforcer.enforce("user", "/api/sensitive", "GET");
-
-      expect(result).toBe(false);
     });
   });
 
@@ -392,8 +384,8 @@ describe("drizzle casbin adapter", () => {
       const testModel = newModel();
       testModel.loadModelFromText(casbinModelText);
 
-      testModel.addPolicy("p", "p", ["new_user", "/api/test", "GET", "allow"]);
-      testModel.addPolicy("p", "p", ["new_user2", "/api/test2", "POST", "allow"]);
+      testModel.addPolicy("p", "p", ["new_user", "/api/test", "GET"]);
+      testModel.addPolicy("p", "p", ["new_user2", "/api/test2", "POST"]);
       testModel.addPolicy("g", "g", ["new_user", "admin"]);
 
       const result = await adapter.savePolicy(testModel);
@@ -416,7 +408,7 @@ describe("drizzle casbin adapter", () => {
       const testModel = newModel();
       testModel.loadModelFromText(casbinModelText);
 
-      testModel.addPolicy("p", "p", ["final_user", "/api/final", "GET", "allow"]);
+      testModel.addPolicy("p", "p", ["final_user", "/api/final", "GET"]);
 
       await adapter.savePolicy(testModel);
 
@@ -425,7 +417,7 @@ describe("drizzle casbin adapter", () => {
       const policies = await e.getPolicy();
 
       expect(policies).toHaveLength(1);
-      expect(policies[0]).toEqual(["final_user", "/api/final", "GET", "allow"]);
+      expect(policies[0]).toEqual(["final_user", "/api/final", "GET"]);
     });
   });
 
@@ -436,9 +428,9 @@ describe("drizzle casbin adapter", () => {
       const e = await newEnforcer(model, adapter);
 
       // 重新添加测试数据
-      await e.addPolicy("alice", "/api/user", "GET", "allow");
-      await e.addPolicy("alice", "/api/user", "POST", "allow");
-      await e.addPolicy("bob", "/api/admin", "GET", "allow");
+      await e.addPolicy("alice", "/api/user", "GET");
+      await e.addPolicy("alice", "/api/user", "POST");
+      await e.addPolicy("bob", "/api/admin", "GET");
       await e.addGroupingPolicy("alice", "user_role");
       await e.addGroupingPolicy("bob", "admin_role");
 
@@ -453,10 +445,10 @@ describe("drizzle casbin adapter", () => {
       await cleanupTestData();
       const e = await newEnforcer(model, adapter);
 
-      await e.addPolicy("alice", "data1", "read", "allow");
-      await e.addPolicy("bob", "data2", "write", "allow");
-      await e.addPolicy("data2_admin", "data2", "read", "allow");
-      await e.addPolicy("data2_admin", "data2", "write", "allow");
+      await e.addPolicy("alice", "data1", "read");
+      await e.addPolicy("bob", "data2", "write");
+      await e.addPolicy("data2_admin", "data2", "read");
+      await e.addPolicy("data2_admin", "data2", "write");
       await e.addGroupingPolicy("alice", "data2_admin");
       await e.addGroupingPolicy("bob", "data1_admin");
     });
@@ -466,8 +458,8 @@ describe("drizzle casbin adapter", () => {
       const permissions = await e.getPermissionsForUser("alice");
 
       expect(permissions).toHaveLength(2);
-      expect(permissions).toContainEqual(["alice", "/api/user", "GET", "allow"]);
-      expect(permissions).toContainEqual(["alice", "/api/user", "POST", "allow"]);
+      expect(permissions).toContainEqual(["alice", "/api/user", "GET"]);
+      expect(permissions).toContainEqual(["alice", "/api/user", "POST"]);
     });
 
     it("应该获取用户的所有角色", async () => {
@@ -501,12 +493,12 @@ describe("drizzle casbin adapter", () => {
       const e = await newEnforcer(model, adapter);
 
       // 添加一个角色的权限
-      await e.addPolicy("admin_role", "/api/admin", "GET", "allow");
-      await e.addPolicy("admin_role", "/api/admin", "POST", "allow");
-      await e.addPolicy("user_role", "/api/user", "GET", "allow");
+      await e.addPolicy("admin_role", "/api/admin", "GET");
+      await e.addPolicy("admin_role", "/api/admin", "POST");
+      await e.addPolicy("user_role", "/api/user", "GET");
 
       // alice 直接有一个权限
-      await e.addPolicy("alice", "/api/profile", "GET", "allow");
+      await e.addPolicy("alice", "/api/profile", "GET");
 
       // alice 拥有 user_role 角色
       await e.addGroupingPolicy("alice", "user_role");
@@ -520,11 +512,11 @@ describe("drizzle casbin adapter", () => {
       const implicitPermissions = await enforcer.getImplicitPermissionsForUser("alice");
 
       // alice 应该有 2 个权限:
-      // 1. 自己直接的权限: ["alice", "/api/profile", "GET", "allow"]
-      // 2. 从 user_role 继承的权限: ["user_role", "/api/user", "GET", "allow"]
+      // 1. 自己直接的权限: ["alice", "/api/profile", "GET"]
+      // 2. 从 user_role 继承的权限: ["user_role", "/api/user", "GET"]
       expect(implicitPermissions.length).toBeGreaterThanOrEqual(2);
-      expect(implicitPermissions).toContainEqual(["alice", "/api/profile", "GET", "allow"]);
-      expect(implicitPermissions).toContainEqual(["user_role", "/api/user", "GET", "allow"]);
+      expect(implicitPermissions).toContainEqual(["alice", "/api/profile", "GET"]);
+      expect(implicitPermissions).toContainEqual(["user_role", "/api/user", "GET"]);
     });
   });
 });

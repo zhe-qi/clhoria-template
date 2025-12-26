@@ -158,12 +158,12 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
   const permissionsSet = new Set<string>();
   const groupingsSet = new Set<string>();
 
-  // 遍历角色，逐个处理权限（避免一次性创建大量中间数组）
-  for (const role of roles) {
-    // 获取当前角色的所有权限（包括通过角色继承获得的权限）
-    const perms = await casbinEnforcer.getImplicitPermissionsForUser(role);
+  const allPermsArrays = await Promise.all(
+    roles.map(role => casbinEnforcer.getImplicitPermissionsForUser(role)),
+  );
 
-    // 处理当前角色的每一项权限
+  // 处理所有角色的权限
+  for (const perms of allPermsArrays) {
     for (const perm of perms) {
       // 过滤空数组
       if (!perm || perm.length === 0)

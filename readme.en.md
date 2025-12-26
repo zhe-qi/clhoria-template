@@ -165,6 +165,14 @@ src/routes/admin/users/handlers.ts   # Presentation layer: calls application ser
 
 ## Core Architecture Features
 
+### 🔄 Auto Route Loading
+
+Auto-scans and registers route modules using `import.meta.glob`. Just create a directory to add new modules. Supports HMR with millisecond-level hot updates.
+
+### 🧩 Singleton Management System
+
+Unified management for long-lived connections like PostgreSQL, Redis, and Casbin. Solves connection leak issues in Vite HMR mode with automatic resource cleanup.
+
 ### 🎯 Integrated Permission + Menu + Dictionary Solution
 
 Modern architecture based on **Casbin + Refine + PostgreSQL Enum + OpenAPI**, thoroughly simplifying traditional backend management system complexity.

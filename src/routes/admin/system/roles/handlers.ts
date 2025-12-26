@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
@@ -51,17 +51,17 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   // 提取 parentRoleIds（如果有）
   const { parentRoleIds, ...roleData } = body;
 
-  // 如果有上级角色，先检查是否会产生循环继承
+  // 如果有上级角色，检查父角色是否存在
   if (parentRoleIds && parentRoleIds.length > 0) {
-    // 新创建的角色不会有循环继承问题，但要检查父角色是否存在
-    const parentRoles = await db
+    // 只查询指定的 parentRoleIds，而非全表
+    const existingParents = await db
       .select({ id: systemRoles.id })
-      .from(systemRoles);
+      .from(systemRoles)
+      .where(inArray(systemRoles.id, parentRoleIds));
 
-    const existingIds = new Set(parentRoles.map(r => r.id));
-    const invalidIds = parentRoleIds.filter(pid => !existingIds.has(pid));
-
-    if (invalidIds.length > 0) {
+    if (existingParents.length !== parentRoleIds.length) {
+      const existingIds = new Set(existingParents.map(r => r.id));
+      const invalidIds = parentRoleIds.filter(pid => !existingIds.has(pid));
       return c.json(Resp.fail(`上级角色不存在: ${invalidIds.join(", ")}`), HttpStatusCodes.BAD_REQUEST);
     }
   }
@@ -128,15 +128,15 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
         return c.json(Resp.fail("设置的上级角色会产生循环继承"), HttpStatusCodes.BAD_REQUEST);
       }
 
-      // 检查父角色是否存在
-      const parentRoles = await db
+      // 优化：只查询指定的 parentRoleIds，而非全表
+      const existingParents = await db
         .select({ id: systemRoles.id })
-        .from(systemRoles);
+        .from(systemRoles)
+        .where(inArray(systemRoles.id, parentRoleIds));
 
-      const existingIds = new Set(parentRoles.map(r => r.id));
-      const invalidIds = parentRoleIds.filter(pid => !existingIds.has(pid));
-
-      if (invalidIds.length > 0) {
+      if (existingParents.length !== parentRoleIds.length) {
+        const existingIds = new Set(existingParents.map(r => r.id));
+        const invalidIds = parentRoleIds.filter(pid => !existingIds.has(pid));
         return c.json(Resp.fail(`上级角色不存在: ${invalidIds.join(", ")}`), HttpStatusCodes.BAD_REQUEST);
       }
     }
@@ -275,7 +275,7 @@ export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = a
 
   // 构建新权限的数组格式（所有权限都是直接权限）
   const oldPolicies = directPermissions;
-  const newPolicies = permissions.map(([resource, action]) => [id.toString(), resource, action, "allow"]);
+  const newPolicies = permissions.map(([resource, action]) => [id.toString(), resource, action]);
 
   let removedCount = 0;
   let addedCount = 0;
@@ -291,15 +291,29 @@ export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = a
 
   // 添加新权限
   if (newPolicies.length > 0) {
-    const addSuccess = await enforcer.addPolicies(newPolicies);
-    if (!addSuccess) {
-      // 添加失败，尝试回滚：重新添加旧权限
-      if (oldPolicies.length > 0) {
-        await enforcer.addPolicies(oldPolicies);
+    try {
+      const addSuccess = await enforcer.addPolicies(newPolicies);
+      if (!addSuccess) {
+        // 添加失败，尝试回滚：重新添加旧权限
+        if (oldPolicies.length > 0) {
+          await enforcer.addPolicies(oldPolicies);
+        }
+        return c.json(Resp.fail("添加新权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
       }
-      return c.json(Resp.fail("添加新权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
+      addedCount = newPolicies.length;
     }
-    addedCount = newPolicies.length;
+    catch (error) {
+      // 添加异常，尝试回滚：重新添加旧权限
+      if (oldPolicies.length > 0) {
+        try {
+          await enforcer.addPolicies(oldPolicies);
+        }
+        catch {
+          // 回滚也失败，记录错误但继续抛出原错误
+        }
+      }
+      throw error;
+    }
   }
 
   return c.json(Resp.ok({ added: addedCount, removed: removedCount, total: newPolicies.length }), HttpStatusCodes.OK);

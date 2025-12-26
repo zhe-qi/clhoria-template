@@ -12,7 +12,7 @@ CREATE TABLE "casbin_rule" (
 	"v3" varchar(64) DEFAULT '' NOT NULL,
 	"v4" varchar(64) DEFAULT '' NOT NULL,
 	"v5" varchar(64) DEFAULT '' NOT NULL,
-	CONSTRAINT "casbin_rule_pkey" PRIMARY KEY("ptype","v0","v1","v2","v3")
+	CONSTRAINT "casbin_rule_pkey" PRIMARY KEY("ptype","v0","v1","v2")
 );
 --> statement-breakpoint
 CREATE TABLE "system_roles" (

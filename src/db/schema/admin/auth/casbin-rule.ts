@@ -11,14 +11,14 @@ export const casbinRule = pgTable("casbin_rule", {
   v1: varchar({ length: 254 }).notNull(), // 非空：p/g 策略均需对象
   /** 动作：业务动作（仅p策略使用，g策略为空字符串） */
   v2: varchar({ length: 64 }).notNull().default(""), // 默认空字符串：兼容g策略
-  /** 效果：allow/deny（仅p策略使用，g策略为空字符串） */
-  v3: varchar({ length: 64 }).notNull().default(""), // 默认空字符串：兼容g策略
+  /** 保留字段（暂不使用，默认空字符串） */
+  v3: varchar({ length: 64 }).notNull().default(""),
   /** 保留字段（暂不使用，默认空字符串） */
   v4: varchar({ length: 64 }).notNull().default(""),
   /** 保留字段（暂不使用，默认空字符串） */
   v5: varchar({ length: 64 }).notNull().default(""),
 }, table => [
-  primaryKey({ name: "casbin_rule_pkey", columns: [table.ptype, table.v0, table.v1, table.v2, table.v3] }),
+  primaryKey({ name: "casbin_rule_pkey", columns: [table.ptype, table.v0, table.v1, table.v2] }),
   index("idx_casbin_g_v0").on(table.ptype, table.v0, table.v1),
 ]);
 
@@ -33,7 +33,7 @@ export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
   v2: schema =>
     schema.meta({ description: "动作: 仅p策略使用（如GET/POST）" }),
   v3: schema =>
-    schema.meta({ description: "效果: 仅p策略使用（allow/deny）" }),
+    schema.meta({ description: "保留字段" }),
   v4: schema =>
     schema.meta({ description: "保留字段" }),
   v5: schema =>
@@ -47,17 +47,14 @@ type InsertCasbinRuleInput = z.infer<typeof insertCasbinRuleSchema>;
 export const insertCasbinRuleSchema = selectCasbinRuleSchema
   .refine((data: InsertCasbinRuleInput) => {
     if (data.ptype === "g") {
-      if ((data.v2 !== "") || (data.v3 !== "")) {
-        throw new Error("角色继承规则（g）不允许设置「动作（v2）」和「效果（v3）」，请留空");
+      if (data.v2 !== "") {
+        throw new Error("角色继承规则（g）不允许设置「动作（v2）」，请留空");
       }
     }
 
     if (data.ptype === "p") {
-      if ((data.v2 === "") || (data.v3 === "")) {
-        throw new Error("权限策略（p）必须设置「动作（v2，如GET/POST）」和「效果（v3，如allow/deny）」");
-      }
-      if (!["allow", "deny"].includes(data.v3)) {
-        throw new Error("权限策略（p）的效果（v3）仅支持「allow」或「deny」");
+      if (data.v2 === "") {
+        throw new Error("权限策略（p）必须设置「动作（v2，如GET/POST）」");
       }
     }
 
@@ -83,22 +80,19 @@ export const patchCasbinRuleSchema = z
   .refine((data: PatchCasbinRuleInput) => {
     const { fromOriginalRule, updateData } = data;
     const originalPtype = fromOriginalRule.ptype;
-    const { ptype: newPtype, v2: newV2, v3: newV3, v0: newV0, v1: newV1 } = updateData;
+    const { ptype: newPtype, v2: newV2, v0: newV0, v1: newV1 } = updateData;
 
     // 场景1：更新 ptype（从g改p或p改g）
     if ((newPtype !== undefined) && (newPtype !== originalPtype)) {
       if (newPtype === "g") {
-        if (((newV2 !== undefined) && (newV2 !== "")) || ((newV3 !== undefined) && (newV3 !== ""))) {
-          throw new Error(`规则类型从「${originalPtype}」改为「g（角色继承）」后，不允许设置「动作（v2）」和「效果（v3）」`);
+        if ((newV2 !== undefined) && (newV2 !== "")) {
+          throw new Error(`规则类型从「${originalPtype}」改为「g（角色继承）」后，不允许设置「动作（v2）」`);
         }
       }
 
       if (newPtype === "p") {
-        if (((newV2 === undefined) || (newV2 === "")) || ((newV3 === undefined) || (newV3 === ""))) {
-          throw new Error(`规则类型从「${originalPtype}」改为「p（权限）」后，必须设置「动作（v2）」和「效果（v3）」`);
-        }
-        if (!["allow", "deny"].includes(newV3 as string)) {
-          throw new Error(`规则类型改为「p（权限）」后，效果（v3）仅支持「allow」或「deny」，当前值：${newV3}`);
+        if ((newV2 === undefined) || (newV2 === "")) {
+          throw new Error(`规则类型从「${originalPtype}」改为「p（权限）」后，必须设置「动作（v2）」`);
         }
       }
     }
@@ -106,23 +100,14 @@ export const patchCasbinRuleSchema = z
     // 场景2：未更新 ptype（保持原类型）
     if ((newPtype === undefined) || (newPtype === originalPtype)) {
       if (originalPtype === "g") {
-        // 修复混合运算符：用括号明确 (newV2 !== undefined) 的优先级
-        if ((newV2 !== undefined) || (newV3 !== undefined)) {
-          throw new Error(`原规则为「g（角色继承）」，不允许更新「动作（v2）」和「效果（v3）」，请移除这些字段`);
+        if (newV2 !== undefined) {
+          throw new Error(`原规则为「g（角色继承）」，不允许更新「动作（v2）」，请移除此字段`);
         }
       }
 
       if (originalPtype === "p") {
         if ((newV2 !== undefined) && (newV2 === "")) {
           throw new Error(`原规则为「p（权限）」，更新「动作（v2）」时不能为空（如GET/POST）`);
-        }
-        if (newV3 !== undefined) {
-          if (newV3 === "") {
-            throw new Error(`原规则为「p（权限）」，更新「效果（v3）」时不能为空`);
-          }
-          if (!["allow", "deny"].includes(newV3)) {
-            throw new Error(`原规则为「p（权限）」，效果（v3）仅支持「allow」或「deny」，当前值：${newV3}`);
-          }
         }
       }
     }

@@ -149,7 +149,7 @@ async function seedCasbinRules(roles: any) {
           v0: "admin",
           v1: rule.v1,
           v2: rule.v2,
-          v3: "allow",
+          v3: "",
           v4: "",
           v5: "",
         })

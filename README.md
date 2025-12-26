@@ -175,6 +175,14 @@ src/routes/admin/users/handlers.ts   # 表示层:调用应用服务编排
 
 ## 核心架构特性
 
+### 🔄 自动路由加载
+
+基于 `import.meta.glob` 自动扫描注册路由模块，新增模块只需创建目录即可。支持 HMR 热更新，修改代码毫秒级生效。
+
+### 🧩 单例管理系统
+
+统一管理 PostgreSQL、Redis、Casbin 等长连接资源，解决 Vite HMR 模式下的连接泄漏问题，支持自动资源清理
+
 ### 🎯 权限 + 菜单 + 字典一体化方案
 
 基于 **Casbin + Refine + PostgreSQL Enum + OpenAPI** 的现代化架构,彻底简化传统后台管理系统的复杂度。

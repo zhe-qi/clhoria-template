@@ -191,31 +191,34 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
   const { userId } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
 
-  // 检查用户是否存在
-  const [user] = await db.select({ id: systemUsers.id }).from(systemUsers).where(eq(systemUsers.id, userId)).limit(1);
+  // 合并用户检查和当前角色查询为一次查询
+  const userWithRoles = await db.query.systemUsers.findFirst({
+    where: eq(systemUsers.id, userId),
+    columns: { id: true },
+    with: {
+      systemUserRoles: {
+        columns: { roleId: true },
+      },
+    },
+  });
 
-  if (!user) {
+  if (!userWithRoles) {
     return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 检查所有新角色是否存在
+  // 验证角色存在性
   if (roleIds.length > 0) {
     const existingRoles = await db.select({ id: systemRoles.id }).from(systemRoles).where(inArray(systemRoles.id, roleIds));
 
     if (existingRoles.length !== roleIds.length) {
-      const foundRoles = existingRoles.map(role => role.id);
-      const notFoundRoles = roleIds.filter(roleId => !foundRoles.includes(roleId));
+      const foundRoles = new Set(existingRoles.map(role => role.id));
+      const notFoundRoles = roleIds.filter(roleId => !foundRoles.has(roleId));
       return c.json(Resp.fail(`角色不存在: ${notFoundRoles.join(", ")}`), HttpStatusCodes.NOT_FOUND);
     }
   }
 
-  // 获取用户当前的所有角色
-  const currentUserRoles = await db
-    .select({ roleId: systemUserRoles.roleId })
-    .from(systemUserRoles)
-    .where(eq(systemUserRoles.userId, userId));
-
-  const currentRoleIds = currentUserRoles.map(ur => ur.roleId);
+  // 从合并查询结果获取当前角色
+  const currentRoleIds = userWithRoles.systemUserRoles.map(ur => ur.roleId);
   const currentRoleSet = new Set(currentRoleIds);
   const newRoleSet = new Set(roleIds);
 

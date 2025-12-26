@@ -190,15 +190,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
     await this.db
       .insert(this.schema)
       .values(policy)
-      .onConflictDoNothing({
-        target: [
-          this.schema.ptype,
-          this.schema.v0,
-          this.schema.v1,
-          this.schema.v2,
-          this.schema.v3,
-        ],
-      });
+      .onConflictDoNothing();
   }
 
   async addPolicies(_sec: string, ptype: string, rules: string[][]): Promise<void> {
@@ -220,15 +212,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
     await this.db
       .insert(this.schema)
       .values(policies)
-      .onConflictDoNothing({
-        target: [
-          this.schema.ptype,
-          this.schema.v0,
-          this.schema.v1,
-          this.schema.v2,
-          this.schema.v3,
-        ],
-      });
+      .onConflictDoNothing();
   }
 
   // ---------- removePolicy / removePolicies ----------

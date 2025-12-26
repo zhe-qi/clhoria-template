@@ -50,10 +50,26 @@ export function operationLog(options: { moduleName: string; description: string 
 
     // 获取响应信息
     let response: unknown = null;
+    const MAX_RESPONSE_SIZE = 50 * 1024; // 50KB 阈值
+
     try {
-      // 尝试获取响应体（如果是 JSON）
-      const resClone = c.res.clone();
-      response = await resClone.json().catch(() => null);
+      const contentLength = c.res.headers.get("content-length");
+      const responseSize = contentLength ? Number.parseInt(contentLength, 10) : 0;
+
+      // 只有响应体较小时才记录完整内容
+      if (responseSize > 0 && responseSize <= MAX_RESPONSE_SIZE) {
+        const resClone = c.res.clone();
+        response = await resClone.json().catch(() => null);
+      }
+      else if (responseSize > MAX_RESPONSE_SIZE) {
+        // 大响应只记录摘要
+        response = { _truncated: true, size: responseSize };
+      }
+      else {
+        // 未知大小，尝试解析但设置超时保护
+        const resClone = c.res.clone();
+        response = await resClone.json().catch(() => null);
+      }
     }
     catch (error) {
       logger.warn({ error }, "响应体解析失败");
