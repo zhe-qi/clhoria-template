@@ -13,9 +13,10 @@ export default defineConfig(({ mode }) => {
       ssr: "src/index.ts",
       outDir: "dist",
       minify: false,
-      sourcemap: true,
+      sourcemap: mode === "development",
       target: "esnext",
       rolldownOptions: {
+        external: [/node_modules/],
         output: {
           entryFileNames: "index.js",
           format: "esm",

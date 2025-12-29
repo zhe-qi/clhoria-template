@@ -17,7 +17,7 @@ COPY package.json pnpm-lock.yaml ./
 
 # 只安装生产依赖，减少镜像大小
 # 跳过后续处理脚本以避免 msgpackr-extract 构建问题
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --prod && \
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # 构建阶段
@@ -50,11 +50,11 @@ ENV NODE_ENV=production
 ENV LOG_LEVEL=info
 
 # 安装运行时依赖并清理缓存
-RUN apk add --no-cache openssl curl && \
+RUN apk add --no-cache openssl && \
     rm -rf /var/cache/apk/*
 
 # 安装 dotenvx
-RUN curl -sfS https://dotenvx.sh/install.sh | sh
+RUN npm install -g @dotenvx/dotenvx
 
 # 创建非 root 用户
 RUN addgroup --system --gid 1001 nodejs && \
