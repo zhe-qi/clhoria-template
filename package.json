@@ -34,7 +34,7 @@
     "@hono/zod-openapi": "^1.2.0",
     "@node-rs/argon2": "^2.0.2",
     "@scalar/hono-api-reference": "^0.9.30",
-    "casbin": "^5.45.1",
+    "casbin": "^5.45.2",
     "croner": "^9.1.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
@@ -63,7 +63,7 @@
     "simple-git-hooks": "^2.13.1",
     "type-fest": "^5.3.1",
     "typescript": "5.9.3",
-    "vite": "8.0.0-beta.4",
+    "vite": "8.0.0-beta.5",
     "vitest": "^4.0.16"
   },
   "simple-git-hooks": {
