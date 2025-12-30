@@ -1,23 +1,70 @@
-import Redis from "ioredis";
+import Redis, { Cluster } from "ioredis";
 import { parseURL } from "ioredis/built/utils/index.js";
 
 import env from "@/env";
 import { createSingleton } from "@/lib/internal/singleton";
+import logger from "@/lib/logger";
 
-export const redisConnectionOptions = parseURL(env.REDIS_URL);
+/** Redis 客户端类型（单机或集群） */
+export type RedisClient = Redis | Cluster;
 
-// 确保 port 是数字类型
-if (redisConnectionOptions.port && typeof redisConnectionOptions.port === "string") {
-  redisConnectionOptions.port = Number.parseInt(redisConnectionOptions.port, 10);
+/** 解析集群节点配置 */
+function parseClusterNodes(nodesStr: string): Array<{ host: string; port: number }> {
+  return nodesStr.split(",").map((node) => {
+    const [host, portStr] = node.trim().split(":");
+    return {
+      host: host || "127.0.0.1",
+      port: Number.parseInt(portStr || "6379", 10),
+    };
+  });
 }
 
-const redisClient = createSingleton(
-  "redis",
-  () => new Redis({
-    ...redisConnectionOptions,
+/** 创建 Redis 客户端 */
+function createRedisClient(): RedisClient {
+  const isClusterMode = env.REDIS_CLUSTER_ENABLED === "true";
+
+  if (isClusterMode) {
+    if (!env.REDIS_CLUSTER_NODES) {
+      throw new Error("集群模式下 REDIS_CLUSTER_NODES 不能为空");
+    }
+
+    const nodes = parseClusterNodes(env.REDIS_CLUSTER_NODES);
+    const baseOptions = env.REDIS_URL ? parseURL(env.REDIS_URL) : {};
+
+    logger.info({ nodes: nodes.length }, "[Redis]: 初始化集群模式");
+
+    return new Cluster(nodes, {
+      redisOptions: {
+        password: baseOptions.password as string | undefined,
+        maxRetriesPerRequest: null,
+      },
+      enableAutoPipelining: true,
+      scaleReads: "slave",
+    });
+  }
+
+  const connectionOptions = parseURL(env.REDIS_URL);
+  if (connectionOptions.port && typeof connectionOptions.port === "string") {
+    connectionOptions.port = Number.parseInt(connectionOptions.port, 10);
+  }
+
+  logger.info("[Redis]: 初始化单机模式");
+
+  return new Redis({
+    ...connectionOptions,
     maxRetriesPerRequest: null,
-  }),
+  });
+}
+
+const redisClient = createSingleton<RedisClient>(
+  "redis",
+  createRedisClient,
   { destroy: async client => void await client.quit() },
 );
 
 export default redisClient;
+
+/** 判断当前是否为集群模式 */
+export function isClusterMode(): boolean {
+  return env.REDIS_CLUSTER_ENABLED === "true";
+}

@@ -31,6 +31,10 @@ const EnvSchema = z.object({
     val => process.env.NODE_ENV !== "production" || val !== "",
     { message: "生产环境下redis连接字符串不能为空" },
   ),
+  /** Redis 集群模式开关 */
+  REDIS_CLUSTER_ENABLED: z.enum(["true", "false"]).default("false"),
+  /** Redis 集群节点列表（逗号分隔：host:port,host:port） */
+  REDIS_CLUSTER_NODES: z.string().optional(),
   /** 客户端JWT密钥 */
   CLIENT_JWT_SECRET: z.string().min(32, "JWT密钥长度至少32字符,建议使用强随机字符串"),
   /** 管理端JWT密钥 */
