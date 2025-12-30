@@ -21,8 +21,8 @@ importers:
         specifier: ^4.0.5
         version: 4.0.5
       '@dotenvx/dotenvx':
-        specifier: ^1.51.2
-        version: 1.51.2
+        specifier: ^1.51.4
+        version: 1.51.4
       '@hono/node-server':
         specifier: 1.19.7
         version: 1.19.7(hono@4.11.3)
@@ -63,8 +63,8 @@ importers:
         specifier: ^0.10.3
         version: 0.10.3(hono@4.11.3)(pino@10.1.0)
       hono-rate-limiter:
-        specifier: ^0.5.2
-        version: 0.5.2(hono@4.11.3)(unstorage@1.17.3(ioredis@5.8.2))
+        specifier: ^0.5.3
+        version: 0.5.3(hono@4.11.3)(unstorage@1.17.3(ioredis@5.8.2))
       iconv-lite:
         specifier: ^0.7.1
         version: 0.7.1
@@ -398,8 +398,8 @@ packages:
   '@cloudflare/workers-types@4.20250820.0':
     resolution: {integrity: sha512-WiGPOVlejDGlKRsTbaREkRKm8Xo5nHtucq5AmR/ObvKmaFOVVv0OQCW5Xht2YQgV0BfYPb/QEkO8oFjDXjBMZg==}
 
-  '@dotenvx/dotenvx@1.51.2':
-    resolution: {integrity: sha512-+693mNflujDZxudSEqSNGpn92QgFhJlBn9q2mDQ9yGWyHuz3hZ8B5g3EXCwdAz4DMJAI+OFCIbfEFZS+YRdrEA==}
+  '@dotenvx/dotenvx@1.51.4':
+    resolution: {integrity: sha512-AoziS8lRQ3ew/lY5J4JSlzYSN9Fo0oiyMBY37L3Bwq4mOQJT5GSrdZYLFPt6pH1LApDI3ZJceNyx+rHRACZSeQ==}
     hasBin: true
 
   '@dprint/formatter@0.3.0':
@@ -2802,8 +2802,8 @@ packages:
       hono: '>=4.0.0'
       pino: '>=7.1.0'
 
-  hono-rate-limiter@0.5.2:
-    resolution: {integrity: sha512-AMgn16vbzpt6Qy+sZJ9h5yuH9iBIybc5ZrUktoY7Xy6OOPIwR2TjmLzwdDPlTPZPKD/C75811rYwK0WPwEzvXw==}
+  hono-rate-limiter@0.5.3:
+    resolution: {integrity: sha512-M0DxbVMpPELEzLi0AJg1XyBHLGJXz7GySjsPoK+gc5YeeBsdGDGe+2RvVuCAv8ydINiwlbxqYMNxUEyYfRji/A==}
     peerDependencies:
       hono: ^4.10.8
       unstorage: ^1.17.3
@@ -4862,7 +4862,7 @@ snapshots:
   '@cloudflare/workers-types@4.20250820.0':
     optional: true
 
-  '@dotenvx/dotenvx@1.51.2':
+  '@dotenvx/dotenvx@1.51.4':
     dependencies:
       commander: 11.1.0
       dotenv: 17.2.3
@@ -7209,7 +7209,7 @@ snapshots:
       hono: 4.11.3
       pino: 10.1.0
 
-  hono-rate-limiter@0.5.2(hono@4.11.3)(unstorage@1.17.3(ioredis@5.8.2)):
+  hono-rate-limiter@0.5.3(hono@4.11.3)(unstorage@1.17.3(ioredis@5.8.2)):
     dependencies:
       hono: 4.11.3
     optionalDependencies:

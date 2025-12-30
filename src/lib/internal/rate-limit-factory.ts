@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import type { Store } from "hono-rate-limiter";
+import type { ConnInfo } from "hono/conninfo";
 import type { RedisReply } from "rate-limit-redis";
 
 import { rateLimiter } from "hono-rate-limiter";
@@ -12,6 +13,23 @@ import env from "@/env";
 import redisClient from "@/lib/redis";
 
 import { createSingleton } from "./singleton";
+
+/**
+ * 运行时检测：判断是否为 Bun 环境
+ */
+const isBun = "Bun" in globalThis;
+
+/**
+ * 动态加载对应运行时的 getConnInfo
+ * - Bun: hono/bun
+ * - Node.js: @hono/node-server/conninfo
+ */
+const getConnInfo = await (async () => {
+  if (isBun) {
+    return (await import("hono/bun")).getConnInfo;
+  }
+  return (await import("@hono/node-server/conninfo")).getConnInfo;
+})() as (c: Context) => ConnInfo;
 
 const ioredisStore = createSingleton(
   "rate-limit-store",
@@ -55,10 +73,13 @@ function normalizeIp(ip: string) {
   return ip;
 }
 
+/**
+ * 通过 Hono ConnInfo Helper 获取 Socket IP
+ * 兼容 Node.js 和 Bun 运行时
+ */
 function getSocketIp(c: Context<AppBindings>) {
-  // @ts-expect-error: Node.js adapter adds `incoming` but TS defs don’t include it
-  const incoming = c.req.raw?.incoming;
-  const ip = incoming?.socket?.remoteAddress || incoming?.connection?.remoteAddress;
+  const info = getConnInfo(c);
+  const ip = info.remote.address;
   return ip ? normalizeIp(ip) : null;
 }
 
