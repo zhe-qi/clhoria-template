@@ -25,7 +25,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **高性能菜单**: 基于 Refine 的菜单和路由最佳实践,相比传统动态路由性能更优
 - **类型安全字典**: PostgreSQL Enum + Drizzle-Zod + OpenAPI 手动同步前端枚举,编译时类型检查
 - **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
-- **高性能缓存**: Redis 缓存 + 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
+- **高性能缓存**: Redis 缓存（支持集群模式）+ 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
 - **任务队列和定时任务**: 基于 pg-boss 的后台任务队列管理，基于 croner 的定时任务
 - **对象存储**: 集成 S3 兼容对象存储(支持 Cloudflare R2、阿里云 OSS、AWS S3 等)
 - **智能验证码**: 集成 Cap.js,支持多种挑战类型的现代化验证码系统
@@ -132,46 +132,35 @@ src/db/schema/
      uuid().primaryKey().notNull().$defaultFn(() => uuidV7());
      ```
 
-**架构原则**:
+### 架构策略
 
-- **按需抽离**: 仅当业务逻辑在多个路由间复用时才创建服务层,避免过度抽象
-- **函数式设计**: 采用命名导出的纯函数/异步函数,支持 `create*`、`get*`、`update*`、`delete*` 等标准前缀
-- **混合实现**: 简单 CRUD 操作直接在 handler 中实现,复杂业务逻辑抽离为服务函数
-- **事务管理**: 复杂业务操作使用 `db.transaction()` 确保数据一致性
-- **缓存集成**: 服务层集成 Redis 缓存,提供数据缓存和权限缓存管理
+**简单 CRUD（80%）**：Handler 直接操作数据库，函数式设计，按需抽离服务层
 
-### 混合架构策略(可选)
+**复杂业务（20%）**：根据场景选择架构模式
 
-**简单 CRUD(80%)**:直接在 handler 实现,保持轻量
+| 场景             | 推荐架构     | 说明                             |
+| ---------------- | ------------ | -------------------------------- |
+| 简单 CRUD        | 三层架构     | Handler 直接操作 Drizzle         |
+| 需要技术解耦     | 六边形架构   | Port/Adapter 隔离外部依赖        |
+| 业务逻辑复杂     | DDD          | 领域模型封装业务规则             |
+| 既复杂又需解耦   | DDD + 六边形 | 两者结合                         |
 
-```typescript
-// routes/admin/posts/handlers.ts
-export const list: PostRouteHandlerType<"list"> = async (c) => {
-  const result = await db.select().from(posts).limit(10);
-  return c.json(Resp.ok(result), HttpStatusCodes.OK);
-};
-```
-
-**复杂业务(20%)**:采用轻量 DDD 分层
+**DDD / 六边形架构目录结构**:
 
 ```text
-src/domain/user/                      # 领域层
-├── user.application.ts               # 应用服务:编排多个领域服务
-├── user.entity.ts                    # 领域实体:核心业务逻辑和规则验证
-└── user.repository.ts                # 仓储接口:定义数据访问抽象
+src/domain/[module]/                  # 领域层（纯业务，无外部依赖）
+├── [module].entity.ts                # 领域实体：业务规则、状态变更
+├── [module].service.ts               # 领域服务：跨实体逻辑、流程编排
+└── [module].repository.port.ts       # 仓储接口（Port）
 
-src/infrastructure/persistence/       # 基础设施层
-└── user.repository.impl.ts           # 仓储实现:Drizzle ORM 数据访问
+src/infrastructure/persistence/       # 基础设施层（Adapter）
+├── mappers/[module].mapper.ts        # Domain ↔ Drizzle 转换
+└── repositories/[module].repository.ts  # 仓储实现（Drizzle ORM）
 
-src/routes/admin/users/handlers.ts   # 表示层:调用应用服务编排
+src/routes/{tier}/{feature}/handlers.ts  # 表示层：HTTP + 调用领域服务
 ```
 
-**分层职责**:
-
-- **Handler**:HTTP 请求响应、参数验证、调用应用服务、错误码映射
-- **Application**:业务流程编排、事务边界控制、跨聚合根协调
-- **Entity**:领域对象建模、业务规则验证、状态变更逻辑
-- **Repository**:数据访问抽象与实现分离
+**核心原则**: Domain 层纯净（不依赖 Drizzle/Redis）→ Port 定义抽象 → Adapter 实现细节 → 依赖反转
 
 ## 核心架构特性
 
@@ -250,15 +239,15 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 ### 🚀 高并发与性能优化方案
 
-**高并发解决方案**:K8s 集群 + 负载均衡 + Redis 分布式会话 + 数据库主从读写分离,实现无状态水平扩展
+**高并发解决方案**:K8s/阿里云 SLB 负载均衡 + PostgreSQL/Redis 高可用集群 + 分布式会话,实现无状态水平扩展
 
-**CPU 密集型优化**:
+**计算密集型优化**:
 
-| 场景             | 推荐方案         | 适用场景                       |
-| ---------------- | ---------------- | ------------------------------ |
-| **多次重复调用** | N-API (原生模块) | 图像处理、加密解密、数据压缩   |
-| **单次密集计算** | WASM             | 复杂算法、科学计算、单次重计算 |
-| **并行多任务**   | Worker Threads   | 大量独立任务、并发数据处理     |
+| 场景             | 推荐方案       | 适用场景                       |
+| ---------------- | -------------- | ------------------------------ |
+| **多次重复调用** | napi-rs        | 图像处理、加密解密、数据压缩   |
+| **单次密集计算** | WASM           | 复杂算法、科学计算、单次重计算 |
+| **并行多任务**   | Worker Threads | 大量独立任务、并发数据处理     |
 
 ## Claude Code 深度集成(可选)
 

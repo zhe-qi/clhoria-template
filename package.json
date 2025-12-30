@@ -5,6 +5,7 @@
   "packageManager": "pnpm@10.26.2",
   "license": "MIT",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "postinstall": "test -f node_modules/.bin/simple-git-hooks && simple-git-hooks",
     "dev": "vite",
     "start": "cross-env NODE_ENV=production dotenvx run -- node dist/index.js",

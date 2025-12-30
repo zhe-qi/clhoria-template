@@ -38,9 +38,9 @@ const REFRESH_TTL_SECONDS = differenceInSeconds(
   new Date(),
 );
 
-// ===== Redis Key 约定 =====
-const refreshKey = (token: string) => `rt:${token}`;
-const refreshIndexKey = (userId: string | number) => `rtidx:${userId}`;
+// ===== Redis Key 约定（使用 Hash Tag 确保同一用户的 key 在同一 slot） =====
+const refreshKey = (userId: string | number, token: string) => `{user:${userId}}:rt:${token}`;
+const refreshIndexKey = (userId: string | number) => `{user:${userId}}:rtidx`;
 
 // ===== Access Token 生成 =====
 async function generateAccessToken(user: UserTokenInfo) {
@@ -62,11 +62,14 @@ async function generateAccessToken(user: UserTokenInfo) {
 
 // ===== Refresh Token 生成 =====
 async function generateRefreshToken(user: UserTokenInfo) {
-  const token = crypto.randomBytes(32).toString("hex"); // 256 bit
+  const randomPart = crypto.randomBytes(32).toString("hex"); // 256 bit
+  const token = `${user.id}:${randomPart}`; // 包含 userId 便于解析
+
   const pipeline = redisClient.pipeline();
-  pipeline.set(refreshKey(token), JSON.stringify(user), "EX", REFRESH_TTL_SECONDS);
-  pipeline.sadd(refreshIndexKey(user.id), token);
+  pipeline.set(refreshKey(user.id, randomPart), JSON.stringify(user), "EX", REFRESH_TTL_SECONDS);
+  pipeline.sadd(refreshIndexKey(user.id), randomPart);
   await pipeline.exec();
+
   return token;
 }
 
@@ -83,16 +86,34 @@ export async function generateTokens(user: UserTokenInfo) {
  * 刷新 Access Token
  */
 export async function refreshAccessToken(refreshToken: string) {
-  const userDataStr = await redisClient.get(refreshKey(refreshToken));
+  // 解析 token 获取 userId
+  const separatorIndex = refreshToken.indexOf(":");
+  if (separatorIndex === -1) {
+    throw new Error("Invalid refresh token format");
+  }
+
+  const userId = refreshToken.slice(0, separatorIndex);
+  const randomPart = refreshToken.slice(separatorIndex + 1);
+
+  if (!userId || !randomPart) {
+    throw new Error("Invalid refresh token format");
+  }
+
+  const userDataStr = await redisClient.get(refreshKey(userId, randomPart));
   if (!userDataStr) {
     throw new Error("Invalid refresh token");
   }
 
   const user: UserTokenInfo = JSON.parse(userDataStr);
 
+  // 验证 token 中的 userId 与存储的一致
+  if (String(user.id) !== userId) {
+    throw new Error("Token user mismatch");
+  }
+
   // 轮换：删除旧 refresh，发新 refresh
-  await redisClient.del(refreshKey(refreshToken));
-  await redisClient.srem(refreshIndexKey(user.id), refreshToken);
+  await redisClient.del(refreshKey(userId, randomPart));
+  await redisClient.srem(refreshIndexKey(userId), randomPart);
 
   const newAccessToken = await generateAccessToken(user);
   const newRefreshToken = await generateRefreshToken(user);
@@ -105,8 +126,14 @@ export async function refreshAccessToken(refreshToken: string) {
  */
 export async function logout(userId: string | number) {
   const tokens = await redisClient.smembers(refreshIndexKey(userId));
+
+  if (tokens.length === 0) {
+    return;
+  }
+
   const pipeline = redisClient.pipeline();
-  tokens.forEach(t => pipeline.del(refreshKey(t)));
+  // 所有 key 都带有相同的 Hash Tag {user:${userId}}，确保在同一 slot
+  tokens.forEach(t => pipeline.del(refreshKey(userId, t)));
   pipeline.del(refreshIndexKey(userId));
   await pipeline.exec();
 }

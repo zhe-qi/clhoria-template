@@ -25,7 +25,7 @@ Clhoria simplifies complex technical architectures, making every coding session 
 - **High-performance Menu**: Based on Refine best practices for menus and routing, better performance than traditional dynamic routing
 - **Type-safe Dictionary**: PostgreSQL Enum + Drizzle-Zod + OpenAPI manual frontend enum sync, compile-time type checking
 - **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
-- **High-performance Cache**: Redis caching + multi-layer rate limiting + permission caching + session management + distributed locks
+- **High-performance Cache**: Redis caching (cluster mode supported) + multi-layer rate limiting + permission caching + session management + distributed locks
 - **Task Queue**: Scheduled tasks and background task queue management based on pg-boss
 - **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, Alibaba Cloud OSS, AWS S3, etc.)
 - **Smart CAPTCHA**: Integrated Cap.js with modern CAPTCHA system supporting multiple challenge types
@@ -122,46 +122,35 @@ src/db/schema/
 └── index.ts                # Unified exports
 ```
 
-**Architecture Principles**:
+### Architecture Strategy
 
-- **Extract on Demand**: Only create service layer when business logic is reused across multiple routes, avoid over-abstraction
-- **Functional Design**: Use named exports with pure/async functions, support standard prefixes like `create*`, `get*`, `update*`, `delete*`
-- **Hybrid Implementation**: Simple CRUD operations directly in handlers, complex business logic extracted as service functions
-- **Transaction Management**: Complex business operations use `db.transaction()` to ensure data consistency
-- **Cache Integration**: Service layer integrates Redis caching for data caching and permission cache management
+**Simple CRUD (80%)**: Handler directly operates database, functional design, extract service layer on demand
 
-### Hybrid Architecture Strategy (Optional)
+**Complex Business (20%)**: Choose architecture pattern based on scenario
 
-**Simple CRUD (80%)**: Implement directly in handlers, keep it lightweight
+| Scenario               | Recommended      | Description                          |
+| ---------------------- | ---------------- | ------------------------------------ |
+| Simple CRUD            | 3-tier           | Handler directly operates Drizzle    |
+| Need Tech Decoupling   | Hexagonal        | Port/Adapter isolates external deps  |
+| Complex Business Logic | DDD              | Domain model encapsulates rules      |
+| Complex + Decoupling   | DDD + Hexagonal  | Combine both                         |
 
-```typescript
-// routes/admin/posts/handlers.ts
-export const list: PostRouteHandlerType<"list"> = async (c) => {
-  const result = await db.select().from(posts).limit(10);
-  return c.json(Resp.ok(result), HttpStatusCodes.OK);
-};
-```
-
-**Complex Business (20%)**: Adopt lightweight DDD layering
+**DDD / Hexagonal Architecture Directory Structure**:
 
 ```text
-src/domain/user/                      # Domain layer
-├── user.application.ts               # Application service: orchestrates multiple domain services
-├── user.entity.ts                    # Domain entity: core business logic and rule validation
-└── user.repository.ts                # Repository interface: defines data access abstraction
+src/domain/[module]/                  # Domain layer (pure business, no external deps)
+├── [module].entity.ts                # Domain entity: business rules, state changes
+├── [module].service.ts               # Domain service: cross-entity logic, orchestration
+└── [module].repository.port.ts       # Repository interface (Port)
 
-src/infrastructure/persistence/       # Infrastructure layer
-└── user.repository.impl.ts           # Repository implementation: Drizzle ORM data access
+src/infrastructure/persistence/       # Infrastructure layer (Adapter)
+├── mappers/[module].mapper.ts        # Domain ↔ Drizzle mapping
+└── repositories/[module].repository.ts  # Repository impl (Drizzle ORM)
 
-src/routes/admin/users/handlers.ts   # Presentation layer: calls application service orchestration
+src/routes/{tier}/{feature}/handlers.ts  # Presentation: HTTP + call domain services
 ```
 
-**Layer Responsibilities**:
-
-- **Handler**: HTTP request/response, parameter validation, call application services, error code mapping
-- **Application**: Business process orchestration, transaction boundary control, cross-aggregate coordination
-- **Entity**: Domain object modeling, business rule validation, state change logic
-- **Repository**: Separation of data access abstraction and implementation
+**Core Principle**: Pure Domain (no Drizzle/Redis deps) → Port defines abstraction → Adapter implements details → Dependency Inversion
 
 ## Core Architecture Features
 
@@ -240,15 +229,15 @@ Detailed benchmark: [bun-http-framework-benchmark](https://github.com/SaltyAom/b
 
 ### 🚀 High Concurrency & Performance Optimization Solutions
 
-**High Concurrency Solution**: K8s cluster + load balancing + Redis distributed sessions + database master-slave read-write separation, enabling stateless horizontal scaling
+**High Concurrency Solution**: K8s/Cloud SLB load balancing + PostgreSQL/Redis HA clusters + distributed sessions, enabling stateless horizontal scaling
 
 **CPU-intensive Optimization**:
 
-| Scenario                  | Recommended Solution  | Use Case                                                       |
-| ------------------------- | --------------------- | -------------------------------------------------------------- |
-| **Repeated Calls**        | N-API (Native Module) | Image processing, encryption/decryption, data compression      |
-| **Single Intensive Calc** | WASM                  | Complex algorithms, scientific computing, single recalculation |
-| **Parallel Multi-task**   | Worker Threads        | Many independent tasks, concurrent data processing             |
+| Scenario                  | Recommended      | Use Case                                                       |
+| ------------------------- | ---------------- | -------------------------------------------------------------- |
+| **Repeated Calls**        | napi-rs          | Image processing, encryption/decryption, data compression      |
+| **Single Intensive Calc** | WASM             | Complex algorithms, scientific computing, single recalculation |
+| **Parallel Multi-task**   | Worker Threads   | Many independent tasks, concurrent data processing             |
 
 ## Claude Code Deep Integration (Optional)
 
