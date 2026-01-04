@@ -42,9 +42,13 @@ export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
 
 // 类型来源：z.infer<typeof selectCasbinRuleSchema> 是 selectSchema 的解析类型，omit 后得到插入类型
 type InsertCasbinRuleType = z.infer<typeof selectCasbinRuleSchema>;
-type InsertCasbinRuleInput = z.infer<typeof insertCasbinRuleSchema>;
 
-export const insertCasbinRuleSchema = selectCasbinRuleSchema
+/** 基础插入 schema（不含 refine，用于 partial 等操作） */
+export const baseCasbinRuleSchema = selectCasbinRuleSchema;
+
+type InsertCasbinRuleInput = z.infer<typeof baseCasbinRuleSchema>;
+
+export const insertCasbinRuleSchema = baseCasbinRuleSchema
   .refine((data: InsertCasbinRuleInput) => {
     if (data.ptype === "g") {
       if (data.v2 !== "") {
@@ -64,7 +68,7 @@ export const insertCasbinRuleSchema = selectCasbinRuleSchema
 type FromOriginalRuleType = {
   ptype: InsertCasbinRuleType["ptype"];
 };
-type UpdateDataInput = z.infer<typeof insertCasbinRuleSchema>;
+type UpdateDataInput = z.infer<typeof baseCasbinRuleSchema>;
 type PatchCasbinRuleInput = {
   fromOriginalRule: FromOriginalRuleType;
   updateData: Partial<UpdateDataInput>;
@@ -75,7 +79,8 @@ export const patchCasbinRuleSchema = z
     fromOriginalRule: z.object({
       ptype: selectCasbinRuleSchema.shape.ptype,
     }).meta({ description: "原规则的基础信息（仅需ptype，用于校验更新合法性）" }),
-    updateData: insertCasbinRuleSchema.partial().meta({ description: "待更新的规则字段（部分可选）" }),
+    // Zod v4.3+: 包含 refine 的 schema 不能调用 partial()，使用基础 schema
+    updateData: baseCasbinRuleSchema.partial().meta({ description: "待更新的规则字段（部分可选）" }),
   })
   .refine((data: PatchCasbinRuleInput) => {
     const { fromOriginalRule, updateData } = data;
