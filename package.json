@@ -2,7 +2,7 @@
   "name": "clhoria-template",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.26.2",
+  "packageManager": "pnpm@10.27.0",
   "license": "MIT",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -23,9 +23,9 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^8.2.0",
-    "@aws-sdk/client-s3": "^3.958.0",
-    "@aws-sdk/s3-request-presigner": "^3.958.0",
+    "@asteasolutions/zod-to-openapi": "^8.3.3",
+    "@aws-sdk/client-s3": "^3.962.0",
+    "@aws-sdk/s3-request-presigner": "^3.962.0",
     "@cap.js/server": "^4.0.5",
     "@dotenvx/dotenvx": "^1.51.4",
     "@hono/node-server": "1.19.7",
@@ -34,7 +34,7 @@
     "@hono/zod-openapi": "^1.2.0",
     "@node-rs/argon2": "^2.0.2",
     "@scalar/hono-api-reference": "^0.9.30",
-    "casbin": "^5.45.2",
+    "casbin": "^5.46.0",
     "croner": "^9.1.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
@@ -48,7 +48,7 @@
     "pino": "^10.1.0",
     "postgres": "^3.4.7",
     "rate-limit-redis": "^4.3.1",
-    "zod": "4.2.1"
+    "zod": "4.3.4"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^6.7.3",

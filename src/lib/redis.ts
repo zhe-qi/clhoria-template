@@ -3,7 +3,6 @@ import { parseURL } from "ioredis/built/utils/index.js";
 
 import env from "@/env";
 import { createSingleton } from "@/lib/internal/singleton";
-import logger from "@/lib/logger";
 
 /** Redis 客户端类型（单机或集群） */
 export type RedisClient = Redis | Cluster;
@@ -31,8 +30,6 @@ function createRedisClient(): RedisClient {
     const nodes = parseClusterNodes(env.REDIS_CLUSTER_NODES);
     const baseOptions = env.REDIS_URL ? parseURL(env.REDIS_URL) : {};
 
-    logger.info({ nodes: nodes.length }, "[Redis]: 初始化集群模式");
-
     return new Cluster(nodes, {
       redisOptions: {
         password: baseOptions.password as string | undefined,
@@ -47,8 +44,6 @@ function createRedisClient(): RedisClient {
   if (connectionOptions.port && typeof connectionOptions.port === "string") {
     connectionOptions.port = Number.parseInt(connectionOptions.port, 10);
   }
-
-  logger.info("[Redis]: 初始化单机模式");
 
   return new Redis({
     ...connectionOptions,

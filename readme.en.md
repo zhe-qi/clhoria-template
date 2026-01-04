@@ -128,12 +128,12 @@ src/db/schema/
 
 **Complex Business (20%)**: Choose architecture pattern based on scenario
 
-| Scenario               | Recommended      | Description                          |
-| ---------------------- | ---------------- | ------------------------------------ |
-| Simple CRUD            | 3-tier           | Handler directly operates Drizzle    |
-| Need Tech Decoupling   | Hexagonal        | Port/Adapter isolates external deps  |
-| Complex Business Logic | DDD              | Domain model encapsulates rules      |
-| Complex + Decoupling   | DDD + Hexagonal  | Combine both                         |
+| Scenario               | Recommended     | Description                         |
+| ---------------------- | --------------- | ----------------------------------- |
+| Simple CRUD            | 3-tier          | Handler directly operates Drizzle   |
+| Need Tech Decoupling   | Hexagonal       | Port/Adapter isolates external deps |
+| Complex Business Logic | DDD             | Domain model encapsulates rules     |
+| Complex + Decoupling   | DDD + Hexagonal | Combine both                        |
 
 **DDD / Hexagonal Architecture Directory Structure**:
 
@@ -233,11 +233,11 @@ Detailed benchmark: [bun-http-framework-benchmark](https://github.com/SaltyAom/b
 
 **CPU-intensive Optimization**:
 
-| Scenario                  | Recommended      | Use Case                                                       |
-| ------------------------- | ---------------- | -------------------------------------------------------------- |
-| **Repeated Calls**        | napi-rs          | Image processing, encryption/decryption, data compression      |
-| **Single Intensive Calc** | WASM             | Complex algorithms, scientific computing, single recalculation |
-| **Parallel Multi-task**   | Worker Threads   | Many independent tasks, concurrent data processing             |
+| Scenario                  | Recommended    | Use Case                                                       |
+| ------------------------- | -------------- | -------------------------------------------------------------- |
+| **Repeated Calls**        | napi-rs        | Image processing, encryption/decryption, data compression      |
+| **Single Intensive Calc** | WASM           | Complex algorithms, scientific computing, single recalculation |
+| **Parallel Multi-task**   | Worker Threads | Many independent tasks, concurrent data processing             |
 
 ## Claude Code Deep Integration (Optional)
 
