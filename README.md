@@ -306,6 +306,8 @@ pnpm test
 
 如有问题或建议,请创建 [Issue](https://github.com/zhe-qi/clhoria-template/issues) 或联系维护者。
 
+**QQ 交流群**: 1076889416
+
 ## 贡献指南
 
 欢迎贡献!请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范,提交 PR 前确保 `pnpm test` 和 `pnpm lint` 通过。
