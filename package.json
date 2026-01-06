@@ -43,7 +43,7 @@
     "hono-pino": "^0.10.3",
     "hono-rate-limiter": "^0.5.3",
     "iconv-lite": "^0.7.1",
-    "ioredis": "5.8.2",
+    "ioredis": "5.9.0",
     "pg-boss": "^12.5.4",
     "pino": "^10.1.0",
     "postgres": "^3.4.7",
