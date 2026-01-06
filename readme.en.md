@@ -296,6 +296,8 @@ pnpm test
 
 For questions or suggestions, please create an [Issue](https://github.com/zhe-qi/clhoria-template/issues) or contact the maintainer.
 
+**QQ Group**: 1076889416
+
 ## Contributing Guidelines
 
 Contributions welcome! Please follow [Conventional Commits](https://www.conventionalcommits.org/) specifications, ensure `pnpm test` and `pnpm lint` pass before submitting PR.
