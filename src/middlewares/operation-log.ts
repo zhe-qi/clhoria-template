@@ -1,17 +1,18 @@
-import type { Context, MiddlewareHandler } from "hono";
-import type { JWTPayload } from "hono/utils/jwt/types";
-
 import { differenceInMilliseconds, format } from "date-fns";
 
 import env from "@/env";
 import { LogType } from "@/lib/enums";
+import { createMiddleware } from "@/lib/internal/factory";
 import logger from "@/lib/logger";
 
 /**
  * 操作日志中间件
+ * 记录后台管理操作的审计日志
+ *
+ * 使用 Factory Helper 自动推断 AppBindings 类型
  */
-export function operationLog(options: { moduleName: string; description: string }): MiddlewareHandler {
-  return async (c: Context, next) => {
+export function operationLog(options: { moduleName: string; description: string }) {
+  return createMiddleware(async (c, next) => {
     const startTime = new Date();
     // 获取请求信息
     const method = c.req.method;
@@ -39,8 +40,8 @@ export function operationLog(options: { moduleName: string; description: string 
     const endTime = new Date();
     const durationMs = differenceInMilliseconds(endTime, startTime);
 
-    // 获取用户信息
-    const payload: JWTPayload | undefined = c.get("jwtPayload");
+    // 获取用户信息（类型自动推断）
+    const payload = c.get("jwtPayload");
     if (!payload) {
       // 没有用户信息，不记录日志
       return;
@@ -99,5 +100,5 @@ export function operationLog(options: { moduleName: string; description: string 
     if (env.NODE_ENV === "production") {
       logger.info(logEntry, "操作日志");
     }
-  };
+  });
 }

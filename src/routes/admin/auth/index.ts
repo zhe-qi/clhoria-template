@@ -16,9 +16,6 @@ const auth = createRouter()
 
 export default auth;
 
-/** 跳过全局认证中间件（内部使用局部中间件处理 JWT） */
-export const skipGlobalAuth = true;
-
 type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
