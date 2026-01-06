@@ -1,7 +1,8 @@
+import { except } from "hono/combine";
 import { jwt } from "hono/jwt";
 import * as z from "zod";
 
-import type { RouteModule } from "@/types/lib";
+import type { AppOpenAPI } from "@/types/lib";
 
 import configureOpenAPI from "@/lib/internal/openapi";
 
@@ -11,9 +12,21 @@ import { authorize } from "./middlewares/authorize";
 import { operationLog } from "./middlewares/operation-log";
 
 // 使用 import.meta.glob 自动加载路由模块
-const adminModules = import.meta.glob<RouteModule>("./routes/admin/**/index.ts", { eager: true });
-const clientModules = import.meta.glob<RouteModule>("./routes/client/**/index.ts", { eager: true });
-const publicModules = import.meta.glob<RouteModule>("./routes/public/**/index.ts", { eager: true });
+const adminModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/admin/**/index.ts", { eager: true });
+const clientModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/client/**/index.ts", { eager: true });
+const publicModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/public/**/index.ts", { eager: true });
+
+/**
+ * 跳过全局 JWT 认证的路径（登录前操作）
+ * 这些路径在 auth 模块中自行处理认证
+ */
+const SKIP_JWT_PATHS = ["/auth/login", "/auth/refresh", "/auth/challenge", "/auth/redeem"];
+
+/**
+ * 跳过全局权限检查和操作日志的路径
+ * auth 模块不需要 Casbin 权限检查
+ */
+const SKIP_AUTH_PREFIX = "/auth";
 
 // 配置 Zod 使用中文错误消息
 z.config(z.locales.zhCN());
@@ -48,23 +61,37 @@ for (const module of Object.values(clientModules)) {
 // #region 后管路由
 // tip: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
 
-// 1. 先注册跳过全局认证的模块（如 auth 模块，内部自己处理 JWT）
-for (const module of Object.values(adminModules)) {
-  if (module.skipGlobalAuth) {
-    adminApp.route("/", module.default);
-  }
-}
+// 使用 except 中间件简化权限控制逻辑
+// 1. JWT 认证：排除登录前操作路径
+adminApp.use(
+  "/*",
+  except(
+    c => SKIP_JWT_PATHS.some(p => c.req.path.endsWith(p)),
+    jwt({ secret: env.ADMIN_JWT_SECRET }),
+  ),
+);
 
-// 2. 应用全局中间件
-adminApp.use("/*", jwt({ secret: env.ADMIN_JWT_SECRET }));
-adminApp.use("/*", authorize());
-adminApp.use("/*", operationLog({ moduleName: "后台管理", description: "后台管理操作日志" }));
+// 2. Casbin 权限检查：排除 auth 模块
+adminApp.use(
+  "/*",
+  except(
+    c => c.req.path.includes(SKIP_AUTH_PREFIX),
+    authorize,
+  ),
+);
 
-// 3. 注册需要全局认证的模块
+// 3. 操作日志：排除 auth 模块
+adminApp.use(
+  "/*",
+  except(
+    c => c.req.path.includes(SKIP_AUTH_PREFIX),
+    operationLog({ moduleName: "后台管理", description: "后台管理操作日志" }),
+  ),
+);
+
+// 一次性注册所有路由模块
 for (const module of Object.values(adminModules)) {
-  if (!module.skipGlobalAuth) {
-    adminApp.route("/", module.default);
-  }
+  adminApp.route("/", module.default);
 }
 // #endregion
 
