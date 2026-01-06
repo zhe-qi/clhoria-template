@@ -248,6 +248,36 @@ This project is designed for AI-driven development, providing complete CLAUDE.md
 - **[Serena](https://github.com/SerenaAI/serena-mcp)**: Intelligent code analysis and refactoring suggestions
 - **[Context7](https://github.com/context7/mcp-plugin)**: Real-time technical documentation queries and code examples
 
+## VSCode Code Snippets
+
+The project includes built-in code snippet templates for CRUD development (`.vscode/crud.code-snippets`). Type the prefix in a TypeScript file and press `Tab` to quickly generate code.
+
+### Complete Module Templates
+
+| Prefix          | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| `crud-schema`   | Complete schema.ts template                              |
+| `crud-routes`   | Complete routes.ts template (with all 5 CRUD routes)     |
+| `crud-handlers` | Complete handlers.ts template (with all 5 CRUD handlers) |
+| `crud-index`    | Complete index.ts template                               |
+
+### Individual Route/Handler
+
+| Prefix                                                    | Description                       |
+| --------------------------------------------------------- | --------------------------------- |
+| `r-list` / `r-create` / `r-get` / `r-update` / `r-remove` | Individual route definitions      |
+| `h-list` / `h-create` / `h-get` / `h-update` / `h-remove` | Individual handler functions      |
+| `r-custom` / `h-custom`                                   | Custom route or handler templates |
+
+### Common Code Snippets
+
+| Prefix                                     | Description                                           |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `ir` / `ih` / `is`                         | Import common dependencies for routes/handlers/schema |
+| `rok` / `rcreated` / `rfail` / `rnotfound` | Response shortcuts                                    |
+| `logi` / `loge`                            | Logger shortcuts                                      |
+| `db-tx`                                    | Database transaction template                         |
+
 ## Testing
 
 Uses Vitest testing framework, supports complete unit testing and integration testing, can add end-to-end tests under tests directory.
