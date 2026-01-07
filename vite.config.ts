@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     resolve: {
+      // tsconfigPaths: true,
       alias: {
         "@": path.join(process.cwd(), "./src"),
         "~": path.join(process.cwd(), "."),

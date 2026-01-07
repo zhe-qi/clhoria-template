@@ -61,8 +61,6 @@ for (const module of Object.values(clientModules)) {
 // #region 后管路由
 // tip: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
 
-// 使用 except 中间件简化权限控制逻辑
-// 1. JWT 认证：排除登录前操作路径
 adminApp.use(
   "/*",
   except(
@@ -70,8 +68,6 @@ adminApp.use(
     jwt({ secret: env.ADMIN_JWT_SECRET }),
   ),
 );
-
-// 2. Casbin 权限检查：排除 auth 模块
 adminApp.use(
   "/*",
   except(
@@ -79,8 +75,6 @@ adminApp.use(
     authorize,
   ),
 );
-
-// 3. 操作日志：排除 auth 模块
 adminApp.use(
   "/*",
   except(
