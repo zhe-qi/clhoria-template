@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
-    "@aws-sdk/client-s3": "^3.964.0",
-    "@aws-sdk/s3-request-presigner": "^3.964.0",
+    "@aws-sdk/client-s3": "^3.965.0",
+    "@aws-sdk/s3-request-presigner": "^3.965.0",
     "@cap.js/server": "^4.0.5",
     "@dotenvx/dotenvx": "^1.51.4",
     "@hono/node-server": "1.19.7",
@@ -34,7 +34,7 @@
     "@hono/vite-build": "^1.8.0",
     "@hono/zod-openapi": "^1.2.0",
     "@node-rs/argon2": "^2.0.2",
-    "@scalar/hono-api-reference": "^0.9.30",
+    "@scalar/hono-api-reference": "^0.9.32",
     "casbin": "^5.46.0",
     "croner": "^9.1.0",
     "date-fns": "^4.1.0",
@@ -64,7 +64,7 @@
     "simple-git-hooks": "^2.13.1",
     "type-fest": "^5.3.1",
     "typescript": "5.9.3",
-    "vite": "8.0.0-beta.6",
+    "vite": "8.0.0-beta.7",
     "vitest": "^4.0.16"
   },
   "simple-git-hooks": {
