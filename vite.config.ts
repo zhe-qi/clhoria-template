@@ -3,6 +3,8 @@ import nodeAdapter from "@hono/vite-dev-server/node";
 import path from "node:path";
 import { defineConfig, loadEnv } from "vite";
 
+import buildPluginNodejs from "./plugins/vite-plugin-build";
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
@@ -10,9 +12,6 @@ export default defineConfig(({ mode }) => {
       port: Number.parseInt(env.PORT, 10),
     },
     build: {
-      ssr: "src/index.ts",
-      outDir: "dist",
-      minify: false,
       sourcemap: mode === "development",
       target: "esnext",
       rolldownOptions: {
@@ -41,6 +40,10 @@ export default defineConfig(({ mode }) => {
       devServer({
         entry: "src/index.ts",
         adapter: nodeAdapter(),
+      }),
+      buildPluginNodejs({
+        port: Number.parseInt(env.PORT, 10),
+        minify: false,
       }),
     ],
   };

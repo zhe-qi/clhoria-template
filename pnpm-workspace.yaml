@@ -1,11 +1,10 @@
-onlyBuiltDependencies:
-  - better-sqlite3
-  - esbuild
-  - simple-git-hooks
-
 shellEmulator: true
 
 trustPolicy: no-downgrade
 
 trustPolicyExclude:
   - chokidar@4.0.3
+onlyBuiltDependencies:
+  - better-sqlite3
+  - esbuild
+  - simple-git-hooks
