@@ -4,6 +4,8 @@ import path from "node:path";
 import { defineConfig, loadEnv } from "vite";
 
 import buildPluginNodejs from "./plugins/vite-plugin-build";
+import hmrNotifyPlugin from "./plugins/vite-plugin-hmr-notify";
+import resourceMonitorPlugin from "./plugins/vite-plugin-resource-monitor";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -37,6 +39,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      hmrNotifyPlugin(),
+      resourceMonitorPlugin(),
       devServer({
         entry: "src/index.ts",
         adapter: nodeAdapter(),
