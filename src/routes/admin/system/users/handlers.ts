@@ -12,7 +12,7 @@ import { omit, Resp } from "@/utils";
 import { mapDbError } from "@/utils/db-errors";
 
 import type { SystemUsersRouteHandlerType } from ".";
-import type { responseSystemUsersWithPassword } from "./schema";
+import type { systemUsersQueryResult } from "./schema";
 
 export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();
@@ -22,7 +22,7 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
     return c.json(Resp.fail(parseResult.error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [error, result] = await executeRefineQuery<z.infer<typeof responseSystemUsersWithPassword>>({
+  const [error, result] = await executeRefineQuery<z.infer<typeof systemUsersQueryResult>>({
     table: systemUsers,
     queryParams: parseResult.data,
     joinConfig: {

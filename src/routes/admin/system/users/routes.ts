@@ -1,13 +1,14 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
 
+import { insertSystemUsersSchema } from "@/db/schema";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 import { respErr } from "@/utils";
 
-import { insertSystemUsers, patchSystemUsers, responseSystemUsersWithList, responseSystemUsersWithoutPassword, responseSystemUsersWithoutPasswordAndRoles } from "./schema";
+import { systemUsersDetailResponse, systemUsersListResponse, systemUsersPatchSchema, systemUsersResponse } from "./schema";
 
 const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];
@@ -23,7 +24,7 @@ export const list = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(responseSystemUsersWithList),
+      RefineResultSchema(systemUsersListResponse),
       "列表响应成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "查询参数验证错误"),
@@ -39,13 +40,13 @@ export const create = createRoute({
   path: routePrefix,
   request: {
     body: jsonContentRequired(
-      insertSystemUsers,
+      insertSystemUsersSchema,
       "创建系统用户参数",
     ),
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(
-      RefineResultSchema(responseSystemUsersWithoutPassword),
+      RefineResultSchema(systemUsersResponse),
       "创建成功",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
@@ -64,7 +65,7 @@ export const get = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(responseSystemUsersWithoutPasswordAndRoles),
+      RefineResultSchema(systemUsersDetailResponse),
       "获取成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
@@ -81,13 +82,13 @@ export const update = createRoute({
   request: {
     params: IdUUIDParamsSchema,
     body: jsonContentRequired(
-      patchSystemUsers,
+      systemUsersPatchSchema,
       "更新系统用户参数",
     ),
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(responseSystemUsersWithoutPassword),
+      RefineResultSchema(systemUsersResponse),
       "更新成功",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
