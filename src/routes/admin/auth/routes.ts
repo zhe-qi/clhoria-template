@@ -7,7 +7,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErr } from "@/utils";
 
-import { getUserInfoSchema, loginSystemUsers } from "../system/users/schema";
+import { systemUsersInfoResponse, systemUsersLoginSchema } from "../system/users/schema";
 
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];
@@ -18,7 +18,7 @@ export const login = createRoute({
   method: "post",
   request: {
     body: jsonContentRequired(
-      loginSystemUsers,
+      systemUsersLoginSchema,
       "登录请求",
     ),
   },
@@ -80,7 +80,7 @@ export const getIdentity = createRoute({
   summary: "管理端获取当前用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(getUserInfoSchema),
+      RefineResultSchema(systemUsersInfoResponse),
       "获取成功",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),

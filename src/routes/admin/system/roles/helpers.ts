@@ -2,9 +2,9 @@ import type { z } from "zod";
 
 import { enforcerPromise } from "@/lib/internal/casbin";
 
-import type { selectSystemRoles } from "./schema";
+import type { systemRolesDetailResponse } from "./schema";
 
-type Role = z.infer<typeof selectSystemRoles>;
+type Role = z.infer<typeof systemRolesDetailResponse>;
 type RoleWithParents = Role & { parentRoles?: string[] };
 
 /**

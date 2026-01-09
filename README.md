@@ -111,6 +111,13 @@ src/db/schema/
 └── index.ts                # 统一导出
 ```
 
+### Zod Schema 分层
+
+| 层级   | 位置                 | 内容                                      |
+| ------ | -------------------- | ----------------------------------------- |
+| db     | `db/schema/*.ts`     | `select*Schema` / `insert*Schema`（基础） |
+| routes | `routes/*/schema.ts` | `*PatchSchema` / `*Response`（业务组合）  |
+
 **PostgreSQL 版本说明**:
 
 - **PostgreSQL 18 及以上**: 无需任何修改,直接使用即可。项目默认使用 PostgreSQL 18 的 `uuidv7()` 函数。

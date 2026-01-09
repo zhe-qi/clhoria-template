@@ -122,6 +122,13 @@ src/db/schema/
 └── index.ts                # Unified exports
 ```
 
+### Zod Schema Layering
+
+| Layer  | Location             | Content                                  |
+| ------ | -------------------- | ---------------------------------------- |
+| db     | `db/schema/*.ts`     | `select*Schema` / `insert*Schema` (base) |
+| routes | `routes/*/schema.ts` | `*PatchSchema` / `*Response` (business)  |
+
 ### Architecture Strategy
 
 **Simple CRUD (80%)**: Handler directly operates database, functional design, extract service layer on demand

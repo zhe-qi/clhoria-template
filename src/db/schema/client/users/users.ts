@@ -7,6 +7,7 @@ import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxO
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { genderEnum, userStatusEnum, verificationStatusEnum } from "@/db/schema/_shard/enums";
 import { Gender, UserStatus, VerificationStatus } from "@/lib/enums";
+import { emailField, ipAddressField, mobileField, nicknameField, passwordField, StatusDescriptions, usernameField } from "@/lib/schemas";
 
 export const clientUsers = pgTable("client_users", {
   ...baseColumns,
@@ -105,12 +106,12 @@ export const selectClientUsersSchema = createSelectSchema(clientUsers, {
   password: schema => schema.meta({ description: "密码" }),
   passwordSecretVersion: schema => schema.meta({ description: "密码密钥版本" }),
   nickname: schema => schema.meta({ description: "用户昵称" }),
-  gender: schema => schema.meta({ description: "性别 (UNKNOWN=未知, MALE=男性, FEMALE=女性)" }),
-  status: schema => schema.meta({ description: "用户状态 (NORMAL=正常, DISABLED=禁用, PENDING=审核中, REJECTED=审核拒绝)" }),
+  gender: schema => schema.meta({ description: StatusDescriptions.GENDER }),
+  status: schema => schema.meta({ description: StatusDescriptions.USER }),
   mobile: schema => schema.meta({ description: "手机号码" }),
-  mobileConfirmed: schema => schema.meta({ description: "手机验证状态 (UNVERIFIED=未验证, VERIFIED=已验证)" }),
+  mobileConfirmed: schema => schema.meta({ description: StatusDescriptions.VERIFICATION }),
   email: schema => schema.meta({ description: "邮箱地址" }),
-  emailConfirmed: schema => schema.meta({ description: "邮箱验证状态 (UNVERIFIED=未验证, VERIFIED=已验证)" }),
+  emailConfirmed: schema => schema.meta({ description: StatusDescriptions.VERIFICATION }),
   avatar: schema => schema.meta({ description: "头像地址" }),
   score: schema => schema.meta({ description: "用户积分" }),
   comment: schema => schema.meta({ description: "备注" }),
@@ -125,54 +126,18 @@ export const selectClientUsersSchema = createSelectSchema(clientUsers, {
 export const insertClientUsersSchema = createInsertSchema(
   clientUsers,
   {
-    username: z.string()
-      .min(4, "用户名最少4个字符")
-      .max(32, "用户名最多32个字符")
-      .regex(/^\w+$/, "用户名只能包含字母、数字和下划线")
-      .meta({ description: "用户名" }),
-    password: z.string()
-      .min(6, "密码最少6个字符")
-      .max(20, "密码最多20个字符")
-      .meta({ description: "密码" }),
-    nickname: z.string()
-      .min(1, "昵称不能为空")
-      .max(32, "昵称最多32个字符")
-      .optional()
-      .meta({ description: "用户昵称" }),
-    mobile: z.string()
-      .regex(/^\+?[0-9-]{3,20}$/, "手机号格式不正确")
-      .optional()
-      .meta({ description: "手机号码" }),
-    email: z
-      .email("邮箱格式不正确")
-      .optional()
-      .meta({ description: "邮箱地址" }),
-    gender: schema => schema
-      .optional()
-      .meta({ description: "性别 (UNKNOWN=未知, MALE=男性, FEMALE=女性)" }),
-    status: schema => schema
-      .optional()
-      .meta({ description: "用户状态 (NORMAL=正常, DISABLED=禁用, PENDING=审核中, REJECTED=审核拒绝)" }),
-    score: z.number()
-      .min(0)
-      .optional()
-      .meta({ description: "用户积分" }),
-    comment: z.string()
-      .max(500, "备注最多500个字符")
-      .optional()
-      .meta({ description: "备注" }),
-    registerIp: z.string()
-      .regex(/^(?:(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})$|^(?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4}$/i, "IP地址格式不正确")
-      .optional()
-      .meta({ description: "注册时 IP 地址" }),
-    lastLoginIp: z.string()
-      .regex(/^(?:(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})$|^(?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4}$/i, "IP地址格式不正确")
-      .optional()
-      .meta({ description: "最后登录时 IP 地址" }),
-    myInviteCode: z.string()
-      .max(32, "邀请码最多32个字符")
-      .optional()
-      .meta({ description: "用户自身邀请码" }),
+    username: () => usernameField,
+    password: () => passwordField,
+    nickname: () => nicknameField.optional(),
+    mobile: () => mobileField.optional(),
+    email: () => emailField.optional(),
+    gender: schema => schema.optional().meta({ description: StatusDescriptions.GENDER }),
+    status: schema => schema.optional().meta({ description: StatusDescriptions.USER }),
+    score: z.number().min(0).optional().meta({ description: "用户积分" }),
+    comment: z.string().max(500, "备注最多500个字符").optional().meta({ description: "备注" }),
+    registerIp: () => ipAddressField.optional().meta({ description: "注册时 IP 地址" }),
+    lastLoginIp: () => ipAddressField.optional().meta({ description: "最后登录时 IP 地址" }),
+    myInviteCode: z.string().max(32, "邀请码最多32个字符").optional().meta({ description: "用户自身邀请码" }),
   },
 ).omit({
   id: true,
@@ -187,5 +152,3 @@ export const insertClientUsersSchema = createInsertSchema(
   lastLoginDate: true,
   tokens: true,
 });
-
-export const patchClientUsersSchema = insertClientUsersSchema.partial();

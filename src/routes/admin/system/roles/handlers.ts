@@ -12,7 +12,7 @@ import { Resp } from "@/utils";
 import { mapDbError } from "@/utils/db-errors";
 
 import type { SystemRolesRouteHandlerType } from ".";
-import type { selectSystemRoles } from "./schema";
+import type { systemRolesDetailResponse } from "./schema";
 
 import { checkCircularInheritance, cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./helpers";
 
@@ -26,7 +26,7 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   }
 
   // 执行查询
-  const [error, result] = await executeRefineQuery<z.infer<typeof selectSystemRoles>>({
+  const [error, result] = await executeRefineQuery<z.infer<typeof systemRolesDetailResponse>>({
     table: systemRoles,
     queryParams: parseResult.data,
   });
