@@ -195,16 +195,6 @@ export default function resourceMonitorPlugin(options?: ResourceMonitorOptions):
     configureServer(_server) {
       server = _server;
 
-      server.config.logger.info(
-        `${colors.green("[资源监控]")} 已启动`,
-      );
-      server.config.logger.info(
-        colors.dim(`  监控类型: ${watchTypes.join(", ")}`),
-      );
-      server.config.logger.info(
-        colors.dim(`  稳定期: ${stabilizeCount} 次, 窗口: ${windowSize} 次, 连续增长: ${consecutiveGrowthThreshold} 次, 阈值: ${threshold}`),
-      );
-
       // 监听文件变化
       server.watcher.on("change", async (file) => {
         // 检查文件扩展名
@@ -235,9 +225,6 @@ export default function resourceMonitorPlugin(options?: ResourceMonitorOptions):
             // 首次记录
             lastStableSnapshot = currentSnapshot;
             stabilizeCounter = 1;
-            server.config.logger.info(
-              colors.dim(`[资源监控] 等待稳定中... (${stabilizeCounter}/${stabilizeCount})`),
-            );
             return;
           }
 
