@@ -1,5 +1,5 @@
 // 应用工厂
-export { createRouter, createTestApp } from "./create-app";
+export { createRouter } from "./create-app";
 
 export { default as createApp } from "./create-app";
 // 速率限制

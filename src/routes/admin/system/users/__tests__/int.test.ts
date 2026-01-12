@@ -7,11 +7,11 @@ import db from "@/db";
 import { casbinRule, systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
 import { Status } from "@/lib/enums";
-import { createTestApp } from "@/lib/internal/create-app";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
 import systemUsersRouter from "@/routes/admin/system/users";
 import { getAdminToken, getAuthHeaders, getUserToken } from "~/tests/auth-utils";
+import { createTestApp } from "~/tests/utils/test-app";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");

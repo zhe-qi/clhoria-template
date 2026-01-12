@@ -69,12 +69,3 @@ export default function createApp() {
 
   return app;
 }
-
-export function createTestApp() {
-  const app = createRouter();
-  app.use(requestId())
-    .use(pinoLogger({ pino: logger }));
-  app.notFound(notFound);
-  app.onError(onError);
-  return app;
-}
