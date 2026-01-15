@@ -1,8 +1,8 @@
+import type { AppOpenAPI } from "@/types/lib";
 import { except } from "hono/combine";
 import { jwt } from "hono/jwt";
-import * as z from "zod";
 
-import type { AppOpenAPI } from "@/types/lib";
+import * as z from "zod";
 
 import configureOpenAPI from "@/lib/internal/openapi";
 
@@ -52,7 +52,7 @@ for (const module of Object.values(publicModules)) {
 // #endregion
 
 // #region 客户端路由（JWT）
-clientApp.use("/*", jwt({ secret: env.CLIENT_JWT_SECRET }));
+clientApp.use("/*", jwt({ secret: env.CLIENT_JWT_SECRET, alg: "HS256" }));
 for (const module of Object.values(clientModules)) {
   clientApp.route("/", module.default);
 }
@@ -65,7 +65,7 @@ adminApp.use(
   "/*",
   except(
     c => SKIP_JWT_PATHS.some(p => c.req.path.endsWith(p)),
-    jwt({ secret: env.ADMIN_JWT_SECRET }),
+    jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" }),
   ),
 );
 adminApp.use(

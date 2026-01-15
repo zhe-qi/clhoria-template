@@ -1,7 +1,7 @@
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { Resp } from "@/utils/zod";
-
 import type { ClientUsersRouteHandlerType } from ".";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+
+import { Resp } from "@/utils/zod";
 
 export const getUsersInfo: ClientUsersRouteHandlerType<"getUsersInfo"> = (c) => {
   // Handler logic to get user information

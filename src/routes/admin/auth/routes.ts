@@ -60,7 +60,7 @@ export const logout = createRoute({
   path: `${routePrefix}/logout`,
   method: "post",
   tags,
-  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" })],
   summary: "管理端退出登录",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -76,7 +76,7 @@ export const getIdentity = createRoute({
   path: `${routePrefix}/userinfo`,
   method: "get",
   tags,
-  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" })],
   summary: "管理端获取当前用户信息",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
@@ -92,7 +92,7 @@ export const getPermissions = createRoute({
   path: `${routePrefix}/permissions`,
   method: "get",
   tags,
-  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET })],
+  middleware: [jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" })],
   summary: "管理端获取当前用户权限",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(

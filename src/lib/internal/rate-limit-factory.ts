@@ -3,11 +3,11 @@ import type { Store } from "hono-rate-limiter";
 import type { ConnInfo } from "hono/conninfo";
 import type { RedisReply } from "rate-limit-redis";
 
+import type { AppBindings } from "@/types/lib";
 import { rateLimiter } from "hono-rate-limiter";
 import { RedisStore } from "rate-limit-redis";
-import { z } from "zod";
 
-import type { AppBindings } from "@/types/lib";
+import { z } from "zod";
 
 import env from "@/env";
 import redisClient from "@/lib/redis";

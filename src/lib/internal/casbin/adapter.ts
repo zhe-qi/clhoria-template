@@ -2,11 +2,11 @@ import type { Adapter, Model, UpdatableAdapter } from "casbin";
 import type { InferInsertModel } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
-import { Helper } from "casbin";
-import { and, eq, inArray, not, or, sql } from "drizzle-orm";
-
 import type * as schema from "@/db/schema";
 import type { casbinRule } from "@/db/schema";
+
+import { Helper } from "casbin";
+import { and, eq, inArray, not, or, sql } from "drizzle-orm";
 
 import { insertCasbinRuleSchema } from "@/db/schema";
 

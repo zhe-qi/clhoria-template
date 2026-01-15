@@ -1,9 +1,9 @@
+import type { ZodSchema } from "./types.ts";
+
 import {
   OpenApiGeneratorV3,
   OpenAPIRegistry,
 } from "@asteasolutions/zod-to-openapi";
-
-import type { ZodSchema } from "./types.ts";
 
 const oneOf = <
   T extends ZodSchema,

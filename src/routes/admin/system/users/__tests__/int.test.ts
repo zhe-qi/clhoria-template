@@ -19,7 +19,7 @@ if (env.NODE_ENV !== "test") {
 
 function createSysUsersApp() {
   return createTestApp()
-    .use("/system/users/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/users/*", jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" }))
     .use("/system/users/*", authorize)
     .route("/", systemUsersRouter);
 }

@@ -1,6 +1,6 @@
 /* eslint-disable node/no-process-env */
-import { config } from "@dotenvx/dotenvx";
 import path from "node:path";
+import { config } from "@dotenvx/dotenvx";
 import { z } from "zod";
 
 import { parseEnvOrExit } from "@/utils/zod";

@@ -1,9 +1,9 @@
-import { Scalar } from "@scalar/hono-api-reference";
+import type { AppConfig, ScalarAuthentication, ScalarSource } from "./types";
 
 import type { AppNameType } from "@/lib/enums";
 import type { AppOpenAPI } from "@/types/lib";
 
-import type { AppConfig, ScalarAuthentication, ScalarSource } from "./types";
+import { Scalar } from "@scalar/hono-api-reference";
 
 import packageJSON from "../../../../package.json" with { type: "json" };
 import { createRouter } from "../create-app";

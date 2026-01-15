@@ -1,18 +1,18 @@
 import type { z } from "zod";
 
-import { eq, inArray } from "drizzle-orm";
+import type { SystemRolesRouteHandlerType } from ".";
 
+import type { systemRolesDetailResponse } from "./schema";
+import { eq, inArray } from "drizzle-orm";
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
 import { enforcerPromise } from "@/lib/internal/casbin";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+
 import { Resp } from "@/utils";
 import { mapDbError } from "@/utils/db-errors";
-
-import type { SystemRolesRouteHandlerType } from ".";
-import type { systemRolesDetailResponse } from "./schema";
 
 import { checkCircularInheritance, cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./helpers";
 

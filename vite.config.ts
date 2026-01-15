@@ -1,6 +1,6 @@
+import path from "node:path";
 import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
-import path from "node:path";
 import { defineConfig, loadEnv } from "vite";
 
 import buildPluginNodejs from "./plugins/vite-plugin-build";

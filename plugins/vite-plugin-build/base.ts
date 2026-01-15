@@ -1,11 +1,11 @@
 import type { Dirent } from "node:fs";
 import type { ConfigEnv, Plugin, ResolvedConfig, UserConfig } from "vite";
 
+import type { GetEntryContentOptions } from "./entry";
 import { readdirSync } from "node:fs";
 import { builtinModules } from "node:module";
-import { resolve } from "node:path";
 
-import type { GetEntryContentOptions } from "./entry";
+import { resolve } from "node:path";
 
 import { getEntryContent } from "./entry";
 

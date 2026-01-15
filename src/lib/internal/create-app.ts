@@ -1,3 +1,4 @@
+import type { AppBindings } from "@/types/lib";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { pinoLogger } from "hono-pino";
 import { bodyLimit } from "hono/body-limit";
@@ -6,9 +7,8 @@ import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { timeout } from "hono/timeout";
-import { trimTrailingSlash } from "hono/trailing-slash";
 
-import type { AppBindings } from "@/types/lib";
+import { trimTrailingSlash } from "hono/trailing-slash";
 
 import { RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants/rate-limit";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";

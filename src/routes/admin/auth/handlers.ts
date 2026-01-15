@@ -1,7 +1,8 @@
+import type { AuthRouteHandlerType } from ".";
 import { verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import db from "@/db";
 import { systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
@@ -12,9 +13,8 @@ import { enforcerPromise } from "@/lib/internal/casbin";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/services/admin";
-import { Resp, toColumns, tryit } from "@/utils";
 
-import type { AuthRouteHandlerType } from ".";
+import { Resp, toColumns, tryit } from "@/utils";
 
 /** 管理端登录 */
 export const login: AuthRouteHandlerType<"login"> = async (c) => {

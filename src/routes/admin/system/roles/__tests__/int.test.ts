@@ -19,7 +19,7 @@ if (env.NODE_ENV !== "test") {
 
 function createSysRolesApp() {
   return createTestApp()
-    .use("/system/roles/*", jwt({ secret: env.ADMIN_JWT_SECRET }))
+    .use("/system/roles/*", jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" }))
     .use("/system/roles/*", authorize)
     .route("/", systemRolesRouter);
 }

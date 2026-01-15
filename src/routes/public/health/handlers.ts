@@ -1,9 +1,9 @@
-import { format } from "date-fns";
-
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { Resp } from "@/utils";
-
 import type { HealthRouteHandlerType } from ".";
+
+import { format } from "date-fns";
+import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+
+import { Resp } from "@/utils";
 
 export const get: HealthRouteHandlerType<"get"> = async (c) => {
   return c.json(Resp.ok({

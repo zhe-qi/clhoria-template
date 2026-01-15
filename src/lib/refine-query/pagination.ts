@@ -1,8 +1,8 @@
 import type { Simplify } from "type-fest";
 
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/constants";
-
 import type { Pagination } from "./schemas";
+
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/constants";
 
 /**
  * 分页计算结果接口

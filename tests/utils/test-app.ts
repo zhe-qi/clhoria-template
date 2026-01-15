@@ -1,8 +1,8 @@
+import type { AppBindings } from "@/types/lib";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { pinoLogger } from "hono-pino";
-import { requestId } from "hono/request-id";
 
-import type { AppBindings } from "@/types/lib";
+import { requestId } from "hono/request-id";
 
 import logger from "@/lib/logger";
 import { notFound, onError } from "@/lib/stoker/middlewares";

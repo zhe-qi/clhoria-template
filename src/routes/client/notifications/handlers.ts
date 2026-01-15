@@ -1,6 +1,6 @@
-import { streamSSE } from "hono/streaming";
-
 import type { NotificationsRouteHandlerType } from ".";
+
+import { streamSSE } from "hono/streaming";
 
 /**
  * 订阅实时通知（SSE）

@@ -1,8 +1,8 @@
+import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxOpenId } from "@/db/schema/_shard/types/app-user";
 import { index, integer, jsonb, pgTable, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
 
-import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxOpenId } from "@/db/schema/_shard/types/app-user";
+import { z } from "zod";
 
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { genderEnum, userStatusEnum, verificationStatusEnum } from "@/db/schema/_shard/enums";

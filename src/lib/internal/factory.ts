@@ -1,6 +1,6 @@
-import { createFactory } from "hono/factory";
-
 import type { AppBindings } from "@/types/lib";
+
+import { createFactory } from "hono/factory";
 
 /**
  * Hono Factory 实例
