@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
-    "@aws-sdk/client-s3": "^3.969.0",
-    "@aws-sdk/s3-request-presigner": "^3.969.0",
+    "@aws-sdk/client-s3": "^3.970.0",
+    "@aws-sdk/s3-request-presigner": "^3.970.0",
     "@cap.js/server": "^4.0.5",
     "@dotenvx/dotenvx": "^1.51.4",
     "@hono/node-server": "1.19.9",
@@ -42,7 +42,7 @@
     "hono-pino": "^0.10.3",
     "hono-rate-limiter": "^0.5.3",
     "iconv-lite": "^0.7.2",
-    "ioredis": "5.9.1",
+    "ioredis": "5.9.2",
     "pg-boss": "^12.5.4",
     "pino": "^10.2.0",
     "postgres": "^3.4.8",
@@ -52,7 +52,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^7.0.1",
     "@hono/vite-dev-server": "^0.24.1",
-    "@types/node": "25.0.8",
+    "@types/node": "25.0.9",
     "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.2",

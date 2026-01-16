@@ -1,0 +1,63 @@
+services:
+  # 开发容器
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
+      # 持久化 pnpm store 以加速后续安装
+      - pnpm-store:/pnpm
+      # 持久化 VS Code 扩展
+      - vscode-extensions:/home/node/.vscode-server/extensions
+    command: sleep infinity
+    networks:
+      - devcontainer-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --locale=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - devcontainer-network
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis 缓存
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
+    networks:
+      - devcontainer-network
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  pnpm-store:
+  vscode-extensions:
+
+networks:
+  devcontainer-network:
+    driver: bridge

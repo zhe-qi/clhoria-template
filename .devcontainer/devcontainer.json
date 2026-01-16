@@ -1,0 +1,81 @@
+{
+  "name": "Clhoria Template",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "postCreateCommand": "pnpm install",
+  "postStartCommand": "pnpm install",
+
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "LOG_LEVEL": "debug",
+    "DATABASE_URL": "postgresql://postgres:postgres@postgres:5432/postgres",
+    "REDIS_URL": "redis://redis:6379/0"
+  },
+
+  "forwardPorts": [9999, 5432, 6379],
+  "portsAttributes": {
+    "9999": {
+      "label": "Hono App",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "mikestead.dotenv",
+        "streetsidesoftware.code-spell-checker",
+        "Lokalise.i18n-ally",
+        "antfu.pnpm-catalog-lens",
+        "editorconfig.editorconfig",
+        "vitest.explorer",
+        "cweijan.vscode-database-client2",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "prettier.enable": false,
+        "editor.formatOnSave": false,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "never"
+        },
+        "eslint.rules.customizations": [
+          { "rule": "style/*", "severity": "off", "fixable": true },
+          { "rule": "format/*", "severity": "off", "fixable": true },
+          { "rule": "*-indent", "severity": "off", "fixable": true },
+          { "rule": "*-spacing", "severity": "off", "fixable": true },
+          { "rule": "*-spaces", "severity": "off", "fixable": true },
+          { "rule": "*-order", "severity": "off", "fixable": true },
+          { "rule": "*-dangle", "severity": "off", "fixable": true },
+          { "rule": "*-newline", "severity": "off", "fixable": true },
+          { "rule": "*quotes", "severity": "off", "fixable": true },
+          { "rule": "*semi", "severity": "off", "fixable": true }
+        ],
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "json",
+          "jsonc",
+          "yaml"
+        ],
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}
