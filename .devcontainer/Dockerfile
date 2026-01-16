@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 pnpm（与 package.json 中的 packageManager 版本一致）
-RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
+# 安装 corepack 和 pnpm（Node.js 25 不再默认包含 corepack）
+RUN npm install -g --force corepack && corepack enable && corepack prepare pnpm@10.28.0 --activate
 
 # 设置 node 用户的 sudo 权限（无密码）
 RUN echo "node ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/node
