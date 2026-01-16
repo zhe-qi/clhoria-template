@@ -21,7 +21,7 @@ services:
 
   # PostgreSQL 数据库
   postgres:
-    image: postgres:latest
+    image: postgres:18
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -33,15 +33,15 @@ services:
       - devcontainer-network
     healthcheck:
       test: [CMD-SHELL, "pg_isready -U postgres -d postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     restart: unless-stopped
 
   # Redis 缓存
   redis:
-    image: redis:latest
+    image: redis:7
     volumes:
       - redis_data:/data
     networks:
