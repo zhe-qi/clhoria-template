@@ -7,26 +7,16 @@ import * as z from "zod";
 import configureOpenAPI from "@/lib/internal/openapi";
 
 import env from "./env";
+import { SKIP_AUTH_PREFIXES, SKIP_JWT_PATHS } from "./lib/constants/auth-bypass";
 import createApp from "./lib/internal/create-app";
 import { authorize } from "./middlewares/authorize";
+
 import { operationLog } from "./middlewares/operation-log";
 
 // 使用 import.meta.glob 自动加载路由模块
 const adminModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/admin/**/index.ts", { eager: true });
 const clientModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/client/**/index.ts", { eager: true });
 const publicModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/public/**/index.ts", { eager: true });
-
-/**
- * 跳过全局 JWT 认证的路径（登录前操作）
- * 这些路径在 auth 模块中自行处理认证
- */
-const SKIP_JWT_PATHS = ["/auth/login", "/auth/refresh", "/auth/challenge", "/auth/redeem"];
-
-/**
- * 跳过全局权限检查和操作日志的路径
- * auth 模块不需要 Casbin 权限检查
- */
-const SKIP_AUTH_PREFIX = "/auth";
 
 // 配置 Zod 使用中文错误消息
 z.config(z.locales.zhCN());
@@ -60,28 +50,18 @@ for (const module of Object.values(clientModules)) {
 
 // #region 后管路由
 // tip: 如果你要用 trpc 请参考 https://github.com/honojs/hono/issues/2399#issuecomment-2675421823
-
-adminApp.use(
-  "/*",
-  except(
-    c => SKIP_JWT_PATHS.some(p => c.req.path.endsWith(p)),
-    jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" }),
-  ),
-);
-adminApp.use(
-  "/*",
-  except(
-    c => c.req.path.includes(SKIP_AUTH_PREFIX),
-    authorize,
-  ),
-);
-adminApp.use(
-  "/*",
-  except(
-    c => c.req.path.includes(SKIP_AUTH_PREFIX),
-    operationLog({ moduleName: "后台管理", description: "后台管理操作日志" }),
-  ),
-);
+adminApp.use("/*", except(
+  c => SKIP_JWT_PATHS.some(p => c.req.path.endsWith(p)),
+  jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" }),
+));
+adminApp.use("/*", except(
+  c => SKIP_AUTH_PREFIXES.some(p => c.req.path.includes(p)),
+  authorize,
+));
+adminApp.use("/*", except(
+  c => SKIP_AUTH_PREFIXES.some(p => c.req.path.includes(p)),
+  operationLog({ moduleName: "后台管理", description: "后台管理操作日志" }),
+));
 
 // 一次性注册所有路由模块
 for (const module of Object.values(adminModules)) {

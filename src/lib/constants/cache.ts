@@ -1,6 +1,3 @@
-/** 默认租户 ID */
-export const DEFAULT_TENANT_ID = "default";
-
 /** 标准缓存过期时间(秒) - 1小时 */
 export const CACHE_TTL = 3600;
 

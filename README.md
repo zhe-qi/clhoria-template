@@ -269,31 +269,12 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 项目内置了 CRUD 开发常用的代码片段模板（`.vscode/crud.code-snippets`），在 TypeScript 文件中输入前缀后按 `Tab` 键即可快速生成代码。
 
-### 完整模块模板
-
 | 前缀            | 说明                                          |
 | --------------- | --------------------------------------------- |
 | `crud-schema`   | 完整 schema.ts 模板                           |
 | `crud-routes`   | 完整 routes.ts 模板（含 CRUD 五个路由）       |
 | `crud-handlers` | 完整 handlers.ts 模板（含 CRUD 五个处理函数） |
 | `crud-index`    | 完整 index.ts 模板                            |
-
-### 单个路由/处理函数
-
-| 前缀                                                      | 说明                     |
-| --------------------------------------------------------- | ------------------------ |
-| `r-list` / `r-create` / `r-get` / `r-update` / `r-remove` | 单个路由定义             |
-| `h-list` / `h-create` / `h-get` / `h-update` / `h-remove` | 单个处理函数             |
-| `r-custom` / `h-custom`                                   | 自定义路由或处理函数模板 |
-
-### 常用代码片段
-
-| 前缀                                       | 说明                                 |
-| ------------------------------------------ | ------------------------------------ |
-| `ir` / `ih` / `is`                         | 导入 routes/handlers/schema 常用依赖 |
-| `rok` / `rcreated` / `rfail` / `rnotfound` | 响应快捷方式                         |
-| `logi` / `loge`                            | 日志记录                             |
-| `db-tx`                                    | 数据库事务模板                       |
 
 ## 测试
 

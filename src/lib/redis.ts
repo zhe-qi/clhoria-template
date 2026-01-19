@@ -12,8 +12,8 @@ function parseClusterNodes(nodesStr: string): Array<{ host: string; port: number
   return nodesStr.split(",").map((node) => {
     const [host, portStr] = node.trim().split(":");
     return {
-      host: host || "127.0.0.1",
-      port: Number.parseInt(portStr || "6379", 10),
+      host,
+      port: Number.parseInt(portStr, 10),
     };
   });
 }
