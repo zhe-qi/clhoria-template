@@ -70,6 +70,12 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 4. **初始化数据库**
 
    ```bash
+   # 启动postgres服务(可选,在本地docker环境下快速搭建postgres数据库)
+   docker compose --env-file .env run -d --service-ports postgres
+
+   # 启动redis服务(可选,在本地docker环境下快速搭建redis)
+   docker compose --env-file .env run -d --service-ports redis
+
    # 推送数据库架构到开发环境
    pnpm push
 
