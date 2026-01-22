@@ -104,6 +104,116 @@ Visit <http://localhost:9999> to view the API documentation.
 
 ## Development Guidelines
 
+### Claude Code Development Workflow
+
+When developing features with Claude Code, follow this 8-stage standard workflow:
+
+```
+1. Requirements Analysis → 2. Architecture Design → 3. Test Planning → 4. Generate Code →
+5. Generate Tests → 6-7. Iterative Optimization → 8. Generate Skill Docs
+```
+
+#### Core Points of Each Stage
+
+| Stage | Goal | Output |
+|-------|------|--------|
+| 1. Requirements Analysis | Ensure requirements are clear and complete | Clear requirement description |
+| 2. Architecture Design | Use thinking mode to design architecture | `docs/{feature}/architecture.md` |
+| 3. Test Planning | Generate test strategy based on architecture | `docs/{feature}/test-plan.md` |
+| 4. Generate Code | Generate complete code at once (Schema + Handlers) | Complete API code + migration |
+| 5. Generate Tests | Generate executable tests based on API types | `__tests__/int.test.ts` |
+| 6-7. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance |
+| 8. Skill Documentation | Generate docs for Claude quick learning | `docs/{feature}/skill.md` |
+
+#### Acceptance Criteria (Done Criteria)
+
+- ✅ All tests pass (**Required**)
+- ✅ Complies with CLAUDE.md specs (**Required**)
+- ✅ No obvious performance issues (**Required**)
+- ✅ Code quality meets standards (**Optional**)
+
+#### Documentation Output
+
+After completing each feature module, should include the following docs:
+
+```
+docs/{feature}/
+├── architecture.md  # Technical architecture design
+├── test-plan.md     # Testing strategy
+└── skill.md         # Claude quick learning docs
+```
+
+<details>
+<summary>📋 Document Template Examples (Click to expand)</summary>
+
+**architecture.md Template**
+
+```markdown
+# {Feature Name} Technical Architecture
+
+## Feature Overview
+{Brief description}
+
+## Database Design
+- Table Structure: {table name, fields, types}
+- Relations: {table relationships}
+- Indexes: {indexing strategy}
+
+## API Design
+| Path | Method | Description | Permission |
+|------|--------|-------------|------------|
+| /api/admin/{feature} | GET | List query | admin |
+| /api/admin/{feature} | POST | Create | admin |
+
+## Tech Stack
+- {Selected technologies and reasons}
+
+## Key Technical Decisions
+- {Important architectural decisions and rationale}
+```
+
+**test-plan.md Template**
+
+```markdown
+# {Feature Name} Test Plan
+
+## Feature Overview
+{Brief description}
+
+## Test Scenario Matrix
+| API | Normal Flow | Error Flow | Edge Cases |
+|-----|-------------|------------|------------|
+| Create | ✓ | Duplicate, Invalid format | Field length limits |
+| Query | ✓ | Non-existent ID | Pagination boundaries |
+```
+
+**skill.md Template**
+
+```markdown
+# {Feature Name} - Claude Skill Documentation
+
+## Quick Index
+- Entry: `src/routes/admin/{feature}/index.ts`
+- Tests: `src/routes/admin/{feature}/__tests__/int.test.ts`
+
+## Core Concepts
+- **{Term}**: {Explanation}
+
+## Data Flow Diagram
+\`\`\`
+Request → JWT Auth → RBAC → Zod Validation → Business Logic → Resp.ok()
+\`\`\`
+
+## Pitfall Guide
+- ⚠️ Responses must use `Resp.ok()` / `Resp.fail()` wrapper
+- ⚠️ Use `logger.info()` not console.log
+- ⚠️ DB Schema uses `snake_case`, TS uses `camelCase`
+```
+
+</details>
+
+---
+
 ### Route Module Structure
 
 ```text

@@ -71,7 +71,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "pnpm lint:fix",
+      "eslint --fix",
       "bash -c 'pnpm typecheck'"
     ]
   }

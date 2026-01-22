@@ -99,6 +99,116 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 
 ## 开发规范
 
+### Claude Code 开发流程
+
+配合 Claude Code 进行功能开发时，遵循以下 8 阶段标准流程：
+
+```
+1. 需求分析 → 2. 技术架构设计 → 3. 测试规划 → 4. 生成接口代码 →
+5. 生成测试用例 → 6-7. 循环优化 → 8. 生成 Skill 文档
+```
+
+#### 各阶段核心要点
+
+| 阶段 | 目标 | 输出 |
+|------|------|------|
+| 1. 需求分析 | 确保需求清晰完整 | 明确的需求描述 |
+| 2. 技术架构设计 | 使用 thinking 模式设计架构 | `docs/{feature}/architecture.md` |
+| 3. 测试规划 | 根据架构生成测试策略 | `docs/{feature}/test-plan.md` |
+| 4. 生成接口代码 | 一次性生成完整代码(Schema + Handlers) | 完整的接口代码 + migration |
+| 5. 生成测试用例 | 基于接口类型生成可执行测试 | `__tests__/int.test.ts` |
+| 6-7. 循环优化 | 持续改进直到满足验收标准 | 通过验收的代码 |
+| 8. Skill 文档 | 生成供 Claude 快速学习的文档 | `docs/{feature}/skill.md` |
+
+#### 验收标准（Done Criteria）
+
+- ✅ 所有测试通过（**必须**）
+- ✅ 符合 CLAUDE.md 规范（**必须**）
+- ✅ 无明显性能问题（**必须**）
+- ✅ 代码质量达标（**可选**）
+
+#### 文档产出
+
+每个功能模块完成后，应包含以下文档：
+
+```
+docs/{feature}/
+├── architecture.md  # 技术架构设计
+├── test-plan.md     # 测试策略
+└── skill.md         # Claude 快速学习文档
+```
+
+<details>
+<summary>📋 文档模板示例（点击展开）</summary>
+
+**architecture.md 模板**
+
+```markdown
+# {功能名称} 技术架构
+
+## 功能概述
+{简短描述功能}
+
+## 数据库设计
+- 表结构：{表名、字段、类型}
+- 关系：{表关系}
+- 索引：{索引策略}
+
+## API 设计
+| 路径 | 方法 | 描述 | 权限 |
+|------|------|------|------|
+| /api/admin/{feature} | GET | 列表查询 | admin |
+| /api/admin/{feature} | POST | 创建 | admin |
+
+## 技术选型
+- {选择的技术及原因}
+
+## 关键技术决策
+- {重要的架构决策及理由}
+```
+
+**test-plan.md 模板**
+
+```markdown
+# {功能名称} 测试计划
+
+## 功能概述
+{简短描述}
+
+## 测试场景矩阵
+| 接口 | 正常流程 | 异常流程 | 边界条件 |
+|------|---------|---------|---------|
+| 创建 | ✓ | 重复、无效格式 | 字段长度限制 |
+| 查询 | ✓ | 不存在的 ID | 分页边界 |
+```
+
+**skill.md 模板**
+
+```markdown
+# {功能名称} - Claude Skill 文档
+
+## 快速索引
+- 入口：`src/routes/admin/{feature}/index.ts`
+- 测试：`src/routes/admin/{feature}/__tests__/int.test.ts`
+
+## 核心概念
+- **{术语}**：{解释}
+
+## 数据流图
+\`\`\`
+请求 → JWT验证 → RBAC授权 → Zod验证 → 业务逻辑 → Resp.ok()
+\`\`\`
+
+## 避坑指南
+- ⚠️ 响应必须使用 `Resp.ok()` / `Resp.fail()` 包装
+- ⚠️ 日志使用 `logger.info()` 不用 console.log
+- ⚠️ DB Schema 用 `snake_case`，TS 用 `camelCase`
+```
+
+</details>
+
+---
+
 ### 路由模块结构
 
 ```text

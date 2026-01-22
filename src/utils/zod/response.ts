@@ -50,7 +50,7 @@ export class Resp {
   ): RespErr {
     // 初始化响应对象，提前合并 extra，避免多次展开
     const response: RespErr = {
-      ...(extra ?? {}), // 用 ?? 替代 ||，避免 0/false 等假值被错误覆盖
+      ...(extra ?? {}),
     };
 
     // 分支逻辑：集中处理 message/error/stack 字段，解决变量未初始化问题
