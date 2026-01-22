@@ -2,7 +2,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent } from "@/lib/stoker/openapi/helpers";
-import { respErr } from "@/utils";
+import { respErrSchema } from "@/utils";
 
 const routePrefix = "/notifications";
 const tags = [`${routePrefix}（通知）`];
@@ -45,6 +45,6 @@ eventSource.addEventListener('notification', (event) => {
         },
       },
     },
-    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErr, "未授权"),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErrSchema, "未授权"),
   },
 });

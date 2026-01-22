@@ -1,3 +1,4 @@
+import type { RedisOptions } from "ioredis";
 import Redis, { Cluster } from "ioredis";
 import { parseURL } from "ioredis/built/utils/index.js";
 
@@ -28,13 +29,10 @@ function createRedisClient(): RedisClient {
     }
 
     const nodes = parseClusterNodes(env.REDIS_CLUSTER_NODES);
-    const baseOptions = env.REDIS_URL ? parseURL(env.REDIS_URL) : {};
+    const baseOptions: RedisOptions = env.REDIS_URL ? parseURL(env.REDIS_URL) : {};
 
     return new Cluster(nodes, {
-      redisOptions: {
-        password: baseOptions.password as string | undefined,
-        maxRetriesPerRequest: null,
-      },
+      redisOptions: baseOptions,
       enableAutoPipelining: true,
       scaleReads: "slave",
     });
@@ -45,10 +43,7 @@ function createRedisClient(): RedisClient {
     connectionOptions.port = Number.parseInt(connectionOptions.port, 10);
   }
 
-  return new Redis({
-    ...connectionOptions,
-    maxRetriesPerRequest: null,
-  });
+  return new Redis(connectionOptions);
 }
 
 const redisClient = createSingleton<RedisClient>(
@@ -58,8 +53,3 @@ const redisClient = createSingleton<RedisClient>(
 );
 
 export default redisClient;
-
-/** 判断当前是否为集群模式 */
-export function isClusterMode(): boolean {
-  return env.REDIS_CLUSTER_ENABLED === "true";
-}

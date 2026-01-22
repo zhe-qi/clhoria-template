@@ -13,24 +13,6 @@ export default defineConfig(({ mode }) => {
     server: {
       port: Number.parseInt(env.PORT, 10),
     },
-    build: {
-      sourcemap: mode === "development",
-      target: "esnext",
-      rolldownOptions: {
-        external: [/node_modules/],
-        output: {
-          entryFileNames: "index.js",
-          format: "esm",
-          inlineDynamicImports: true,
-        },
-        treeshake: true,
-      },
-      oxc: {
-        transform: {
-          target: "esnext",
-        },
-      },
-    },
     resolve: {
       // tsconfigPaths: true,
       alias: {

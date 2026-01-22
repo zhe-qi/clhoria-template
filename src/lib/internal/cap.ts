@@ -1,5 +1,4 @@
 import Cap from "@cap.js/server";
-// 导入date-fns核心函数
 import { differenceInSeconds, isValid } from "date-fns";
 
 import redisClient from "../redis";
@@ -7,17 +6,15 @@ import { createSingleton } from "./singleton";
 
 /** 生成带前缀的Redis Key */
 function getRedisKey(type: "challenge" | "token", id: string): string {
-  return `cap:${type}:${id}`; // 统一前缀格式：cap:类型:唯一标识
+  return `cap:${type}:${id}`;
 }
 
-/** 计算TTL秒数（基于date-fns，增强鲁棒性） */
+/** 计算TTL秒数 */
 function calculateTtlSeconds(expires: number | Date): number {
   // 校验expires是否为合法日期（避免无效时间导致的异常）
   const expiresDate = typeof expires === "number" ? new Date(expires) : expires;
   if (!isValid(expiresDate))
     return 0;
-
-  // 计算当前时间与过期时间的秒数差（语义化清晰）
   const ttl = differenceInSeconds(expiresDate, new Date());
   // 确保TTL不小于0（过期数据直接返回0，不存入Redis）
   return Math.max(ttl, 0);

@@ -178,6 +178,7 @@ function getClientIdentifier(c: Context<AppBindings>) {
   if (remote)
     return remote;
 
+  // 如果以上都失败，则返回 0.0.0.0，生产环境中基本走不到这里
   return "0.0.0.0";
 }
 

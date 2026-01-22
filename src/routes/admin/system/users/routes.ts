@@ -6,7 +6,7 @@ import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query"
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
-import { respErr } from "@/utils";
+import { respErrSchema } from "@/utils";
 
 import { systemUsersDetailResponse, systemUsersListResponse, systemUsersPatchSchema, systemUsersResponse } from "./schema";
 
@@ -27,8 +27,8 @@ export const list = createRoute({
       RefineResultSchema(systemUsersListResponse),
       "列表响应成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "查询参数验证错误"),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "服务器内部错误"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "查询参数验证错误"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "服务器内部错误"),
   },
 });
 
@@ -49,8 +49,8 @@ export const create = createRoute({
       RefineResultSchema(systemUsersResponse),
       "创建成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
-    [HttpStatusCodes.CONFLICT]: jsonContent(respErr, "用户名已存在"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "The validation error(s)"),
+    [HttpStatusCodes.CONFLICT]: jsonContent(respErrSchema, "用户名已存在"),
   },
 });
 
@@ -68,8 +68,8 @@ export const get = createRoute({
       RefineResultSchema(systemUsersDetailResponse),
       "获取成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
   },
 });
 
@@ -91,9 +91,9 @@ export const update = createRoute({
       RefineResultSchema(systemUsersResponse),
       "更新成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "请求参数错误"),
-    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "内置用户不允许修改状态"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErrSchema, "内置用户不允许修改状态"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
   },
 });
 
@@ -111,9 +111,9 @@ export const remove = createRoute({
       RefineResultSchema(IdUUIDParamsSchema),
       "删除成功",
     ),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErr, "ID参数错误"),
-    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErr, "内置用户不允许删除"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户不存在"),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
+    [HttpStatusCodes.FORBIDDEN]: jsonContent(respErrSchema, "内置用户不允许删除"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
   },
 });
 
@@ -144,8 +144,8 @@ export const saveRoles = createRoute({
       })),
       "保存成功",
     ),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErr, "The validation error(s)"),
-    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErr, "用户或角色不存在"),
-    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErr, "保存角色失败"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "The validation error(s)"),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户或角色不存在"),
+    [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "保存角色失败"),
   },
 });
