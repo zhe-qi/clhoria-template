@@ -12,9 +12,9 @@ import cap from "@/lib/internal/cap";
 import { enforcerPromise } from "@/lib/internal/casbin";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-import { generateTokens, logout as logoutUtil, refreshAccessToken } from "@/services/admin";
-
 import { Resp, toColumns, tryit } from "@/utils";
+
+import { generateTokens, logout as logoutUtil, refreshAccessToken } from "./token.services";
 
 /** 管理端登录 */
 export const login: AuthRouteHandlerType<"login"> = async (c) => {
