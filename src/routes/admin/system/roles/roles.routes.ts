@@ -1,12 +1,11 @@
 import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod";
 
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { permissionItemSchema, systemRolesCreateSchema, systemRolesDetailResponse, systemRolesIdParams, systemRolesPatchSchema } from "./roles.schema";
+import { savePermissionsParamsSchema, savePermissionsResponseSchema, savePermissionsSchema, systemRolesCreateSchema, systemRolesDetailResponse, systemRolesIdParams, systemRolesListResponse, systemRolesPatchSchema } from "./roles.schema";
 
 const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];
@@ -21,10 +20,7 @@ export const list = createRoute({
     query: RefineQueryParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.array(systemRolesDetailResponse)),
-      "列表响应成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemRolesListResponse), "列表响应成功"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "查询参数验证错误"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "服务器内部错误"),
   },
@@ -37,16 +33,10 @@ export const create = createRoute({
   method: "post",
   path: routePrefix,
   request: {
-    body: jsonContentRequired(
-      systemRolesCreateSchema,
-      "创建系统角色参数",
-    ),
+    body: jsonContentRequired(systemRolesCreateSchema, "创建系统角色参数"),
   },
   responses: {
-    [HttpStatusCodes.CREATED]: jsonContent(
-      RefineResultSchema(systemRolesDetailResponse),
-      "创建成功",
-    ),
+    [HttpStatusCodes.CREATED]: jsonContent(RefineResultSchema(systemRolesDetailResponse), "创建成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "参数验证失败"),
     [HttpStatusCodes.CONFLICT]: jsonContent(respErrSchema, "角色代码已存在"),
@@ -63,10 +53,7 @@ export const get = createRoute({
     params: systemRolesIdParams,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(systemRolesDetailResponse),
-      "获取成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemRolesDetailResponse), "获取成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "角色不存在"),
   },
@@ -80,16 +67,10 @@ export const update = createRoute({
   path: `${routePrefix}/{id}`,
   request: {
     params: systemRolesIdParams,
-    body: jsonContentRequired(
-      systemRolesPatchSchema,
-      "更新系统角色参数",
-    ),
+    body: jsonContentRequired(systemRolesPatchSchema, "更新系统角色参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(systemRolesDetailResponse),
-      "更新成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemRolesDetailResponse), "更新成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "角色不存在"),
   },
@@ -105,10 +86,7 @@ export const remove = createRoute({
     params: systemRolesIdParams,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(systemRolesIdParams),
-      "删除成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemRolesIdParams), "删除成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "角色不存在"),
   },
@@ -124,16 +102,7 @@ export const getPermissions = createRoute({
     params: systemRolesIdParams,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
-        permissions: z.array(permissionItemSchema).meta({ description: "权限列表" }),
-        groupings: z.array(z.object({
-          child: z.string().meta({ description: "子角色ID" }),
-          parent: z.string().meta({ description: "父角色ID" }),
-        })).meta({ description: "角色继承关系列表" }),
-      })),
-      "获取权限成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(savePermissionsSchema), "获取权限成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "获取权限失败"),
   },
@@ -146,28 +115,10 @@ export const savePermissions = createRoute({
   path: `${routePrefix}/{id}/permissions`,
   request: {
     params: systemRolesIdParams,
-    body: jsonContentRequired(
-      z.object({
-        permissions: z.array(
-          z.tuple([
-            z.string().min(1).meta({ description: "资源" }),
-            z.string().min(1).meta({ description: "操作" }),
-          ]),
-        ).meta({ description: "权限列表（全量）" }),
-        parentRoleIds: z.array(z.string().min(1).regex(/^[a-z0-9_]+$/)).optional().meta({ description: "上级角色ID列表（可选）" }),
-      }),
-      "保存权限参数",
-    ),
+    body: jsonContentRequired(savePermissionsParamsSchema, "保存权限参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
-        added: z.number().int().meta({ description: "新增权限数量" }),
-        removed: z.number().int().meta({ description: "删除权限数量" }),
-        total: z.number().int().meta({ description: "总权限数量" }),
-      })),
-      "保存权限成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(savePermissionsResponseSchema), "保存权限成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "角色不存在"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "保存权限失败"),

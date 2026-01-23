@@ -1,5 +1,4 @@
 import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod";
 
 import { insertSystemUsersSchema } from "@/db/schema";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
@@ -8,7 +7,7 @@ import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 import { respErrSchema } from "@/utils";
 
-import { systemUsersDetailResponse, systemUsersListResponse, systemUsersPatchSchema, systemUsersResponse } from "./users.schema";
+import { saveRolesParamsSchema, saveRolesResponseSchema, saveRolesSchema, systemUsersDetailResponse, systemUsersListResponse, systemUsersPatchSchema, systemUsersResponse } from "./users.schema";
 
 const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];
@@ -23,10 +22,7 @@ export const list = createRoute({
     query: RefineQueryParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(systemUsersListResponse),
-      "列表响应成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersListResponse), "列表响应成功"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "查询参数验证错误"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "服务器内部错误"),
   },
@@ -39,16 +35,10 @@ export const create = createRoute({
   method: "post",
   path: routePrefix,
   request: {
-    body: jsonContentRequired(
-      insertSystemUsersSchema,
-      "创建系统用户参数",
-    ),
+    body: jsonContentRequired(insertSystemUsersSchema, "创建系统用户参数"),
   },
   responses: {
-    [HttpStatusCodes.CREATED]: jsonContent(
-      RefineResultSchema(systemUsersResponse),
-      "创建成功",
-    ),
+    [HttpStatusCodes.CREATED]: jsonContent(RefineResultSchema(systemUsersResponse), "创建成功"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "The validation error(s)"),
     [HttpStatusCodes.CONFLICT]: jsonContent(respErrSchema, "用户名已存在"),
   },
@@ -64,10 +54,7 @@ export const get = createRoute({
     params: IdUUIDParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(systemUsersDetailResponse),
-      "获取成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersDetailResponse), "获取成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
   },
@@ -81,16 +68,10 @@ export const update = createRoute({
   path: `${routePrefix}/{id}`,
   request: {
     params: IdUUIDParamsSchema,
-    body: jsonContentRequired(
-      systemUsersPatchSchema,
-      "更新系统用户参数",
-    ),
+    body: jsonContentRequired(systemUsersPatchSchema, "更新系统用户参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(systemUsersResponse),
-      "更新成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersResponse), "更新成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
     [HttpStatusCodes.FORBIDDEN]: jsonContent(respErrSchema, "内置用户不允许修改状态"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
@@ -107,10 +88,7 @@ export const remove = createRoute({
     params: IdUUIDParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(IdUUIDParamsSchema),
-      "删除成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(IdUUIDParamsSchema), "删除成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
     [HttpStatusCodes.FORBIDDEN]: jsonContent(respErrSchema, "内置用户不允许删除"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
@@ -124,26 +102,11 @@ export const saveRoles = createRoute({
   method: "put",
   path: `${routePrefix}/{userId}/roles`,
   request: {
-    params: z.object({
-      userId: z.uuid().meta({ description: "用户ID" }),
-    }),
-    body: jsonContentRequired(
-      z.object({
-        roleIds: z.array(z.string().min(1).max(64).meta({ example: "admin", description: "角色编码" }))
-          .meta({ description: "角色列表（全量）" }),
-      }),
-      "保存角色参数",
-    ),
+    params: saveRolesParamsSchema,
+    body: jsonContentRequired(saveRolesSchema, "保存角色参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
-        added: z.number().int().meta({ description: "新增角色数量" }),
-        removed: z.number().int().meta({ description: "删除角色数量" }),
-        total: z.number().int().meta({ description: "总角色数量" }),
-      })),
-      "保存成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(saveRolesResponseSchema), "保存成功"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "The validation error(s)"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户或角色不存在"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "保存角色失败"),

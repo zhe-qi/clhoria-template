@@ -17,20 +17,14 @@ export const login = createRoute({
   path: `${routePrefix}/login`,
   method: "post",
   request: {
-    body: jsonContentRequired(
-      systemUsersLoginSchema,
-      "登录请求",
-    ),
+    body: jsonContentRequired(systemUsersLoginSchema, "登录请求"),
   },
   tags,
   summary: "管理端登录",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
-        accessToken: z.string().meta({ description: "访问令牌" }),
-      })),
-      "登录成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(z.object({
+      accessToken: z.string().meta({ description: "访问令牌" }),
+    })), "登录成功"),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErrSchema, "用户名或密码错误"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "验证码错误"),
     [HttpStatusCodes.FORBIDDEN]: jsonContent(respErrSchema, "用户被禁用"),
@@ -45,12 +39,9 @@ export const refreshToken = createRoute({
   tags,
   summary: "管理端刷新访问令牌",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
-        accessToken: z.string().meta({ description: "访问令牌" }),
-      })),
-      "刷新成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(z.object({
+      accessToken: z.string().meta({ description: "访问令牌" }),
+    })), "刷新成功"),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErrSchema, "刷新令牌无效"),
   },
 });
@@ -63,10 +54,7 @@ export const logout = createRoute({
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" })],
   summary: "管理端退出登录",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({})),
-      "退出成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(z.object({})), "退出成功"),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(respErrSchema, "未授权"),
   },
 });
@@ -79,10 +67,7 @@ export const getIdentity = createRoute({
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" })],
   summary: "管理端获取当前用户信息",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(systemUsersInfoResponse),
-      "获取成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersInfoResponse), "获取成功"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
   },
 });
@@ -95,13 +80,10 @@ export const getPermissions = createRoute({
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" })],
   summary: "管理端获取当前用户权限",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      RefineResultSchema(z.object({
-        permissions: z.array(z.string()).meta({ description: "权限策略列表（p策略）" }),
-        groupings: z.array(z.string()).meta({ description: "角色继承关系列表（g策略）" }),
-      })),
-      "获取成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(z.object({
+      permissions: z.array(z.string()).meta({ description: "权限策略列表（p策略）" }),
+      groupings: z.array(z.string()).meta({ description: "角色继承关系列表（g策略）" }),
+    })), "获取成功"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "角色不存在"),
   },
 });
@@ -113,14 +95,11 @@ export const createChallenge = createRoute({
   tags,
   summary: "管理端生成验证码挑战",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        challenge: z.any().meta({ description: "验证码挑战数据" }),
-        token: z.string().optional().meta({ description: "挑战token" }),
-        expires: z.number().meta({ description: "过期时间戳" }),
-      }),
-      "生成成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(z.object({
+      challenge: z.any().meta({ description: "验证码挑战数据" }),
+      token: z.string().optional().meta({ description: "挑战token" }),
+      expires: z.number().meta({ description: "过期时间戳" }),
+    }), "生成成功"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "生成失败"),
   },
 });
@@ -130,25 +109,19 @@ export const redeemChallenge = createRoute({
   path: `${routePrefix}/redeem`,
   method: "post",
   request: {
-    body: jsonContentRequired(
-      z.object({
-        token: z.string().meta({ description: "挑战token" }),
-        solutions: z.array(z.number()).meta({ description: "用户解答" }),
-      }),
-      "验证请求",
-    ),
+    body: jsonContentRequired(z.object({
+      token: z.string().meta({ description: "挑战token" }),
+      solutions: z.array(z.number()).meta({ description: "用户解答" }),
+    }), "验证请求"),
   },
   tags,
   summary: "管理端验证用户解答",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      z.object({
-        success: z.boolean().meta({ description: "验证结果" }),
-        token: z.string().optional().meta({ description: "验证token" }),
-        expires: z.number().optional().meta({ description: "过期时间戳" }),
-      }),
-      "验证成功",
-    ),
+    [HttpStatusCodes.OK]: jsonContent(z.object({
+      success: z.boolean().meta({ description: "验证结果" }),
+      token: z.string().optional().meta({ description: "验证token" }),
+      expires: z.number().optional().meta({ description: "过期时间戳" }),
+    }), "验证成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "验证失败"),
   },
 });

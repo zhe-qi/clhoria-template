@@ -54,3 +54,6 @@ export const systemDictIdParams = z.object({
 
 /** 响应 Schema */
 export const systemDictResponseSchema = selectSystemDictSchema;
+
+/** 列表响应 Schema */
+export const systemDictListResponse = z.array(systemDictResponseSchema);
