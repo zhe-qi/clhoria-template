@@ -23,7 +23,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **完整 RBAC**: 用户管理 + 角色管理 + Casbin 权限策略 + Refine Resource 菜单
 - **智能权限系统**: Casbin KeyMatch3 + RESTful + Refine Resource,无需后端存储权限标识
 - **高性能菜单**: 基于 Refine 的菜单和路由最佳实践,相比传统动态路由性能更优
-- **业务和系统字典**: 业务字典支持运行时动态配置(JSONB + Redis缓存),系统字典使用 PostgreSQL Enum 编译时类型检查
+- **业务和系统字典**: 业务字典支持运行时动态配置(JSONB + Redis缓存),系统字典使用 Pg枚举 编译时类型检查
 - **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
 - **高性能缓存**: Redis 缓存（支持集群模式）+ 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
 - **任务队列和定时任务**: 基于 pg-boss 的后台任务队列管理，基于 croner 的定时任务

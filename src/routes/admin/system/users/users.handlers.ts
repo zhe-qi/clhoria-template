@@ -101,7 +101,7 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
     with: {
       systemUserRoles: {
         with: {
-          roles: true,
+          role: true,
         },
       },
     },
@@ -111,7 +111,7 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  const roles = user.systemUserRoles.map(({ roles: { id, name } }) => ({ id, name }));
+  const roles = user.systemUserRoles.map(({ role: { id, name } }) => ({ id, name }));
   const userWithoutPassword = omit(user, ["password", "systemUserRoles"]);
 
   return c.json(Resp.ok({ ...userWithoutPassword, roles }), HttpStatusCodes.OK);
