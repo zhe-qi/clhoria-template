@@ -154,6 +154,22 @@ const querySchema = selectSchema.pick({...}).extend({
   // Use extend for: override properties, change types, add new fields
   optional: z.string().optional()
 });
+
+// 4. 合并 Schema（Zod v4 语法）
+// ✓ 使用 .extend() 合并对象 Schema
+const combinedSchema = baseSchema.extend(additionalSchema.shape);
+// ✗ 不要使用 .merge()（已弃用）
+const combinedSchema = baseSchema.merge(additionalSchema); // 已弃用
+
+// 5. 扩展 RefineQueryParamsSchema 添加自定义过滤字段
+const customQuerySchema = z.object({
+  code: z.string().optional(),
+  name: z.string().optional(),
+});
+// 在 routes 中使用
+request: {
+  query: RefineQueryParamsSchema.extend(customQuerySchema.shape),
+}
 ```
 
 **Type Constraints（推荐）**
@@ -171,6 +187,10 @@ const createUserSchema: z.ZodType<CreateUserRequest> = z.object({
 
 // Zod v4 语法
 z.uuid()  // not z.string().uuid()
+
+// 枚举使用 z.enum() 而非 z.nativeEnum()（已弃用）
+z.enum([Status.ENABLED, Status.DISABLED])  // ✓ 正确
+z.nativeEnum(Status)  // ✗ 已弃用
 
 // 说明:
 // - 使用接口约束可在编译时发现 Schema 定义与类型不一致的问题
@@ -306,3 +326,50 @@ export const list = createRoute({
 
 **Testing**
 - Developer must manually run and test project for debugging
+
+## 开发流程规范
+
+**代码质量检查**
+1. 完成代码编写后，**必须**运行以下命令：
+   ```bash
+   pnpm typecheck  # 类型检查
+   pnpm lint:fix   # 代码格式修复
+   ```
+2. 确保两个命令都通过，无错误和警告
+
+**测试要求**
+- 参考现有测试文件编写单元测试（如 `src/routes/admin/system/users/__tests__/users.test.ts`）
+- 测试编写完成后运行 `pnpm test` 确保通过
+- **注意**：不需要通过调用请求手动测试，只需跑通单元测试即可
+- 不需要关注 OpenAPI 文档的手动验证
+
+**Redis 缓存规范**
+- Public 接口应使用 Redis 缓存以提升性能
+- 缓存策略：
+  - 缓存 key 格式：`{prefix}:{identifier}`（如 `dict:user_status`）
+  - 缓存过期时间：根据业务需求设置（通常 300 秒）
+  - Admin 接口的 create/update/delete 操作需清除相关缓存
+- 示例：
+  ```typescript
+  // Public handler - 读取缓存
+  const cached = await redisClient.get(cacheKey);
+  if (cached) {
+    return c.json(Resp.ok(JSON.parse(cached)), HttpStatusCodes.OK);
+  }
+
+  // 查询数据库后写入缓存
+  void redisClient.setex(cacheKey, TTL, JSON.stringify(result))
+    .catch(error => logger.warn({ error }, "[模块]: 缓存写入失败"));
+
+  // Admin handler - 清除缓存
+  void redisClient.del(cacheKey)
+    .catch(error => logger.warn({ error }, "[模块]: 清除缓存失败"));
+  ```
+
+**开发步骤总结**
+1. 编写代码（schema、routes、handlers、types）
+2. 运行 `pnpm typecheck` 和 `pnpm lint:fix`
+3. 编写单元测试
+4. 运行 `pnpm test` 确保测试通过
+5. 提交代码（无需手动测试 API）
+

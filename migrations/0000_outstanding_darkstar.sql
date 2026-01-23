@@ -15,6 +15,20 @@ CREATE TABLE "casbin_rule" (
 	CONSTRAINT "casbin_rule_pkey" PRIMARY KEY("ptype","v0","v1","v2")
 );
 --> statement-breakpoint
+CREATE TABLE "system_dict" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
+	"created_at" timestamp,
+	"created_by" varchar(64),
+	"updated_at" timestamp,
+	"updated_by" varchar(64),
+	"code" varchar(64) NOT NULL,
+	"name" varchar(128) NOT NULL,
+	"description" text,
+	"items" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"status" "status" DEFAULT 'ENABLED' NOT NULL,
+	CONSTRAINT "system_dict_code_unique" UNIQUE("code")
+);
+--> statement-breakpoint
 CREATE TABLE "system_roles" (
 	"id" varchar(64) PRIMARY KEY NOT NULL,
 	"created_at" timestamp,
@@ -101,6 +115,7 @@ CREATE TABLE "client_users" (
 ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_user_id_system_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."system_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_role_id_system_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."system_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0","v1");--> statement-breakpoint
+CREATE INDEX "system_dict_status_idx" ON "system_dict" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "idx_user_roles_user_id" ON "system_user_roles" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "idx_user_roles_role_id" ON "system_user_roles" USING btree ("role_id");--> statement-breakpoint
 CREATE INDEX "system_user_username_idx" ON "system_users" USING btree ("username");--> statement-breakpoint

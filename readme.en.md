@@ -23,7 +23,7 @@ Clhoria simplifies complex technical architectures, making every coding session 
 - **Complete RBAC**: User management + Role management + Casbin policies + Refine Resource menus
 - **Intelligent Permission System**: Casbin KeyMatch3 + RESTful + Refine Resource, no backend permission identifier storage needed
 - **High-performance Menu**: Based on Refine best practices for menus and routing, better performance than traditional dynamic routing
-- **Type-safe Dictionary**: PostgreSQL Enum + Drizzle-Zod + OpenAPI manual frontend enum sync, compile-time type checking
+- **Business + System Dictionary**: Business dictionaries support runtime dynamic configuration (JSONB + Redis cache), system dictionaries use PostgreSQL Enum for compile-time type checking
 - **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
 - **High-performance Cache**: Redis caching (cluster mode supported) + multi-layer rate limiting + permission caching + session management + distributed locks
 - **Task Queue**: Scheduled tasks and background task queue management based on pg-boss
@@ -115,15 +115,15 @@ When developing features with Claude Code, follow this 8-stage standard workflow
 
 #### Core Points of Each Stage
 
-| Stage | Goal | Output |
-|-------|------|--------|
-| 1. Requirements Analysis | Ensure requirements are clear and complete | Clear requirement description |
-| 2. Architecture Design | Use thinking mode to design architecture | `docs/{feature}/architecture.md` |
-| 3. Test Planning | Generate test strategy based on architecture | `docs/{feature}/test-plan.md` |
-| 4. Generate Code | Generate complete code at once (Schema + Handlers) | Complete API code + migration |
-| 5. Generate Tests | Generate executable tests based on API types | `__tests__/int.test.ts` |
-| 6-7. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance |
-| 8. Skill Documentation | Generate docs for Claude quick learning | `docs/{feature}/skill.md` |
+| Stage                       | Goal                                               | Output                           |
+| --------------------------- | -------------------------------------------------- | -------------------------------- |
+| 1. Requirements Analysis    | Ensure requirements are clear and complete         | Clear requirement description    |
+| 2. Architecture Design      | Use thinking mode to design architecture           | `docs/{feature}/architecture.md` |
+| 3. Test Planning            | Generate test strategy based on architecture       | `docs/{feature}/test-plan.md`    |
+| 4. Generate Code            | Generate complete code at once (Schema + Handlers) | Complete API code + migration    |
+| 5. Generate Tests           | Generate executable tests based on API types       | `__tests__/int.test.ts`          |
+| 6-7. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance          |
+| 8. Skill Documentation      | Generate docs for Claude quick learning            | `docs/{feature}/skill.md`        |
 
 #### Acceptance Criteria (Done Criteria)
 
@@ -152,23 +152,28 @@ docs/{feature}/
 # {Feature Name} Technical Architecture
 
 ## Feature Overview
+
 {Brief description}
 
 ## Database Design
+
 - Table Structure: {table name, fields, types}
 - Relations: {table relationships}
 - Indexes: {indexing strategy}
 
 ## API Design
-| Path | Method | Description | Permission |
-|------|--------|-------------|------------|
-| /api/admin/{feature} | GET | List query | admin |
-| /api/admin/{feature} | POST | Create | admin |
+
+| Path                 | Method | Description | Permission |
+| -------------------- | ------ | ----------- | ---------- |
+| /api/admin/{feature} | GET    | List query  | admin      |
+| /api/admin/{feature} | POST   | Create      | admin      |
 
 ## Tech Stack
+
 - {Selected technologies and reasons}
 
 ## Key Technical Decisions
+
 - {Important architectural decisions and rationale}
 ```
 
@@ -178,13 +183,15 @@ docs/{feature}/
 # {Feature Name} Test Plan
 
 ## Feature Overview
+
 {Brief description}
 
 ## Test Scenario Matrix
-| API | Normal Flow | Error Flow | Edge Cases |
-|-----|-------------|------------|------------|
-| Create | ✓ | Duplicate, Invalid format | Field length limits |
-| Query | ✓ | Non-existent ID | Pagination boundaries |
+
+| API    | Normal Flow | Error Flow                | Edge Cases            |
+| ------ | ----------- | ------------------------- | --------------------- |
+| Create | ✓           | Duplicate, Invalid format | Field length limits   |
+| Query  | ✓           | Non-existent ID           | Pagination boundaries |
 ```
 
 **skill.md Template**
@@ -193,18 +200,22 @@ docs/{feature}/
 # {Feature Name} - Claude Skill Documentation
 
 ## Quick Index
+
 - Entry: `src/routes/admin/{feature}/index.ts`
 - Tests: `src/routes/admin/{feature}/__tests__/int.test.ts`
 
 ## Core Concepts
+
 - **{Term}**: {Explanation}
 
 ## Data Flow Diagram
+
 \`\`\`
 Request → JWT Auth → RBAC → Zod Validation → Business Logic → Resp.ok()
 \`\`\`
 
 ## Pitfall Guide
+
 - ⚠️ Responses must use `Resp.ok()` / `Resp.fail()` wrapper
 - ⚠️ Use `logger.info()` not console.log
 - ⚠️ DB Schema uses `snake_case`, TS uses `camelCase`

@@ -141,6 +141,11 @@ async function seedCasbinRules(roles: any) {
       { v1: "/system/users/{id}", v2: "GET" },
       { v1: "/system/users/{id}", v2: "PATCH" },
       { v1: "/system/users/{id}/roles", v2: "PUT" },
+      { v1: "/system/dict", v2: "GET" },
+      { v1: "/system/dict", v2: "POST" },
+      { v1: "/system/dict/{id}", v2: "DELETE" },
+      { v1: "/system/dict/{id}", v2: "GET" },
+      { v1: "/system/dict/{id}", v2: "PATCH" },
     ];
     for (const rule of adminRules) {
       await db.insert(casbinRule)
