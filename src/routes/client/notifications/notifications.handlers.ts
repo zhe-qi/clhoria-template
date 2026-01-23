@@ -1,4 +1,4 @@
-import type { NotificationsRouteHandlerType } from ".";
+import type { NotificationsRouteHandlerType } from "./notifications.types";
 
 import { streamSSE } from "hono/streaming";
 

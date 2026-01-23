@@ -1,9 +1,7 @@
-import type { AppRouteHandler } from "@/types/lib";
-
 import { createRouter } from "@/lib/internal/create-app";
 
-import * as handlers from "./handlers";
-import * as routes from "./routes";
+import * as handlers from "./users.handlers";
+import * as routes from "./users.routes";
 
 const systemUsersRouter = createRouter()
   .openapi(routes.get, handlers.get)
@@ -14,9 +12,3 @@ const systemUsersRouter = createRouter()
   .openapi(routes.saveRoles, handlers.saveRoles);
 
 export default systemUsersRouter;
-
-type RouteTypes = {
-  [K in keyof typeof routes]: typeof routes[K];
-};
-
-export type SystemUsersRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

@@ -6,7 +6,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { permissionItemSchema, systemRolesCreateSchema, systemRolesDetailResponse, systemRolesIdParams, systemRolesPatchSchema } from "./schema";
+import { permissionItemSchema, systemRolesCreateSchema, systemRolesDetailResponse, systemRolesIdParams, systemRolesPatchSchema } from "./roles.schema";
 
 const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];

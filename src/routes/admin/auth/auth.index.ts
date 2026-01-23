@@ -1,9 +1,7 @@
-import type { AppRouteHandler } from "@/types/lib";
-
 import { createRouter } from "@/lib/internal/create-app";
 
-import * as handlers from "./handlers";
-import * as routes from "./routes";
+import * as handlers from "./auth.handlers";
+import * as routes from "./auth.routes";
 
 const auth = createRouter()
   .openapi(routes.login, handlers.login)
@@ -15,9 +13,3 @@ const auth = createRouter()
   .openapi(routes.redeemChallenge, handlers.redeemChallenge);
 
 export default auth;
-
-type RouteTypes = {
-  [K in keyof typeof routes]: typeof routes[K];
-};
-
-export type AuthRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;

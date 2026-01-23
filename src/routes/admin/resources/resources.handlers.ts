@@ -1,4 +1,4 @@
-import type { ObjectStorageRouteHandlerType } from ".";
+import type { ObjectStorageRouteHandlerType } from "./resources.types";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { Resp } from "@/utils";
 

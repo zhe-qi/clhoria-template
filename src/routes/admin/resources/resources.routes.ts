@@ -5,7 +5,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { DownloadTokenRequestSchema, TokenResponseSchema, UploadTokenRequestSchema } from "./schema";
+import { DownloadTokenRequestSchema, TokenResponseSchema, UploadTokenRequestSchema } from "./resources.schema";
 
 const routePrefix = "/resources";
 const tags = [`${routePrefix}（通用资源）`];

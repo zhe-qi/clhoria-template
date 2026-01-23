@@ -213,26 +213,106 @@ docs/{feature}/
 
 ```text
 routes/{tier}/{feature}/
-├── {feature}.handlers.ts    # 业务逻辑处理器
-├── {feature}.routes.ts      # 路由定义和 OpenAPI 架构
-├── {feature}.schema.ts      # Zod 校验 Schema(类型约束与接口文档)
-└── {feature}.index.ts       # 统一导出
+├── {feature}.handlers.ts       # 业务逻辑处理器（必需）
+├── {feature}.routes.ts         # 路由定义和 OpenAPI 规范（必需）
+├── {feature}.index.ts          # 统一导出（必需）
+├── {feature}.types.ts          # 类型定义（必需）
+├── {feature}.schema.ts         # 路由级 Zod Schema（可选）
+├── {feature}.services.ts       # 路由级服务函数（可选）
+├── {feature}.helpers.ts        # 辅助工具函数（可选）
+└── __tests__/                  # 测试目录（推荐）
+    └── {feature}.test.ts
 ```
+
+**文件说明:**
+
+| 文件 | 状态 | 用途 |
+|------|------|------|
+| `{feature}.handlers.ts` | 必需 | 实现路由的业务逻辑处理函数 |
+| `{feature}.routes.ts` | 必需 | 定义路由的 OpenAPI 规范和路径 |
+| `{feature}.index.ts` | 必需 | 导出路由实例 |
+| `{feature}.types.ts` | 必需 | 路由处理器类型定义和业务类型 |
+| `{feature}.schema.ts` | 可选 | 定义该模块特有的 Zod 校验 Schema |
+| `{feature}.services.ts` | 可选 | 该模块专属的服务函数（复用 ≥2 次） |
+| `{feature}.helpers.ts` | 可选 | 模块内部的辅助工具函数（纯函数） |
+| `__tests__/` | 推荐 | 集成测试文件 |
+
+**何时创建可选文件:**
+- **schema.ts**: 当有多个复杂的请求/响应 Schema 需要组合和复用时
+- **services.ts**: 当有多个 handler 共享相同的业务逻辑时（但仅限本模块使用）
+- **helpers.ts**: 当需要特定的数据转换、格式化或验证辅助函数时
+
+**全局服务:**
+- 跨多个层级（admin/client/public）复用的服务应放在 `src/services/{service}/`
 
 ### 数据库架构
 
 ```text
 src/db/schema/
-├── {entity}.ts             # Drizzle 表定义
-└── index.ts                # 统一导出
+├── _shard/                     # 共享基础组件
+│   ├── base-columns.ts         # 通用字段（id/createdAt/updatedAt等）
+│   └── enums.ts                # PostgreSQL 枚举定义
+├── {tier}/{feature}/           # 业务表定义（按层级和功能组织）
+│   ├── {entity}.ts             # Drizzle 表定义
+│   └── index.ts                # 该功能模块的表导出
+└── index.ts                    # 根导出（汇总所有 schema）
 ```
+
+**目录说明:**
+
+- **`_shard/` 目录**: 存放跨功能的共享基础组件
+  - `base-columns.ts`: 导出 `baseColumns` 对象，所有表通过 `...baseColumns` 扩展
+  - `enums.ts`: 使用 `pgEnum()` 定义数据库枚举类型
+
+- **业务表组织**: 按 `{tier}/{feature}` 分层（如 `admin/system/users.ts`），与路由结构对应
 
 ### Zod Schema 分层
 
-| 层级   | 位置                 | 内容                                      |
-| ------ | -------------------- | ----------------------------------------- |
-| db     | `db/schema/*.ts`     | `select*Schema` / `insert*Schema`（基础） |
-| routes | `routes/*/schema.ts` | `*PatchSchema` / `*Response`（业务组合）  |
+项目中的 Zod Schema 分为两个层级:
+
+| 层级 | 位置 | 内容 | 用途 |
+|------|------|------|------|
+| **DB 层** | `db/schema/{entity}.ts` | `select*Schema` / `insert*Schema` | 从 Drizzle 表定义生成，作为基础 Schema |
+| **路由层** | `routes/{tier}/{feature}/*.schema.ts` | 业务组合 Schema | 继承 DB Schema 并组合成特定接口的请求/响应 Schema |
+
+**标准流程:**
+
+```typescript
+// 1. DB 层: 在表定义所在文件生成基础 Schema
+// src/db/schema/admin/system/users.ts
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+export const selectUserSchema = createSelectSchema(users, {
+  username: schema => schema.meta({ description: "用户名" })
+});
+export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+
+// 2. 路由层: 在 schema.ts 中组合业务 Schema
+// src/routes/admin/system/users/users.schema.ts
+import { selectUserSchema, insertUserSchema } from "@/db/schema";
+
+interface CreateUserRequest {
+  username: string;
+  email?: string;
+}
+
+export const createUserRequestSchema: z.ZodType<CreateUserRequest> =
+  insertUserSchema.pick({
+    username: true,
+    email: true
+  });
+
+export const userListResponseSchema = z.object({
+  data: z.array(selectUserSchema),
+  total: z.number()
+});
+```
+
+**关键规则:**
+- 所有 `.meta({ description })` 仅在 DB 层添加（通过 `createSelectSchema` 回调）
+- 路由层只负责组合、裁剪和扩展，不重复添加描述
+- 如果路由 Schema 简单（如单表 CRUD），可以直接在 `routes.ts` 中使用 DB Schema
+- 推荐使用接口约束 Zod Schema（`z.ZodType<Interface>`）以增强类型安全
 
 **PostgreSQL 版本说明**:
 
@@ -290,6 +370,33 @@ src/routes/{tier}/{feature}/handlers.ts  # 表示层：HTTP + 调用领域服务
 ### 🔄 自动路由加载
 
 基于 `import.meta.glob` 自动扫描注册路由模块，新增模块只需创建目录即可。支持 HMR 热更新，修改代码毫秒级生效。
+
+**工作原理:**
+
+```typescript
+// src/index.ts
+// 1. 自动扫描路由模块
+const adminModules = import.meta.glob<{ default: AppOpenAPI }>(
+  "./routes/admin/**/*.index.ts",
+  { eager: true }
+);
+
+// 2. 批量注册路由
+for (const module of Object.values(adminModules)) {
+  adminApp.route("/", module.default);
+}
+```
+
+**开发流程:**
+
+1. **创建新功能**: 在 `routes/{tier}/{feature}/` 下创建标准文件结构
+2. **自动发现**: Vite 自动扫描新的 `*.index.ts` 文件
+3. **立即生效**: 保存后毫秒级热更新，无需重启服务器
+
+**约定:**
+- 每个路由模块必须包含 `{feature}.index.ts` 文件
+- `index.ts` 必须 `export default` 一个路由实例
+- 文件路径格式: `routes/{tier}/{feature}/*.index.ts`
 
 ### 🧩 单例管理系统
 

@@ -14,9 +14,9 @@ import { authorize } from "./middlewares/authorize";
 import { operationLog } from "./middlewares/operation-log";
 
 // 使用 import.meta.glob 自动加载路由模块
-const adminModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/admin/**/index.ts", { eager: true });
-const clientModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/client/**/index.ts", { eager: true });
-const publicModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/public/**/index.ts", { eager: true });
+const adminModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/admin/**/*.index.ts", { eager: true });
+const clientModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/client/**/*.index.ts", { eager: true });
+const publicModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/public/**/*.index.ts", { eager: true });
 
 // 配置 Zod 使用中文错误消息
 z.config(z.locales.zhCN());

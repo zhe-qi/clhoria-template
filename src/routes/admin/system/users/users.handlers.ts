@@ -1,7 +1,7 @@
 import type { z } from "zod";
 
-import type { SystemUsersRouteHandlerType } from ".";
-import type { systemUsersQueryResult } from "./schema";
+import type { systemUsersQueryResult } from "./users.schema";
+import type { SystemUsersRouteHandlerType } from "./users.types";
 
 import { hash } from "@node-rs/argon2";
 import { and, eq, inArray, sql } from "drizzle-orm";

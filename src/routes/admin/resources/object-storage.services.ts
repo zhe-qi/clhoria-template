@@ -1,5 +1,7 @@
+import type { GenerateDownloadUrlParams, GenerateUploadUrlParams, PresignedUrlResult } from "./resources.types";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
 import { addSeconds, formatISO } from "date-fns";
 
 import env from "@/env";
@@ -17,22 +19,6 @@ const s3Client = createSingleton(
   }),
   { destroy: client => client.destroy() },
 );
-
-export type GenerateUploadUrlParams = {
-  fileName: string;
-  fileType?: string;
-  expiresIn?: number;
-};
-
-export type GenerateDownloadUrlParams = {
-  fileName: string;
-  expiresIn?: number;
-};
-
-export type PresignedUrlResult = {
-  url: string;
-  expiresAt: string;
-};
 
 /**
  * 生成上传预签名 URL

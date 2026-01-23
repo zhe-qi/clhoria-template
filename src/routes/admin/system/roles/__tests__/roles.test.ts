@@ -9,7 +9,7 @@ import env from "@/env";
 import { Status } from "@/lib/enums";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { authorize } from "@/middlewares/authorize";
-import systemRolesRouter from "@/routes/admin/system/roles";
+import systemRolesRouter from "@/routes/admin/system/roles/roles.index";
 import { getAdminToken, getAuthHeaders, getUserToken } from "~/tests/auth-utils";
 import { createTestApp } from "~/tests/utils/test-app";
 

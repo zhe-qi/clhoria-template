@@ -7,7 +7,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { systemUsersInfoResponse, systemUsersLoginSchema } from "../system/users/schema";
+import { systemUsersInfoResponse, systemUsersLoginSchema } from "../system/users/users.schema";
 
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];

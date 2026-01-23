@@ -1,11 +1,6 @@
-import type { z } from "zod";
-
-import type { systemRolesDetailResponse } from "./schema";
+import type { Role, RoleWithParents } from "./roles.types";
 
 import { enforcerPromise } from "@/lib/internal/casbin";
-
-type Role = z.infer<typeof systemRolesDetailResponse>;
-type RoleWithParents = Role & { parentRoles?: string[] };
 
 /**
  * 获取角色的所有上级角色
@@ -41,10 +36,7 @@ export async function setRoleParents(roleId: string, parentIds: string[]): Promi
  * @param parentIds 要设置的上级角色ID数组
  * @returns true表示会产生循环，false表示正常
  */
-export async function checkCircularInheritance(
-  roleId: string,
-  parentIds: string[],
-): Promise<boolean> {
+export async function checkCircularInheritance(roleId: string, parentIds: string[]): Promise<boolean> {
   const enforcer = await enforcerPromise;
 
   // 检查每个要设置的上级角色

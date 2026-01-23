@@ -1,4 +1,4 @@
-import type { ClientUsersRouteHandlerType } from ".";
+import type { ClientUsersRouteHandlerType } from "./users.types";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 
 import { Resp } from "@/utils/zod";

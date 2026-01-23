@@ -1,8 +1,8 @@
 import type { z } from "zod";
 
-import type { SystemRolesRouteHandlerType } from ".";
+import type { systemRolesDetailResponse } from "./roles.schema";
 
-import type { systemRolesDetailResponse } from "./schema";
+import type { SystemRolesRouteHandlerType } from "./roles.types";
 import { eq, inArray } from "drizzle-orm";
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
@@ -14,7 +14,7 @@ import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";
 import { mapDbError } from "@/utils/db-errors";
 
-import { checkCircularInheritance, cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./helpers";
+import { checkCircularInheritance, cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./roles.helpers";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   // 获取查询参数

@@ -8,7 +8,7 @@ import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 import { respErrSchema } from "@/utils";
 
-import { systemUsersDetailResponse, systemUsersListResponse, systemUsersPatchSchema, systemUsersResponse } from "./schema";
+import { systemUsersDetailResponse, systemUsersListResponse, systemUsersPatchSchema, systemUsersResponse } from "./users.schema";
 
 const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];

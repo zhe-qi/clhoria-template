@@ -1,4 +1,4 @@
-import type { AuthRouteHandlerType } from ".";
+import type { AuthRouteHandlerType } from "./auth.types";
 import { verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 
