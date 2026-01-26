@@ -366,6 +366,13 @@ export const list = createRoute({
     .catch(error => logger.warn({ error }, "[模块]: 清除缓存失败"));
   ```
 
+**数据库 Schema 开发流程**
+1. 修改 `src/db/schema/` 下的 Schema 文件
+2. 运行 `pnpm typecheck` 确保类型正确
+3. 运行 `pnpm push` 推送变更到开发数据库（开发环境专用，直接同步 Schema）
+4. 确认功能正常后，运行 `pnpm generate` 生成迁移文件
+5. 提交代码（包含迁移文件）
+
 **开发步骤总结**
 1. 编写代码（schema、routes、handlers、types）
 2. 运行 `pnpm typecheck` 和 `pnpm lint:fix`

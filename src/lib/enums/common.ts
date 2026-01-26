@@ -96,3 +96,21 @@ export const RealNameAuthStatus = {
 
 /** 实名认证状态类型 */
 export type RealNameAuthStatusType = (typeof RealNameAuthStatus)[keyof typeof RealNameAuthStatus];
+
+/** 参数值类型枚举 */
+export const ParamValueType = {
+  /** 字符串 */
+  STRING: "STRING",
+
+  /** 数字 */
+  NUMBER: "NUMBER",
+
+  /** 布尔值 */
+  BOOLEAN: "BOOLEAN",
+
+  /** JSON 对象 */
+  JSON: "JSON",
+} as const;
+
+/** 参数值类型 */
+export type ParamValueTypeType = (typeof ParamValueType)[keyof typeof ParamValueType];

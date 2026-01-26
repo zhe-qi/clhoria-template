@@ -1,4 +1,5 @@
 CREATE TYPE "public"."gender" AS ENUM('UNKNOWN', 'MALE', 'FEMALE');--> statement-breakpoint
+CREATE TYPE "public"."param_value_type" AS ENUM('STRING', 'NUMBER', 'BOOLEAN', 'JSON');--> statement-breakpoint
 CREATE TYPE "public"."real_name_auth_status" AS ENUM('UNAUTHENTICATED', 'PENDING', 'VERIFIED', 'FAILED');--> statement-breakpoint
 CREATE TYPE "public"."real_name_auth_type" AS ENUM('INDIVIDUAL', 'ENTERPRISE');--> statement-breakpoint
 CREATE TYPE "public"."status" AS ENUM('ENABLED', 'DISABLED');--> statement-breakpoint
@@ -27,6 +28,21 @@ CREATE TABLE "system_dict" (
 	"items" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"status" "status" DEFAULT 'ENABLED' NOT NULL,
 	CONSTRAINT "system_dict_code_unique" UNIQUE("code")
+);
+--> statement-breakpoint
+CREATE TABLE "system_param" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
+	"created_at" timestamp,
+	"created_by" varchar(64),
+	"updated_at" timestamp,
+	"updated_by" varchar(64),
+	"key" varchar(128) NOT NULL,
+	"value" text NOT NULL,
+	"value_type" "param_value_type" DEFAULT 'STRING' NOT NULL,
+	"name" varchar(128) NOT NULL,
+	"description" text,
+	"status" "status" DEFAULT 'ENABLED' NOT NULL,
+	CONSTRAINT "system_param_key_unique" UNIQUE("key")
 );
 --> statement-breakpoint
 CREATE TABLE "system_roles" (
@@ -116,6 +132,7 @@ ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_user_id_system
 ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_role_id_system_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."system_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0","v1");--> statement-breakpoint
 CREATE INDEX "system_dict_status_idx" ON "system_dict" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "system_param_status_idx" ON "system_param" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "idx_user_roles_user_id" ON "system_user_roles" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "idx_user_roles_role_id" ON "system_user_roles" USING btree ("role_id");--> statement-breakpoint
 CREATE INDEX "system_user_username_idx" ON "system_users" USING btree ("username");--> statement-breakpoint

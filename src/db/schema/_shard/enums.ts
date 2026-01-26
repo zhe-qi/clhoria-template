@@ -1,6 +1,6 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
-import { Gender, RealNameAuthStatus, RealNameAuthType, Status, UserStatus, VerificationStatus } from "@/lib/enums";
+import { Gender, ParamValueType, RealNameAuthStatus, RealNameAuthType, Status, UserStatus, VerificationStatus } from "@/lib/enums";
 
 /**
  * 类型安全的枚举值提取函数
@@ -23,3 +23,4 @@ export const userStatusEnum = pgEnum("user_status", extractEnumValues(UserStatus
 export const verificationStatusEnum = pgEnum("verification_status", extractEnumValues(VerificationStatus));
 export const realNameAuthTypeEnum = pgEnum("real_name_auth_type", extractEnumValues(RealNameAuthType));
 export const realNameAuthStatusEnum = pgEnum("real_name_auth_status", extractEnumValues(RealNameAuthStatus));
+export const paramValueTypeEnum = pgEnum("param_value_type", extractEnumValues(ParamValueType));
