@@ -1,5 +1,5 @@
 {
-  "id": "3bf91119-4b6b-4d51-971e-121292e6f35c",
+  "id": "5845b79b-22c0-4671-8329-fd801b6acdc1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -101,8 +101,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.system_dict": {
-      "name": "system_dict",
+    "public.system_dicts": {
+      "name": "system_dicts",
       "schema": "",
       "columns": {
         "id": {
@@ -171,8 +171,8 @@
         }
       },
       "indexes": {
-        "system_dict_status_idx": {
-          "name": "system_dict_status_idx",
+        "system_dicts_status_idx": {
+          "name": "system_dicts_status_idx",
           "columns": [
             {
               "expression": "status",
@@ -190,8 +190,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "system_dict_code_unique": {
-          "name": "system_dict_code_unique",
+        "system_dicts_code_unique": {
+          "name": "system_dicts_code_unique",
           "nullsNotDistinct": false,
           "columns": [
             "code"
@@ -202,8 +202,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.system_param": {
-      "name": "system_param",
+    "public.system_params": {
+      "name": "system_params",
       "schema": "",
       "columns": {
         "id": {
@@ -279,8 +279,8 @@
         }
       },
       "indexes": {
-        "system_param_status_idx": {
-          "name": "system_param_status_idx",
+        "system_params_status_idx": {
+          "name": "system_params_status_idx",
           "columns": [
             {
               "expression": "status",
@@ -298,8 +298,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "system_param_key_unique": {
-          "name": "system_param_key_unique",
+        "system_params_key_unique": {
+          "name": "system_params_key_unique",
           "nullsNotDistinct": false,
           "columns": [
             "key"
