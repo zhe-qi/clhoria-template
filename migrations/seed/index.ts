@@ -127,6 +127,7 @@ async function seedCasbinRules(roles: any) {
       console.warn(`${logPrefix} 跳过 Casbin 规则 seed：未找到 admin 角色`);
       return;
     }
+
     const adminRules = [
       { v1: "/system/roles", v2: "GET" },
       { v1: "/system/roles", v2: "POST" },
@@ -152,19 +153,21 @@ async function seedCasbinRules(roles: any) {
       { v1: "/system/params/{id}", v2: "GET" },
       { v1: "/system/params/{id}", v2: "PATCH" },
     ];
-    for (const rule of adminRules) {
-      await db.insert(casbinRule)
-        .values({
-          ptype: "p",
-          v0: "admin",
-          v1: rule.v1,
-          v2: rule.v2,
-          v3: "",
-          v4: "",
-          v5: "",
-        })
-        .onConflictDoNothing();
-    }
+
+    await db.insert(casbinRule)
+    .values(
+      adminRules.map(rule => ({
+        ptype: "p",
+        v0: "admin",
+        v1: rule.v1,
+        v2: rule.v2,
+        v3: "",
+        v4: "",
+        v5: "",
+      }))
+    )
+    .onConflictDoNothing();
+
     console.info(`${logPrefix} 已为 admin 角色创建 ${adminRules.length} 条 Casbin 规则`);
   } catch (error) {
     console.error(`${logPrefix} 写入 Casbin 规则失败:`, error);

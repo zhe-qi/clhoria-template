@@ -39,38 +39,42 @@ export async function setRoleParents(roleId: string, parentIds: string[]): Promi
 export async function checkCircularInheritance(roleId: string, parentIds: string[]): Promise<boolean> {
   const enforcer = await enforcerPromise;
 
+  // 一次性获取所有角色继承关系，避免递归中多次调用 enforcer
+  const allGroupingPolicies = await enforcer.getGroupingPolicy();
+
+  // 构建本地图：child -> parents
+  const parentMap = new Map<string, string[]>();
+  for (const [child, parent] of allGroupingPolicies) {
+    if (!parentMap.has(child)) {
+      parentMap.set(child, []);
+    }
+    parentMap.get(child)!.push(parent);
+  }
+
+  // 使用本地图进行 DFS 检查循环
+  const hasCycle = (currentId: string, visited: Set<string>): boolean => {
+    if (visited.has(currentId))
+      return false;
+    visited.add(currentId);
+
+    const parents = parentMap.get(currentId) || [];
+    for (const parent of parents) {
+      if (parent === roleId)
+        return true;
+      if (hasCycle(parent, visited))
+        return true;
+    }
+    return false;
+  };
+
   // 检查每个要设置的上级角色
   for (const parentId of parentIds) {
     // 自己不能是自己的上级
-    if (parentId === roleId) {
+    if (parentId === roleId)
       return true;
-    }
-
-    // 递归检查：如果parentId的祖先中包含roleId，则会形成循环
-    const visited = new Set<string>();
-    const checkAncestors = async (currentId: string): Promise<boolean> => {
-      if (visited.has(currentId)) {
-        return false; // 已检查过，避免死循环
-      }
-      visited.add(currentId);
-
-      const ancestors = await enforcer.getRolesForUser(currentId);
-      if (ancestors.includes(roleId)) {
-        return true;
-      }
-
-      // 递归检查所有祖先
-      for (const ancestorId of ancestors) {
-        if (await checkAncestors(ancestorId)) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    if (await checkAncestors(parentId)) {
+    // 检查祖先链中是否包含 roleId
+    if (hasCycle(parentId, new Set<string>()))
       return true;
-    }
   }
 
   return false;

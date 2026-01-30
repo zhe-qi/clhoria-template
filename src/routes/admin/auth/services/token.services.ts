@@ -1,8 +1,8 @@
-import type { UserTokenInfo } from "./auth.types";
+import type { UserTokenInfo } from "../auth.types";
 
 import redisClient from "@/lib/redis";
 
-import { generateAccessToken, generateRefreshToken, refreshIndexKey, refreshKey } from "./auth.helpers";
+import { generateAccessToken, generateRefreshToken, refreshIndexKey, refreshKey } from "../auth.helpers";
 
 /**
  * 登录/注册时生成一对 Token

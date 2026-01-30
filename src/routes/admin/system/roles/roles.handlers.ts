@@ -3,20 +3,19 @@ import type { z } from "zod";
 import type { systemRolesDetailResponse } from "./roles.schema";
 
 import type { SystemRolesRouteHandlerType } from "./roles.types";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
-import { enforcerPromise } from "@/lib/internal/casbin";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 
 import { Resp } from "@/utils";
 
-import { checkCircularInheritance, cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./roles.helpers";
+import { cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./roles.helpers";
+import { getRoleById, getRolePermissionsAndGroupings, roleExists, saveRolePermissions, updateRoleParents, validateParentRolesExist } from "./roles.services";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
-  // 获取查询参数
   const rawParams = c.req.query();
 
   const parseResult = RefineQueryParamsSchema.safeParse(rawParams);
@@ -24,7 +23,6 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
     return c.json(Resp.fail(parseResult.error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  // 执行查询
   const [error, result] = await executeRefineQuery<z.infer<typeof systemRolesDetailResponse>>({
     table: systemRoles,
     queryParams: parseResult.data,
@@ -34,10 +32,8 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
     return c.json(Resp.fail(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
 
-  // 批量添加上级角色信息
   const rolesWithParents = await enrichRolesWithParents(result.data);
 
-  // 设置 x-total-count 标头
   c.header("x-total-count", result.total.toString());
 
   return c.json(Resp.ok(rolesWithParents), HttpStatusCodes.OK);
@@ -47,20 +43,11 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  // 提取 parentRoleIds（如果有）
   const { parentRoleIds, ...roleData } = body;
 
-  // 如果有上级角色，检查父角色是否存在
   if (parentRoleIds && parentRoleIds.length > 0) {
-    // 只查询指定的 parentRoleIds，而非全表
-    const existingParents = await db
-      .select({ id: systemRoles.id })
-      .from(systemRoles)
-      .where(inArray(systemRoles.id, parentRoleIds));
-
-    if (existingParents.length !== parentRoleIds.length) {
-      const existingIds = new Set(existingParents.map(r => r.id));
-      const invalidIds = parentRoleIds.filter(pid => !existingIds.has(pid));
+    const invalidIds = await validateParentRolesExist(parentRoleIds);
+    if (invalidIds) {
       return c.json(Resp.fail(`上级角色不存在: ${invalidIds.join(", ")}`), HttpStatusCodes.BAD_REQUEST);
     }
   }
@@ -70,12 +57,10 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
     createdBy: sub,
   }).returning();
 
-  // 如果有上级角色，设置继承关系
   if (parentRoleIds && parentRoleIds.length > 0) {
     await setRoleParents(role.id, parentRoleIds);
   }
 
-  // 返回包含上级角色信息的完整对象
   const roleWithParents = await enrichRoleWithParents(role);
 
   return c.json(Resp.ok(roleWithParents), HttpStatusCodes.CREATED);
@@ -84,16 +69,12 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const [role] = await db
-    .select()
-    .from(systemRoles)
-    .where(eq(systemRoles.id, id));
+  const role = await getRoleById(id);
 
   if (!role) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 添加上级角色信息
   const roleWithParents = await enrichRoleWithParents(role);
 
   return c.json(Resp.ok(roleWithParents), HttpStatusCodes.OK);
@@ -104,36 +85,15 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  // 提取 parentRoleIds（如果有）
   const { parentRoleIds, ...roleData } = body;
 
-  // 如果有上级角色，检查是否会产生循环继承
   if (parentRoleIds !== undefined) {
-    if (parentRoleIds.length > 0) {
-      // 检查是否会产生循环继承
-      const hasCircular = await checkCircularInheritance(id, parentRoleIds);
-      if (hasCircular) {
-        return c.json(Resp.fail("设置的上级角色会产生循环继承"), HttpStatusCodes.BAD_REQUEST);
-      }
-
-      // 优化：只查询指定的 parentRoleIds，而非全表
-      const existingParents = await db
-        .select({ id: systemRoles.id })
-        .from(systemRoles)
-        .where(inArray(systemRoles.id, parentRoleIds));
-
-      if (existingParents.length !== parentRoleIds.length) {
-        const existingIds = new Set(existingParents.map(r => r.id));
-        const invalidIds = parentRoleIds.filter(pid => !existingIds.has(pid));
-        return c.json(Resp.fail(`上级角色不存在: ${invalidIds.join(", ")}`), HttpStatusCodes.BAD_REQUEST);
-      }
+    const result = await updateRoleParents(id, parentRoleIds);
+    if (!result.success) {
+      return c.json(Resp.fail(result.error), HttpStatusCodes.BAD_REQUEST);
     }
-
-    // 更新角色继承关系
-    await setRoleParents(id, parentRoleIds);
   }
 
-  // 如果有其他字段需要更新
   let updated;
   if (Object.keys(roleData).length > 0) {
     [updated] = await db
@@ -146,18 +106,13 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
       .returning();
   }
   else {
-    // 只更新了上级角色，获取角色数据
-    [updated] = await db
-      .select()
-      .from(systemRoles)
-      .where(eq(systemRoles.id, id));
+    updated = await getRoleById(id);
   }
 
   if (!updated) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 返回包含上级角色信息的完整对象
   const roleWithParents = await enrichRoleWithParents(updated);
 
   return c.json(Resp.ok(roleWithParents), HttpStatusCodes.OK);
@@ -166,7 +121,6 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  // 先清理角色的所有继承关系
   await cleanRoleInheritance(id);
 
   const [deleted] = await db
@@ -184,23 +138,7 @@ export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
 export const getPermissions: SystemRolesRouteHandlerType<"getPermissions"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const enforcer = await enforcerPromise;
-
-  // 获取所有隐式权限（包括继承的）
-  const allImplicitPermissions = await enforcer.getImplicitPermissionsForUser(id.toString());
-
-  // 转换为简单的权限对象数组
-  const permissions = allImplicitPermissions.map(p => ({
-    resource: p[1],
-    action: p[2],
-  }));
-
-  // 获取所有角色继承关系（g 策略）
-  const allGroupings = await enforcer.getGroupingPolicy();
-  const groupings = allGroupings.map(g => ({
-    child: g[0],
-    parent: g[1],
-  }));
+  const { permissions, groupings } = await getRolePermissionsAndGroupings(id);
 
   return c.json(Resp.ok({ permissions, groupings }), HttpStatusCodes.OK);
 };
@@ -209,100 +147,22 @@ export const savePermissions: SystemRolesRouteHandlerType<"savePermissions"> = a
   const { id } = c.req.valid("param");
   const { permissions, parentRoleIds } = c.req.valid("json");
 
-  // 检查角色是否存在
-  const [role] = await db.select({ id: systemRoles.id }).from(systemRoles).where(eq(systemRoles.id, id)).limit(1);
-
-  if (!role) {
+  const exists = await roleExists(id);
+  if (!exists) {
     return c.json(Resp.fail("角色不存在"), HttpStatusCodes.NOT_FOUND);
   }
 
-  const enforcer = await enforcerPromise;
-
-  // 1. 处理角色继承关系（g 策略）
   if (parentRoleIds !== undefined) {
-    // 检查循环继承
-    const hasCircular = await checkCircularInheritance(id, parentRoleIds);
-    if (hasCircular) {
-      return c.json(Resp.fail("不能设置循环继承的角色关系"), HttpStatusCodes.BAD_REQUEST);
-    }
-
-    // 保存上级角色
-    await setRoleParents(id, parentRoleIds);
-  }
-
-  // 2. 处理权限（p 策略）
-  // 获取角色的直接权限（不包括继承的）
-  const directPermissions = await enforcer.getPermissionsForUser(id.toString());
-
-  // 获取所有隐式权限（包括继承的）
-  const allImplicitPermissions = await enforcer.getImplicitPermissionsForUser(id.toString());
-  const directPermSet = new Set(
-    directPermissions.map(p => `${p[1]}:${p[2]}`),
-  );
-  const inheritedPermSet = new Set(
-    allImplicitPermissions
-      .filter(p => !directPermSet.has(`${p[1]}:${p[2]}`))
-      .map(p => `${p[1]}:${p[2]}`),
-  );
-
-  // 检查是否尝试添加已经继承的权限
-  const duplicateInheritedPerms: string[] = [];
-  for (const [resource, action] of permissions) {
-    const key = `${resource}:${action}`;
-    if (inheritedPermSet.has(key)) {
-      duplicateInheritedPerms.push(key);
+    const result = await updateRoleParents(id, parentRoleIds);
+    if (!result.success) {
+      return c.json(Resp.fail(result.error), HttpStatusCodes.BAD_REQUEST);
     }
   }
 
-  if (duplicateInheritedPerms.length > 0) {
-    return c.json(
-      Resp.fail(`不能重复添加已继承的权限: ${duplicateInheritedPerms.join(", ")}`),
-      HttpStatusCodes.BAD_REQUEST,
-    );
+  const permResult = await saveRolePermissions(id, permissions);
+  if (!permResult.success) {
+    return c.json(Resp.fail(permResult.error), HttpStatusCodes.BAD_REQUEST);
   }
 
-  // 构建新权限的数组格式（所有权限都是直接权限）
-  const oldPolicies = directPermissions;
-  const newPolicies = permissions.map(([resource, action]) => [id.toString(), resource, action]);
-
-  let removedCount = 0;
-  let addedCount = 0;
-
-  // 删除所有现有直接权限
-  if (oldPolicies.length > 0) {
-    const removeSuccess = await enforcer.removePolicies(oldPolicies);
-    if (!removeSuccess) {
-      return c.json(Resp.fail("删除旧权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
-    }
-    removedCount = oldPolicies.length;
-  }
-
-  // 添加新权限
-  if (newPolicies.length > 0) {
-    try {
-      const addSuccess = await enforcer.addPolicies(newPolicies);
-      if (!addSuccess) {
-        // 添加失败，尝试回滚：重新添加旧权限
-        if (oldPolicies.length > 0) {
-          await enforcer.addPolicies(oldPolicies);
-        }
-        return c.json(Resp.fail("添加新权限失败"), HttpStatusCodes.INTERNAL_SERVER_ERROR);
-      }
-      addedCount = newPolicies.length;
-    }
-    catch (error) {
-      // 添加异常，尝试回滚：重新添加旧权限
-      if (oldPolicies.length > 0) {
-        try {
-          await enforcer.addPolicies(oldPolicies);
-        }
-        catch {
-          // 回滚也失败，记录错误但继续抛出原错误
-        }
-      }
-      throw error;
-    }
-  }
-
-  return c.json(Resp.ok({ added: addedCount, removed: removedCount, total: newPolicies.length }), HttpStatusCodes.OK);
+  return c.json(Resp.ok({ added: permResult.added, removed: permResult.removed, total: permResult.total }), HttpStatusCodes.OK);
 };

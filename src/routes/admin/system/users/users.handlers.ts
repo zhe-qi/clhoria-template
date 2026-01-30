@@ -1,17 +1,11 @@
-import type { z } from "zod";
-
-import type { systemUsersQueryResult } from "./users.schema";
 import type { SystemUsersRouteHandlerType } from "./users.types";
 
-import { hash } from "@node-rs/argon2";
-import { and, eq, inArray, sql } from "drizzle-orm";
-import db from "@/db";
-import { systemRoles, systemUserRoles, systemUsers } from "@/db/schema";
-import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
+import { RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
-
 import { omit, Resp } from "@/utils";
+
+import { checkUserBuiltIn, createUser, deleteUser, getUserById, getUserWithRoles, listUsers, saveUserRoles, updateUser, validateRolesExist } from "./users.services";
 
 export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();
@@ -21,35 +15,7 @@ export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
     return c.json(Resp.fail(parseResult.error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [error, result] = await executeRefineQuery<z.infer<typeof systemUsersQueryResult>>({
-    table: systemUsers,
-    queryParams: parseResult.data,
-    joinConfig: {
-      joins: [
-        {
-          table: systemUserRoles,
-          type: "left",
-          on: eq(systemUsers.id, systemUserRoles.userId),
-        },
-        {
-          table: systemRoles,
-          type: "left",
-          on: eq(systemUserRoles.roleId, systemRoles.id),
-        },
-      ],
-      selectFields: {
-        id: systemUsers.id,
-        username: systemUsers.username,
-        nickName: systemUsers.nickName,
-        roles: sql`json_agg(json_build_object('id', ${systemRoles.id}, 'name', ${systemRoles.name}))`,
-        createdAt: systemUsers.createdAt,
-        updatedAt: systemUsers.updatedAt,
-        status: systemUsers.status,
-        avatar: systemUsers.avatar,
-      },
-      groupBy: [systemUsers.id],
-    },
-  });
+  const [error, result] = await listUsers(parseResult.data);
   if (error) {
     return c.json(Resp.fail(error.message), HttpStatusCodes.INTERNAL_SERVER_ERROR);
   }
@@ -64,18 +30,7 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  const hashedPassword = await hash(body.password);
-
-  const [created] = await db
-    .insert(systemUsers)
-    .values({
-      ...body,
-      password: hashedPassword,
-      createdBy: sub,
-      updatedBy: sub,
-    })
-    .returning();
-
+  const created = await createUser(body, sub);
   const userWithoutPassword = omit(created, ["password"]);
 
   return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.CREATED);
@@ -84,16 +39,7 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
 export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const user = await db.query.systemUsers.findFirst({
-    where: eq(systemUsers.id, id),
-    with: {
-      systemUserRoles: {
-        with: {
-          role: true,
-        },
-      },
-    },
-  });
+  const user = await getUserById(id);
 
   if (!user) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -111,31 +57,21 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const { sub } = c.get("jwtPayload");
 
   // 检查是否为内置用户
-  const [existingUser] = await db
-    .select({ builtIn: systemUsers.builtIn })
-    .from(systemUsers)
-    .where(eq(systemUsers.id, id));
+  const builtIn = await checkUserBuiltIn(id);
 
-  if (!existingUser) {
+  if (builtIn === null) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   // 内置用户不允许修改状态
-  if (existingUser.builtIn && body.status !== undefined) {
+  if (builtIn && body.status !== undefined) {
     return c.json(Resp.fail("内置用户不允许修改状态"), HttpStatusCodes.FORBIDDEN);
   }
 
   // 不允许直接更新密码
   const updateData = omit(body, ["password"]);
 
-  const [updated] = await db
-    .update(systemUsers)
-    .set({
-      ...updateData,
-      updatedBy: sub,
-    })
-    .where(eq(systemUsers.id, id))
-    .returning();
+  const updated = await updateUser(id, updateData, sub);
 
   if (!updated) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -150,23 +86,17 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // 检查是否为内置用户
-  const [existingUser] = await db
-    .select({ builtIn: systemUsers.builtIn })
-    .from(systemUsers)
-    .where(eq(systemUsers.id, id));
+  const builtIn = await checkUserBuiltIn(id);
 
-  if (!existingUser) {
+  if (builtIn === null) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  if (existingUser.builtIn) {
+  if (builtIn) {
     return c.json(Resp.fail("内置用户不允许删除"), HttpStatusCodes.FORBIDDEN);
   }
 
-  const [deleted] = await db
-    .delete(systemUsers)
-    .where(eq(systemUsers.id, id))
-    .returning({ id: systemUsers.id });
+  const deleted = await deleteUser(id);
 
   if (!deleted) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -179,67 +109,22 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
   const { userId } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
 
-  // 合并用户检查和当前角色查询为一次查询
-  const userWithRoles = await db.query.systemUsers.findFirst({
-    where: eq(systemUsers.id, userId),
-    columns: { id: true },
-    with: {
-      systemUserRoles: {
-        columns: { roleId: true },
-      },
-    },
-  });
+  // 获取用户及其当前角色
+  const userWithRoles = await getUserWithRoles(userId);
 
   if (!userWithRoles) {
     return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
   }
 
   // 验证角色存在性
-  if (roleIds.length > 0) {
-    const existingRoles = await db.select({ id: systemRoles.id }).from(systemRoles).where(inArray(systemRoles.id, roleIds));
-
-    if (existingRoles.length !== roleIds.length) {
-      const foundRoles = new Set(existingRoles.map(role => role.id));
-      const notFoundRoles = roleIds.filter(roleId => !foundRoles.has(roleId));
-      return c.json(Resp.fail(`角色不存在: ${notFoundRoles.join(", ")}`), HttpStatusCodes.NOT_FOUND);
-    }
+  const invalidRoleIds = await validateRolesExist(roleIds);
+  if (invalidRoleIds) {
+    return c.json(Resp.fail(`角色不存在: ${invalidRoleIds.join(", ")}`), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 从合并查询结果获取当前角色
+  // 保存用户角色
   const currentRoleIds = userWithRoles.systemUserRoles.map(ur => ur.roleId);
-  const currentRoleSet = new Set(currentRoleIds);
-  const newRoleSet = new Set(roleIds);
+  const result = await saveUserRoles(userId, roleIds, currentRoleIds);
 
-  // 计算需要删除的角色（在当前角色中但不在新角色中）
-  const rolesToRemove = currentRoleIds.filter(roleId => !newRoleSet.has(roleId));
-
-  // 计算需要添加的角色（在新角色中但不在当前角色中）
-  const rolesToAdd = roleIds.filter(roleId => !currentRoleSet.has(roleId));
-
-  let removedCount = 0;
-  let addedCount = 0;
-
-  // 使用事务确保数据一致性
-  await db.transaction(async (tx) => {
-    // 删除不需要的角色
-    if (rolesToRemove.length > 0) {
-      const deleteResult = await tx.delete(systemUserRoles).where(
-        and(
-          eq(systemUserRoles.userId, userId),
-          inArray(systemUserRoles.roleId, rolesToRemove),
-        ),
-      ).returning({ roleId: systemUserRoles.roleId });
-
-      removedCount = deleteResult.length;
-    }
-
-    // 添加新的角色
-    if (rolesToAdd.length > 0) {
-      const valuesToInsert = rolesToAdd.map(roleId => ({ userId, roleId }));
-      const insertResult = await tx.insert(systemUserRoles).values(valuesToInsert).returning();
-      addedCount = insertResult.length;
-    }
-  });
-
-  return c.json(Resp.ok({ added: addedCount, removed: removedCount, total: roleIds.length }), HttpStatusCodes.OK);
+  return c.json(Resp.ok(result), HttpStatusCodes.OK);
 };

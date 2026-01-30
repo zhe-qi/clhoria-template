@@ -37,6 +37,7 @@ logger.info({ userId }, "[Module]: message");  // data object FIRST
 - Extend `...baseColumns` (id/createdAt/updatedAt/createdBy/updatedBy)
 - Syntax: `varchar({ length: 128 })` - always specify length
 - **NEVER modify `migrations/` or `meta/` folders**
+- Batch inserts: When inserting multiple rows, use `db.insert(table).values([...items])` instead of for-loop single inserts
 
 ## Other Rules
 
@@ -45,8 +46,10 @@ logger.info({ userId }, "[Module]: message");  // data object FIRST
 - Timestamps: `timestamp({ mode: "string" })`
 - UUID params: `IdUUIDParamsSchema`
 - Naming: PascalCase (classes/types), UPPER_SNAKE_CASE (enum values), kebab-case (files)
+- Folder grouping: When multiple files of same type exist (e.g., `*.services.ts`), create a folder (e.g., `services/`)
 - Queries: Use enums `eq(table.status, Status.ENABLED)` not magic values
-- Services: Route-level (`{feature}.services.ts`) for ≥2x reuse; global (`src/services/`) for cross-tier
+- Services: Route-level (`{feature}.services.ts`) for business logic extraction (keeps handlers clean); global (`src/services/`) for cross-tier shared logic
+- Types: Prefer inferring from Zod schemas (`z.infer<typeof schema>`) over manual definitions
 
 ## Dev Workflow
 
