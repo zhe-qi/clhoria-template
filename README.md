@@ -244,14 +244,14 @@ routes/{tier}/{feature}/
 | `{feature}.index.ts`    | 必需 | 导出路由实例                       |
 | `{feature}.types.ts`    | 必需 | 路由处理器类型定义和业务类型       |
 | `{feature}.schema.ts`   | 可选 | 定义该模块特有的 Zod 校验 Schema   |
-| `{feature}.services.ts` | 可选 | 该模块专属的服务函数（复用 ≥2 次） |
+| `{feature}.services.ts` | 可选 | 该模块专属的服务函数（复杂逻辑或模块内复用） |
 | `{feature}.helpers.ts`  | 可选 | 模块内部的辅助工具函数（纯函数）   |
 | `__tests__/`            | 推荐 | 集成测试文件                       |
 
 **何时创建可选文件:**
 
 - **schema.ts**: 当有多个复杂的请求/响应 Schema 需要组合和复用时
-- **services.ts**: 当有多个 handler 共享相同的业务逻辑时（但仅限本模块使用）
+- **services.ts**: 当业务逻辑复杂或需要在模块内复用时（保持 handlers 简洁）
 - **helpers.ts**: 当需要特定的数据转换、格式化或验证辅助函数时
 
 **全局服务:**

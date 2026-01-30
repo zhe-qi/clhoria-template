@@ -15,7 +15,7 @@ src/routes/{tier}/{category}/{feature}/
 ├── {feature}.handlers.ts    # 必需：处理器实现
 ├── {feature}.types.ts       # 必需：类型定义
 ├── {feature}.schema.ts      # 可选：Zod 验证
-├── {feature}.services.ts    # 可选：复用 ≥2 次的业务逻辑
+├── {feature}.services.ts    # 可选：复杂业务逻辑或模块内复用
 └── __tests__/               # 可选：单元测试
 ```
 

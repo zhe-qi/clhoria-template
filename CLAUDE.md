@@ -48,7 +48,7 @@ logger.info({ userId }, "[Module]: message");  // data object FIRST
 - Naming: PascalCase (classes/types), UPPER_SNAKE_CASE (enum values), kebab-case (files)
 - Folder grouping: When multiple files of same type exist (e.g., `*.services.ts`), create a folder (e.g., `services/`)
 - Queries: Use enums `eq(table.status, Status.ENABLED)` not magic values
-- Services: Route-level (`{feature}.services.ts`) for business logic extraction (keeps handlers clean); global (`src/services/`) for cross-tier shared logic
+- Services: Route-level (`{feature}.services.ts`) for complex business logic or reuse within module; global (`src/services/`) for cross-tier shared logic
 - Types: Prefer inferring from Zod schemas (`z.infer<typeof schema>`) over manual definitions
 
 ## Dev Workflow
