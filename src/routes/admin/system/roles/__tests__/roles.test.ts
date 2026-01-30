@@ -544,14 +544,12 @@ describe("system role routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      // 可能返回 409 或 500（取决于数据库驱动和错误处理）
-      expect([HttpStatusCodes.CONFLICT, HttpStatusCodes.INTERNAL_SERVER_ERROR]).toContain(response2.status);
+      // 数据库唯一约束错误由全局 onError 处理，返回 409
+      expect(response2.status).toBe(HttpStatusCodes.CONFLICT);
 
-      if (response2.status === HttpStatusCodes.CONFLICT) {
-        const json = await response2.json() as { message: string };
+      const json = await response2.json() as { message: string };
 
-        expect(json.message).toBeDefined();
-      }
+      expect(json.message).toContain("已存在");
     });
   });
 

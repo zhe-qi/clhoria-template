@@ -37,9 +37,7 @@ export const create = createRoute({
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(RefineResultSchema(systemDictResponseSchema), "创建成功"),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "参数验证失败"),
-    [HttpStatusCodes.CONFLICT]: jsonContent(respErrSchema, "字典编码已存在"),
   },
 });
 
@@ -71,9 +69,7 @@ export const update = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemDictResponseSchema), "更新成功"),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "字典不存在"),
-    [HttpStatusCodes.CONFLICT]: jsonContent(respErrSchema, "字典编码已存在"),
   },
 });
 

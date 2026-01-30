@@ -37,9 +37,8 @@ export const create = createRoute({
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(RefineResultSchema(systemRolesDetailResponse), "创建成功"),
-    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
+    [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "上级角色不存在"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "参数验证失败"),
-    [HttpStatusCodes.CONFLICT]: jsonContent(respErrSchema, "角色代码已存在"),
   },
 });
 

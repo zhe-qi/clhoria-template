@@ -11,7 +11,6 @@ import redisClient from "@/lib/redis";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { Resp } from "@/utils";
-import { mapDbError } from "@/utils/db-errors";
 
 /** Redis 缓存 Key 前缀 */
 const PARAM_CACHE_PREFIX = "param:";
@@ -47,27 +46,16 @@ export const create: SystemParamRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  try {
-    const [created] = await db.insert(systemParams).values({
-      ...body,
-      createdBy: sub,
-    }).returning();
+  const [created] = await db.insert(systemParams).values({
+    ...body,
+    createdBy: sub,
+  }).returning();
 
-    // 异步清除可能存在的缓存
-    void redisClient.del(`${PARAM_CACHE_PREFIX}${created.key}`)
-      .catch(error => logger.warn({ error, key: created.key }, "[参数]: 清除缓存失败"));
+  // 异步清除可能存在的缓存
+  void redisClient.del(`${PARAM_CACHE_PREFIX}${created.key}`)
+    .catch(error => logger.warn({ error, key: created.key }, "[参数]: 清除缓存失败"));
 
-    return c.json(Resp.ok(created), HttpStatusCodes.CREATED);
-  }
-  catch (error) {
-    const pgError = mapDbError(error);
-
-    if (pgError?.type === "UniqueViolation" && pgError.constraint?.includes("key")) {
-      return c.json(Resp.fail("参数键已存在"), HttpStatusCodes.CONFLICT);
-    }
-
-    throw error;
-  }
+  return c.json(Resp.ok(created), HttpStatusCodes.CREATED);
 };
 
 /** 获取参数详情 */
@@ -91,37 +79,26 @@ export const update: SystemParamRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  try {
-    const [updated] = await db
-      .update(systemParams)
-      .set({
-        ...body,
-        updatedBy: sub,
-      })
-      .where(eq(systemParams.id, id))
-      .returning();
+  const [updated] = await db
+    .update(systemParams)
+    .set({
+      ...body,
+      updatedBy: sub,
+    })
+    .where(eq(systemParams.id, id))
+    .returning();
 
-    // 如果没有更新任何记录，说明参数不存在
-    if (!updated) {
-      return c.json(Resp.fail("参数不存在"), HttpStatusCodes.NOT_FOUND);
-    }
-
-    // 清除缓存（无论 key 是否修改，都清除当前 key 的缓存）
-    // 注意：如果修改了 key，旧的缓存 key 不会被清除，但会自然过期
-    void redisClient.del(`${PARAM_CACHE_PREFIX}${updated.key}`)
-      .catch(error => logger.warn({ error, key: updated.key }, "[参数]: 清除缓存失败"));
-
-    return c.json(Resp.ok(updated), HttpStatusCodes.OK);
+  // 如果没有更新任何记录，说明参数不存在
+  if (!updated) {
+    return c.json(Resp.fail("参数不存在"), HttpStatusCodes.NOT_FOUND);
   }
-  catch (error) {
-    const pgError = mapDbError(error);
 
-    if (pgError?.type === "UniqueViolation" && pgError.constraint?.includes("key")) {
-      return c.json(Resp.fail("参数键已存在"), HttpStatusCodes.CONFLICT);
-    }
+  // 清除缓存（无论 key 是否修改，都清除当前 key 的缓存）
+  // 注意：如果修改了 key，旧的缓存 key 不会被清除，但会自然过期
+  void redisClient.del(`${PARAM_CACHE_PREFIX}${updated.key}`)
+    .catch(error => logger.warn({ error, key: updated.key }, "[参数]: 清除缓存失败"));
 
-    throw error;
-  }
+  return c.json(Resp.ok(updated), HttpStatusCodes.OK);
 };
 
 /** 删除参数 */

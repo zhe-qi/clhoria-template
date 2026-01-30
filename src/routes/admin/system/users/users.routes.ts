@@ -39,8 +39,7 @@ export const create = createRoute({
   },
   responses: {
     [HttpStatusCodes.CREATED]: jsonContent(RefineResultSchema(systemUsersResponse), "创建成功"),
-    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "The validation error(s)"),
-    [HttpStatusCodes.CONFLICT]: jsonContent(respErrSchema, "用户名已存在"),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "参数验证失败"),
   },
 });
 

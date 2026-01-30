@@ -62,6 +62,7 @@
     "setex",
     "tryit",
     "tsdown",
-    "uuidv"
+    "uuidv",
+    "varchar"
   ]
 }

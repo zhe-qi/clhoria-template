@@ -12,7 +12,6 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 
 import { Resp } from "@/utils";
-import { mapDbError } from "@/utils/db-errors";
 
 import { checkCircularInheritance, cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./roles.helpers";
 
@@ -66,31 +65,20 @@ export const create: SystemRolesRouteHandlerType<"create"> = async (c) => {
     }
   }
 
-  try {
-    const [role] = await db.insert(systemRoles).values({
-      ...roleData,
-      createdBy: sub,
-    }).returning();
+  const [role] = await db.insert(systemRoles).values({
+    ...roleData,
+    createdBy: sub,
+  }).returning();
 
-    // 如果有上级角色，设置继承关系
-    if (parentRoleIds && parentRoleIds.length > 0) {
-      await setRoleParents(role.id, parentRoleIds);
-    }
-
-    // 返回包含上级角色信息的完整对象
-    const roleWithParents = await enrichRoleWithParents(role);
-
-    return c.json(Resp.ok(roleWithParents), HttpStatusCodes.CREATED);
+  // 如果有上级角色，设置继承关系
+  if (parentRoleIds && parentRoleIds.length > 0) {
+    await setRoleParents(role.id, parentRoleIds);
   }
-  catch (error) {
-    const pgError = mapDbError(error);
 
-    if (pgError?.type === "UniqueViolation") {
-      return c.json(Resp.fail("角色代码已存在"), HttpStatusCodes.CONFLICT);
-    }
+  // 返回包含上级角色信息的完整对象
+  const roleWithParents = await enrichRoleWithParents(role);
 
-    throw error;
-  }
+  return c.json(Resp.ok(roleWithParents), HttpStatusCodes.CREATED);
 };
 
 export const get: SystemRolesRouteHandlerType<"get"> = async (c) => {

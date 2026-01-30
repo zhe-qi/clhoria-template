@@ -230,13 +230,12 @@ describe("system params routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
+      // 数据库唯一约束错误由全局 onError 处理，返回 409
       expect(response2.status).toBe(HttpStatusCodes.CONFLICT);
 
-      if (response2.status === HttpStatusCodes.CONFLICT) {
-        const json = await response2.json() as { message: string };
+      const json = await response2.json() as { message: string };
 
-        expect(json.message).toContain("已存在");
-      }
+      expect(json.message).toContain("已存在");
     });
   });
 

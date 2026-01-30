@@ -11,7 +11,6 @@ import redisClient from "@/lib/redis";
 import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { Resp } from "@/utils";
-import { mapDbError } from "@/utils/db-errors";
 
 /** Redis 缓存 Key 前缀 */
 const DICT_CACHE_PREFIX = "dict:";
@@ -47,27 +46,16 @@ export const create: SystemDictRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  try {
-    const [created] = await db.insert(systemDicts).values({
-      ...body,
-      createdBy: sub,
-    }).returning();
+  const [created] = await db.insert(systemDicts).values({
+    ...body,
+    createdBy: sub,
+  }).returning();
 
-    // 异步清除可能存在的缓存
-    void redisClient.del(`${DICT_CACHE_PREFIX}${created.code}`)
-      .catch(error => logger.warn({ error, code: created.code }, "[字典]: 清除缓存失败"));
+  // 异步清除可能存在的缓存
+  void redisClient.del(`${DICT_CACHE_PREFIX}${created.code}`)
+    .catch(error => logger.warn({ error, code: created.code }, "[字典]: 清除缓存失败"));
 
-    return c.json(Resp.ok(created), HttpStatusCodes.CREATED);
-  }
-  catch (error) {
-    const pgError = mapDbError(error);
-
-    if (pgError?.type === "UniqueViolation" && pgError.constraint?.includes("code")) {
-      return c.json(Resp.fail("字典编码已存在"), HttpStatusCodes.CONFLICT);
-    }
-
-    throw error;
-  }
+  return c.json(Resp.ok(created), HttpStatusCodes.CREATED);
 };
 
 /** 获取字典详情 */
@@ -91,37 +79,26 @@ export const update: SystemDictRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  try {
-    const [updated] = await db
-      .update(systemDicts)
-      .set({
-        ...body,
-        updatedBy: sub,
-      })
-      .where(eq(systemDicts.id, id))
-      .returning();
+  const [updated] = await db
+    .update(systemDicts)
+    .set({
+      ...body,
+      updatedBy: sub,
+    })
+    .where(eq(systemDicts.id, id))
+    .returning();
 
-    // 如果没有更新任何记录，说明字典不存在
-    if (!updated) {
-      return c.json(Resp.fail("字典不存在"), HttpStatusCodes.NOT_FOUND);
-    }
-
-    // 清除缓存（无论 code 是否修改，都清除当前 code 的缓存）
-    // 注意：如果修改了 code，旧的缓存 key 不会被清除，但会自然过期
-    void redisClient.del(`${DICT_CACHE_PREFIX}${updated.code}`)
-      .catch(error => logger.warn({ error, code: updated.code }, "[字典]: 清除缓存失败"));
-
-    return c.json(Resp.ok(updated), HttpStatusCodes.OK);
+  // 如果没有更新任何记录，说明字典不存在
+  if (!updated) {
+    return c.json(Resp.fail("字典不存在"), HttpStatusCodes.NOT_FOUND);
   }
-  catch (error) {
-    const pgError = mapDbError(error);
 
-    if (pgError?.type === "UniqueViolation" && pgError.constraint?.includes("code")) {
-      return c.json(Resp.fail("字典编码已存在"), HttpStatusCodes.CONFLICT);
-    }
+  // 清除缓存（无论 code 是否修改，都清除当前 code 的缓存）
+  // 注意：如果修改了 code，旧的缓存 key 不会被清除，但会自然过期
+  void redisClient.del(`${DICT_CACHE_PREFIX}${updated.code}`)
+    .catch(error => logger.warn({ error, code: updated.code }, "[字典]: 清除缓存失败"));
 
-    throw error;
-  }
+  return c.json(Resp.ok(updated), HttpStatusCodes.OK);
 };
 
 /** 删除字典 */

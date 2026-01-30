@@ -12,7 +12,6 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 
 import { omit, Resp } from "@/utils";
-import { mapDbError } from "@/utils/db-errors";
 
 export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();
@@ -65,32 +64,21 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  try {
-    const hashedPassword = await hash(body.password);
+  const hashedPassword = await hash(body.password);
 
-    const [created] = await db
-      .insert(systemUsers)
-      .values({
-        ...body,
-        password: hashedPassword,
-        createdBy: sub,
-        updatedBy: sub,
-      })
-      .returning();
+  const [created] = await db
+    .insert(systemUsers)
+    .values({
+      ...body,
+      password: hashedPassword,
+      createdBy: sub,
+      updatedBy: sub,
+    })
+    .returning();
 
-    const userWithoutPassword = omit(created, ["password"]);
+  const userWithoutPassword = omit(created, ["password"]);
 
-    return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.CREATED);
-  }
-  catch (error) {
-    const pgError = mapDbError(error);
-
-    if (pgError?.type === "UniqueViolation") {
-      return c.json(Resp.fail("用户名已存在"), HttpStatusCodes.CONFLICT);
-    }
-
-    throw error;
-  }
+  return c.json(Resp.ok(userWithoutPassword), HttpStatusCodes.CREATED);
 };
 
 export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
