@@ -35,6 +35,7 @@ Clhoria simplifies complex technical architectures, making every coding session 
 - **Instant Feedback Development**: Vite-powered hot-reload dev environment, millisecond-level code updates for ultimate development experience
 - **Claude Code Optimized**: Complete CLAUDE.md configuration, MCP plugin ecosystem, AI understands project architecture
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
+- **Excel Processing**: High-performance Excel import/export based on excelize-wasm, singleton lazy loading, Docker deployment compatible
 
 ## Project Preview
 

@@ -56,6 +56,9 @@ importers:
       drizzle-zod:
         specifier: ^0.8.3
         version: 0.8.3(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20250820.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(pg@8.17.2)(postgres@3.4.8))(zod@4.3.6)
+      excelize-wasm:
+        specifier: ^0.1.1
+        version: 0.1.1
       hono:
         specifier: ^4.11.7
         version: 4.11.7
@@ -2802,6 +2805,9 @@ packages:
 
   eventemitter3@5.0.1:
     resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
+
+  excelize-wasm@0.1.1:
+    resolution: {integrity: sha512-EFAv5pbCQW5rZg2ts5bI46Uh4Lo7B0QEZZwskwxaX4DBq4iFj9rfohI5pvHTBqumMnLI4ypKNDYPQxQFCmEktQ==}
 
   execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
@@ -7278,6 +7284,8 @@ snapshots:
   etag@1.8.1: {}
 
   eventemitter3@5.0.1: {}
+
+  excelize-wasm@0.1.1: {}
 
   execa@5.1.1:
     dependencies:
