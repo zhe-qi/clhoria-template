@@ -101,7 +101,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
   // ---------- savePolicy ----------
   async savePolicy(model: Model): Promise<boolean> {
     // 核心字段（与数据库主键保持一致）
-    const keyFields: (keyof TCasbinTable)[] = ["ptype", "v0", "v1", "v2", "v3"];
+    const keyFields: (keyof TCasbinTable)[] = ["ptype", "v0", "v1", "v2"];
 
     const policies = this.extractAndValidatePolicies(model, keyFields);
 
@@ -283,7 +283,6 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
             this.schema.v0,
             this.schema.v1,
             this.schema.v2,
-            this.schema.v3,
           ],
         });
     });
@@ -326,7 +325,6 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
             this.schema.v0,
             this.schema.v1,
             this.schema.v2,
-            this.schema.v3,
           ],
         });
     });

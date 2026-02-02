@@ -5,12 +5,11 @@ import { jwt } from "hono/jwt";
 import * as z from "zod";
 
 import configureOpenAPI from "@/lib/internal/openapi";
-
 import env from "./env";
+
 import { SKIP_AUTH_PREFIXES, SKIP_JWT_PATHS } from "./lib/constants/auth-bypass";
 import createApp from "./lib/internal/create-app";
 import { authorize } from "./middlewares/authorize";
-
 import { operationLog } from "./middlewares/operation-log";
 
 // 使用 import.meta.glob 自动加载路由模块
