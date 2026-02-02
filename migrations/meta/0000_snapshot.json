@@ -1,5 +1,5 @@
 {
-  "id": "5845b79b-22c0-4671-8329-fd801b6acdc1",
+  "id": "6962a4ef-a085-41fd-9a01-e9b02546917e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -67,6 +67,27 @@
             },
             {
               "expression": "v0",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "v1",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_casbin_v1": {
+          "name": "idx_casbin_v1",
+          "columns": [
+            {
+              "expression": "ptype",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

@@ -131,6 +131,7 @@ CREATE TABLE "client_users" (
 ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_user_id_system_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."system_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_role_id_system_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."system_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0","v1");--> statement-breakpoint
+CREATE INDEX "idx_casbin_v1" ON "casbin_rule" USING btree ("ptype","v1");--> statement-breakpoint
 CREATE INDEX "system_dicts_status_idx" ON "system_dicts" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "system_params_status_idx" ON "system_params" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "idx_user_roles_user_id" ON "system_user_roles" USING btree ("user_id");--> statement-breakpoint
