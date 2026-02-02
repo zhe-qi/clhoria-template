@@ -20,12 +20,16 @@ src/db/schema/
 │   ├── base-columns.ts  # 基础列（id/createdAt/updatedAt/createdBy/updatedBy）
 │   ├── enums.ts         # 数据库枚举定义
 │   └── types/           # 共享类型
+├── _infra/              # 基础设施表（非业务表）
+│   └── saga/            # Saga 分布式事务
 ├── admin/               # 管理端表
 │   ├── system/          # 系统管理
 │   └── auth/            # 认证相关
 ├── client/              # 客户端表
 └── index.ts             # 统一导出
 ```
+
+> **注意**: `_infra` 目录使用下划线前缀，存放基础设施相关的表（如 Saga、审计日志、定时任务记录等），与业务表分开管理。
 
 ## 核心规则
 

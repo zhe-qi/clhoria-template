@@ -26,7 +26,8 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **业务和系统字典**: 业务字典支持运行时动态配置(JSONB + Redis缓存),系统字典使用 Pg枚举 编译时类型检查
 - **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
 - **高性能缓存**: Redis 缓存（支持集群模式）+ 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
-- **任务队列和定时任务**: 基于 pg-boss 的后台任务队列管理，基于 croner 的定时任务
+- **任务队列和定时任务**: 基于 pg-boss 的后台任务队列管理和定时任务调度（分布式安全，多节点只执行一次）
+- **分布式事务**: 基于 pg-boss 的 Saga 协调器，支持多步骤事务、自动补偿回滚、重试策略、超时处理
 - **对象存储**: 集成 S3 兼容对象存储(支持 Cloudflare R2、阿里云 OSS、AWS S3 等)
 - **智能验证码**: 集成 Cap.js,支持多种挑战类型的现代化验证码系统
 - **AI 原生开发**: Claude Code + OpenAPI 自动生成,告别手工维护接口文档的痛苦
@@ -417,6 +418,91 @@ for (const module of Object.values(adminModules)) {
 ### 🧩 单例管理系统
 
 统一管理 PostgreSQL、Redis、Casbin 等长连接资源，解决 Vite HMR 模式下的连接泄漏问题，支持自动资源清理
+
+### ⏰ 定时任务调度器
+
+基于 pg-boss 封装的分布式安全定时任务系统，多节点部署时同一时间只有一个节点执行任务。
+
+```typescript
+import { scheduler } from "@/lib/infrastructure";
+
+// 注册定时任务
+await scheduler.register({
+  name: "clean-expired-data",
+  pattern: "0 3 * * *", // 每天凌晨3点
+  timezone: "Asia/Shanghai",
+}, async () => {
+  await cleanExpiredData();
+});
+
+// 手动触发
+await scheduler.trigger("clean-expired-data");
+
+// 取消注册
+await scheduler.unregister("clean-expired-data");
+```
+
+### 🔄 Saga 分布式事务
+
+基于 pg-boss 的 Saga 协调器，用于处理跨服务/跨表的复杂业务流程，支持自动补偿回滚。
+
+**核心特性：**
+
+- 多步骤事务编排，步骤间共享上下文
+- 失败自动补偿（从最后完成的步骤向前回滚）
+- 可配置重试策略（支持指数退避）
+- 超时检测和处理
+- 幂等性支持
+- 完整的数据库审计追踪
+
+```typescript
+import { getSagaOrchestrator, sagaRegistry } from "@/lib/infrastructure";
+
+// 1. 注册 Saga 定义
+sagaRegistry.register({
+  type: "order-process",
+  timeoutSeconds: 300,
+  maxRetries: 3,
+  steps: [
+    {
+      name: "create-order",
+      execute: async (input, context) => {
+        const order = await createOrder(input);
+        return { success: true, output: { orderId: order.id } };
+      },
+      compensate: async (input, output) => {
+        await cancelOrder(output.orderId);
+        return { success: true };
+      },
+    },
+    {
+      name: "process-payment",
+      execute: async (input, context) => {
+        const payment = await processPayment(context.orderId, input.amount);
+        return { success: true, output: { paymentId: payment.id } };
+      },
+      compensate: async (input, output) => {
+        await refundPayment(output.paymentId);
+        return { success: true };
+      },
+    },
+  ],
+});
+
+// 2. 启动 Saga
+const orchestrator = await getSagaOrchestrator;
+const sagaId = await orchestrator.start("order-process", {
+  userId: "user-123",
+  amount: 100,
+});
+
+// 3. 查询状态
+const saga = await orchestrator.get(sagaId);
+
+// 4. 手动取消或重试
+await orchestrator.cancel(sagaId);
+await orchestrator.retry(sagaId);
+```
 
 ### 🎯 权限 + 菜单 + 字典一体化方案
 

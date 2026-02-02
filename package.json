@@ -34,7 +34,6 @@
     "@node-rs/argon2": "^2.0.2",
     "@scalar/hono-api-reference": "^0.9.39",
     "casbin": "^5.48.0",
-    "croner": "^10.0.1",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",

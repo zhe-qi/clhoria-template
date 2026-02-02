@@ -45,6 +45,40 @@ export const systemRoles = pgTable("system_roles", {
 });
 ```
 
+### baseColumns 选择使用
+
+不是所有表都需要完整的 `...baseColumns`，根据场景选择：
+
+```typescript
+// 情况1：业务表 - 使用完整 baseColumns（需要审计字段）
+export const orders = pgTable("orders", {
+  ...baseColumns,  // id, createdAt, createdBy, updatedAt, updatedBy
+  // ...
+});
+
+// 情况2：基础设施表 - 只需要部分字段（无需审计）
+// 如：Saga、队列任务、系统日志等
+export const sagas = pgTable("sagas", {
+  id: baseColumns.id,           // 只要 id
+  createdAt: baseColumns.createdAt,  // 只要创建时间
+  // 不需要 createdBy, updatedAt, updatedBy
+  // ...
+});
+
+// 情况3：关联表 - 无需 baseColumns
+export const userRoles = pgTable("user_roles", {
+  userId: uuid().notNull(),
+  roleId: varchar({ length: 64 }).notNull(),
+}, (table) => [
+  primaryKey({ name: "user_roles_pkey", columns: [table.userId, table.roleId] }),
+]);
+```
+
+**选择原则**：
+- 业务实体表：使用 `...baseColumns`（需要审计谁创建/修改了数据）
+- 基础设施表：使用 `baseColumns.id` + `baseColumns.createdAt`（系统自动管理）
+- 关联表/无主键表：不使用 baseColumns
+
 ## 标准表定义
 
 ```typescript
