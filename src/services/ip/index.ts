@@ -4,7 +4,22 @@ import { z } from "zod";
 
 import { CACHE_TTL, NULL_CACHE_TTL, NULL_CACHE_VALUE } from "@/lib/constants";
 import redisClient from "@/lib/redis";
-import { getIpVersion, isPrivateIp, normalizeIp, tryit } from "@/utils";
+import { isPrivateIp, normalizeIp, tryit } from "@/utils";
+
+const Ipv4Schema = z.ipv4();
+const Ipv6Schema = z.ipv6();
+
+/**
+ * 获取 IP 版本（4/6），非法则返回 0。
+ * 使用 Zod v4 内置 `z.ipv4()/z.ipv6()`，可兼容 Bun 等运行时。
+ */
+function getIpVersion(ip: string): 0 | 4 | 6 {
+  if (Ipv4Schema.safeParse(ip).success)
+    return 4;
+  if (Ipv6Schema.safeParse(ip).success)
+    return 6;
+  return 0;
+}
 
 const UNKNOWN = "unknown" as const;
 const LOCAL = "本地" as const;

@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 /**
  * 将上游可能带有端口/括号/IPv4-mapped IPv6 的输入，归一化为“纯 IP 字符串”。
  *
@@ -32,22 +30,6 @@ export function normalizeIp(raw: string, unknownValue = "unknown"): string {
     return t.split(":")[0] ?? t;
 
   return t;
-}
-
-const Ipv4Schema = z.ipv4();
-const Ipv6Schema = z.ipv6();
-
-/**
- * 获取 IP 版本（4/6），非法则返回 0。
- * 说明：这里不依赖 Node.js 的 `net.isIP()`，使用 Zod v4 内置 `z.ipv4()/z.ipv6()`，
- * 可兼容 Bun 等运行时。
- */
-export function getIpVersion(ip: string): 0 | 4 | 6 {
-  if (Ipv4Schema.safeParse(ip).success)
-    return 4;
-  if (Ipv6Schema.safeParse(ip).success)
-    return 6;
-  return 0;
 }
 
 /**
