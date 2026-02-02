@@ -20,6 +20,7 @@ export const casbinRule = pgTable("casbin_rule", {
 }, table => [
   primaryKey({ name: "casbin_rule_pkey", columns: [table.ptype, table.v0, table.v1, table.v2] }),
   index("idx_casbin_g_v0").on(table.ptype, table.v0, table.v1),
+  index("idx_casbin_v1").on(table.ptype, table.v1),
 ]);
 
 // Zod Schema 适配字段非空+默认值约束

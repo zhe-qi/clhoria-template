@@ -21,6 +21,8 @@ Hono + Node.js 25 + PostgreSQL(Drizzle snake_case) + Redis(ioredis) + JWT(admin/
 
 **CRUD 模块开发详见 `/crud` skill**
 
+**数据库 Schema 开发详见 `/db-schema` skill**
+
 ## Critical Rules
 
 ### Response & Logging (MANDATORY)
@@ -30,14 +32,6 @@ return c.json(Resp.fail("error"), HttpStatusCodes.BAD_REQUEST);
 logger.info({ userId }, "[Module]: message");  // data object FIRST
 // NEVER: console.log/warn/error (except: env validation, singleton, tests, scripts)
 ```
-
-### DB Schema
-- Import: `import db from "@/db"` (default export)
-- Casing: TS camelCase → auto snake_case
-- Extend `...baseColumns` (id/createdAt/updatedAt/createdBy/updatedBy)
-- Syntax: `varchar({ length: 128 })` - always specify length
-- **NEVER modify `migrations/` or `meta/` folders**
-- Batch inserts: When inserting multiple rows, use `db.insert(table).values([...items])` instead of for-loop single inserts
 
 ## Other Rules
 

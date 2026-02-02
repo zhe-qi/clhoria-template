@@ -1,5 +1,10 @@
 # Zod Schema 模板
 
+## 技术栈
+
+- **验证库**: Zod v4
+- **Drizzle 集成**: drizzle-zod
+
 ## 标准 Schema 文件
 
 ```typescript
@@ -61,9 +66,43 @@ export const {feature}ListResponse = z.array({feature}ResponseSchema);
 | 提取字段 | `.pick({ id: true, name: true })` | 简化响应 |
 | 自定义验证 | `.refine()` | 至少一个字段 |
 
-## 注意事项
+## 最佳实践
+
+### 使用规范
 
 - 使用 `.extend()` 合并 schema，不用 `.merge()`
 - 使用 `z.enum([...])` 不用 `z.nativeEnum()`
 - 使用 `z.uuid()` 不用 `z.string().uuid()`
 - 所有字段添加 `.meta({ description })` 用于 OpenAPI 文档
+
+### 中文错误消息
+
+```typescript
+z.string().min(1, "名称不能为空")
+z.string().max(128, "名称最多128个字符")
+z.uuid("ID 必须是有效的 UUID")
+z.number().min(0, "数量不能为负数")
+```
+
+### 类型推导
+
+```typescript
+// 从 Schema 推导类型，而非手动定义
+type CreateInput = z.infer<typeof {feature}CreateSchema>;
+type ResponseOutput = z.infer<typeof {feature}ResponseSchema>;
+```
+
+## Zod v4 注意事项
+
+```typescript
+// Zod v4.3+: 包含 refine 的 schema 不能调用 partial()
+// 解决方案：先 partial() 再 refine()
+
+// 错误示例
+const baseSchema = z.object({ ... }).refine(...);
+const patchSchema = baseSchema.partial();  // 报错！
+
+// 正确示例
+const baseSchema = z.object({ ... });
+const patchSchema = baseSchema.partial().refine(...);
+```

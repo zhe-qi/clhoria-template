@@ -237,16 +237,16 @@ routes/{tier}/{feature}/
 
 **文件说明:**
 
-| 文件                    | 状态 | 用途                               |
-| ----------------------- | ---- | ---------------------------------- |
-| `{feature}.handlers.ts` | 必需 | 实现路由的业务逻辑处理函数         |
-| `{feature}.routes.ts`   | 必需 | 定义路由的 OpenAPI 规范和路径      |
-| `{feature}.index.ts`    | 必需 | 导出路由实例                       |
-| `{feature}.types.ts`    | 必需 | 路由处理器类型定义和业务类型       |
-| `{feature}.schema.ts`   | 可选 | 定义该模块特有的 Zod 校验 Schema   |
+| 文件                    | 状态 | 用途                                         |
+| ----------------------- | ---- | -------------------------------------------- |
+| `{feature}.handlers.ts` | 必需 | 实现路由的业务逻辑处理函数                   |
+| `{feature}.routes.ts`   | 必需 | 定义路由的 OpenAPI 规范和路径                |
+| `{feature}.index.ts`    | 必需 | 导出路由实例                                 |
+| `{feature}.types.ts`    | 必需 | 路由处理器类型定义和业务类型                 |
+| `{feature}.schema.ts`   | 可选 | 定义该模块特有的 Zod 校验 Schema             |
 | `{feature}.services.ts` | 可选 | 该模块专属的服务函数（复杂逻辑或模块内复用） |
-| `{feature}.helpers.ts`  | 可选 | 模块内部的辅助工具函数（纯函数）   |
-| `__tests__/`            | 推荐 | 集成测试文件                       |
+| `{feature}.helpers.ts`  | 可选 | 模块内部的辅助工具函数（纯函数）             |
+| `__tests__/`            | 推荐 | 集成测试文件                                 |
 
 **何时创建可选文件:**
 

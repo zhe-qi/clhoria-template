@@ -31,11 +31,11 @@ src/routes/{tier}/{category}/{feature}/
 
 ### 1. 数据库 Schema（如需新表）
 
-参考 [templates/db-schema.md](templates/db-schema.md)
+参考 [db-schema.md](../_shared/templates/db-schema.md)
 
 ```typescript
 // src/db/schema/{tier}/{category}/{feature}.ts
-export const {feature}s = pgTable("{feature}s", {
+export const {feature}s = pgTable("{tier}_{feature}s", {
   ...baseColumns,
   // 字段定义...
 });
@@ -47,7 +47,7 @@ export const {feature}s = pgTable("{feature}s", {
 
 ### 3. Schema 文件
 
-参考 [templates/schema.md](templates/schema.md)
+参考 [zod-schema.md](../_shared/templates/zod-schema.md)
 
 ### 4. 路由文件
 
