@@ -7,9 +7,6 @@ export default mergeConfig(
   defineConfig({
     test: {
       setupFiles: [],
-      fileParallelism: false,
-      isolate: true,
-      pool: "threads",
     },
   }),
 );
