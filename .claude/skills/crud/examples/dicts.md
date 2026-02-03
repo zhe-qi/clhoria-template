@@ -109,23 +109,24 @@ export const dictCodeField = z.string()
   .regex(/^[a-z0-9_]+$/, "字典编码只能包含小写字母、数字和下划线")
   .meta({ description: "字典编码" });
 
-export const systemDictCreateSchema = insertSystemDictsSchema.extend({
+/** 基础字段（共享） */
+const dictBaseFields = {
   code: dictCodeField,
   name: z.string().min(1).max(128).meta({ description: "字典名称" }),
   description: z.string().optional().meta({ description: "字典描述" }),
   items: z.array(dictItemSchema).default([]).meta({ description: "字典项列表" }),
   status: z.enum([Status.ENABLED, Status.DISABLED]).optional().meta({ description: "状态" }),
-});
+};
 
-export const systemDictPatchSchema = insertSystemDictsSchema.extend({
-  code: dictCodeField,
-  name: z.string().min(1).max(128).meta({ description: "字典名称" }),
-  items: z.array(dictItemSchema).default([]).meta({ description: "字典项列表" }),
-  status: z.enum([Status.ENABLED, Status.DISABLED]).optional().meta({ description: "状态" }),
-}).partial().refine(
-  data => Object.keys(data).length > 0,
-  { message: "至少需要提供一个字段进行更新" },
-);
+export const systemDictCreateSchema = insertSystemDictsSchema.extend(dictBaseFields);
+
+export const systemDictPatchSchema = insertSystemDictsSchema
+  .extend(dictBaseFields)
+  .partial()
+  .refine(
+    data => Object.keys(data).length > 0,
+    { message: "至少需要提供一个字段进行更新" },
+  );
 
 export const systemDictQuerySchema = z.object({
   code: z.string().optional().meta({ description: "字典编码（模糊搜索）" }),
@@ -133,12 +134,11 @@ export const systemDictQuerySchema = z.object({
   status: z.enum([Status.ENABLED, Status.DISABLED]).optional().meta({ description: "状态" }),
 });
 
-export const systemDictIdParams = z.object({
-  id: z.uuid("ID 必须是有效的 UUID").meta({ description: "字典ID" }),
-});
+// ID 参数使用 stoker 提供的 IdUUIDParamsSchema，无需自定义
+// import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 
 export const systemDictResponseSchema = selectSystemDictsSchema;
-export const systemDictListResponse = z.array(systemDictResponseSchema);
+export const systemDictListResponseSchema = z.array(systemDictResponseSchema);
 ```
 
 ## 4. 路由定义
@@ -149,11 +149,11 @@ import { createRoute } from "@hono/zod-openapi";
 import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
+import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 import { respErrSchema } from "@/utils";
 import {
   systemDictCreateSchema,
-  systemDictIdParams,
-  systemDictListResponse,
+  systemDictListResponseSchema,
   systemDictPatchSchema,
   systemDictQuerySchema,
   systemDictResponseSchema,
@@ -171,7 +171,7 @@ export const list = createRoute({
     query: RefineQueryParamsSchema.extend(systemDictQuerySchema.shape),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemDictListResponse), "列表响应成功"),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemDictListResponseSchema), "列表响应成功"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "查询参数验证错误"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "服务器内部错误"),
   },
@@ -196,7 +196,7 @@ export const get = createRoute({
   summary: "获取字典详情",
   method: "get",
   path: `${routePrefix}/{id}`,
-  request: { params: systemDictIdParams },
+  request: { params: IdUUIDParamsSchema },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemDictResponseSchema), "获取成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
@@ -210,7 +210,7 @@ export const update = createRoute({
   method: "patch",
   path: `${routePrefix}/{id}`,
   request: {
-    params: systemDictIdParams,
+    params: IdUUIDParamsSchema,
     body: jsonContentRequired(systemDictPatchSchema, "更新字典参数"),
   },
   responses: {
@@ -224,9 +224,9 @@ export const remove = createRoute({
   summary: "删除字典",
   method: "delete",
   path: `${routePrefix}/{id}`,
-  request: { params: systemDictIdParams },
+  request: { params: IdUUIDParamsSchema },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemDictIdParams), "删除成功"),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(IdUUIDParamsSchema), "删除成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "字典不存在"),
   },

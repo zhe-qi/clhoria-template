@@ -7,7 +7,7 @@ import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 import { respErrSchema } from "@/utils";
 
-import { saveRolesParamsSchema, saveRolesResponseSchema, saveRolesSchema, systemUsersDetailResponse, systemUsersListResponse, systemUsersPatchSchema, systemUsersResponse } from "./users.schema";
+import { saveRolesParamsSchema, saveRolesResponseSchema, saveRolesSchema, systemUsersDetailResponseSchema, systemUsersListResponseSchema, systemUsersPatchSchema, systemUsersResponseSchema } from "./users.schema";
 
 const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];
@@ -22,7 +22,7 @@ export const list = createRoute({
     query: RefineQueryParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersListResponse), "列表响应成功"),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersListResponseSchema), "列表响应成功"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "查询参数验证错误"),
     [HttpStatusCodes.INTERNAL_SERVER_ERROR]: jsonContent(respErrSchema, "服务器内部错误"),
   },
@@ -38,7 +38,7 @@ export const create = createRoute({
     body: jsonContentRequired(insertSystemUsersSchema, "创建系统用户参数"),
   },
   responses: {
-    [HttpStatusCodes.CREATED]: jsonContent(RefineResultSchema(systemUsersResponse), "创建成功"),
+    [HttpStatusCodes.CREATED]: jsonContent(RefineResultSchema(systemUsersResponseSchema), "创建成功"),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(respErrSchema, "参数验证失败"),
   },
 });
@@ -53,7 +53,7 @@ export const get = createRoute({
     params: IdUUIDParamsSchema,
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersDetailResponse), "获取成功"),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersDetailResponseSchema), "获取成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "ID参数错误"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
   },
@@ -70,7 +70,7 @@ export const update = createRoute({
     body: jsonContentRequired(systemUsersPatchSchema, "更新系统用户参数"),
   },
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersResponse), "更新成功"),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersResponseSchema), "更新成功"),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(respErrSchema, "请求参数错误"),
     [HttpStatusCodes.FORBIDDEN]: jsonContent(respErrSchema, "内置用户不允许修改状态"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),

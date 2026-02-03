@@ -5,7 +5,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent } from "@/lib/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { paramKeyParams, paramResponseSchema } from "./params.schema";
+import { paramKeyParamsSchema, paramResponseSchema } from "./params.schema";
 
 const routePrefix = "/params";
 const tags = [`${routePrefix}（系统参数查询）`];
@@ -17,7 +17,7 @@ export const getByKey = createRoute({
   method: "get",
   path: `${routePrefix}/{key}`,
   request: {
-    params: paramKeyParams,
+    params: paramKeyParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(

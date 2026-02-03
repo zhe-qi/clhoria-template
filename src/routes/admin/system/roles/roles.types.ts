@@ -1,10 +1,10 @@
 import type { z } from "zod";
 import type * as routes from "./roles.routes";
-import type { savePermissionsResponseSchema, systemRolesDetailResponse } from "./roles.schema";
+import type { savePermissionsResponseSchema, systemRolesDetailResponseSchema } from "./roles.schema";
 
 import type { AppRouteHandler } from "@/types/lib";
 
-export type Role = z.infer<typeof systemRolesDetailResponse>;
+export type Role = z.infer<typeof systemRolesDetailResponseSchema>;
 export type RoleWithParents = Role & { parentRoles?: string[] };
 
 type RouteTypes = {

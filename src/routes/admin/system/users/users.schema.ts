@@ -18,23 +18,23 @@ export const systemUsersLoginSchema = insertSystemUsersSchema.pick({
 });
 
 /** 响应 Schema（不包含密码） */
-export const systemUsersResponse = selectSystemUsersSchema.omit({ password: true });
+export const systemUsersResponseSchema = selectSystemUsersSchema.omit({ password: true });
 
 /** 详情响应 Schema（包含角色） */
-export const systemUsersDetailResponse = selectSystemUsersSchema.omit({ password: true }).extend({
+export const systemUsersDetailResponseSchema = selectSystemUsersSchema.omit({ password: true }).extend({
   roles: z.array(roleBriefSchema).meta({ description: "用户角色" }),
 });
 
 /** 列表响应 Schema */
-export const systemUsersListResponse = z.array(systemUsersDetailResponse);
+export const systemUsersListResponseSchema = z.array(systemUsersDetailResponseSchema);
 
 /** 内部查询结果类型（包含密码，用于 JOIN 查询后再移除） */
-export const systemUsersQueryResult = selectSystemUsersSchema.extend({
+export const systemUsersQueryResultSchema = selectSystemUsersSchema.extend({
   roles: z.array(roleBriefSchema).meta({ description: "用户角色" }),
 });
 
 /** 用户信息响应 Schema */
-export const systemUsersInfoResponse = selectSystemUsersSchema.pick({
+export const systemUsersInfoResponseSchema = selectSystemUsersSchema.pick({
   id: true,
   username: true,
   avatar: true,

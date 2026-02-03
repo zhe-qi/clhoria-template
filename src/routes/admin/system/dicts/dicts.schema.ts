@@ -19,26 +19,26 @@ export const dictCodeField = z.string()
   .regex(/^[a-z0-9_]+$/, "字典编码只能包含小写字母、数字和下划线")
   .meta({ description: "字典编码" });
 
-/** 创建字典 Schema */
-export const systemDictCreateSchema = insertSystemDictsSchema.extend({
+/** 字典基础字段（共享） */
+const dictBaseFields = {
   code: dictCodeField,
   name: z.string().min(1, "字典名称不能为空").max(128, "字典名称最多128个字符").meta({ description: "字典名称" }),
   description: z.string().optional().meta({ description: "字典描述" }),
   items: z.array(dictItemSchema).default([]).meta({ description: "字典项列表" }),
   status: z.enum([Status.ENABLED, Status.DISABLED]).optional().meta({ description: "状态" }),
-});
+};
+
+/** 创建字典 Schema */
+export const systemDictCreateSchema = insertSystemDictsSchema.extend(dictBaseFields);
 
 /** 更新字典 Schema */
-export const systemDictPatchSchema = insertSystemDictsSchema.extend({
-  code: dictCodeField,
-  name: z.string().min(1, "字典名称不能为空").max(128, "字典名称最多128个字符").meta({ description: "字典名称" }),
-  description: z.string().optional().meta({ description: "字典描述" }),
-  items: z.array(dictItemSchema).default([]).meta({ description: "字典项列表" }),
-  status: z.enum([Status.ENABLED, Status.DISABLED]).optional().meta({ description: "状态" }),
-}).partial().refine(
-  data => Object.keys(data).length > 0,
-  { message: "至少需要提供一个字段进行更新" },
-);
+export const systemDictPatchSchema = insertSystemDictsSchema
+  .extend(dictBaseFields)
+  .partial()
+  .refine(
+    data => Object.keys(data).length > 0,
+    { message: "至少需要提供一个字段进行更新" },
+  );
 
 /** 查询参数 Schema（自定义过滤字段，不包含分页参数） */
 export const systemDictQuerySchema = z.object({
@@ -47,13 +47,8 @@ export const systemDictQuerySchema = z.object({
   status: z.enum([Status.ENABLED, Status.DISABLED]).optional().meta({ description: "状态" }),
 });
 
-/** ID 参数 Schema */
-export const systemDictIdParams = z.object({
-  id: z.uuid("ID 必须是有效的 UUID").meta({ description: "字典ID" }),
-});
-
 /** 响应 Schema */
 export const systemDictResponseSchema = selectSystemDictsSchema;
 
 /** 列表响应 Schema */
-export const systemDictListResponse = z.array(systemDictResponseSchema);
+export const systemDictListResponseSchema = z.array(systemDictResponseSchema);

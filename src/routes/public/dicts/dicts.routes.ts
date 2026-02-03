@@ -5,7 +5,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent } from "@/lib/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { dictCodeParams, dictItemsResponseSchema } from "./dicts.schema";
+import { dictCodeParamsSchema, dictItemsResponseSchema } from "./dicts.schema";
 
 const routePrefix = "/dicts";
 const tags = [`${routePrefix}（业务字典查询）`];
@@ -17,7 +17,7 @@ export const getByCode = createRoute({
   method: "get",
   path: `${routePrefix}/{code}`,
   request: {
-    params: dictCodeParams,
+    params: dictCodeParamsSchema,
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(

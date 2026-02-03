@@ -10,7 +10,7 @@ export const systemRolesPatchSchema = insertSystemRolesSchema.extend({
 }).partial();
 
 /** 详情响应 Schema（包含上级角色） */
-export const systemRolesDetailResponse = selectSystemRolesSchema.extend({
+export const systemRolesDetailResponseSchema = selectSystemRolesSchema.extend({
   parentRoles: z.array(z.string()).optional().describe("上级角色列表"),
 });
 
@@ -19,8 +19,8 @@ export const systemRolesCreateSchema = insertSystemRolesSchema.extend({
   parentRoleIds: z.array(roleIdField).optional().describe("上级角色ID列表"),
 });
 
-/** ID 参数 Schema */
-export const systemRolesIdParams = z.object({
+/** ID 参数 Schema（角色使用字符串 ID，非 UUID） */
+export const systemRolesIdParamsSchema = z.object({
   id: roleIdField,
 });
 
@@ -33,7 +33,7 @@ export const savePermissionsSchema = z.object({
 });
 
 /** 列表响应 Schema */
-export const systemRolesListResponse = z.array(systemRolesDetailResponse);
+export const systemRolesListResponseSchema = z.array(systemRolesDetailResponseSchema);
 
 /** 保存角色权限 Schema */
 export const savePermissionsParamsSchema = z.object({

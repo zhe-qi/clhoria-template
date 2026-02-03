@@ -3,7 +3,7 @@ import { z } from "zod";
 import { dictCodeField, dictItemSchema } from "@/routes/admin/system/dicts/dicts.schema";
 
 /** Code 参数 Schema */
-export const dictCodeParams = z.object({
+export const dictCodeParamsSchema = z.object({
   code: dictCodeField,
 });
 

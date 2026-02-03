@@ -13,9 +13,8 @@ import { z } from "zod";
 import { insert{Feature}sSchema, select{Feature}sSchema } from "@/db/schema";
 import { Status } from "@/lib/enums";
 
-/** 创建 Schema */
-export const {feature}CreateSchema = insert{Feature}sSchema.extend({
-  // 覆盖或添加字段验证
+/** 基础字段（共享，避免 Create/Patch 重复定义） */
+const {feature}BaseFields = {
   name: z.string()
     .min(1, "名称不能为空")
     .max(128, "名称最多128个字符")
@@ -23,18 +22,19 @@ export const {feature}CreateSchema = insert{Feature}sSchema.extend({
   status: z.enum([Status.ENABLED, Status.DISABLED])
     .optional()
     .meta({ description: "状态" }),
-});
+};
+
+/** 创建 Schema */
+export const {feature}CreateSchema = insert{Feature}sSchema.extend({feature}BaseFields);
 
 /** 更新 Schema（partial + refine） */
-export const {feature}PatchSchema = insert{Feature}sSchema.extend({
-  name: z.string()
-    .min(1, "名称不能为空")
-    .max(128, "名称最多128个字符")
-    .meta({ description: "名称" }),
-}).partial().refine(
-  data => Object.keys(data).length > 0,
-  { message: "至少需要提供一个字段进行更新" },
-);
+export const {feature}PatchSchema = insert{Feature}sSchema
+  .extend({feature}BaseFields)
+  .partial()
+  .refine(
+    data => Object.keys(data).length > 0,
+    { message: "至少需要提供一个字段进行更新" },
+  );
 
 /** 查询参数 Schema（自定义过滤字段） */
 export const {feature}QuerySchema = z.object({
@@ -44,16 +44,14 @@ export const {feature}QuerySchema = z.object({
     .meta({ description: "状态" }),
 });
 
-/** ID 参数 Schema */
-export const {feature}IdParams = z.object({
-  id: z.uuid("ID 必须是有效的 UUID").meta({ description: "ID" }),
-});
+// ID 参数使用 stoker 提供的 IdUUIDParamsSchema
+// import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
 
 /** 响应 Schema */
 export const {feature}ResponseSchema = select{Feature}sSchema;
 
 /** 列表响应 Schema */
-export const {feature}ListResponse = z.array({feature}ResponseSchema);
+export const {feature}ListResponseSchema = z.array({feature}ResponseSchema);
 ```
 
 ## Schema 派生规则

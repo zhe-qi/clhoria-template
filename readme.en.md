@@ -138,12 +138,12 @@ When developing features with Claude Code, follow this 6-stage standard workflow
 
 #### Core Points of Each Stage
 
-| Stage                       | Goal                                               | Output                                                               |
-| --------------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
-| 1. Spec                     | Requirements analysis, architecture, test planning | `docs/{feature}/spec.md` (requirements, architecture, test strategy) |
-| 2. Generate Code            | Generate complete code at once (Schema + Handlers) | Complete API code + migration                                        |
-| 3. Generate Tests           | Generate executable tests based on API types       | `__tests__/int.test.ts`                                              |
-| 4-5. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance                                              |
+| Stage                       | Goal                                               | Output                                                                  |
+| --------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
+| 1. Spec                     | Requirements analysis, architecture, test planning | `docs/{feature}/spec.md` (requirements, architecture, test strategy)    |
+| 2. Generate Code            | Generate complete code at once (Schema + Handlers) | Complete API code + migration                                           |
+| 3. Generate Tests           | Generate executable tests based on API types       | `__tests__/int.test.ts`                                                 |
+| 4-5. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance                                                 |
 | 6. Module Documentation     | Generate docs for future AI dev/maintenance        | `docs/{feature}/module.md` (related files, code functions, tech points) |
 
 #### Acceptance Criteria (Done Criteria)
@@ -224,14 +224,14 @@ docs/{feature}/
 
 ## Module File Index
 
-| File Path                                        | Purpose          |
-| ------------------------------------------------ | ---------------- |
-| `src/routes/admin/{feature}/{feature}.index.ts`  | Route entry      |
-| `src/routes/admin/{feature}/{feature}.routes.ts` | Route definition |
+| File Path                                          | Purpose           |
+| -------------------------------------------------- | ----------------- |
+| `src/routes/admin/{feature}/{feature}.index.ts`    | Route entry       |
+| `src/routes/admin/{feature}/{feature}.routes.ts`   | Route definition  |
 | `src/routes/admin/{feature}/{feature}.handlers.ts` | Business handlers |
-| `src/routes/admin/{feature}/{feature}.types.ts`  | Type definitions |
+| `src/routes/admin/{feature}/{feature}.types.ts`    | Type definitions  |
 | `src/routes/admin/{feature}/__tests__/int.test.ts` | Integration tests |
-| `src/db/schema/admin/{feature}/{entity}.ts`      | Database Schema  |
+| `src/db/schema/admin/{feature}/{entity}.ts`        | Database Schema   |
 
 ## Related Modules
 

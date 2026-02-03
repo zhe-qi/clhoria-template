@@ -4,7 +4,7 @@ import { ParamValueType } from "@/lib/enums";
 import { paramKeyField } from "@/routes/admin/system/params/params.schema";
 
 /** Key 参数 Schema */
-export const paramKeyParams = z.object({
+export const paramKeyParamsSchema = z.object({
   key: paramKeyField,
 });
 

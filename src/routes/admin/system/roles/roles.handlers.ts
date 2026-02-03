@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import type { systemRolesDetailResponse } from "./roles.schema";
+import type { systemRolesDetailResponseSchema } from "./roles.schema";
 
 import type { SystemRolesRouteHandlerType } from "./roles.types";
 import { eq } from "drizzle-orm";
@@ -23,7 +23,7 @@ export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
     return c.json(Resp.fail(parseResult.error), HttpStatusCodes.UNPROCESSABLE_ENTITY);
   }
 
-  const [error, result] = await executeRefineQuery<z.infer<typeof systemRolesDetailResponse>>({
+  const [error, result] = await executeRefineQuery<z.infer<typeof systemRolesDetailResponseSchema>>({
     table: systemRoles,
     queryParams: parseResult.data,
   });

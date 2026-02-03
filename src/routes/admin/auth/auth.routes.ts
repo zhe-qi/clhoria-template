@@ -7,7 +7,7 @@ import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { systemUsersInfoResponse, systemUsersLoginSchema } from "../system/users/users.schema";
+import { systemUsersInfoResponseSchema, systemUsersLoginSchema } from "../system/users/users.schema";
 
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];
@@ -67,7 +67,7 @@ export const getIdentity = createRoute({
   middleware: [jwt({ secret: env.ADMIN_JWT_SECRET, alg: "HS256" })],
   summary: "管理端获取当前用户信息",
   responses: {
-    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersInfoResponse), "获取成功"),
+    [HttpStatusCodes.OK]: jsonContent(RefineResultSchema(systemUsersInfoResponseSchema), "获取成功"),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(respErrSchema, "用户不存在"),
   },
 });

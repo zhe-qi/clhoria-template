@@ -47,6 +47,7 @@
     "pino": "^10.3.0",
     "postgres": "^3.4.8",
     "rate-limit-redis": "^4.3.1",
+    "redlock": "5.0.0-beta.2",
     "zod": "4.3.6"
   },
   "devDependencies": {

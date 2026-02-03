@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import type { systemUsersQueryResult } from "./users.schema";
+import type { systemUsersQueryResultSchema } from "./users.schema";
 
 import type { insertSystemUsersSchema } from "@/db/schema";
 
@@ -18,7 +18,7 @@ type CreateUserInput = z.infer<typeof insertSystemUsersSchema>;
  * 查询用户列表（包含角色信息）
  */
 export async function listUsers(queryParams: RefineQueryParams) {
-  return executeRefineQuery<z.infer<typeof systemUsersQueryResult>>({
+  return executeRefineQuery<z.infer<typeof systemUsersQueryResultSchema>>({
     table: systemUsers,
     queryParams,
     joinConfig: {

@@ -1,6 +1,7 @@
 import type { Role, RoleWithParents } from "./roles.types";
 
 import { enforcerPromise } from "@/lib/internal/casbin";
+import { withLock } from "@/lib/redis-lock";
 
 /**
  * 获取角色的所有上级角色
@@ -18,16 +19,18 @@ export async function getRoleParents(roleId: string): Promise<string[]> {
  * @param parentIds 新的上级角色ID数组
  */
 export async function setRoleParents(roleId: string, parentIds: string[]): Promise<void> {
-  const enforcer = await enforcerPromise;
+  await withLock(`role:${roleId}:inheritance`, async () => {
+    const enforcer = await enforcerPromise;
 
-  // 先移除所有现有的上级角色关系
-  await enforcer.removeFilteredGroupingPolicy(0, roleId);
+    // 先移除所有现有的上级角色关系
+    await enforcer.removeFilteredGroupingPolicy(0, roleId);
 
-  // 如果有新的上级角色，批量添加
-  if (parentIds.length > 0) {
-    const rules = parentIds.map(parentId => [roleId, parentId]);
-    await enforcer.addGroupingPolicies(rules);
-  }
+    // 如果有新的上级角色，批量添加
+    if (parentIds.length > 0) {
+      const rules = parentIds.map(parentId => [roleId, parentId]);
+      await enforcer.addGroupingPolicies(rules);
+    }
+  });
 }
 
 /**
