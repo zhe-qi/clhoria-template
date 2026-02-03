@@ -22,7 +22,3 @@ export type {
   StepExecutionResult,
   TimeoutJobData,
 } from "./saga";
-
-// 定时任务调度（基于 pg-boss）
-export { default as scheduler } from "./scheduler";
-export type { ScheduleHandler, ScheduleOptions } from "./scheduler";
