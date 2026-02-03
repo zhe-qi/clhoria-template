@@ -103,6 +103,24 @@ Clhoria simplifies complex technical architectures, making every coding session 
 
 Visit <http://localhost:9999> to view the API documentation.
 
+## TypeScript 5.9+ and ts-go Support
+
+This project supports using the experimental ts-go to enhance TypeScript type checking and language service performance. With the current project scale, ts-go provides significant performance improvements and the language service is relatively stable, so it is recommended.
+
+### Using ts-go (Recommended)
+
+Install the VSCode extension: [TypeScript Native Preview](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)
+
+> **Note**: Currently ts-go is only used for type checking and language service. Development and bundling are based on Vite (Rolldown), runtime uses tsx.
+
+### Not Using ts-go
+
+If you prefer not to use ts-go, follow these steps to revert:
+
+1. Remove `"typescript.experimental.useTsgo": true` from `.vscode/settings.json`
+2. Run `pnpm remove @typescript/native-preview`
+3. Modify the `typecheck` command in `package.json`, changing `npx tsgo` to `tsc`
+
 ## Development Guidelines
 
 ### Claude Code Development Workflow

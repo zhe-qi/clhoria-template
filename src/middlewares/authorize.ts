@@ -11,8 +11,6 @@ import { stripPrefix } from "@/utils/tools";
 /**
  * Casbin 权限校验中间件
  * 用于校验当前用户是否有访问指定接口的权限
- *
- * 使用 Factory Helper 自动推断 AppBindings 类型
  */
 export const authorize = createMiddleware(async (c, next) => {
   // 获取 Casbin 权限管理器

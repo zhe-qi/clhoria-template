@@ -8,8 +8,6 @@ import logger from "@/lib/logger";
 /**
  * 操作日志中间件
  * 记录后台管理操作的审计日志
- *
- * 使用 Factory Helper 自动推断 AppBindings 类型
  */
 export function operationLog(options: { moduleName: string; description: string }) {
   return createMiddleware(async (c, next) => {

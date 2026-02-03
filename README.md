@@ -99,6 +99,24 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 
 访问 <http://localhost:9999> 查看 API 文档。
 
+## TypeScript 5.9+ 和 ts-go 支持
+
+本项目支持使用实验性的 ts-go 来提升 TypeScript 的类型检查和语言服务性能。在当前项目规模下，ts-go 的性能提升非常明显，且语言服务相对稳定，推荐使用。
+
+### 使用 ts-go（推荐）
+
+安装 VSCode 插件：[TypeScript Native Preview](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)
+
+> **注意**：目前 ts-go 仅用于类型检查和语言服务，开发和打包基于 Vite (Rolldown)，运行时使用 tsx。
+
+### 不使用 ts-go
+
+如果不希望使用 ts-go，可以按以下步骤回退：
+
+1. 移除 `.vscode/settings.json` 里的 `"typescript.experimental.useTsgo": true`
+2. 执行 `pnpm remove @typescript/native-preview`
+3. 修改 `package.json` 中的 `typecheck` 命令，将 `npx tsgo` 改为 `tsc`
+
 ## 开发规范
 
 ### Claude Code 开发流程

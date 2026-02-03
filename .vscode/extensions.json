@@ -13,7 +13,9 @@
     // editorconfig 插件
     "editorconfig.editorconfig",
     // vitest 插件
-    "vitest.explorer"
+    "vitest.explorer",
+    // Native Preview 插件用于ts-go，必装
+    "typescriptteam.native-preview"
   ],
   "unwantedRecommendations": [
     // 和...冲突

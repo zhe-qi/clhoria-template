@@ -1,4 +1,4 @@
-import type { UserTokenInfo } from "../auth.types";
+import type { ValidateLoginResult } from "../auth.types";
 
 import { verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
@@ -27,10 +27,7 @@ export async function validateCaptcha(captchaToken: string): Promise<string | nu
  * 登录验证
  * @returns 成功返回用户信息，失败返回 { error, status }
  */
-export async function validateLogin(username: string, password: string): Promise<
-  | { success: true; user: UserTokenInfo }
-  | { success: false; error: string; status: "unauthorized" | "forbidden" }
-> {
+export async function validateLogin(username: string, password: string): Promise<ValidateLoginResult> {
   const user = await db.query.systemUsers.findFirst({
     where: eq(systemUsers.username, username),
     columns: {
