@@ -1,7 +1,7 @@
 import type { Role, RoleWithParents } from "./roles.types";
 
+import { withLock } from "@/lib/infrastructure";
 import { enforcerPromise } from "@/lib/internal/casbin";
-import { withLock } from "@/lib/redis-lock";
 
 /**
  * 获取角色的所有上级角色

@@ -34,7 +34,7 @@ export async function bootstrap(): Promise<void> {
 
   // 2. 初始化 Saga 协调器（依赖 pg-boss，使用动态导入确保顺序）
   const { getSagaOrchestrator } = await import("./saga");
-  await getSagaOrchestrator;
+  await getSagaOrchestrator();
   logger.info("[Bootstrap]: Saga 协调器已初始化");
 
   initialized = true;

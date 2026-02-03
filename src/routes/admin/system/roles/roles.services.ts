@@ -4,8 +4,8 @@ import { eq, inArray } from "drizzle-orm";
 
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
+import { withLock } from "@/lib/infrastructure";
 import { enforcerPromise } from "@/lib/internal/casbin";
-import { withLock } from "@/lib/redis-lock";
 
 import { checkCircularInheritance, setRoleParents } from "./roles.helpers";
 

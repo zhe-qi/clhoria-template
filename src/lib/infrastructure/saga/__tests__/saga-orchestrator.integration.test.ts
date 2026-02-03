@@ -1,39 +1,46 @@
+import type { Mock } from "vitest";
+
 /**
  * Saga 协调器集成测试
  *
  * 使用真实数据库，只 mock pg-boss 队列操作
  */
 import type { SagaDefinition } from "../types";
-
 import { eq, like } from "drizzle-orm";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import db from "@/db";
 import { sagas, sagaSteps } from "@/db/schema";
 import env from "@/env";
 import { SagaStatus, SagaStepStatus } from "@/lib/enums";
 
-import { SagaOrchestrator } from "../saga-orchestrator";
-import { sagaRegistry } from "../saga-registry";
+import { destroySingleton } from "@/lib/internal/singleton";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
 }
 
+type MockBoss = {
+  createQueue: Mock<() => Promise<void>>;
+  work: Mock<() => Promise<void>>;
+  send: Mock<() => Promise<string>>;
+  stop: Mock<() => Promise<void>>;
+};
+
+// 使用 vi.hoisted 确保 mock 对象在 vi.mock 之前可用
+const { mockBoss } = vi.hoisted(() => ({
+  mockBoss: {
+    createQueue: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    work: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    send: vi.fn<() => Promise<string>>().mockResolvedValue("mock-job-id"),
+    stop: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  } as MockBoss,
+}));
+
 // Mock pg-boss - 只 mock 队列操作，不真正发送任务
-// 必须在 vi.mock 内部定义，因为 vi.mock 会被提升
-vi.mock("@/lib/infrastructure/pg-boss-adapter", () => {
-  const mockBoss = {
-    createQueue: vi.fn().mockResolvedValue(undefined),
-    work: vi.fn().mockResolvedValue(undefined),
-    send: vi.fn().mockResolvedValue("mock-job-id"),
-    stop: vi.fn().mockResolvedValue(undefined),
-  };
-  return {
-    default: Promise.resolve(mockBoss),
-    __mockBoss: mockBoss,
-  };
-});
+vi.mock("@/lib/infrastructure/pg-boss-adapter", () => ({
+  default: mockBoss,
+}));
 
 // Mock logger 避免测试输出过多日志
 vi.mock("@/lib/logger", () => ({
@@ -43,13 +50,6 @@ vi.mock("@/lib/logger", () => ({
     error: vi.fn(),
   },
 }));
-
-type MockBoss = {
-  createQueue: ReturnType<typeof vi.fn>;
-  work: ReturnType<typeof vi.fn>;
-  send: ReturnType<typeof vi.fn>;
-  stop: ReturnType<typeof vi.fn>;
-};
 
 /** 测试用 Saga 类型前缀 */
 const TEST_SAGA_TYPE_PREFIX = "integration-test-";
@@ -96,31 +96,47 @@ function createTestSagaDefinition(type: string): SagaDefinition {
 }
 
 /** 获取 mock boss 实例 */
-async function getMockBoss(): Promise<MockBoss> {
-  const mod = await import("@/lib/infrastructure/pg-boss-adapter") as unknown as { __mockBoss: MockBoss };
-  return mod.__mockBoss;
+function getMockBoss(): MockBoss {
+  return mockBoss;
 }
 
 describe("SagaOrchestrator 集成测试", () => {
-  let orchestrator: SagaOrchestrator;
+  // 使用动态导入，确保在单例清理后重新获取模块
+  let SagaOrchestrator: typeof import("../saga-orchestrator").SagaOrchestrator;
+  let sagaRegistry: typeof import("../saga-registry").sagaRegistry;
+  let orchestrator: InstanceType<typeof SagaOrchestrator>;
 
   beforeAll(async () => {
+    // 销毁可能存在的真实单例，确保使用 mock
+    await destroySingleton("saga-orchestrator");
+    await destroySingleton("pg-boss");
+    // 重置模块缓存，确保使用 mock
+    vi.resetModules();
+    // 动态导入，使用 mock 后的模块
+    const orchestratorModule = await import("../saga-orchestrator");
+    const registryModule = await import("../saga-registry");
+    SagaOrchestrator = orchestratorModule.SagaOrchestrator;
+    sagaRegistry = registryModule.sagaRegistry;
     // 清理可能残留的测试数据
     await cleanupTestData();
+  });
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    sagaRegistry.clear();
+    orchestrator = new SagaOrchestrator();
+    await orchestrator.initialize();
+  });
+
+  afterEach(async () => {
+    // 调用 mock boss 的 stop 方法，确保清理
+    await getMockBoss().stop();
   });
 
   afterAll(async () => {
     // 清理测试数据
     await cleanupTestData();
     sagaRegistry.clear();
-  });
-
-  // eslint-disable-next-line test/prefer-hooks-in-order
-  beforeEach(async () => {
-    vi.clearAllMocks();
-    sagaRegistry.clear();
-    orchestrator = new SagaOrchestrator();
-    await orchestrator.initialize();
   });
 
   describe("start - 创建 Saga 实例", () => {
@@ -158,7 +174,7 @@ describe("SagaOrchestrator 集成测试", () => {
     });
 
     it("应发送执行任务和超时任务到队列", async () => {
-      const mockBoss = await getMockBoss();
+      const mockBoss = getMockBoss();
       const sagaType = `${TEST_SAGA_TYPE_PREFIX}queue-test`;
       sagaRegistry.register(createTestSagaDefinition(sagaType));
 
@@ -189,7 +205,7 @@ describe("SagaOrchestrator 集成测试", () => {
     });
 
     it("支持延迟执行", async () => {
-      const mockBoss = await getMockBoss();
+      const mockBoss = getMockBoss();
       const sagaType = `${TEST_SAGA_TYPE_PREFIX}delay-test`;
       sagaRegistry.register(createTestSagaDefinition(sagaType));
 
@@ -204,7 +220,7 @@ describe("SagaOrchestrator 集成测试", () => {
     });
 
     it("支持优先级设置", async () => {
-      const mockBoss = await getMockBoss();
+      const mockBoss = getMockBoss();
       const sagaType = `${TEST_SAGA_TYPE_PREFIX}priority-test`;
       sagaRegistry.register(createTestSagaDefinition(sagaType));
 
@@ -250,7 +266,7 @@ describe("SagaOrchestrator 集成测试", () => {
 
   describe("cancel - 取消 Saga", () => {
     it("运行中的 Saga 应能取消并触发补偿", async () => {
-      const mockBoss = await getMockBoss();
+      const mockBoss = getMockBoss();
       const sagaType = `${TEST_SAGA_TYPE_PREFIX}cancel-test`;
       sagaRegistry.register(createTestSagaDefinition(sagaType));
 
@@ -308,7 +324,7 @@ describe("SagaOrchestrator 集成测试", () => {
 
   describe("retry - 重试失败的 Saga", () => {
     it("失败的 Saga 应能重试", async () => {
-      const mockBoss = await getMockBoss();
+      const mockBoss = getMockBoss();
       const sagaType = `${TEST_SAGA_TYPE_PREFIX}retry-test`;
       sagaRegistry.register(createTestSagaDefinition(sagaType));
 
