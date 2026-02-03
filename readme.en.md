@@ -123,6 +123,10 @@ If you prefer not to use ts-go, follow these steps to revert:
 
 ## Development Guidelines
 
+This project adopts the **Spec-Driven Development (SDD)** methodology. SDD inverts the traditional development hierarchy—specifications become the primary artifact, and code becomes an implementation of the spec. Through AI capabilities, precise specifications can directly generate working code while structured processes prevent chaos.
+
+> 📖 Further reading: [Spec-Driven Development](https://github.com/github/spec-kit/blob/main/spec-driven.md)
+
 ### Claude Code Development Workflow
 
 When developing features with Claude Code, follow this 6-stage standard workflow:
