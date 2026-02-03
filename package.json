@@ -55,7 +55,7 @@
     "@hono/vite-dev-server": "^0.24.1",
     "@oxc-project/types": "^0.112.0",
     "@types/node": "25.2.0",
-    "@typescript/native-preview": "7.0.0-dev.20260202.1",
+    "@typescript/native-preview": "7.0.0-dev.20260203.1",
     "cross-env": "^10.1.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.2",
@@ -68,7 +68,7 @@
     "tsx": "^4.21.0",
     "type-fest": "^5.4.3",
     "typescript": "5.9.3",
-    "vite": "8.0.0-beta.11",
+    "vite": "8.0.0-beta.12",
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {

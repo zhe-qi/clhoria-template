@@ -128,7 +128,7 @@ const buildPlugin = (options: BuildOptions): Plugin => {
             input: virtualEntryId,
             output: {
               entryFileNames: output,
-              inlineDynamicImports: true,
+              codeSplitting: false,
             },
           },
         },
