@@ -125,24 +125,22 @@ If you prefer not to use ts-go, follow these steps to revert:
 
 ### Claude Code Development Workflow
 
-When developing features with Claude Code, follow this 8-stage standard workflow:
+When developing features with Claude Code, follow this 6-stage standard workflow:
 
 ```
-1. Requirements Analysis → 2. Architecture Design → 3. Test Planning → 4. Generate Code →
-5. Generate Tests → 6-7. Iterative Optimization → 8. Generate Skill Docs
+1. Spec (Requirements + Architecture + Test Planning) → 2. Generate Code →
+3. Generate Tests → 4-5. Iterative Optimization → 6. Generate Module Docs
 ```
 
 #### Core Points of Each Stage
 
-| Stage                       | Goal                                               | Output                           |
-| --------------------------- | -------------------------------------------------- | -------------------------------- |
-| 1. Requirements Analysis    | Ensure requirements are clear and complete         | Clear requirement description    |
-| 2. Architecture Design      | Use thinking mode to design architecture           | `docs/{feature}/architecture.md` |
-| 3. Test Planning            | Generate test strategy based on architecture       | `docs/{feature}/test-plan.md`    |
-| 4. Generate Code            | Generate complete code at once (Schema + Handlers) | Complete API code + migration    |
-| 5. Generate Tests           | Generate executable tests based on API types       | `__tests__/int.test.ts`          |
-| 6-7. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance          |
-| 8. Skill Documentation      | Generate docs for Claude quick learning            | `docs/{feature}/skill.md`        |
+| Stage                       | Goal                                               | Output                                                               |
+| --------------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
+| 1. Spec                     | Requirements analysis, architecture, test planning | `docs/{feature}/spec.md` (requirements, architecture, test strategy) |
+| 2. Generate Code            | Generate complete code at once (Schema + Handlers) | Complete API code + migration                                        |
+| 3. Generate Tests           | Generate executable tests based on API types       | `__tests__/int.test.ts`                                              |
+| 4-5. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance                                              |
+| 6. Module Documentation     | Generate docs for future AI dev/maintenance        | `docs/{feature}/module.md` (related files, code functions, tech points) |
 
 #### Acceptance Criteria (Done Criteria)
 
@@ -157,55 +155,55 @@ After completing each feature module, should include the following docs:
 
 ```
 docs/{feature}/
-├── architecture.md  # Technical architecture design
-├── test-plan.md     # Testing strategy
-└── skill.md         # Claude quick learning docs
+├── spec.md    # Spec document (requirements + architecture + test strategy)
+└── module.md  # Module document (for future AI dev/maintenance)
 ```
 
 <details>
 <summary>📋 Document Template Examples (Click to expand)</summary>
 
-**architecture.md Template**
+**spec.md Template**
 
 ```markdown
-# {Feature Name} Technical Architecture
+# {Feature Name} Spec
 
-## Feature Overview
+## Requirements Analysis
+
+### Feature Overview
 
 {Brief description}
 
-## Database Design
+### Business Requirements
+
+- {Requirement 1}
+- {Requirement 2}
+
+## Technical Architecture Design
+
+### Database Design
 
 - Table Structure: {table name, fields, types}
 - Relations: {table relationships}
 - Indexes: {indexing strategy}
 
-## API Design
+### API Design
 
 | Path                 | Method | Description | Permission |
 | -------------------- | ------ | ----------- | ---------- |
 | /api/admin/{feature} | GET    | List query  | admin      |
 | /api/admin/{feature} | POST   | Create      | admin      |
 
-## Tech Stack
+### Tech Stack
 
 - {Selected technologies and reasons}
 
-## Key Technical Decisions
+### Key Technical Decisions
 
 - {Important architectural decisions and rationale}
-```
 
-**test-plan.md Template**
+## Test Strategy
 
-```markdown
-# {Feature Name} Test Plan
-
-## Feature Overview
-
-{Brief description}
-
-## Test Scenario Matrix
+### Test Scenario Matrix
 
 | API    | Normal Flow | Error Flow                | Edge Cases            |
 | ------ | ----------- | ------------------------- | --------------------- |
@@ -213,19 +211,35 @@ docs/{feature}/
 | Query  | ✓           | Non-existent ID           | Pagination boundaries |
 ```
 
-**skill.md Template**
+**module.md Template**
+
+> This document is for future AI to continue development or maintenance of this module, providing quick understanding of related files and code functions.
 
 ```markdown
-# {Feature Name} - Claude Skill Documentation
+# {Feature Name} - Module Documentation
 
-## Quick Index
+## Module File Index
 
-- Entry: `src/routes/admin/{feature}/index.ts`
-- Tests: `src/routes/admin/{feature}/__tests__/int.test.ts`
+| File Path                                        | Purpose          |
+| ------------------------------------------------ | ---------------- |
+| `src/routes/admin/{feature}/{feature}.index.ts`  | Route entry      |
+| `src/routes/admin/{feature}/{feature}.routes.ts` | Route definition |
+| `src/routes/admin/{feature}/{feature}.handlers.ts` | Business handlers |
+| `src/routes/admin/{feature}/{feature}.types.ts`  | Type definitions |
+| `src/routes/admin/{feature}/__tests__/int.test.ts` | Integration tests |
+| `src/db/schema/admin/{feature}/{entity}.ts`      | Database Schema  |
 
-## Core Concepts
+## Related Modules
 
-- **{Term}**: {Explanation}
+- **Dependencies**: {List modules this module depends on}
+- **Dependents**: {List modules that depend on this module}
+
+## Core Function Descriptions
+
+### {Feature Point 1}
+
+- **Entry Function**: `{function name}`
+- **Implementation Logic**: {Brief description of logic}
 
 ## Data Flow Diagram
 
@@ -233,11 +247,12 @@ docs/{feature}/
 Request → JWT Auth → RBAC → Zod Validation → Business Logic → Resp.ok()
 \`\`\`
 
-## Pitfall Guide
+## Technical Notes & Pitfall Guide
 
 - ⚠️ Responses must use `Resp.ok()` / `Resp.fail()` wrapper
 - ⚠️ Use `logger.info()` not console.log
 - ⚠️ DB Schema uses `snake_case`, TS uses `camelCase`
+- {Other module-specific technical notes}
 ```
 
 </details>
