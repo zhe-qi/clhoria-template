@@ -1,5 +1,7 @@
+import { Effect } from "effect";
 import Redlock from "redlock";
 
+import { LockAcquisitionError } from "@/lib/effect/errors";
 import redisClient from "@/lib/redis";
 
 /** 锁配置选项 */
@@ -23,18 +25,24 @@ export const redlock = new Redlock([redisClient], {
 });
 
 /**
- * 在锁保护下执行函数
+ * 在分布式锁保护下执行 Effect
+ *
+ * 使用 Effect.acquireUseRelease 确保锁的安全获取与释放
+ *
  * @param key 锁的键名
- * @param fn 要执行的函数
+ * @param effect 要在锁保护下执行的 Effect
  * @param options 锁配置
- * @returns 函数执行结果
- * @throws 获取锁失败时抛出错误
  */
-export async function withLock<T>(
+export const withLock = <A, E, R>(
   key: string,
-  fn: () => Promise<T>,
+  effect: Effect.Effect<A, E, R>,
   options: LockOptions = {},
-): Promise<T> {
-  const ttl = options.ttl ?? 10000;
-  return redlock.using([`lock:${key}`], ttl, fn);
-}
+): Effect.Effect<A, E | LockAcquisitionError, R> =>
+  Effect.acquireUseRelease(
+    Effect.tryPromise({
+      try: () => redlock.acquire([`lock:${key}`], options.ttl ?? 10000),
+      catch: error => new LockAcquisitionError({ key, cause: error }),
+    }),
+    () => effect,
+    lock => Effect.promise(() => lock.release()),
+  );

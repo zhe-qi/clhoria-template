@@ -59,11 +59,7 @@ function getRegistry(): Map<string, SingletonEntry> {
  *   destroy: (client) => client.quit(),
  * });
  */
-export function createSingleton<T>(
-  key: string,
-  factory: () => T,
-  options?: SingletonOptions<T>,
-): T {
+export function createSingleton<T>(key: string, factory: () => T, options?: SingletonOptions<T>): T {
   const registry = getRegistry();
 
   if (!registry.has(key)) {
@@ -87,11 +83,7 @@ export function createSingleton<T>(
  * // 使用时
  * const client = getQueryClient();
  */
-export function createLazySingleton<T>(
-  key: string,
-  factory: () => T,
-  options?: SingletonOptions<T>,
-): () => T {
+export function createLazySingleton<T>(key: string, factory: () => T, options?: SingletonOptions<T>): () => T {
   return () => createSingleton(key, factory, options);
 }
 
@@ -104,11 +96,7 @@ export function createLazySingleton<T>(
  *   return newEnforcer(model, adapter);
  * });
  */
-export function createAsyncSingleton<T>(
-  key: string,
-  factory: () => Promise<T>,
-  options?: SingletonOptions<T>,
-): Promise<T> {
+export function createAsyncSingleton<T>(key: string, factory: () => Promise<T>, options?: SingletonOptions<T>): Promise<T> {
   const registry = getRegistry();
 
   if (!registry.has(key)) {

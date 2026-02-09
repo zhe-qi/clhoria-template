@@ -1,9 +1,6 @@
 import type { AppOpenAPI } from "@/types/lib";
 import { except } from "hono/combine";
 import { jwt } from "hono/jwt";
-
-import * as z from "zod";
-
 import { bootstrap } from "@/lib/infrastructure/bootstrap";
 import configureOpenAPI from "@/lib/internal/openapi";
 import env from "./env";
@@ -21,9 +18,6 @@ const adminModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/admin/*
 const clientModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/client/**/*.index.ts", { eager: true });
 const publicModules = import.meta.glob<{ default: AppOpenAPI }>("./routes/public/**/*.index.ts", { eager: true });
 
-// 配置 Zod 使用中文错误消息
-z.config(z.locales.zhCN());
-
 // 获取OpenAPIHono实例
 const { adminApp, clientApp, publicApp, configureMainDoc } = configureOpenAPI();
 
@@ -38,7 +32,7 @@ if (env.SENTRY_DSN) {
   app.use("*", sentry({ dsn: env.SENTRY_DSN }));
 }
 
-// #region 公共路由（无认证）
+// #region 公共路由（无认证但是可使用局部中间件进行认证）
 for (const module of Object.values(publicModules)) {
   publicApp.route("/", module.default);
 }

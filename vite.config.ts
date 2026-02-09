@@ -1,4 +1,3 @@
-import path from "node:path";
 import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
 import { defineConfig, loadEnv } from "vite";
@@ -15,11 +14,7 @@ export default defineConfig(({ mode }) => {
       port: Number.parseInt(env.PORT, 10),
     },
     resolve: {
-      // tsconfigPaths: true,
-      alias: {
-        "@": path.join(process.cwd(), "./src"),
-        "~": path.join(process.cwd(), "."),
-      },
+      tsconfigPaths: true,
     },
     plugins: [
       zodHoistPlugin(),

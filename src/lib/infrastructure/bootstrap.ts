@@ -1,58 +1,49 @@
-/**
- * 基础设施启动模块
- *
- * 负责初始化 pg-boss 等基础设施组件
- * 必须在应用启动时调用
- */
+import { Effect } from "effect";
+
+import * as z from "zod";
+
 import logger from "@/lib/logger";
 
 import boss from "./pg-boss-adapter";
 
 let initialized = false;
 
-/**
- * 初始化基础设施
- *
- * 包括：
- * - pg-boss 任务队列（会自动创建 pgboss schema 和相关表）
- * - Saga 协调器
- *
- * @example
- * // 在应用启动时调用
- * import { bootstrap } from "@/lib/infrastructure";
- * await bootstrap();
- */
-export async function bootstrap(): Promise<void> {
+/** 初始化基础设施 */
+export function bootstrap(): Promise<void> {
   if (initialized) {
-    return;
+    return Promise.resolve();
   }
 
-  // 1. 初始化 pg-boss（必须先于其他组件）
-  const bossInstance = boss;
-  await bossInstance.start();
-  logger.info("[PgBossAdapter]: pg-boss 已启动");
+  const program = Effect.gen(function* () {
+    // 配置 Zod 使用中文错误消息
+    z.config(z.locales.zhCN());
 
-  // 2. 初始化 Saga 协调器（依赖 pg-boss，使用动态导入确保顺序）
-  const { getSagaOrchestrator } = await import("./saga");
-  await getSagaOrchestrator();
-  logger.info("[Bootstrap]: Saga 协调器已初始化");
+    // 1. 初始化 pg-boss（必须先于其他组件）
+    yield* Effect.promise(() => boss.start());
+    logger.info("[PgBossAdapter]: pg-boss 已启动");
 
-  initialized = true;
+    // 2. 初始化 Saga 协调器（依赖 pg-boss，使用动态导入确保顺序）
+    const { getSagaOrchestrator } = yield* Effect.promise(() => import("./saga"));
+    yield* Effect.promise(() => getSagaOrchestrator());
+    logger.info("[Bootstrap]: Saga 协调器已初始化");
+
+    initialized = true;
+  });
+
+  return Effect.runPromise(program);
 }
 
-/**
- * 关闭基础设施
- *
- * 用于优雅关闭应用
- */
-export async function shutdown(): Promise<void> {
+/** 关闭基础设施 */
+export function shutdown(): Promise<void> {
   if (!initialized) {
-    return;
+    return Promise.resolve();
   }
 
-  const bossInstance = boss;
-  await bossInstance.stop();
-  logger.info("[Bootstrap]: pg-boss 已停止");
+  const program = Effect.gen(function* () {
+    yield* Effect.promise(() => boss.stop());
+    logger.info("[Bootstrap]: pg-boss 已停止");
+    initialized = false;
+  });
 
-  initialized = false;
+  return Effect.runPromise(program);
 }

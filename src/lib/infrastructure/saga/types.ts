@@ -101,19 +101,34 @@ export type SagaExecutionOptions = {
 export type SagaInstance = {
   id: string;
   type: string;
-  correlationId?: string;
+  correlationId: string | null;
   status: SagaStatusType;
   currentStepIndex: number;
   totalSteps: number;
   input: Record<string, unknown>;
-  output?: Record<string, unknown>;
+  output: Record<string, unknown> | null;
   context: Record<string, unknown>;
-  error?: string;
+  error: string | null;
   retryCount: number;
-  startedAt?: string;
-  completedAt?: string;
+  startedAt: string | null;
+  completedAt: string | null;
   steps: SagaStepInstance[];
 };
+
+/** Saga 实例中需要直接透传的字段（input/context/steps 需特殊处理） */
+export const sagaInstanceKeys = [
+  "id",
+  "type",
+  "correlationId",
+  "status",
+  "currentStepIndex",
+  "totalSteps",
+  "output",
+  "error",
+  "retryCount",
+  "startedAt",
+  "completedAt",
+] as const satisfies readonly (keyof SagaInstance)[];
 
 /** Saga 步骤实例信息 */
 export type SagaStepInstance = {
@@ -121,13 +136,27 @@ export type SagaStepInstance = {
   name: string;
   stepIndex: number;
   status: SagaStepStatusType;
-  input?: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  error?: string;
+  input: Record<string, unknown> | null;
+  output: Record<string, unknown> | null;
+  error: string | null;
   retryCount: number;
-  startedAt?: string;
-  completedAt?: string;
+  startedAt: string | null;
+  completedAt: string | null;
 };
+
+/** Saga 步骤实例的全部字段 */
+export const sagaStepInstanceKeys = [
+  "id",
+  "name",
+  "stepIndex",
+  "status",
+  "input",
+  "output",
+  "error",
+  "retryCount",
+  "startedAt",
+  "completedAt",
+] as const satisfies readonly (keyof SagaStepInstance)[];
 
 /** pg-boss 执行任务数据 */
 export type ExecuteJobData = {

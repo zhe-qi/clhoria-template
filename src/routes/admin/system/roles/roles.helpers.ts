@@ -1,5 +1,7 @@
 import type { Role, RoleWithParents } from "./roles.types";
 
+import { Effect } from "effect";
+
 import { withLock } from "@/lib/infrastructure";
 import { enforcerPromise } from "@/lib/internal/casbin";
 
@@ -19,18 +21,21 @@ export async function getRoleParents(roleId: string): Promise<string[]> {
  * @param parentIds 新的上级角色ID数组
  */
 export async function setRoleParents(roleId: string, parentIds: string[]): Promise<void> {
-  await withLock(`role:${roleId}:inheritance`, async () => {
-    const enforcer = await enforcerPromise;
+  await Effect.runPromise(withLock(
+    `role:${roleId}:inheritance`,
+    Effect.promise(async () => {
+      const enforcer = await enforcerPromise;
 
-    // 先移除所有现有的上级角色关系
-    await enforcer.removeFilteredGroupingPolicy(0, roleId);
+      // 先移除所有现有的上级角色关系
+      await enforcer.removeFilteredGroupingPolicy(0, roleId);
 
-    // 如果有新的上级角色，批量添加
-    if (parentIds.length > 0) {
-      const rules = parentIds.map(parentId => [roleId, parentId]);
-      await enforcer.addGroupingPolicies(rules);
-    }
-  });
+      // 如果有新的上级角色，批量添加
+      if (parentIds.length > 0) {
+        const rules = parentIds.map(parentId => [roleId, parentId]);
+        await enforcer.addGroupingPolicies(rules);
+      }
+    }),
+  ));
 }
 
 /**
@@ -90,10 +95,7 @@ export async function checkCircularInheritance(roleId: string, parentIds: string
  */
 export async function enrichRoleWithParents(role: Role): Promise<RoleWithParents> {
   const parentRoles = await getRoleParents(role.id);
-  return {
-    ...role,
-    parentRoles,
-  };
+  return { ...role, parentRoles };
 }
 
 /**

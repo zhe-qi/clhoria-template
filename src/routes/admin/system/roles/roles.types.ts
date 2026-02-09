@@ -16,3 +16,4 @@ export type SystemRolesRouteHandlerType<T extends keyof RouteTypes> = AppRouteHa
 // Services types
 export type SavePermissionsResult = { success: true } & z.infer<typeof savePermissionsResponseSchema>;
 export type SavePermissionsError = { success: false; error: string };
+export type UpdateRoleParentsResult = { success: true } | { success: false; error: string };
