@@ -23,11 +23,12 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **完整 RBAC**: 用户管理 + 角色管理 + Casbin 权限策略 + Refine Resource 菜单
 - **智能权限系统**: Casbin KeyMatch3 + RESTful + Refine Resource,无需后端存储权限标识
 - **高性能菜单**: 基于 Refine 的菜单和路由最佳实践,相比传统动态路由性能更优
-- **业务和系统字典**: 业务字典支持运行时动态配置(JSONB + Redis缓存),系统字典使用 Pg枚举 编译时类型检查
+- **业务和系统字典**: 业务字典支持运行时动态配置(JSONB + Redis缓存),系统字典使用Pg枚举编译时类型检查
 - **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
 - **高性能缓存**: Redis 缓存（支持集群模式）+ 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
 - **任务队列和定时任务**: 基于 pg-boss 的后台任务队列管理和定时任务调度（分布式安全，多节点只执行一次）
 - **分布式事务**: 基于 pg-boss 的 Saga 协调器，支持多步骤事务、自动补偿回滚、重试策略、超时处理
+- **函数式基础设施**: 基于 Effect-TS 构建基础设施层，类型安全的依赖注入、可组合的错误处理、结构化并发
 - **对象存储**: 集成 S3 兼容对象存储(支持 Cloudflare R2、阿里云 OSS、AWS S3 等)
 - **智能验证码**: 集成 Cap.js,支持多种挑战类型的现代化验证码系统
 - **AI 原生开发**: Claude Code + OpenAPI 自动生成,告别手工维护接口文档的痛苦
@@ -36,16 +37,16 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 - **即时反馈开发**: 基于 Vite 的热重载开发环境,代码变更毫秒级生效,开发体验极致流畅
 - **Claude Code 深度优化**: 完整 CLAUDE.md 配置,MCP 插件生态,AI 理解项目架构
 - **监控系统**: 集成 Sentry 错误追踪,支持自建或云原生方案(小团队推荐云服务,免运维)
-- **Excel 处理**: 基于 excelize-wasm 的高性能 Excel 导入导出，单例延迟加载，golang同款excel处理性能
+- **Excel 处理**: 基于 excelize-wasm 的高性能 Excel 处理，单例延迟加载，golang 同款
 
 ## 快速开始
 
 ### 本地开发环境
 
-- Node.js >= 24
-- pnpm >= 10
-- PostgreSQL >= 18
-- Redis >= 7
+- Node.js >= 24(建议使用latest)
+- pnpm >= 10(根据package.json里的packageManager版本号来即可)
+- PostgreSQL >= 18(如果使用17请参考readme中的降级指南很轻松的降级)
+- Redis >= 7(这个无所谓，7或者8或者latest都行)
 
 #### 安装步骤
 
@@ -78,8 +79,8 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
    # 启动redis服务(可选,在本地docker环境下快速搭建redis)
    docker compose --env-file .env run -d --service-ports redis
 
-   # 推送数据库架构到开发环境，第一次初始化数据库请使用migrate，有个pgSchema
-   pnpm push
+   # 执行数据库迁移(开发环境快速迭代请直接使用 pnpm push，尽可能保证 generate 和 migrate 用在重要节点)
+   pnpm migrate
 
    # 填充初始数据(可选,应用启动时会自动检查并初始化)
    pnpm seed
@@ -132,8 +133,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 配合 Claude Code 进行功能开发时，遵循以下 6 阶段标准流程：
 
 ```
-1. Spec（需求分析 + 技术架构设计 + 测试规划）→ 2. 生成接口代码 →
-3. 生成测试用例 → 4-5. 循环优化 → 6. 生成模块文档
+1. Spec → 2. 生成接口代码 → 3. 生成测试用例 → 4-5. 循环优化 → 6. 生成模块文档
 ```
 
 #### 各阶段核心要点
@@ -459,10 +459,6 @@ for (const module of Object.values(adminModules)) {
 ### 🧩 单例管理系统
 
 统一管理 PostgreSQL、Redis、Casbin 等长连接资源，解决 Vite HMR 模式下的连接泄漏问题，支持自动资源清理
-
-### 🎯 权限 + 菜单 + 字典一体化方案
-
-基于 **Casbin + Refine + PostgreSQL Enum + OpenAPI** 的现代化架构,彻底简化传统后台管理系统的复杂度。
 
 #### 核心思路
 
