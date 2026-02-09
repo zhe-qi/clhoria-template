@@ -1,19 +1,21 @@
+CREATE SCHEMA "infra";
+--> statement-breakpoint
+CREATE TYPE "infra"."saga_status" AS ENUM('PENDING', 'RUNNING', 'COMPENSATING', 'COMPLETED', 'FAILED', 'CANCELLED');--> statement-breakpoint
+CREATE TYPE "infra"."saga_step_status" AS ENUM('PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'SKIPPED', 'COMPENSATING', 'COMPENSATED', 'COMPENSATION_FAILED');--> statement-breakpoint
 CREATE TYPE "public"."gender" AS ENUM('UNKNOWN', 'MALE', 'FEMALE');--> statement-breakpoint
 CREATE TYPE "public"."param_value_type" AS ENUM('STRING', 'NUMBER', 'BOOLEAN', 'JSON');--> statement-breakpoint
 CREATE TYPE "public"."real_name_auth_status" AS ENUM('UNAUTHENTICATED', 'PENDING', 'VERIFIED', 'FAILED');--> statement-breakpoint
 CREATE TYPE "public"."real_name_auth_type" AS ENUM('INDIVIDUAL', 'ENTERPRISE');--> statement-breakpoint
-CREATE TYPE "public"."saga_status" AS ENUM('PENDING', 'RUNNING', 'COMPENSATING', 'COMPLETED', 'FAILED', 'CANCELLED');--> statement-breakpoint
-CREATE TYPE "public"."saga_step_status" AS ENUM('PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'SKIPPED', 'COMPENSATING', 'COMPENSATED', 'COMPENSATION_FAILED');--> statement-breakpoint
 CREATE TYPE "public"."status" AS ENUM('ENABLED', 'DISABLED');--> statement-breakpoint
 CREATE TYPE "public"."user_status" AS ENUM('NORMAL', 'DISABLED', 'PENDING', 'REJECTED');--> statement-breakpoint
 CREATE TYPE "public"."verification_status" AS ENUM('UNVERIFIED', 'VERIFIED');--> statement-breakpoint
-CREATE TABLE "saga_steps" (
+CREATE TABLE "infra"."saga_steps" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"created_at" timestamp,
 	"saga_id" uuid NOT NULL,
 	"name" varchar(128) NOT NULL,
 	"step_index" integer NOT NULL,
-	"status" "saga_step_status" DEFAULT 'PENDING' NOT NULL,
+	"status" "infra"."saga_step_status" DEFAULT 'PENDING' NOT NULL,
 	"input" jsonb,
 	"output" jsonb,
 	"error" text,
@@ -28,12 +30,12 @@ CREATE TABLE "saga_steps" (
 	"compensation_completed_at" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE "sagas" (
+CREATE TABLE "infra"."sagas" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7() NOT NULL,
 	"created_at" timestamp,
 	"type" varchar(128) NOT NULL,
 	"correlation_id" varchar(128),
-	"status" "saga_status" DEFAULT 'PENDING' NOT NULL,
+	"status" "infra"."saga_status" DEFAULT 'PENDING' NOT NULL,
 	"current_step_index" integer DEFAULT 0 NOT NULL,
 	"total_steps" integer NOT NULL,
 	"input" jsonb,
@@ -171,17 +173,17 @@ CREATE TABLE "client_users" (
 	CONSTRAINT "client_users_myInviteCode_unique" UNIQUE("my_invite_code")
 );
 --> statement-breakpoint
-ALTER TABLE "saga_steps" ADD CONSTRAINT "saga_steps_saga_id_sagas_id_fk" FOREIGN KEY ("saga_id") REFERENCES "public"."sagas"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "infra"."saga_steps" ADD CONSTRAINT "saga_steps_saga_id_sagas_id_fk" FOREIGN KEY ("saga_id") REFERENCES "infra"."sagas"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_user_id_system_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."system_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system_user_roles" ADD CONSTRAINT "system_user_roles_role_id_system_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."system_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "saga_steps_saga_id_idx" ON "saga_steps" USING btree ("saga_id");--> statement-breakpoint
-CREATE INDEX "saga_steps_status_idx" ON "saga_steps" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "saga_steps_idempotency_key_idx" ON "saga_steps" USING btree ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "saga_steps_job_id_idx" ON "saga_steps" USING btree ("job_id");--> statement-breakpoint
-CREATE INDEX "sagas_type_idx" ON "sagas" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "sagas_correlation_id_idx" ON "sagas" USING btree ("correlation_id");--> statement-breakpoint
-CREATE INDEX "sagas_status_idx" ON "sagas" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "sagas_expires_at_idx" ON "sagas" USING btree ("expires_at");--> statement-breakpoint
+CREATE INDEX "saga_steps_saga_id_idx" ON "infra"."saga_steps" USING btree ("saga_id");--> statement-breakpoint
+CREATE INDEX "saga_steps_status_idx" ON "infra"."saga_steps" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "saga_steps_idempotency_key_idx" ON "infra"."saga_steps" USING btree ("idempotency_key");--> statement-breakpoint
+CREATE INDEX "saga_steps_job_id_idx" ON "infra"."saga_steps" USING btree ("job_id");--> statement-breakpoint
+CREATE INDEX "sagas_type_idx" ON "infra"."sagas" USING btree ("type");--> statement-breakpoint
+CREATE INDEX "sagas_correlation_id_idx" ON "infra"."sagas" USING btree ("correlation_id");--> statement-breakpoint
+CREATE INDEX "sagas_status_idx" ON "infra"."sagas" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "sagas_expires_at_idx" ON "infra"."sagas" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "idx_casbin_g_v0" ON "casbin_rule" USING btree ("ptype","v0","v1");--> statement-breakpoint
 CREATE INDEX "idx_casbin_v1" ON "casbin_rule" USING btree ("ptype","v1");--> statement-breakpoint
 CREATE INDEX "system_dicts_status_idx" ON "system_dicts" USING btree ("status");--> statement-breakpoint

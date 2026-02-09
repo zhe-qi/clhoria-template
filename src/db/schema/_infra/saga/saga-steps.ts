@@ -1,14 +1,15 @@
 import { relations } from "drizzle-orm";
-import { index, integer, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { index, integer, jsonb, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { baseColumns } from "@/db/schema/_shard/base-columns";
-import { sagaStepStatusEnum } from "@/db/schema/_shard/enums";
 import { SagaStepStatus } from "@/lib/enums";
 
+import { infraSchema } from "../schema";
+import { sagaStepStatusEnum } from "./enums";
 import { sagas } from "./sagas";
 
 /** Saga 步骤表 - 记录每个步骤的执行状态 */
-export const sagaSteps = pgTable("saga_steps", {
+export const sagaSteps = infraSchema.table("saga_steps", {
   id: baseColumns.id,
   createdAt: baseColumns.createdAt,
   /** 关联的 Saga ID */

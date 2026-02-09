@@ -1,12 +1,12 @@
 {
-  "id": "ea7ad6eb-6652-41d8-bcbd-76c6741a3f62",
+  "id": "4cb90221-9924-4c4b-baac-7f3d29b31e51",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.saga_steps": {
+    "infra.saga_steps": {
       "name": "saga_steps",
-      "schema": "",
+      "schema": "infra",
       "columns": {
         "id": {
           "name": "id",
@@ -42,7 +42,7 @@
         "status": {
           "name": "status",
           "type": "saga_step_status",
-          "typeSchema": "public",
+          "typeSchema": "infra",
           "primaryKey": false,
           "notNull": true,
           "default": "'PENDING'"
@@ -189,6 +189,7 @@
           "name": "saga_steps_saga_id_sagas_id_fk",
           "tableFrom": "saga_steps",
           "tableTo": "sagas",
+          "schemaTo": "infra",
           "columnsFrom": [
             "saga_id"
           ],
@@ -205,9 +206,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sagas": {
+    "infra.sagas": {
       "name": "sagas",
-      "schema": "",
+      "schema": "infra",
       "columns": {
         "id": {
           "name": "id",
@@ -237,7 +238,7 @@
         "status": {
           "name": "status",
           "type": "saga_status",
-          "typeSchema": "public",
+          "typeSchema": "infra",
           "primaryKey": false,
           "notNull": true,
           "default": "'PENDING'"
@@ -1398,6 +1399,32 @@
     }
   },
   "enums": {
+    "infra.saga_status": {
+      "name": "saga_status",
+      "schema": "infra",
+      "values": [
+        "PENDING",
+        "RUNNING",
+        "COMPENSATING",
+        "COMPLETED",
+        "FAILED",
+        "CANCELLED"
+      ]
+    },
+    "infra.saga_step_status": {
+      "name": "saga_step_status",
+      "schema": "infra",
+      "values": [
+        "PENDING",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "SKIPPED",
+        "COMPENSATING",
+        "COMPENSATED",
+        "COMPENSATION_FAILED"
+      ]
+    },
     "public.gender": {
       "name": "gender",
       "schema": "public",
@@ -1435,32 +1462,6 @@
         "ENTERPRISE"
       ]
     },
-    "public.saga_status": {
-      "name": "saga_status",
-      "schema": "public",
-      "values": [
-        "PENDING",
-        "RUNNING",
-        "COMPENSATING",
-        "COMPLETED",
-        "FAILED",
-        "CANCELLED"
-      ]
-    },
-    "public.saga_step_status": {
-      "name": "saga_step_status",
-      "schema": "public",
-      "values": [
-        "PENDING",
-        "RUNNING",
-        "COMPLETED",
-        "FAILED",
-        "SKIPPED",
-        "COMPENSATING",
-        "COMPENSATED",
-        "COMPENSATION_FAILED"
-      ]
-    },
     "public.status": {
       "name": "status",
       "schema": "public",
@@ -1488,7 +1489,9 @@
       ]
     }
   },
-  "schemas": {},
+  "schemas": {
+    "infra": "infra"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

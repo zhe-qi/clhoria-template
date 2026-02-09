@@ -78,7 +78,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
    # 启动redis服务(可选,在本地docker环境下快速搭建redis)
    docker compose --env-file .env run -d --service-ports redis
 
-   # 推送数据库架构到开发环境
+   # 推送数据库架构到开发环境，第一次初始化数据库请使用migrate，有个pgSchema
    pnpm push
 
    # 填充初始数据(可选,应用启动时会自动检查并初始化)
@@ -108,6 +108,10 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 安装 VSCode 插件：[TypeScript Native Preview](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)
 
 > **注意**：目前 ts-go 仅用于类型检查和语言服务，开发和打包基于 Vite (Rolldown)，运行时使用 tsx。
+
+> **缓存问题**：如果遇到 ts 服务报错或类型缓存异常，使用 `Cmd + Shift + P` 打开命令面板，输入 `restart`，找到 **TypeScript: Restart TS Server** 重启 TS 服务即可恢复正常。
+
+> **性能提示**：Zod 对类型服务的性能消耗较大，ts-go 在这方面有明显改善。如果能接受偶尔的缓存问题，仍然建议继续使用 ts-go 以获得更好的开发体验。
 
 ### 不使用 ts-go
 
