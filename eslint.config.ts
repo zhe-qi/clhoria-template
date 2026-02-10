@@ -24,6 +24,7 @@ export default antfu({
       case: "kebabCase",
       ignore: ["README.md"],
     }],
+    "antfu/if-newline": "off",
     "antfu/top-level-function": "off",
     "ts/consistent-type-definitions": ["error", "type"],
     "test/padding-around-all": "error",

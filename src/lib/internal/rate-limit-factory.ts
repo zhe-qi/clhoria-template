@@ -150,6 +150,10 @@ function isTrustedProxy(ip: string | null) {
 /**
  * 获取客户端真实标识
  */
+function wrapIpv6(ip: string) {
+  return ip.includes(":") ? `v6-${ip.replaceAll(":", "-")}` : ip;
+}
+
 function getClientIdentifier(c: Context<AppBindings>) {
   const remoteRaw = getSocketIp(c);
   const remote = remoteRaw ? validateIp(remoteRaw) : null;
@@ -160,7 +164,7 @@ function getClientIdentifier(c: Context<AppBindings>) {
     const real = c.req.header("X-Real-IP");
     const realIp = real ? validateIp(normalizeIp(real.trim())) : null;
     if (realIp)
-      return realIp;
+      return wrapIpv6(realIp);
 
     // 2) 可选：再兜底 XFF（不建议取第一个；除非你能保证链路已被 SLB 清洗）
     const xff = c.req.header("X-Forwarded-For");
@@ -170,13 +174,13 @@ function getClientIdentifier(c: Context<AppBindings>) {
       // 最保守做法：只在你确认 SLB 已清洗/重写 XFF 的情况下，才用 parts[0]
       const ip = validateIp(parts[0] ?? "");
       if (ip)
-        return ip;
+        return wrapIpv6(ip);
     }
   }
 
   // 非可信来源：忽略头部，直接用 socket remoteAddress（至少不可由 Header 伪造）
   if (remote)
-    return remote;
+    return wrapIpv6(remote);
 
   // 如果以上都失败，则返回 0.0.0.0，生产环境中基本走不到这里
   return "0.0.0.0";

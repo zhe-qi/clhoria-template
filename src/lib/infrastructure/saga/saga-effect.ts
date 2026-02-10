@@ -69,11 +69,7 @@ export const findStepBySagaAndIndex = (sagaId: string, stepIndex: number) =>
  * 返回 StepExecutionResult（成功或业务失败都在 result 中，不抛异常）
  * 仅在步骤代码本身抛异常或超时时 fail
  */
-export const executeStep = (
-  stepDef: SagaStepDefinition,
-  input: unknown,
-  context: SagaContext,
-): Effect.Effect<StepExecutionResult, SagaStepError, never> =>
+export const executeStep = (stepDef: SagaStepDefinition, input: unknown, context: SagaContext): Effect.Effect<StepExecutionResult, SagaStepError, never> =>
   Effect.tryPromise({
     try: () => stepDef.execute(input, context),
     catch: e => new SagaStepError({

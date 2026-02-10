@@ -61,16 +61,13 @@ export async function checkCircularInheritance(roleId: string, parentIds: string
 
   // 使用本地图进行 DFS 检查循环
   const hasCycle = (currentId: string, visited: Set<string>): boolean => {
-    if (visited.has(currentId))
-      return false;
+    if (visited.has(currentId)) return false;
     visited.add(currentId);
 
     const parents = parentMap.get(currentId) || [];
     for (const parent of parents) {
-      if (parent === roleId)
-        return true;
-      if (hasCycle(parent, visited))
-        return true;
+      if (parent === roleId) return true;
+      if (hasCycle(parent, visited)) return true;
     }
     return false;
   };
@@ -78,11 +75,9 @@ export async function checkCircularInheritance(roleId: string, parentIds: string
   // 检查每个要设置的上级角色
   for (const parentId of parentIds) {
     // 自己不能是自己的上级
-    if (parentId === roleId)
-      return true;
+    if (parentId === roleId) return true;
     // 检查祖先链中是否包含 roleId
-    if (hasCycle(parentId, new Set<string>()))
-      return true;
+    if (hasCycle(parentId, new Set<string>())) return true;
   }
 
   return false;

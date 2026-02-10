@@ -15,18 +15,14 @@ import { checkCircularInheritance, setRoleParents } from "./roles.helpers";
  * @returns null 表示验证通过，否则返回不存在的角色 ID 列表
  */
 export async function validateParentRolesExist(parentRoleIds: string[]): Promise<string[] | null> {
-  if (parentRoleIds.length === 0) {
-    return null;
-  }
+  if (parentRoleIds.length === 0) return null;
 
   const existingParents = await db
     .select({ id: systemRoles.id })
     .from(systemRoles)
     .where(inArray(systemRoles.id, parentRoleIds));
 
-  if (existingParents.length === parentRoleIds.length) {
-    return null;
-  }
+  if (existingParents.length === parentRoleIds.length) return null;
 
   const existingIds = new Set(existingParents.map(r => r.id));
   return parentRoleIds.filter(pid => !existingIds.has(pid));

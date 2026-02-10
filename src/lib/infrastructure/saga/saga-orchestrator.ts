@@ -289,9 +289,7 @@ export class SagaOrchestrator {
   }
 
   /** 处理执行任务 */
-  private async handleExecuteJob(
-    jobs: { id: string; data: ExecuteJobData }[],
-  ): Promise<void> {
+  private async handleExecuteJob(jobs: { id: string; data: ExecuteJobData }[]): Promise<void> {
     const [job] = jobs;
     const { sagaId, stepIndex } = job.data;
 
@@ -428,16 +426,11 @@ export class SagaOrchestrator {
   }
 
   /** 处理补偿任务 */
-  private async handleCompensateJob(
-    jobs: { id: string; data: CompensateJobData }[],
-  ): Promise<void> {
+  private async handleCompensateJob(jobs: { id: string; data: CompensateJobData }[]): Promise<void> {
     const [job] = jobs;
     const { sagaId, fromStepIndex } = job.data;
 
-    logger.info(
-      { sagaId, fromStepIndex, jobId: job.id },
-      "[Saga]: 开始补偿",
-    );
+    logger.info({ sagaId, fromStepIndex, jobId: job.id }, "[Saga]: 开始补偿");
 
     const program = Effect.gen(function* () {
       if (fromStepIndex < 0) {
@@ -469,22 +462,19 @@ export class SagaOrchestrator {
 
       // 获取 Saga 并执行补偿
       const saga = yield* findSagaWithSteps(sagaId);
-      if (!saga) {
-        return;
-      }
+      if (!saga) return;
 
       const definition = sagaRegistry.get(saga.type);
       if (!definition) {
         return yield* Effect.die(new Error(`Saga 类型 "${saga.type}" 未注册`));
-      }
+      };
 
       const stepDefinition = definition.steps[fromStepIndex];
       const stepRecord = saga.steps.find(s => s.stepIndex === fromStepIndex);
 
-      if (!stepRecord || stepRecord.status !== SagaStepStatus.COMPLETED) {
-        // 跳过未完成的步骤，继续补偿上一步
-        yield* sendCompensateJob(sagaId, fromStepIndex - 1);
-        return;
+      const isStepCompleted = !stepRecord || stepRecord.status !== SagaStepStatus.COMPLETED;
+      if (isStepCompleted) {
+        return yield* sendCompensateJob(sagaId, fromStepIndex - 1);
       }
 
       // 执行补偿
@@ -526,10 +516,7 @@ export class SagaOrchestrator {
             error: result.error,
             compensationCompletedAt: now(),
           });
-          logger.error(
-            { sagaId, stepIndex: fromStepIndex, error: result.error },
-            "[Saga]: 补偿失败",
-          );
+          logger.error({ sagaId, stepIndex: fromStepIndex, error: result.error }, "[Saga]: 补偿失败");
         }
       }
       else {
@@ -554,22 +541,17 @@ export class SagaOrchestrator {
   }
 
   /** 处理超时任务 */
-  private async handleTimeoutJob(
-    jobs: { id: string; data: TimeoutJobData }[],
-  ): Promise<void> {
+  private async handleTimeoutJob(jobs: { id: string; data: TimeoutJobData }[]): Promise<void> {
     const [job] = jobs;
     const { sagaId } = job.data;
 
     const program = Effect.gen(function* () {
       const saga = yield* findSaga(sagaId);
-      if (!saga) {
-        return;
-      }
+      if (!saga) return;
 
       // 已完成或已失败则忽略
-      if (saga.status === SagaStatus.COMPLETED || saga.status === SagaStatus.FAILED) {
-        return;
-      }
+      const isCompletedOrFailed = saga.status === SagaStatus.COMPLETED || saga.status === SagaStatus.FAILED;
+      if (isCompletedOrFailed) return;
 
       logger.warn({ sagaId }, "[Saga]: Saga 超时，开始补偿");
 
@@ -593,13 +575,10 @@ export class SagaOrchestrator {
   async cancel(sagaId: string): Promise<boolean> {
     const program = Effect.gen(function* () {
       const saga = yield* findSaga(sagaId);
-      if (!saga) {
-        return false;
-      }
+      if (!saga) return false;
 
-      if (saga.status === SagaStatus.COMPLETED || saga.status === SagaStatus.FAILED) {
-        return false;
-      }
+      const isCompletedOrFailed = saga.status === SagaStatus.COMPLETED || saga.status === SagaStatus.FAILED;
+      if (isCompletedOrFailed) return false;
 
       yield* updateSaga(sagaId, {
         status: SagaStatus.COMPENSATING,
@@ -619,13 +598,9 @@ export class SagaOrchestrator {
   async retry(sagaId: string): Promise<boolean> {
     const program = Effect.gen(function* () {
       const saga = yield* findSaga(sagaId);
-      if (!saga || saga.status !== SagaStatus.FAILED) {
-        return false;
-      }
+      if (!saga || saga.status !== SagaStatus.FAILED) return false;
 
-      if (saga.retryCount >= saga.maxRetries) {
-        return false;
-      }
+      if (saga.retryCount >= saga.maxRetries) return false;
 
       yield* updateSaga(sagaId, {
         status: SagaStatus.PENDING,
@@ -635,19 +610,14 @@ export class SagaOrchestrator {
 
       // 重置失败步骤状态
       yield* Effect.tryPromise({
-        try: () => db
-          .update(sagaSteps)
-          .set({
-            status: SagaStepStatus.PENDING,
-            error: null,
-            retryCount: 0,
-          })
-          .where(
-            and(
-              eq(sagaSteps.sagaId, sagaId),
-              eq(sagaSteps.stepIndex, saga.currentStepIndex),
-            ),
-          ),
+        try: () => db.update(sagaSteps).set({
+          status: SagaStepStatus.PENDING,
+          error: null,
+          retryCount: 0,
+        }).where(and(
+          eq(sagaSteps.sagaId, sagaId),
+          eq(sagaSteps.stepIndex, saga.currentStepIndex),
+        )),
         catch: e => new DatabaseError({ message: "重置步骤状态失败", cause: e }),
       });
 
@@ -659,10 +629,7 @@ export class SagaOrchestrator {
         } satisfies ExecuteJobData),
       );
 
-      logger.info(
-        { sagaId, retryCount: saga.retryCount + 1 },
-        "[Saga]: Saga 重试已发起",
-      );
+      logger.info({ sagaId, retryCount: saga.retryCount + 1 }, "[Saga]: Saga 重试已发起");
       return true;
     });
 
@@ -673,8 +640,7 @@ export class SagaOrchestrator {
   async get(sagaId: string): Promise<SagaInstance | null> {
     const program = Effect.gen(function* () {
       const saga = yield* findSagaWithSteps(sagaId);
-      if (!saga)
-        return null;
+      if (!saga) return null;
 
       return {
         ...pick(saga, sagaInstanceKeys),

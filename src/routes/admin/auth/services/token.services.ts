@@ -8,8 +8,10 @@ import { generateAccessToken, generateRefreshToken, refreshIndexKey, refreshKey 
  * 登录/注册时生成一对 Token
  */
 export async function generateTokens(user: UserTokenInfo) {
-  const accessToken = await generateAccessToken(user);
-  const refreshToken = await generateRefreshToken(user);
+  const [accessToken, refreshToken] = await Promise.all([
+    generateAccessToken(user),
+    generateRefreshToken(user),
+  ]);
   return { accessToken, refreshToken };
 }
 
@@ -46,8 +48,10 @@ export async function refreshAccessToken(refreshToken: string) {
   await redisClient.del(refreshKey(userId, randomPart));
   await redisClient.srem(refreshIndexKey(userId), randomPart);
 
-  const newAccessToken = await generateAccessToken(user);
-  const newRefreshToken = await generateRefreshToken(user);
+  const [newAccessToken, newRefreshToken] = await Promise.all([
+    generateAccessToken(user),
+    generateRefreshToken(user),
+  ]);
 
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 }
@@ -63,7 +67,7 @@ export async function logout(userId: string | number) {
   }
 
   const pipeline = redisClient.pipeline();
-  // 所有 key 都带有相同的 Hash Tag {user:${userId}}，确保在同一 slot
+  // 所有 key 都带有相同的 Hash Tag {user.${userId}}，确保在同一 slot
   tokens.forEach(t => pipeline.del(refreshKey(userId, t)));
   pipeline.del(refreshIndexKey(userId));
   await pipeline.exec();

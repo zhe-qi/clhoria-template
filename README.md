@@ -83,6 +83,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
    pnpm migrate
 
    # 填充初始数据(可选,应用启动时会自动检查并初始化)
+   npm install -g bun
    pnpm seed
    ```
 

@@ -80,9 +80,7 @@ export async function getIdentityById(userId: string) {
     },
   });
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const { systemUserRoles, ...userWithoutRoles } = user;
   const roles = systemUserRoles.map(({ roleId }) => roleId);
@@ -105,12 +103,10 @@ export async function getPermissionsByRoles(roles: string[]) {
   // 处理所有角色的权限
   for (const perms of allPermsArrays) {
     for (const perm of perms) {
-      if (!perm || perm.length === 0)
-        continue;
+      if (!perm || perm.length === 0) continue;
 
       const filteredPerm = perm.filter(item => item && item.trim() !== "");
-      if (filteredPerm.length === 0)
-        continue;
+      if (filteredPerm.length === 0) continue;
 
       const permStr = `p, ${filteredPerm.join(", ")}`;
       permissionsSet.add(permStr);
@@ -120,12 +116,10 @@ export async function getPermissionsByRoles(roles: string[]) {
   // 获取所有角色继承关系
   const allGroupings = await casbinEnforcer.getGroupingPolicy();
   for (const grouping of allGroupings) {
-    if (!grouping || grouping.length === 0)
-      continue;
+    if (!grouping || grouping.length === 0) continue;
 
     const filteredGrouping = grouping.filter(item => item && item.trim() !== "");
-    if (filteredGrouping.length === 0)
-      continue;
+    if (filteredGrouping.length === 0) continue;
 
     const groupingStr = `g, ${filteredGrouping.join(", ")}`;
     groupingsSet.add(groupingStr);

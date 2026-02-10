@@ -36,8 +36,8 @@ const REFRESH_TTL_SECONDS = differenceInSeconds(
 );
 
 // ===== Redis Key 约定（使用 Hash Tag 确保同一用户的 key 在同一 slot） =====
-export const refreshKey = (userId: string | number, token: string) => `{user:${userId}}:rt:${token}`;
-export const refreshIndexKey = (userId: string | number) => `{user:${userId}}:rtidx`;
+export const refreshKey = (userId: string | number, token: string) => `{user.${userId}}:rt:${token}`;
+export const refreshIndexKey = (userId: string | number) => `{user.${userId}}:rtidx`;
 
 // ===== Access Token 生成 =====
 export async function generateAccessToken(user: UserTokenInfo) {
