@@ -1,4 +1,3 @@
-/* eslint-disable node/no-process-env */
 import path from "node:path";
 import { config } from "@dotenvx/dotenvx";
 import { z } from "zod";
