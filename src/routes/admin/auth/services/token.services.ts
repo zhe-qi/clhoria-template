@@ -1,6 +1,6 @@
 import type { UserTokenInfo } from "../auth.types";
 
-import redisClient from "@/lib/redis";
+import redisClient from "@/lib/services/redis";
 
 import { generateAccessToken, generateRefreshToken, refreshIndexKey, refreshKey } from "../auth.helpers";
 

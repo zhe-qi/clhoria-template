@@ -4,13 +4,13 @@ import type { systemUsersQueryResultSchema } from "./users.schema";
 
 import type { insertSystemUsersSchema } from "@/db/schema";
 
-import type { RefineQueryParams } from "@/lib/refine-query";
+import type { RefineQueryParams } from "@/lib/core/refine-query";
 import { hash } from "@node-rs/argon2";
 
 import { and, eq, inArray, sql } from "drizzle-orm";
 import db from "@/db";
 import { systemRoles, systemUserRoles, systemUsers } from "@/db/schema";
-import { executeRefineQuery } from "@/lib/refine-query";
+import { executeRefineQuery } from "@/lib/core/refine-query";
 
 type CreateUserInput = z.infer<typeof insertSystemUsersSchema>;
 

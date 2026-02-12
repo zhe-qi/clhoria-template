@@ -1,5 +1,5 @@
 import type { ObjectStorageRouteHandlerType } from "./resources.types";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { Resp } from "@/utils";
 
 import { generateDownloadUrl, generateUploadUrl } from "./object-storage.services";

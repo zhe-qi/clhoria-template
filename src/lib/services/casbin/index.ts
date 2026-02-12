@@ -3,7 +3,7 @@ import { newEnforcer, newModel } from "casbin";
 import db from "@/db";
 import { casbinRule } from "@/db/schema";
 
-import { createAsyncSingleton } from "../singleton";
+import { createAsyncSingleton } from "../../core/singleton";
 import { DrizzleCasbinAdapter } from "./adapter";
 
 // Casbin 模型配置

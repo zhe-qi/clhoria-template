@@ -1,4 +1,4 @@
-import { createRouter } from "@/lib/internal/create-app";
+import { createRouter } from "@/lib/core/create-app";
 
 import * as handlers from "./notifications.handlers";
 import * as routes from "./notifications.routes";

@@ -4,9 +4,9 @@ import { pinoLogger } from "hono-pino";
 
 import { requestId } from "hono/request-id";
 
-import logger from "@/lib/logger";
-import { notFound, onError } from "@/lib/stoker/middlewares";
-import { defaultHook } from "@/lib/stoker/openapi";
+import { notFound, onError } from "@/lib/core/stoker/middlewares";
+import { defaultHook } from "@/lib/core/stoker/openapi";
+import logger from "@/lib/services/logger";
 
 function createRouter() {
   return new OpenAPIHono<AppBindings>({

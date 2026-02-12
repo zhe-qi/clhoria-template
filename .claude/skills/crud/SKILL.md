@@ -61,7 +61,7 @@ export const {feature}s = pgTable("{tier}_{feature}s", {
 
 ```typescript
 // {feature}.index.ts
-import { createRouter } from "@/lib/internal/create-app";
+import { createRouter } from "@/lib/core/create-app";
 import * as handlers from "./{feature}.handlers";
 import * as routes from "./{feature}.routes";
 

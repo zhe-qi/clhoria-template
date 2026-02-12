@@ -4,7 +4,7 @@ import type { EmptyObject, Simplify, UnknownRecord } from "type-fest";
 
 import { z } from "@hono/zod-openapi";
 
-import logger from "@/lib/logger";
+import logger from "@/lib/services/logger";
 
 /**
  * Refine CRUD 操作符 Schema

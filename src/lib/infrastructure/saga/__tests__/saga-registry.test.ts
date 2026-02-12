@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sagaRegistry } from "../saga-registry";
 
 // Mock logger
-vi.mock("@/lib/logger", () => ({
+vi.mock("@/lib/services/logger", () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),

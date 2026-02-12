@@ -3,7 +3,7 @@ import type { DestinationStream } from "pino";
 import pino from "pino";
 
 import env from "@/env";
-import { createSingleton } from "@/lib/internal/singleton";
+import { createSingleton } from "@/lib/core/singleton";
 
 let destination: DestinationStream | undefined;
 

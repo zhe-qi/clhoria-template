@@ -69,7 +69,7 @@
     "simple-git-hooks": "^2.13.1",
     "type-fest": "^5.4.4",
     "typescript": "5.9.3",
-    "vite": "8.0.0-beta.13",
+    "vite": "8.0.0-beta.14",
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {

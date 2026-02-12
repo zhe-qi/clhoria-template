@@ -5,9 +5,9 @@
 ```typescript
 // {feature}.routes.ts
 import { createRoute } from "@hono/zod-openapi";
-import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
+import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "@/lib/core/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 import {
   {feature}CreateSchema,
@@ -129,7 +129,7 @@ export const remove = createRoute({
 
 ```typescript
 // {feature}.index.ts
-import { createRouter } from "@/lib/internal/create-app";
+import { createRouter } from "@/lib/core/create-app";
 import * as handlers from "./{feature}.handlers";
 import * as routes from "./{feature}.routes";
 

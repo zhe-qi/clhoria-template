@@ -1,9 +1,9 @@
 import { differenceInMilliseconds, format } from "date-fns";
 
 import env from "@/env";
+import { createMiddleware } from "@/lib/core/factory";
 import { LogType } from "@/lib/enums";
-import { createMiddleware } from "@/lib/internal/factory";
-import logger from "@/lib/logger";
+import logger from "@/lib/services/logger";
 
 /**
  * 操作日志中间件

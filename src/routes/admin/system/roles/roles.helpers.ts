@@ -3,7 +3,7 @@ import type { Role, RoleWithParents } from "./roles.types";
 import { Effect } from "effect";
 
 import { withLock } from "@/lib/infrastructure";
-import { enforcerPromise } from "@/lib/internal/casbin";
+import { enforcerPromise } from "@/lib/services/casbin";
 
 /**
  * 获取角色的所有上级角色

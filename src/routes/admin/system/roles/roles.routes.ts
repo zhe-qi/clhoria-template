@@ -1,8 +1,8 @@
 import { createRoute } from "@hono/zod-openapi";
 
-import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
+import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "@/lib/core/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
 import { savePermissionsParamsSchema, savePermissionsResponseSchema, savePermissionsSchema, systemRolesCreateSchema, systemRolesDetailResponseSchema, systemRolesIdParamsSchema, systemRolesListResponseSchema, systemRolesPatchSchema } from "./roles.schema";

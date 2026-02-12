@@ -135,7 +135,7 @@ export const systemDictQuerySchema = z.object({
 });
 
 // ID 参数使用 stoker 提供的 IdUUIDParamsSchema，无需自定义
-// import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
+// import { IdUUIDParamsSchema } from "@/lib/core/stoker/openapi/schemas";
 
 export const systemDictResponseSchema = selectSystemDictsSchema;
 export const systemDictListResponseSchema = z.array(systemDictResponseSchema);
@@ -146,10 +146,10 @@ export const systemDictListResponseSchema = z.array(systemDictResponseSchema);
 ```typescript
 // dicts.routes.ts
 import { createRoute } from "@hono/zod-openapi";
-import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { jsonContent, jsonContentRequired } from "@/lib/stoker/openapi/helpers";
-import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
+import { RefineQueryParamsSchema, RefineResultSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import { jsonContent, jsonContentRequired } from "@/lib/core/stoker/openapi/helpers";
+import { IdUUIDParamsSchema } from "@/lib/core/stoker/openapi/schemas";
 import { respErrSchema } from "@/utils";
 import {
   systemDictCreateSchema,
@@ -244,10 +244,10 @@ import type { SystemDictRouteHandlerType } from "./dicts.types";
 import { eq } from "drizzle-orm";
 import db from "@/db";
 import { systemDicts } from "@/db/schema";
-import logger from "@/lib/logger";
-import redisClient from "@/lib/redis";
-import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import logger from "@/lib/services/logger";
+import redisClient from "@/lib/services/redis";
+import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { Resp } from "@/utils";
 
 const DICT_CACHE_PREFIX = "dict:";
@@ -341,7 +341,7 @@ export const remove: SystemDictRouteHandlerType<"remove"> = async (c) => {
 
 ```typescript
 // dicts.index.ts
-import { createRouter } from "@/lib/internal/create-app";
+import { createRouter } from "@/lib/core/create-app";
 import * as handlers from "./dicts.handlers";
 import * as routes from "./dicts.routes";
 

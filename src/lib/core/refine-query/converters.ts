@@ -6,7 +6,7 @@ import type { ConditionalFilter, CrudFilters, CrudSorting, LogicalFilter } from 
 
 import { and, asc, between, desc, eq, gt, gte, ilike, inArray, isNotNull, isNull, like, lt, lte, ne, not, notInArray, or, sql } from "drizzle-orm";
 
-import logger from "@/lib/logger";
+import logger from "@/lib/services/logger";
 
 // ============================================================================
 // 过滤器转换器

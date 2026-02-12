@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { jsonContent } from "@/lib/stoker/openapi/helpers";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import { jsonContent } from "@/lib/core/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
 const routePrefix = "/notifications";

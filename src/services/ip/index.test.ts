@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getIPAddress } from "./index";
 
 // Mock Redis 客户端
-vi.mock("@/lib/redis", () => ({
+vi.mock("@/lib/services/redis", () => ({
   default: {
     get: vi.fn(),
     set: vi.fn(),
@@ -104,7 +104,7 @@ describe("IP Service", () => {
 
     describe("公网IP处理（带Redis缓存）", () => {
       it("缓存命中时应返回缓存值", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue("北京市");
 
         const result = await getIPAddress("8.8.8.8");
@@ -114,7 +114,7 @@ describe("IP Service", () => {
       });
 
       it("缓存为空值标记时应返回unknown", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue("__NULL__");
 
         const result = await getIPAddress("8.8.8.8");
@@ -123,7 +123,7 @@ describe("IP Service", () => {
       });
 
       it("缓存未命中时应调用API并缓存结果", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue(null);
         vi.mocked(redisClient.set).mockResolvedValue("OK");
 
@@ -142,7 +142,7 @@ describe("IP Service", () => {
       });
 
       it("API返回pro和city时应拼接", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue(null);
 
         const mockResponse = {
@@ -159,7 +159,7 @@ describe("IP Service", () => {
       });
 
       it("API请求失败应返回unknown", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue(null);
 
         mockFetch.mockRejectedValue(new Error("Network error"));
@@ -170,7 +170,7 @@ describe("IP Service", () => {
       });
 
       it("API返回非200应返回unknown", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue(null);
 
         mockFetch.mockResolvedValue({ ok: false, status: 500 });
@@ -181,7 +181,7 @@ describe("IP Service", () => {
       });
 
       it("API返回无效JSON应返回unknown", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue(null);
 
         const mockResponse = {
@@ -196,7 +196,7 @@ describe("IP Service", () => {
       });
 
       it("API返回err字段应返回unknown", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue(null);
 
         const mockResponse = {
@@ -213,7 +213,7 @@ describe("IP Service", () => {
       });
 
       it("Redis读取失败时应继续调用API", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockRejectedValue(new Error("Redis error"));
 
         const mockResponse = {
@@ -232,7 +232,7 @@ describe("IP Service", () => {
 
     describe("IPv6公网地址", () => {
       it("应正确处理公网IPv6地址", async () => {
-        const { default: redisClient } = await import("@/lib/redis");
+        const { default: redisClient } = await import("@/lib/services/redis");
         vi.mocked(redisClient.get).mockResolvedValue("美国");
 
         const result = await getIPAddress("2001:4860:4860::8888");

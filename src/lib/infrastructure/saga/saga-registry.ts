@@ -1,6 +1,6 @@
 import type { SagaDefinition } from "./types";
 
-import logger from "@/lib/logger";
+import logger from "@/lib/services/logger";
 
 /** Saga 定义注册表 */
 class SagaRegistry {

@@ -11,12 +11,12 @@ import { timeout } from "hono/timeout";
 import { trimTrailingSlash } from "hono/trailing-slash";
 
 import { RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants/rate-limit";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { notFound, onError, serveEmojiFavicon } from "@/lib/stoker/middlewares";
-import { defaultHook } from "@/lib/stoker/openapi";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import { notFound, onError, serveEmojiFavicon } from "@/lib/core/stoker/middlewares";
+import { defaultHook } from "@/lib/core/stoker/openapi";
 import { Resp } from "@/utils";
 
-import logger from "../logger";
+import logger from "../services/logger";
 import { createRateLimiter } from "./rate-limit-factory";
 
 export function createRouter() {

@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import Redlock from "redlock";
 
-import { LockAcquisitionError } from "@/lib/effect/errors";
-import redisClient from "@/lib/redis";
+import { LockAcquisitionError } from "@/lib/infrastructure/effect/errors";
+import redisClient from "@/lib/services/redis";
 
 /** 锁配置选项 */
 export type LockOptions = {

@@ -4,7 +4,7 @@ import type { Sql } from "postgres";
 import { PgBoss } from "pg-boss";
 
 import { getQueryClient } from "@/db";
-import { createSingleton } from "@/lib/internal/singleton";
+import { createSingleton } from "@/lib/core/singleton";
 
 export const postgresAdapter: (sql: Sql) => IDatabase = (sql: Sql) => ({
   executeSql: async (query: string, values?: any[]) => {

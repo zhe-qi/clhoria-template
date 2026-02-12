@@ -3,7 +3,7 @@ import iconv from "iconv-lite";
 import { z } from "zod";
 
 import { CACHE_TTL, NULL_CACHE_TTL, NULL_CACHE_VALUE } from "@/lib/constants";
-import redisClient from "@/lib/redis";
+import redisClient from "@/lib/services/redis";
 import { isPrivateIp, normalizeIp, tryit } from "@/utils";
 
 const Ipv4Schema = z.ipv4();

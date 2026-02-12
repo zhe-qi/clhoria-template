@@ -10,7 +10,7 @@ import { RedisStore } from "rate-limit-redis";
 import { z } from "zod";
 
 import env from "@/env";
-import redisClient from "@/lib/redis";
+import redisClient from "@/lib/services/redis";
 
 import { createSingleton } from "./singleton";
 

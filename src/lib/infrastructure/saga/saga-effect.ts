@@ -5,8 +5,8 @@ import { Duration, Effect } from "effect";
 
 import db from "@/db";
 import { sagas, sagaSteps } from "@/db/schema";
-import { DatabaseError, SagaStepError } from "@/lib/effect/errors";
 import { SagaStepStatus } from "@/lib/enums";
+import { DatabaseError, SagaStepError } from "@/lib/infrastructure/effect/errors";
 
 // ==================== DB Helpers ====================
 

@@ -1,8 +1,8 @@
 import Cap from "@cap.js/server";
 import { differenceInSeconds, isValid } from "date-fns";
 
-import redisClient from "../redis";
-import { createSingleton } from "./singleton";
+import { createSingleton } from "../core/singleton";
+import redisClient from "./redis";
 
 /** 生成带前缀的Redis Key */
 function getRedisKey(type: "challenge" | "token", id: string): string {

@@ -6,10 +6,10 @@ import { eq } from "drizzle-orm";
 
 import db from "@/db";
 import { systemDicts } from "@/db/schema";
-import logger from "@/lib/logger";
-import redisClient from "@/lib/redis";
-import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import logger from "@/lib/services/logger";
+import redisClient from "@/lib/services/redis";
 import { Resp } from "@/utils";
 
 /** Redis 缓存 Key 前缀 */

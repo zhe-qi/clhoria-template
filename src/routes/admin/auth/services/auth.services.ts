@@ -7,8 +7,8 @@ import db from "@/db";
 import { systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
 import { Status } from "@/lib/enums";
-import cap from "@/lib/internal/cap";
-import { enforcerPromise } from "@/lib/internal/casbin";
+import cap from "@/lib/services/cap";
+import { enforcerPromise } from "@/lib/services/casbin";
 import { toColumns } from "@/utils";
 
 /**

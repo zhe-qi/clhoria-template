@@ -6,9 +6,9 @@ import type { SystemRolesRouteHandlerType } from "./roles.types";
 import { eq } from "drizzle-orm";
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
-import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
 
 import { Resp } from "@/utils";
 

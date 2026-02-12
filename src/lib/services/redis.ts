@@ -3,7 +3,7 @@ import Redis, { Cluster } from "ioredis";
 import { parseURL } from "ioredis/built/utils/index.js";
 
 import env from "@/env";
-import { createSingleton } from "@/lib/internal/singleton";
+import { createSingleton } from "@/lib/core/singleton";
 
 /** Redis 客户端类型（单机或集群） */
 export type RedisClient = Redis | Cluster;

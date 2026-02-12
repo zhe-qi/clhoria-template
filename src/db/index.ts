@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import env from "@/env";
 
-import { createLazySingleton } from "@/lib/internal/singleton";
+import { createLazySingleton } from "@/lib/core/singleton";
 import * as schema from "./schema";
 
 export const getQueryClient = createLazySingleton(

@@ -1,4 +1,4 @@
-import { enforcerPromise } from "@/lib/internal/casbin";
+import { enforcerPromise } from "@/lib/services/casbin";
 
 /**
  * 重新加载 Casbin 策略（用于测试环境）

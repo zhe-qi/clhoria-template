@@ -1,8 +1,8 @@
 import type { SystemUsersRouteHandlerType } from "./users.types";
 
-import { RefineQueryParamsSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import { RefineQueryParamsSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
 import { omit, Resp } from "@/utils";
 
 import { checkUserBuiltIn, createUser, deleteUser, getUserById, getUserWithRoles, listUsers, saveUserRoles, updateUser, validateRolesExist } from "./users.services";

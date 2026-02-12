@@ -1,7 +1,7 @@
 import { jwt } from "hono/jwt";
 
 import env from "@/env";
-import { defineMiddleware } from "@/lib/internal/define-config";
+import { defineMiddleware } from "@/lib/core/define-config";
 import { authorize } from "@/middlewares/authorize";
 import { operationLog } from "@/middlewares/operation-log";
 

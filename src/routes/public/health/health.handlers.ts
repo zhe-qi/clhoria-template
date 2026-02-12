@@ -1,7 +1,7 @@
 import type { HealthRouteHandlerType } from "./health.types";
 
 import { format } from "date-fns";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 
 import { Resp } from "@/utils";
 

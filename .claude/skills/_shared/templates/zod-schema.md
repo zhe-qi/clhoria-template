@@ -45,7 +45,7 @@ export const {feature}QuerySchema = z.object({
 });
 
 // ID 参数使用 stoker 提供的 IdUUIDParamsSchema
-// import { IdUUIDParamsSchema } from "@/lib/stoker/openapi/schemas";
+// import { IdUUIDParamsSchema } from "@/lib/core/stoker/openapi/schemas";
 
 /** 响应 Schema */
 export const {feature}ResponseSchema = select{Feature}sSchema;

@@ -5,7 +5,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { addSeconds, formatISO } from "date-fns";
 
 import env from "@/env";
-import { createSingleton } from "@/lib/internal/singleton";
+import { createSingleton } from "@/lib/core/singleton";
 
 const s3Client = createSingleton(
   "s3-client",

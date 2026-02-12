@@ -11,8 +11,8 @@ import type { {Feature}RouteHandlerType } from "./{feature}.types";
 import { eq } from "drizzle-orm";
 import db from "@/db";
 import { {feature}s } from "@/db/schema";
-import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import { executeRefineQuery, RefineQueryParamsSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { Resp } from "@/utils";
 
 // ============================================================
@@ -117,8 +117,8 @@ export const remove: {Feature}RouteHandlerType<"remove"> = async (c) => {
 ## 带 Redis 缓存版本（仅 Update/Delete 需要清缓存）
 
 ```typescript
-import logger from "@/lib/logger";
-import redisClient from "@/lib/redis";
+import logger from "@/lib/services/logger";
+import redisClient from "@/lib/services/redis";
 
 const CACHE_PREFIX = "{feature}:";
 

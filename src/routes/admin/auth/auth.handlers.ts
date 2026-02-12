@@ -4,9 +4,9 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
 import env from "@/env";
 import { REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
-import cap from "@/lib/internal/cap";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
+import cap from "@/lib/services/cap";
 import { Resp, tryit } from "@/utils";
 
 import { getIdentityById, getPermissionsByRoles, validateCaptcha, validateLogin } from "./services/auth.services";

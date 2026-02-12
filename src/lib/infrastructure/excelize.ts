@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { init } from "excelize-wasm";
 
-import { createAsyncSingleton } from "@/lib/internal/singleton";
+import { createAsyncSingleton } from "@/lib/core/singleton";
 
 export type Excelize = Awaited<ReturnType<typeof init>>;
 

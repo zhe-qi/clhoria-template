@@ -6,9 +6,9 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import db from "@/db";
 import { systemDicts } from "@/db/schema";
 import env from "@/env";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { Status } from "@/lib/enums";
-import redisClient from "@/lib/redis";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
+import redisClient from "@/lib/services/redis";
 import dictsRouter from "@/routes/public/dicts/dicts.index";
 import { createTestApp } from "~/tests/utils/test-app";
 

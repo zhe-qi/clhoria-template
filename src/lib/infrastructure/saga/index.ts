@@ -1,4 +1,4 @@
-import { createSingleton } from "@/lib/internal/singleton";
+import { createSingleton } from "@/lib/core/singleton";
 
 import { SagaOrchestrator } from "./saga-orchestrator";
 

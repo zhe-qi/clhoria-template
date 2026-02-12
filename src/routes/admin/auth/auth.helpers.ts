@@ -6,7 +6,7 @@ import { sign } from "hono/jwt";
 import env from "@/env";
 import { ACCESS_TOKEN_EXPIRES_MINUTES, REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
 
-import redisClient from "@/lib/redis";
+import redisClient from "@/lib/services/redis";
 
 // ===== 配置 =====
 const ACCESS_TOKEN_SECRET = env.ADMIN_JWT_SECRET;

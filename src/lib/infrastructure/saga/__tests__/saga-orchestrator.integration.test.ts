@@ -12,9 +12,9 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import db from "@/db";
 import { sagas, sagaSteps } from "@/db/schema";
 import env from "@/env";
-import { SagaStatus, SagaStepStatus } from "@/lib/enums";
+import { destroySingleton } from "@/lib/core/singleton";
 
-import { destroySingleton } from "@/lib/internal/singleton";
+import { SagaStatus, SagaStepStatus } from "@/lib/enums";
 
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
@@ -43,7 +43,7 @@ vi.mock("@/lib/infrastructure/pg-boss-adapter", () => ({
 }));
 
 // Mock logger 避免测试输出过多日志
-vi.mock("@/lib/logger", () => ({
+vi.mock("@/lib/services/logger", () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),

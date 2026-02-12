@@ -1,9 +1,9 @@
 import { Enforcer } from "casbin";
 
-import { enforcerPromise } from "@/lib/internal/casbin";
-import { createMiddleware } from "@/lib/internal/factory";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
+import { createMiddleware } from "@/lib/core/factory";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
+import { enforcerPromise } from "@/lib/services/casbin";
 import { Resp } from "@/utils";
 import { stripPrefix } from "@/utils/tools";
 

@@ -2,7 +2,7 @@ import { Effect } from "effect";
 
 import * as z from "zod";
 
-import logger from "@/lib/logger";
+import logger from "@/lib/services/logger";
 
 import boss from "./pg-boss-adapter";
 

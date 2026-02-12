@@ -1,8 +1,8 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
-import { RefineResultSchema } from "@/lib/refine-query";
-import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
-import { jsonContent } from "@/lib/stoker/openapi/helpers";
+import { RefineResultSchema } from "@/lib/core/refine-query";
+import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
+import { jsonContent } from "@/lib/core/stoker/openapi/helpers";
 
 const routePrefix = "/health";
 const tags = [`${routePrefix}（健康检查）`];

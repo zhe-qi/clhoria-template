@@ -1,5 +1,5 @@
+import { createApplication } from "@/lib/core/create-application";
 import { bootstrap } from "@/lib/infrastructure/bootstrap";
-import { createApplication } from "@/lib/internal/create-application";
 import config from "~/app.config";
 
 await bootstrap();

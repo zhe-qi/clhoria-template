@@ -6,7 +6,7 @@ import { Effect } from "effect";
 import db from "@/db";
 import { systemRoles } from "@/db/schema";
 import { withLock } from "@/lib/infrastructure";
-import { enforcerPromise } from "@/lib/internal/casbin";
+import { enforcerPromise } from "@/lib/services/casbin";
 
 import { checkCircularInheritance, setRoleParents } from "./roles.helpers";
 
