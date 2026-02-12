@@ -1,8 +1,8 @@
 import { Enforcer } from "casbin";
 
+import { API_ADMIN_PATH } from "@/lib/constants/api";
 import { enforcerPromise } from "@/lib/internal/casbin";
 import { createMiddleware } from "@/lib/internal/factory";
-import { API_ADMIN_PATH } from "@/lib/internal/openapi/config";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/stoker/http-status-phrases";
 import { Resp } from "@/utils";

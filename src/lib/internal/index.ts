@@ -17,6 +17,5 @@ export {
   hasSingleton,
 } from "./singleton";
 
-// casbin 和 openapi 保持子目录导入方式
+// casbin 保持子目录导入方式
 // import { enforcer } from "@/lib/internal/casbin";
-// import { registerOpenAPI } from "@/lib/internal/openapi";

@@ -3,7 +3,7 @@ import type { Sql } from "postgres";
 
 import { PgBoss } from "pg-boss";
 
-import { getQueryClient } from "@/db/postgres";
+import { getQueryClient } from "@/db";
 import { createSingleton } from "@/lib/internal/singleton";
 
 export const postgresAdapter: (sql: Sql) => IDatabase = (sql: Sql) => ({
