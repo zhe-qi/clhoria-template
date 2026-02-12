@@ -13,6 +13,7 @@
     "lint:fix": "eslint --fix",
     "test": "vitest",
     "build": "vite build",
+    "boss": "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres pnpm exec pg-boss-dashboard",
     "generate": "drizzle-kit generate --config drizzle.config.ts",
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio --config drizzle.config.ts",

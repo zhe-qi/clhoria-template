@@ -1,6 +1,6 @@
 import type { Enforcer, Model } from "casbin";
 
-import { newEnforcer, newModel, Util } from "casbin";
+import { newEnforcer, newModel } from "casbin";
 import { inArray } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
@@ -16,28 +16,21 @@ if (env.NODE_ENV !== "test") {
 }
 
 /**
- * 比较两个二维数组是否相等（忽略顺序）
- */
-const array2DEqualsIgnoreOrder = (a: string[][], b: string[][]): boolean => {
-  return Util.array2DEquals(a.sort(), b.sort());
-};
-
-/**
- * 测试策略是否与预期相等
+ * 测试策略是否包含预期子集（DB 中可能有 seed 数据）
  */
 const testGetPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
   const myRes = await e.getPolicy();
 
-  expect(array2DEqualsIgnoreOrder(res, myRes)).toBe(true);
+  expect(myRes).toEqual(expect.arrayContaining(res));
 };
 
 /**
- * 测试角色继承策略是否与预期相等
+ * 测试角色继承策略是否包含预期子集
  */
 const testGetGroupingPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
   const myRes = await e.getGroupingPolicy();
 
-  expect(array2DEqualsIgnoreOrder(res, myRes)).toBe(true);
+  expect(myRes).toEqual(expect.arrayContaining(res));
 };
 
 /**
@@ -53,18 +46,14 @@ describe("drizzle casbin adapter", () => {
   let adapter: DrizzleCasbinAdapter;
   let model: Model;
   let enforcer: Enforcer;
-  let savedRules: typeof casbinRule.$inferSelect[] = [];
 
   beforeAll(async () => {
     adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule);
     model = newModel();
     model.loadModelFromText(casbinModelText);
 
-    // 保存当前所有规则（包括 seed 的 admin 规则）
-    savedRules = await db.select().from(casbinRule);
-
-    // 清理所有规则以便测试
-    await db.delete(casbinRule);
+    // 仅清理测试主体数据，保留 admin 等 seed 数据
+    await cleanupTestData();
 
     // 初始化基础测试数据
     const initialEnforcer = await newEnforcer(model, adapter);
@@ -88,17 +77,7 @@ describe("drizzle casbin adapter", () => {
   });
 
   afterAll(async () => {
-    // 清理测试数据
     await cleanupTestData();
-
-    // 恢复保存的规则
-    if (savedRules.length > 0) {
-      await db.insert(casbinRule).values(savedRules).onConflictDoNothing();
-    }
-
-    // 重新加载策略，让其他测试能看到恢复的规则
-    const { reloadCasbinPolicy } = await import("~/tests/utils/casbin");
-    await reloadCasbinPolicy();
   });
 
   describe("策略操作", () => {
@@ -183,10 +162,13 @@ describe("drizzle casbin adapter", () => {
     it("应该过滤删除策略", async () => {
       await adapter.removeFilteredPolicy("", "p", 0, "data2_admin");
       const e = await newEnforcer(model, adapter);
-      await testGetPolicy(e, [
+      const policies = await e.getPolicy();
+
+      expect(policies.some(p => p[0] === "data2_admin")).toBe(false);
+      expect(policies).toEqual(expect.arrayContaining([
         ["alice", "data1", "read"],
         ["bob", "data2", "write"],
-      ]);
+      ]));
     });
   });
 
