@@ -16,24 +16,23 @@ Clhoria simplifies complex technical architectures, making every coding session 
 ## Features
 
 - **Modern Tech Stack**: Hono + TypeScript + Vite + Drizzle ORM + PostgreSQL
-- **Hybrid Architecture**: Functional development standards, multi-tier routing structure, optional DDD for complex business
+- **Progressive Layering**: Functional development standards, multi-tier routing structure, optional DDD for complex business
 - **Automated Documentation**: OpenAPI 3.1 spec + Scalar UI, code as documentation with online debugging and type generation
-- **Multi-layer Auth**: Dual JWT keys (Admin/Client isolation) + Casbin RBAC
+- **Multi-layer Auth**: Dual JWT keys (Admin/Client isolation) + Casbin RBAC + KeyMatch3 RESTful path matching, no backend permission identifier storage needed
 - **Declarative Paginator**: Secure declarative queries based on Refine spec, extended Refine query with backend-only JOIN support
-- **Complete RBAC**: User management + Role management + Casbin policies + Refine Resource menus
-- **Intelligent Permission System**: Casbin KeyMatch3 + RESTful + Refine Resource, no backend permission identifier storage needed
-- **High-performance Menu**: Based on Refine best practices for menus and routing, better performance than traditional dynamic routing
+- **Complete Permission System**: User management + Role management + Casbin policies + Refine Resource compile-time menu routing, zero runtime overhead
 - **Business + System Dictionary**: Business dictionaries support runtime dynamic configuration (JSONB + Redis cache), system dictionaries use PostgreSQL Enum for compile-time type checking
 - **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
 - **High-performance Cache**: Redis caching (cluster mode supported) + multi-layer rate limiting + permission caching + session management + distributed locks
-- **Task Queue**: Scheduled tasks and background task queue management based on pg-boss
+- **Task Queue & Scheduling**: Background task queue management and scheduled tasks based on pg-boss (distributed-safe, single execution across nodes)
+- **Distributed Transactions**: pg-boss based Saga coordinator with multi-step transactions, automatic compensation rollback, retry strategies, timeout handling
+- **Functional Infrastructure**: Infrastructure layer built on Effect-TS with type-safe dependency injection, composable error handling, structured concurrency
 - **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, Alibaba Cloud OSS, AWS S3, etc.)
-- **Smart CAPTCHA**: Integrated Cap.js with modern CAPTCHA system supporting multiple challenge types
-- **AI-native Development**: Claude Code + OpenAPI auto-generation, say goodbye to manual API documentation maintenance
+- **Smart CAPTCHA**: Integrated Cap.js, lightweight modern CAPTCHA based on SHA-256 proof-of-work, privacy-friendly with zero tracking
 - **Type-safe System**: Hono + Zod + TypeScript full-chain type inference, catch issues at compile time
-- **Smart Test Coverage**: Vitest + AI assistance, auto-generate test cases ensuring API stability
 - **Instant Feedback Development**: Vite-powered hot-reload dev environment, millisecond-level code updates for ultimate development experience
-- **Claude Code Optimized**: Complete CLAUDE.md configuration, MCP plugin ecosystem, AI understands project architecture
+- **Declarative DSL Architecture**: `defineConfig` drives application assembly, `defineMiddleware` declares middleware chains, entry file stays minimal
+- **AI-driven Development**: Claude Code + CLAUDE.md + MCP plugin ecosystem, AI understands project architecture, auto-generates test cases (Vitest)
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
 - **Excel Processing**: High-performance Excel import/export based on excelize-wasm, singleton lazy loading, Docker deployment compatible
 
@@ -378,9 +377,9 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 | Comparison          | Cap.js (Used in This Project)                                                  | svg-captcha                                              |
 | ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------- |
-| **Security**        | Multiple challenge types, hard to break by automated tools                     | Image-based recognition, easily cracked by OCR tools     |
-| **User Experience** | Modern interactive interface, quick verification, far superior user experience | Traditional image verification, recognize distorted text |
-| **Extensibility**   | Database storage, supports distributed deployment and custom challenge types   | Memory storage, fixed functionality                      |
+| **Security**        | SHA-256 proof-of-work, no visual attack surface, anti-automation               | Image-based recognition, easily cracked by OCR tools     |
+| **User Experience** | No visual puzzles, background silent computation, Widget/Invisible mode        | Traditional image verification, recognize distorted text |
+| **Privacy**         | Self-hosted, zero tracking & telemetry, full data control                      | Memory storage, fixed functionality                      |
 
 ## Performance Comparison
 
