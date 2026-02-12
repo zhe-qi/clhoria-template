@@ -1,6 +1,5 @@
 import { Enforcer } from "casbin";
 
-import { API_ADMIN_PATH } from "@/lib/constants/api";
 import { enforcerPromise } from "@/lib/internal/casbin";
 import { createMiddleware } from "@/lib/internal/factory";
 import * as HttpStatusCodes from "@/lib/stoker/http-status-codes";
@@ -25,7 +24,7 @@ export const authorize = createMiddleware(async (c, next) => {
   const { roles } = c.get("jwtPayload");
 
   // 去除 API 前缀，获取实际请求路径
-  const path = stripPrefix(c.req.path, API_ADMIN_PATH);
+  const path = stripPrefix(c.req.path, c.get("tierBasePath") ?? "");
 
   // 并行检查所有角色权限
   const results = await Promise.all(

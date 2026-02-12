@@ -5,6 +5,7 @@ export default defineConfig({
 
   openapi: {
     enabled: env => env.NODE_ENV !== "production",
+    docEndpoint: "/doc",
     scalar: {
       theme: "kepler",
       layout: "modern",

@@ -6,7 +6,6 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { except } from "hono/combine";
 
 import env from "@/env";
-import { API_BASE_PATH, DOC_ENDPOINT } from "@/lib/constants/api";
 
 import packageJSON from "../../../package.json" with { type: "json" };
 import createApp, { createRouter } from "./create-app";
@@ -24,7 +23,7 @@ const allMiddlewares = import.meta.glob<{ default: TierMiddleware[] }>(
 /** basePath 解析 */
 function resolveTierBasePath(tier: TierConfig, config: AppConfig): string {
   if (tier.basePath) return tier.basePath;
-  const prefix = config.prefix ?? API_BASE_PATH;
+  const prefix = config.prefix ?? "/api";
   const version = config.version ? `/${config.version}` : "";
   if (tier.name === "public") return `${prefix}${version}`;
   return `${prefix}${version}/${tier.name}`;
@@ -67,7 +66,7 @@ function resolveEnabled(enabled: OpenAPIConfig["enabled"]): boolean {
 }
 
 /** 配置单个 tier 的 OpenAPI 文档 */
-function configureAppDoc(router: AppOpenAPI, tier: TierConfig, config: AppConfig) {
+function configureAppDoc(router: AppOpenAPI, tier: TierConfig, config: AppConfig, docEndpoint: string) {
   const version = config.openapi?.version ?? "3.1.0";
   const docConfig = {
     openapi: version,
@@ -80,10 +79,10 @@ function configureAppDoc(router: AppOpenAPI, tier: TierConfig, config: AppConfig
       type: "http",
       scheme: "bearer",
     });
-    router.doc31(DOC_ENDPOINT, { ...docConfig, security: [{ [securityName]: [] }] });
+    router.doc31(docEndpoint, { ...docConfig, security: [{ [securityName]: [] }] });
   }
   else {
-    router.doc31(DOC_ENDPOINT, docConfig);
+    router.doc31(docEndpoint, docConfig);
   }
 }
 
@@ -92,6 +91,7 @@ function configureScalarUI(
   app: AppOpenAPI,
   tierApps: Array<{ tier: TierConfig; basePath: string }>,
   config: AppConfig,
+  docEndpoint: string,
 ) {
   const scalarConfig = config.openapi?.scalar ?? {};
   app.get("/", Scalar({
@@ -99,7 +99,7 @@ function configureScalarUI(
     sources: tierApps.map(({ tier, basePath }, i) => ({
       title: tier.title,
       slug: tier.name,
-      url: `${basePath}${DOC_ENDPOINT}`,
+      url: `${basePath}${docEndpoint}`,
       default: i === 0,
     })),
     authentication: {
@@ -116,6 +116,7 @@ function configureScalarUI(
 export async function createApplication(config: AppConfig): Promise<AppOpenAPI> {
   const app = createApp();
   const openapiEnabled = resolveEnabled(config.openapi?.enabled);
+  const docEndpoint = config.openapi?.docEndpoint ?? "/doc";
 
   const tierApps: Array<{ tierApp: AppOpenAPI; tier: TierConfig; basePath: string }> = [];
 
@@ -125,8 +126,14 @@ export async function createApplication(config: AppConfig): Promise<AppOpenAPI> 
 
     // OpenAPI 文档（在中间件之前注册，避免被认证拦截）
     if (openapiEnabled) {
-      configureAppDoc(tierApp, tier, config);
+      configureAppDoc(tierApp, tier, config, docEndpoint);
     }
+
+    // 注入 tier basePath 供下游中间件使用
+    tierApp.use("/*", async (c, next) => {
+      c.set("tierBasePath", basePath);
+      await next();
+    });
 
     // 注册中间件
     const middlewares = resolveTierMiddlewares(tier, allMiddlewares);
@@ -150,7 +157,7 @@ export async function createApplication(config: AppConfig): Promise<AppOpenAPI> 
 
   // Scalar 文档主页
   if (openapiEnabled) {
-    configureScalarUI(app, tierApps, config);
+    configureScalarUI(app, tierApps, config, docEndpoint);
   }
 
   // Sentry

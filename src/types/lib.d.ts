@@ -9,6 +9,8 @@ export type AppBindings = {
     logger: PinoLogger;
     /** 请求 ID */
     requestId: string;
+    /** 当前 tier 的 basePath，由框架自动注入 */
+    tierBasePath: string;
     /** JWT 负载 */
     jwtPayload: JWTPayload & {
       /** 用户角色 */

@@ -1,17 +1,10 @@
 import path from "node:path";
 import { config } from "@dotenvx/dotenvx";
 import { z } from "zod";
-
 import { parseEnvOrExit } from "@/utils/zod";
 
-config({ path: path.resolve(
-  process.cwd(),
-  process.env.NODE_ENV === "test" ? ".env.test" : ".env",
-) });
+config({ path: path.resolve(process.cwd(), process.env.NODE_ENV === "test" ? ".env.test" : ".env") });
 
-/**
- * 环境变量验证模式，包含对于环境变量的校验，转换，默认值，类型等
- */
 const EnvSchema = z.object({
   /** 环境变量 */
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
@@ -58,5 +51,4 @@ const EnvSchema = z.object({
 });
 
 export type Env = z.infer<typeof EnvSchema>;
-
 export default parseEnvOrExit(EnvSchema);

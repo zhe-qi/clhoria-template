@@ -36,6 +36,8 @@ export type TierConfig = {
 export type OpenAPIConfig = {
   enabled?: boolean | ((env: Env) => boolean);
   version?: string;
+  /** 文档端点路径（默认 "/doc"） */
+  docEndpoint?: string;
   scalar?: Partial<ApiReferenceConfiguration>;
 };
 
