@@ -6,10 +6,10 @@
  */
 
 import type { Plugin } from "vite";
-import type { ZodHoistOptions } from "./types";
+import type { ZodHoistOptions } from "./types.ts";
 
-import { analyze } from "./analyzer";
-import { transform } from "./transformer";
+import { analyze } from "./analyzer.ts";
+import { transform } from "./transformer.ts";
 
 // 默认配置
 const defaultOptions: Required<ZodHoistOptions> = {

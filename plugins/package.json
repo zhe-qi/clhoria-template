@@ -1,0 +1,20 @@
+{
+  "name": "@clhoria/vite-plugin",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./build": "./vite-plugin-build/index.ts",
+    "./hmr-notify": "./vite-plugin-hmr-notify/index.ts",
+    "./resource-monitor": "./vite-plugin-resource-monitor/index.ts",
+    "./zod-hoist": "./vite-plugin-zod-hoist/index.ts"
+  },
+  "dependencies": {
+    "magic-string": "^0.30.21",
+    "oxc-parser": "^0.112.0"
+  },
+  "devDependencies": {
+    "@oxc-project/types": "^0.113.0",
+    "vite": "8.0.0-beta.14"
+  }
+}

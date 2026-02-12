@@ -3,7 +3,7 @@
  * 使用 magic-string 执行代码转换并生成 source map
  */
 
-import type { AnalyzeResult } from "./types";
+import type { AnalyzeResult } from "./types.ts";
 
 import MagicString from "magic-string";
 

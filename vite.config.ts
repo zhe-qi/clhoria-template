@@ -1,11 +1,11 @@
+import buildPluginNodejs from "@clhoria/vite-plugin/build";
+import hmrNotifyPlugin from "@clhoria/vite-plugin/hmr-notify";
+import resourceMonitorPlugin from "@clhoria/vite-plugin/resource-monitor";
+
+import zodHoistPlugin from "@clhoria/vite-plugin/zod-hoist";
 import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
 import { defineConfig, loadEnv } from "vite";
-
-import buildPluginNodejs from "./plugins/vite-plugin-build";
-import hmrNotifyPlugin from "./plugins/vite-plugin-hmr-notify";
-import resourceMonitorPlugin from "./plugins/vite-plugin-resource-monitor";
-import zodHoistPlugin from "./plugins/vite-plugin-zod-hoist";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");

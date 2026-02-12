@@ -10,7 +10,7 @@ import type {
   Function as OxcFunction,
   VariableDeclaration,
 } from "@oxc-project/types";
-import type { AnalyzeResult } from "./types";
+import type { AnalyzeResult } from "./types.ts";
 
 import { createHash } from "node:crypto";
 

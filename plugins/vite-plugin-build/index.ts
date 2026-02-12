@@ -3,10 +3,10 @@
  */
 import type { Plugin } from "vite";
 
-import type { BuildOptions } from "./base";
+import type { BuildOptions } from "./base.ts";
 
-import buildPlugin from "./base";
-import { serveStaticHook } from "./entry/server-static";
+import buildPlugin from "./base.ts";
+import { serveStaticHook } from "./entry/server-static.ts";
 
 export type NodeBuildOptions = {
   staticRoot?: string | undefined;
