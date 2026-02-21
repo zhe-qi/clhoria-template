@@ -13,8 +13,7 @@ import { loginLogger } from "@/lib/services/logger";
 import { getIPAddress } from "@/services/ip";
 import { Resp, tryit } from "@/utils";
 
-import { getIdentityById, getPermissionsByRoles, validateCaptcha, validateLogin } from "./services/auth.services";
-import { generateTokens, logout as logoutUtil, refreshAccessToken } from "./services/token.services";
+import { generateTokens, getIdentityById, getPermissionsByRoles, logout as logoutUtil, refreshAccessToken, validateCaptcha, validateLogin } from "./auth.helpers";
 
 /** 管理端登录 */
 export const login: AuthRouteHandlerType<"login"> = async (c) => {

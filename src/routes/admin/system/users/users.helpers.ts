@@ -69,98 +69,20 @@ export async function createUser(data: CreateUserInput, createdBy: string) {
 }
 
 /**
- * 根据 ID 获取用户（包含角色信息）
- */
-export async function getUserById(id: string) {
-  return db.query.systemUsers.findFirst({
-    where: eq(systemUsers.id, id),
-    with: {
-      systemUserRoles: {
-        with: {
-          role: true,
-        },
-      },
-    },
-  });
-}
-
-/**
- * 检查用户是否为内置用户
- * @returns null 表示用户不存在，否则返回 builtIn 值
- */
-export async function checkUserBuiltIn(id: string): Promise<boolean | null> {
-  const [user] = await db
-    .select({ builtIn: systemUsers.builtIn })
-    .from(systemUsers)
-    .where(eq(systemUsers.id, id));
-
-  return user ? user.builtIn : null;
-}
-
-/**
- * 更新用户
- */
-export async function updateUser(
-  id: string,
-  data: Record<string, unknown>,
-  updatedBy: string,
-) {
-  const [updated] = await db
-    .update(systemUsers)
-    .set({
-      ...data,
-      updatedBy,
-    })
-    .where(eq(systemUsers.id, id))
-    .returning();
-
-  return updated ?? null;
-}
-
-/**
- * 删除用户
- */
-export async function deleteUser(id: string) {
-  const [deleted] = await db
-    .delete(systemUsers)
-    .where(eq(systemUsers.id, id))
-    .returning({ id: systemUsers.id });
-
-  return deleted ?? null;
-}
-
-/**
- * 获取用户及其当前角色
- */
-export async function getUserWithRoles(userId: string) {
-  return db.query.systemUsers.findFirst({
-    where: eq(systemUsers.id, userId),
-    columns: { id: true },
-    with: {
-      systemUserRoles: {
-        columns: { roleId: true },
-      },
-    },
-  });
-}
-
-/**
  * 验证角色是否存在
  * @returns null 表示全部存在，否则返回不存在的角色 ID 列表
  */
 export async function validateRolesExist(roleIds: string[]): Promise<string[] | null> {
-  if (roleIds.length === 0) {
+  if (roleIds.length === 0)
     return null;
-  }
 
   const existingRoles = await db
     .select({ id: systemRoles.id })
     .from(systemRoles)
     .where(inArray(systemRoles.id, roleIds));
 
-  if (existingRoles.length === roleIds.length) {
+  if (existingRoles.length === roleIds.length)
     return null;
-  }
 
   const foundRoles = new Set(existingRoles.map(role => role.id));
   return roleIds.filter(roleId => !foundRoles.has(roleId));

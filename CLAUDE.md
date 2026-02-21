@@ -40,9 +40,9 @@ logger.info({ userId }, "[Module]: message");  // data object FIRST
 - Timestamps: `timestamp({ mode: "string" })`
 - UUID params: `IdUUIDParamsSchema`
 - Naming: PascalCase (classes/types), UPPER_SNAKE_CASE (enum values), kebab-case (files)
-- Folder grouping: When multiple files of same type exist (e.g., `*.services.ts`), create a folder (e.g., `services/`)
+- Folder grouping: When multiple files of same type exist (e.g., `*.helpers.ts`), create a folder (e.g., `helpers/`)
 - Queries: Use enums `eq(table.status, Status.ENABLED)` not magic values
-- Services: Route-level (`{feature}.services.ts`) for complex business logic or reuse within module; global (`src/services/`) for cross-tier shared logic
+- Helpers: Route-level (`{feature}.helpers.ts`) for complex business logic or reuse within module; simple DB operations stay inline in handlers; global (`src/services/`) for cross-tier shared logic
 - Types: Prefer inferring from Zod schemas (`z.infer<typeof schema>`) over manual definitions
 - Simple guard clauses: `if (!x) return null;` 单行无花括号（适用于 return null/true/false/void 等简单返回值）
 

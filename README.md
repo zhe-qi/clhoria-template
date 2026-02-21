@@ -106,7 +106,7 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 
 安装 VSCode 插件：[TypeScript Native Preview](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)
 
-> **注意**：目前 ts-go 仅用于类型检查和语言服务，开发和打包基于 Vite (Rolldown)，运行时使用 tsx。
+> **注意**：目前 ts-go 仅用于类型检查和语言服务，开发和打包基于 Vite (Rolldown)。
 
 > **缓存问题**：如果遇到 ts 服务报错或类型缓存异常，使用 `Cmd + Shift + P` 打开命令面板，输入 `restart`，找到 **TypeScript: Restart TS Server** 重启 TS 服务即可恢复正常。
 
@@ -130,13 +130,13 @@ Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优�
 
 遵循 6 阶段标准流程：`Spec → 生成代码 → 生成测试 → 循环优化 → 模块文档`
 
-| 阶段       | 输出                                               |
-| ---------- | -------------------------------------------------- |
-| Spec       | `docs/{feature}/spec.md`（需求、架构、测试策略）   |
-| 生成代码   | 完整接口代码（Schema + Handlers）+ migration       |
-| 生成测试   | `__tests__/int.test.ts`                            |
-| 循环优化   | 持续改进直到通过验收                               |
-| 模块文档   | `docs/{feature}/module.md`（文件索引、功能、要点） |
+| 阶段     | 输出                                               |
+| -------- | -------------------------------------------------- |
+| Spec     | `docs/{feature}/spec.md`（需求、架构、测试策略）   |
+| 生成代码 | 完整接口代码（Schema + Handlers）+ migration       |
+| 生成测试 | `__tests__/int.test.ts`                            |
+| 循环优化 | 持续改进直到通过验收                               |
+| 模块文档 | `docs/{feature}/module.md`（文件索引、功能、要点） |
 
 **验收标准**：所有测试通过 + 符合 CLAUDE.md 规范 + 无明显性能问题
 
@@ -151,12 +151,11 @@ routes/{tier}/{feature}/
 ├── {feature}.index.ts          # 统一导出（必需）
 ├── {feature}.types.ts          # 类型定义（必需）
 ├── {feature}.schema.ts         # 路由级 Zod Schema（可选，复杂 Schema 时）
-├── {feature}.services.ts       # 服务函数（可选，复杂逻辑或模块内复用）
-├── {feature}.helpers.ts        # 辅助函数（可选）
+├── {feature}.helpers.ts        # 辅助函数（可选，复杂业务逻辑或模块内复用）
 └── __tests__/                  # 测试目录（推荐）
 ```
 
-跨层级复用的服务放在 `src/services/{service}/`
+简单 DB 操作直接在 handlers 中内联，复杂业务逻辑抽到 helpers。跨层级复用的服务放在 `src/services/{service}/`
 
 ### 数据库架构
 
@@ -218,7 +217,7 @@ export const createUserRequestSchema: z.ZodType<CreateUserRequest>
 
 ### 架构策略
 
-**简单 CRUD（80%）**：Handler 直接操作 Drizzle，按需抽离服务层。**复杂业务（20%）**：根据场景选择 DDD / 六边形架构，Domain 层纯净不依赖外部，通过 Port/Adapter 依赖反转。
+**简单 CRUD（80%）**：Handler 直接操作 Drizzle，复杂逻辑抽到 helpers。**复杂业务（20%）**：根据场景选择 DDD / 六边形架构，Domain 层纯净不依赖外部，通过 Port/Adapter 依赖反转。
 
 ```text
 src/domain/[module]/                     # 领域层（纯业务逻辑）

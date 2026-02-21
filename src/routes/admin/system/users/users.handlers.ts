@@ -1,11 +1,15 @@
 import type { SystemUsersRouteHandlerType } from "./users.types";
 
+import { eq } from "drizzle-orm";
+
+import db from "@/db";
+import { systemUsers } from "@/db/schema";
 import { RefineQueryParamsSchema } from "@/lib/core/refine-query";
 import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
 import { omit, Resp } from "@/utils";
 
-import { checkUserBuiltIn, createUser, deleteUser, getUserById, getUserWithRoles, listUsers, saveUserRoles, updateUser, validateRolesExist } from "./users.services";
+import { createUser, listUsers, saveUserRoles, validateRolesExist } from "./users.helpers";
 
 export const list: SystemUsersRouteHandlerType<"list"> = async (c) => {
   const query = c.req.query();
@@ -39,7 +43,16 @@ export const create: SystemUsersRouteHandlerType<"create"> = async (c) => {
 export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  const user = await getUserById(id);
+  const user = await db.query.systemUsers.findFirst({
+    where: eq(systemUsers.id, id),
+    with: {
+      systemUserRoles: {
+        with: {
+          role: true,
+        },
+      },
+    },
+  });
 
   if (!user) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -57,21 +70,31 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const { sub } = c.get("jwtPayload");
 
   // 检查是否为内置用户
-  const builtIn = await checkUserBuiltIn(id);
+  const [user] = await db
+    .select({ builtIn: systemUsers.builtIn })
+    .from(systemUsers)
+    .where(eq(systemUsers.id, id));
 
-  if (builtIn === null) {
+  if (!user) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
   // 内置用户不允许修改状态
-  if (builtIn && body.status !== undefined) {
+  if (user.builtIn && body.status !== undefined) {
     return c.json(Resp.fail("内置用户不允许修改状态"), HttpStatusCodes.FORBIDDEN);
   }
 
   // 不允许直接更新密码
   const updateData = omit(body, ["password"]);
 
-  const updated = await updateUser(id, updateData, sub);
+  const [updated] = await db
+    .update(systemUsers)
+    .set({
+      ...updateData,
+      updatedBy: sub,
+    })
+    .where(eq(systemUsers.id, id))
+    .returning();
 
   if (!updated) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -86,17 +109,23 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // 检查是否为内置用户
-  const builtIn = await checkUserBuiltIn(id);
+  const [user] = await db
+    .select({ builtIn: systemUsers.builtIn })
+    .from(systemUsers)
+    .where(eq(systemUsers.id, id));
 
-  if (builtIn === null) {
+  if (!user) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  if (builtIn) {
+  if (user.builtIn) {
     return c.json(Resp.fail("内置用户不允许删除"), HttpStatusCodes.FORBIDDEN);
   }
 
-  const deleted = await deleteUser(id);
+  const [deleted] = await db
+    .delete(systemUsers)
+    .where(eq(systemUsers.id, id))
+    .returning({ id: systemUsers.id });
 
   if (!deleted) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -110,7 +139,15 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
   const { roleIds } = c.req.valid("json");
 
   // 获取用户及其当前角色
-  const userWithRoles = await getUserWithRoles(userId);
+  const userWithRoles = await db.query.systemUsers.findFirst({
+    where: eq(systemUsers.id, userId),
+    columns: { id: true },
+    with: {
+      systemUserRoles: {
+        columns: { roleId: true },
+      },
+    },
+  });
 
   if (!userWithRoles) {
     return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);

@@ -289,7 +289,7 @@ src/db/schema/
 
 ### Architecture Strategy
 
-**Simple CRUD (80%)**: Handler directly operates database, functional design, extract service layer on demand
+**Simple CRUD (80%)**: Handler directly operates database, extract complex logic to helpers
 
 **Complex Business (20%)**: Choose architecture pattern based on scenario
 

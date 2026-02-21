@@ -12,8 +12,7 @@ import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
 
 import { Resp } from "@/utils";
 
-import { cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, setRoleParents } from "./roles.helpers";
-import { getRoleById, getRolePermissionsAndGroupings, roleExists, saveRolePermissions, updateRoleParents, validateParentRolesExist } from "./roles.services";
+import { cleanRoleInheritance, enrichRolesWithParents, enrichRoleWithParents, getRoleById, getRolePermissionsAndGroupings, roleExists, saveRolePermissions, setRoleParents, updateRoleParents, validateParentRolesExist } from "./roles.helpers";
 
 export const list: SystemRolesRouteHandlerType<"list"> = async (c) => {
   const rawParams = c.req.query();
