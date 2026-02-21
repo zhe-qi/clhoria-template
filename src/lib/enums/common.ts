@@ -97,6 +97,18 @@ export const RealNameAuthStatus = {
 /** 实名认证状态类型 */
 export type RealNameAuthStatusType = (typeof RealNameAuthStatus)[keyof typeof RealNameAuthStatus];
 
+/** 登录结果枚举 */
+export const LoginResult = {
+  /** 登录成功 */
+  SUCCESS: "SUCCESS",
+
+  /** 登录失败 */
+  FAILURE: "FAILURE",
+} as const;
+
+/** 登录结果类型 */
+export type LoginResultType = (typeof LoginResult)[keyof typeof LoginResult];
+
 /** 参数值类型枚举 */
 export const ParamValueType = {
   /** 字符串 */

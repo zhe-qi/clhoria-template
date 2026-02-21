@@ -16,7 +16,7 @@ export default defineMiddleware([
     except: c => c.req.path.includes("/auth"),
   },
   {
-    handler: operationLog({ moduleName: "后台管理", description: "后台管理操作日志" }),
+    handler: operationLog(),
     except: c => c.req.path.includes("/auth"),
   },
 ]);

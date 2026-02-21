@@ -1,12 +1,16 @@
 import type { AuthRouteHandlerType } from "./auth.types";
 
+import { format } from "date-fns";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
 import env from "@/env";
 import { REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
 import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
+import { LoginResult } from "@/lib/enums";
 import cap from "@/lib/services/cap";
+import { loginLogger } from "@/lib/services/logger";
+import { getIPAddress } from "@/services/ip";
 import { Resp, tryit } from "@/utils";
 
 import { getIdentityById, getPermissionsByRoles, validateCaptcha, validateLogin } from "./services/auth.services";
@@ -16,16 +20,22 @@ import { generateTokens, logout as logoutUtil, refreshAccessToken } from "./serv
 export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const body = c.req.valid("json");
   const { username, password } = body;
+  const ip = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+  const userAgent = c.req.header("user-agent") || "";
+  const loginTime = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+  const location = await getIPAddress(ip);
 
   // 1. 验证验证码
   const captchaError = await validateCaptcha(body.captchaToken);
   if (captchaError) {
+    loginLogger.info({ username, ip, location, userAgent, loginTime, result: LoginResult.FAILURE, reason: captchaError }, "登录日志");
     return c.json(Resp.fail(captchaError), HttpStatusCodes.BAD_REQUEST);
   }
 
   // 2. 验证登录
   const result = await validateLogin(username, password);
   if (!result.success) {
+    loginLogger.info({ username, ip, location, userAgent, loginTime, result: LoginResult.FAILURE, reason: result.error }, "登录日志");
     const statusCode = result.status === "forbidden"
       ? HttpStatusCodes.FORBIDDEN
       : HttpStatusCodes.UNAUTHORIZED;
@@ -44,6 +54,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
     path: "/",
   });
 
+  loginLogger.info({ username, userId: result.user.id, ip, location, userAgent, loginTime, result: LoginResult.SUCCESS }, "登录日志");
   return c.json(Resp.ok({ accessToken }), HttpStatusCodes.OK);
 };
 
