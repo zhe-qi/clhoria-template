@@ -375,11 +375,11 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 ### 🔐 Cap.js vs svg-captcha
 
-| Comparison          | Cap.js (Used in This Project)                                                  | svg-captcha                                              |
-| ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------- |
-| **Security**        | SHA-256 proof-of-work, no visual attack surface, anti-automation               | Image-based recognition, easily cracked by OCR tools     |
-| **User Experience** | No visual puzzles, background silent computation, Widget/Invisible mode        | Traditional image verification, recognize distorted text |
-| **Privacy**         | Self-hosted, zero tracking & telemetry, full data control                      | Memory storage, fixed functionality                      |
+| Comparison          | Cap.js (Used in This Project)                                           | svg-captcha                                              |
+| ------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Security**        | SHA-256 proof-of-work, no visual attack surface, anti-automation        | Image-based recognition, easily cracked by OCR tools     |
+| **User Experience** | No visual puzzles, background silent computation, Widget/Invisible mode | Traditional image verification, recognize distorted text |
+| **Privacy**         | Self-hosted, zero tracking & telemetry, full data control               | Memory storage, fixed functionality                      |
 
 ## Performance Comparison
 

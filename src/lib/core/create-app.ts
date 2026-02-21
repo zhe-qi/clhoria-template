@@ -57,7 +57,7 @@ export default function createApp() {
     onError: (c) => {
       return c.json(
         Resp.fail("请求体过大（超过 1MB）"),
-        HttpStatusCodes.REQUEST_TOO_LONG
+        HttpStatusCodes.REQUEST_TOO_LONG,
       );
     },
   }));
