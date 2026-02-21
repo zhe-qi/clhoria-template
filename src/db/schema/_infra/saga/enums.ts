@@ -1,6 +1,6 @@
-import { SagaStatus, SagaStepStatus } from "@/lib/enums";
+import { infraSchema } from "@/db/schema/_root";
 
-import { infraSchema } from "../schema";
+import { SagaStatus, SagaStepStatus } from "@/lib/enums";
 
 /**
  * 类型安全的枚举值提取函数

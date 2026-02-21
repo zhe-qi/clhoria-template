@@ -1,10 +1,10 @@
 import { relations } from "drizzle-orm";
 import { index, integer, jsonb, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
+import { infraSchema } from "@/db/schema/_root";
 import { baseColumns } from "@/db/schema/_shard/base-columns";
-import { SagaStepStatus } from "@/lib/enums";
 
-import { infraSchema } from "../schema";
+import { SagaStepStatus } from "@/lib/enums";
 import { sagaStepStatusEnum } from "./enums";
 import { sagas } from "./sagas";
 

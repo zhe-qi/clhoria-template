@@ -52,10 +52,13 @@ export default function createApp() {
   app.use(cors());
 
   /** 7. 请求体限制 - 在实际解析前限制 */
-  app.use(bodyLimit({
+  app.on(["POST", "PUT", "PATCH"], "*", bodyLimit({
     maxSize: 1 * 1024 * 1024,
     onError: (c) => {
-      return c.json(Resp.fail("请求体过大（超过 1MB）"), HttpStatusCodes.REQUEST_TOO_LONG);
+      return c.json(
+        Resp.fail("请求体过大（超过 1MB）"),
+        HttpStatusCodes.REQUEST_TOO_LONG
+      );
     },
   }));
 
