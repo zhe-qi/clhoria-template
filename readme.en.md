@@ -25,7 +25,6 @@ Clhoria simplifies complex technical architectures, making every coding session 
 - **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
 - **High-performance Cache**: Redis caching (cluster mode supported) + multi-layer rate limiting + permission caching + session management + distributed locks
 - **Task Queue & Scheduling**: Background task queue management and scheduled tasks based on pg-boss (distributed-safe, single execution across nodes)
-- **Distributed Transactions**: pg-boss based Saga coordinator with multi-step transactions, automatic compensation rollback, retry strategies, timeout handling
 - **Functional Infrastructure**: Infrastructure layer built on Effect-TS with type-safe dependency injection, composable error handling, structured concurrency
 - **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, Alibaba Cloud OSS, AWS S3, etc.)
 - **Smart CAPTCHA**: Integrated Cap.js, lightweight modern CAPTCHA based on SHA-256 proof-of-work, privacy-friendly with zero tracking
