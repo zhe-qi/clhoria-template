@@ -2,17 +2,17 @@ import { Effect } from "effect";
 
 import * as z from "zod";
 
+import { createSingleton, destroySingleton, hasSingleton } from "@/lib/core/singleton";
 import logger from "@/lib/services/logger";
 
+import { initExcelize } from "./excelize";
 import boss from "./pg-boss-adapter";
 
-let initialized = false;
+const KEY = "bootstrap";
 
 /** 初始化基础设施 */
 export function bootstrap(): Promise<void> {
-  if (initialized) {
-    return Promise.resolve();
-  }
+  if (hasSingleton(KEY)) return Promise.resolve();
 
   const program = Effect.gen(function* () {
     // 配置 Zod 使用中文错误消息
@@ -22,12 +22,11 @@ export function bootstrap(): Promise<void> {
     yield* Effect.promise(() => boss.start());
     logger.info("[PgBossAdapter]: pg-boss 已启动");
 
-    // 2. 初始化 Saga 协调器（依赖 pg-boss，使用动态导入确保顺序）
-    const { getSagaOrchestrator } = yield* Effect.promise(() => import("./saga"));
-    yield* Effect.promise(() => getSagaOrchestrator());
-    logger.info("[Bootstrap]: Saga 协调器已初始化");
+    // 2. 初始化 excelize wasm
+    yield* initExcelize;
+    logger.info("[Bootstrap]: excelize wasm 已加载");
 
-    initialized = true;
+    createSingleton(KEY, () => true);
   });
 
   return Effect.runPromise(program);
@@ -35,14 +34,12 @@ export function bootstrap(): Promise<void> {
 
 /** 关闭基础设施 */
 export function shutdown(): Promise<void> {
-  if (!initialized) {
-    return Promise.resolve();
-  }
+  if (!hasSingleton(KEY)) return Promise.resolve();
 
   const program = Effect.gen(function* () {
     yield* Effect.promise(() => boss.stop());
     logger.info("[Bootstrap]: pg-boss 已停止");
-    initialized = false;
+    yield* Effect.promise(() => destroySingleton(KEY));
   });
 
   return Effect.runPromise(program);

@@ -2,9 +2,12 @@ import { newEnforcer, newModel } from "casbin";
 
 import db from "@/db";
 import { casbinRule } from "@/db/schema";
+import env from "@/env";
+import logger from "@/lib/services/logger";
 
 import { createAsyncSingleton } from "../../core/singleton";
 import { DrizzleCasbinAdapter } from "./adapter";
+import { watcherPromise } from "./watcher";
 
 // Casbin 模型配置
 export const casbinModelText = `
@@ -27,5 +30,18 @@ m = g(r.sub, p.sub) && keyMatch3(r.obj, p.obj) && regexMatch(r.act, p.act)
 export const enforcerPromise = createAsyncSingleton("casbin", async () => {
   const model = newModel(casbinModelText);
   const adapter = await DrizzleCasbinAdapter.newAdapter(db, casbinRule);
-  return newEnforcer(model, adapter);
+  const enforcer = await newEnforcer(model, adapter);
+
+  // 测试环境不启用 watcher，避免 pub/sub 异步 reload 导致竞态条件
+  if (env.NODE_ENV !== "test") {
+    const watcher = await watcherPromise;
+    enforcer.setWatcher(watcher);
+    watcher.setUpdateCallback(() => {
+      enforcer.loadPolicy()
+        .then(() => logger.info("[Casbin]: 策略已重新加载"))
+        .catch(err => logger.error({ err }, "[Casbin]: 策略重新加载失败"));
+    });
+  }
+
+  return enforcer;
 });

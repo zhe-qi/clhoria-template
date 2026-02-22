@@ -7,7 +7,6 @@ export default defineConfig({
   out: "./migrations",
   dialect: "postgresql",
   casing: "snake_case",
-  schemaFilter: ["public", "infra"],
   dbCredentials: {
     url: env.DATABASE_URL,
   },

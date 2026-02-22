@@ -44,7 +44,7 @@ logger.info({ userId }, "[Module]: message");  // data object FIRST
 - Queries: Use enums `eq(table.status, Status.ENABLED)` not magic values
 - Helpers: Route-level (`{feature}.helpers.ts`) for complex business logic or reuse within module; simple DB operations stay inline in handlers; global (`src/services/`) for cross-tier shared logic
 - Types: Prefer inferring from Zod schemas (`z.infer<typeof schema>`) over manual definitions
-- Simple guard clauses: `if (!x) return null;` 单行无花括号（适用于 return null/true/false/void 等简单返回值）
+- Simple guard clauses: `if (!x) return null;` 单行无花括号（适用于 return 单个值、单个变量、单个函数调用等简短表达式，如 `return fallbackPath;`、`return Promise.resolve();`）
 
 ## Dev Workflow
 

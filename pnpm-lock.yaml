@@ -20,27 +20,30 @@ importers:
       '@cap.js/server':
         specifier: ^4.0.5
         version: 4.0.5
+      '@casbin/redis-watcher':
+        specifier: ^1.2.0
+        version: 1.2.0
       '@dotenvx/dotenvx':
         specifier: ^1.52.0
         version: 1.52.0
       '@hono/node-server':
         specifier: 1.19.9
-        version: 1.19.9(hono@4.12.0)
+        version: 1.19.9(hono@4.12.1)
       '@hono/node-ws':
         specifier: ^1.3.0
-        version: 1.3.0(@hono/node-server@1.19.9(hono@4.12.0))(hono@4.12.0)
+        version: 1.3.0(@hono/node-server@1.19.9(hono@4.12.1))(hono@4.12.1)
       '@hono/sentry':
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.12.0)
+        version: 1.2.2(hono@4.12.1)
       '@hono/zod-openapi':
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.12.0)(zod@4.3.6)
+        version: 1.2.2(hono@4.12.1)(zod@4.3.6)
       '@node-rs/argon2':
         specifier: ^2.0.2
         version: 2.0.2
       '@scalar/hono-api-reference':
         specifier: ^0.9.44
-        version: 0.9.44(hono@4.12.0)
+        version: 0.9.44(hono@4.12.1)
       casbin:
         specifier: ^5.49.0
         version: 5.49.0
@@ -54,20 +57,20 @@ importers:
         specifier: ^0.8.3
         version: 0.8.3(drizzle-orm@0.45.1(@cloudflare/workers-types@4.20250820.0)(@libsql/client@0.15.4)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.3.0)(kysely@0.27.6)(pg@8.18.0)(postgres@3.4.8))(zod@4.3.6)
       effect:
-        specifier: ^3.19.18
-        version: 3.19.18
+        specifier: ^3.19.19
+        version: 3.19.19
       excelize-wasm:
         specifier: ^0.1.1
         version: 0.1.1
       hono:
-        specifier: ^4.12.0
-        version: 4.12.0
+        specifier: ^4.12.1
+        version: 4.12.1
       hono-pino:
         specifier: ^0.10.3
-        version: 0.10.3(hono@4.12.0)(pino@10.3.1)
+        version: 0.10.3(hono@4.12.1)(pino@10.3.1)
       hono-rate-limiter:
         specifier: ^0.5.3
-        version: 0.5.3(hono@4.12.0)(unstorage@1.17.3(ioredis@5.9.3))
+        version: 0.5.3(hono@4.12.1)(unstorage@1.17.3(ioredis@5.9.3))
       iconv-lite:
         specifier: ^0.7.2
         version: 0.7.2
@@ -101,7 +104,7 @@ importers:
         version: link:plugins
       '@hono/vite-dev-server':
         specifier: ^0.25.0
-        version: 0.25.0(hono@4.12.0)
+        version: 0.25.0(hono@4.12.1)
       '@pg-boss/dashboard':
         specifier: ^1.1.0
         version: 1.1.0(@cloudflare/workers-types@4.20250820.0)(@react-router/dev@7.13.0(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tsx@4.21.0)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))(yaml@2.8.2))(@types/react@19.2.13)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -109,8 +112,8 @@ importers:
         specifier: 25.3.0
         version: 25.3.0
       '@typescript/native-preview':
-        specifier: 7.0.0-dev.20260220.1
-        version: 7.0.0-dev.20260220.1
+        specifier: 7.0.0-dev.20260221.1
+        version: 7.0.0-dev.20260221.1
       drizzle-kit:
         specifier: ^0.31.9
         version: 0.31.9
@@ -566,6 +569,9 @@ packages:
 
   '@casbin/expression-eval@5.3.0':
     resolution: {integrity: sha512-mMTHMYXcnBBv/zMvxMpcdVyt2bfw8Y0GnmRLbkFQ1CVJZb4XZp7xWjRh7ymOLuJdsu58rci9gmOOv/99DtJvPA==}
+
+  '@casbin/redis-watcher@1.2.0':
+    resolution: {integrity: sha512-chD3z+omBBtDuuYEc3BiEW7P8egbiyAusXbINb2y/kckjCIXSYxiYTEU3P/PThDHMZUk35IkWX/qTjGybNG91Q==}
 
   '@clack/core@1.0.0':
     resolution: {integrity: sha512-Orf9Ltr5NeiEuVJS8Rk2XTw3IxNC2Bic3ash7GgYeA8LJ/zmSNpSQ/m5UAhe03lA6KFgklzZ5KTHs4OAMA/SAQ==}
@@ -2256,43 +2262,43 @@ packages:
     resolution: {integrity: sha512-AxNRwEie8Nn4eFS1FzDMJWIISMGoXMb037sgCBJ3UR6o0fQTzr2tqN9WT+DkWJPhIdQCfV7T6D387566VtnCJA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-VZQHVaLYTpa3wfCLcFD5cfnegr4iDtzBxV6yh3tys+HYePi4TXuAqct/dmziW0cpCo/UQ2KqAPGxwVO3YMDYJA==}
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-m3ttEpK+eXV7P06RVZZuSuUvNDj8psXODrMJRRQWpTNsk3qITbIdBSgOx2Q/M3tbQ9Mo2IBHt6jUjqOdRW9oZQ==}
     cpu: [arm64]
     os: [darwin]
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-ieGtyz904rlme8YWauDpCqGbnOQQ5dzUyRKU25I7MNIaoZFf0vK5gMh3SLjHC7ayWxjrCa2ezH4ka8UmyWQcPg==}
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-BNaNe3rox2rpkh5sWcnZZob6sDA/at9KK55/WSRAH4W+9dFReOLFAR9YXhKxrLGZ1QpleuIBahKbV8o037S+pA==}
     cpu: [x64]
     os: [darwin]
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-nlOOABSQUe6ix/KOsZS3ALZ/sg9rhtp6SKtQnXO8X4+2XUlwVYS6nIrAQ5jG4+OsCvcESttNeHhBw817uNrsuA==}
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-Y4jsvwDq86LXq63UYRLqCAd+nD1r6C2NVaGNR39H+c6D8SgOBkPLJa8quTH0Ir8E5bsR8vTN4E6xHY9jD4J2PA==}
     cpu: [arm64]
     os: [linux]
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-wMA63N6XLAkO0Ibq1Qz2zkQHF6oLynYh5+q1YayzWxp1FOas0oJUdNgVbiWeisAT4IEI9SmYtVwJJNTm/cwrwg==}
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-+/uyIw7vg4FyAnNpsCJHmSOhMiR2m56lqaEo1J5pMAstJmfLTTKQdJ1muIWCDCqc24k2U30IStHOaCqUerp/nQ==}
     cpu: [arm]
     os: [linux]
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-W7R/5ct/BGuPAmJuKFU0ZuLU2nzLA26XfoaoUHHoTLYRMMuY3LBv+7zKSUTlSGjayeWQ5KtDrfrY72LarWAXkQ==}
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-7agd5FtVLPp+gRMvsecSDmdQ/XM80q/uaQ6+Kahan9uNrCuPJIyMiAtJvCoYYgT1nXX2AjwZk39DH63fRaw/Mg==}
     cpu: [x64]
     os: [linux]
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-FNXTr2lS1QLUB05jWjkBVwrDierNuxKduQq9ayloENJrsC8GfG1sXkfy8R021+ozP/D1LI/CFUn3hkB2vPXTsQ==}
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-lXbsy5vDzS//oE0evX+QwZBwpKselXTd8H18lT42CBQo2hL2r0+w9YBguaYXrnGkAoHjDXEfKA2xii8yVZKVUg==}
     cpu: [arm64]
     os: [win32]
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-byHRyf4dOuKOADrs43tWyPhmAgqk+XrA/XOsJnGsxUKxPwots+gf9x5kg/IxTbB3QjPsVe/V9QdMl3//sUTCmQ==}
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-O02pfQlVlRTsBmp0hODs/bOHm2ic2kXZpIchBP5Qm0wKCp1Ytz/7i3SNT1gN47I+KC4axn/AHhFmkWQyIu9kRQ==}
     cpu: [x64]
     os: [win32]
 
-  '@typescript/native-preview@7.0.0-dev.20260220.1':
-    resolution: {integrity: sha512-trYXlG98/C7Q7pqnPrKo+ksXrWqWVMncCy2x0VftD2llfL99Z//g2mpB9TmzWeKgb4d1659ESvxTowCGnzMccw==}
+  '@typescript/native-preview@7.0.0-dev.20260221.1':
+    resolution: {integrity: sha512-tEUzcnj6pD+z1vANchRzhpPl+3RMD+xQRvIN//0+qjtP5zyYB5T+MIaAWycpKDwlHP9C13JnQgcgYnC+LlNkrg==}
     hasBin: true
 
   '@vitest/eslint-plugin@1.6.7':
@@ -2662,6 +2668,10 @@ packages:
   defu@6.1.4:
     resolution: {integrity: sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==}
 
+  denque@1.5.1:
+    resolution: {integrity: sha512-XwE+iZ4D6ZUB7mfYRMb5wByE8L74HCn30FBN7sWnXksWc1LO1bPDl67pBR9o/kC4z/xSNAwkMYcGgqDV3BE3Hw==}
+    engines: {node: '>=0.10'}
+
   denque@2.1.0:
     resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
     engines: {node: '>=0.10'}
@@ -2813,8 +2823,8 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  effect@3.19.18:
-    resolution: {integrity: sha512-KlbNuYzzwpOpnpshIhjCaqweQkthAT1oVG61Z2wIHqo6Sb6n/+pgzFXyTvsLyxcx5Cg3aWaQXa0XQHMuzdVW4A==}
+  effect@3.19.19:
+    resolution: {integrity: sha512-Yc8U/SVXo2dHnaP7zNBlAo83h/nzSJpi7vph6Hzyl4ulgMBIgPmz3UzOjb9sBgpFE00gC0iETR244sfXDNLHRg==}
 
   electron-to-chromium@1.5.244:
     resolution: {integrity: sha512-OszpBN7xZX4vWMPJwB9illkN/znA8M36GQqQxi6MNy9axWxhOfJyZZJtSLQCpEFLHP2xK33BiWx9aIuIEXVCcw==}
@@ -3354,8 +3364,8 @@ packages:
       unstorage:
         optional: true
 
-  hono@4.12.0:
-    resolution: {integrity: sha512-NekXntS5M94pUfiVZ8oXXK/kkri+5WpX2/Ik+LVsl+uvw+soj4roXIsPqO+XsWrAw20mOzaXOZf3Q7PfB9A/IA==}
+  hono@4.12.1:
+    resolution: {integrity: sha512-hi9afu8g0lfJVLolxElAZGANCTTl6bewIdsRNhaywfP9K8BPf++F2z6OLrYGIinUwpRKzbZHMhPwvc0ZEpAwGw==}
     engines: {node: '>=16.9.0'}
 
   html-entities@2.6.0:
@@ -3397,6 +3407,10 @@ packages:
 
   ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
+
+  ioredis@4.31.0:
+    resolution: {integrity: sha512-tVrCrc4LWJwX82GD79dZ0teZQGq+5KJEGpXJRgzHOrhHtLgF9ME6rTwDV5+HN5bjnvmtrnS8ioXhflY16sy2HQ==}
+    engines: {node: '>=6'}
 
   ioredis@5.9.3:
     resolution: {integrity: sha512-VI5tMCdeoxZWU5vjHWsiE/Su76JGhBvWF1MJnV9ZtGltHk9BmD48oDq8Tj8haZ85aceXZMxLNDQZRVo5QKNgXA==}
@@ -3610,6 +3624,9 @@ packages:
 
   lodash.defaults@4.2.0:
     resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
+
+  lodash.flatten@4.4.0:
+    resolution: {integrity: sha512-C5N2Z3DgnnKr0LOpv/hKCgKdb7ZZwafIrsesve6lmzvZIRZRGaZ/l6Q8+2W7NaT+ZwO3fFlSCzCzrDCFdJfZ4g==}
 
   lodash.isarguments@3.1.0:
     resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
@@ -3952,6 +3969,10 @@ packages:
   p-locate@5.0.0:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
+
+  p-map@2.1.0:
+    resolution: {integrity: sha512-y3b8Kpd8OAN444hxfBbFfj1FY/RjtTd8tzYwhUqNYXx0fXx2iX4maP4Qr6qhIKbQXI02wTLAda4fYUbDagTUFw==}
+    engines: {node: '>=6'}
 
   p-map@7.0.4:
     resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
@@ -5724,6 +5745,12 @@ snapshots:
     dependencies:
       jsep: 0.3.5
 
+  '@casbin/redis-watcher@1.2.0':
+    dependencies:
+      ioredis: 4.31.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@clack/core@1.0.0':
     dependencies:
       picocolors: 1.1.1
@@ -6123,41 +6150,41 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@hono/node-server@1.19.9(hono@4.12.0)':
+  '@hono/node-server@1.19.9(hono@4.12.1)':
     dependencies:
-      hono: 4.12.0
+      hono: 4.12.1
 
-  '@hono/node-ws@1.3.0(@hono/node-server@1.19.9(hono@4.12.0))(hono@4.12.0)':
+  '@hono/node-ws@1.3.0(@hono/node-server@1.19.9(hono@4.12.1))(hono@4.12.1)':
     dependencies:
-      '@hono/node-server': 1.19.9(hono@4.12.0)
-      hono: 4.12.0
+      '@hono/node-server': 1.19.9(hono@4.12.1)
+      hono: 4.12.1
       ws: 8.19.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@hono/sentry@1.2.2(hono@4.12.0)':
+  '@hono/sentry@1.2.2(hono@4.12.1)':
     dependencies:
-      hono: 4.12.0
+      hono: 4.12.1
       toucan-js: 4.1.1
 
-  '@hono/vite-dev-server@0.25.0(hono@4.12.0)':
+  '@hono/vite-dev-server@0.25.0(hono@4.12.1)':
     dependencies:
-      '@hono/node-server': 1.19.9(hono@4.12.0)
-      hono: 4.12.0
+      '@hono/node-server': 1.19.9(hono@4.12.1)
+      hono: 4.12.1
       minimatch: 9.0.5
 
-  '@hono/zod-openapi@1.2.2(hono@4.12.0)(zod@4.3.6)':
+  '@hono/zod-openapi@1.2.2(hono@4.12.1)(zod@4.3.6)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.4.1(zod@4.3.6)
-      '@hono/zod-validator': 0.7.6(hono@4.12.0)(zod@4.3.6)
-      hono: 4.12.0
+      '@hono/zod-validator': 0.7.6(hono@4.12.1)(zod@4.3.6)
+      hono: 4.12.1
       openapi3-ts: 4.5.0
       zod: 4.3.6
 
-  '@hono/zod-validator@0.7.6(hono@4.12.0)(zod@4.3.6)':
+  '@hono/zod-validator@0.7.6(hono@4.12.1)(zod@4.3.6)':
     dependencies:
-      hono: 4.12.0
+      hono: 4.12.1
       zod: 4.3.6
 
   '@humanfs/core@0.19.1': {}
@@ -6427,11 +6454,11 @@ snapshots:
   '@pg-boss/dashboard@1.1.0(@cloudflare/workers-types@4.20250820.0)(@react-router/dev@7.13.0(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tsx@4.21.0)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))(yaml@2.8.2))(@types/react@19.2.13)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@base-ui/react': 1.1.0(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@hono/node-server': 1.19.9(hono@4.12.0)
+      '@hono/node-server': 1.19.9(hono@4.12.1)
       '@react-router/node': 7.13.0(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
-      hono: 4.12.0
+      hono: 4.12.1
       isbot: 5.1.34
       lucide-react: 0.563.0(react@19.2.4)
       pg: 8.18.0
@@ -6439,7 +6466,7 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       react-router: 7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react-router-hono-server: 2.24.1(@cloudflare/workers-types@4.20250820.0)(@hono/node-server@1.19.9(hono@4.12.0))(@react-router/dev@7.13.0(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tsx@4.21.0)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))(yaml@2.8.2))(@types/react@19.2.13)(hono@4.12.0)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))
+      react-router-hono-server: 2.24.1(@cloudflare/workers-types@4.20250820.0)(@hono/node-server@1.19.9(hono@4.12.1))(@react-router/dev@7.13.0(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tsx@4.21.0)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))(yaml@2.8.2))(@types/react@19.2.13)(hono@4.12.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))
       tailwind-merge: 3.4.0
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -6673,10 +6700,10 @@ snapshots:
 
   '@scalar/helpers@0.2.15': {}
 
-  '@scalar/hono-api-reference@0.9.44(hono@4.12.0)':
+  '@scalar/hono-api-reference@0.9.44(hono@4.12.1)':
     dependencies:
       '@scalar/core': 0.3.41
-      hono: 4.12.0
+      hono: 4.12.1
 
   '@scalar/types@0.6.6':
     dependencies:
@@ -7191,36 +7218,36 @@ snapshots:
       '@typescript-eslint/types': 8.55.0
       eslint-visitor-keys: 4.2.1
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260220.1':
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260221.1':
     optional: true
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260220.1':
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20260221.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260220.1':
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20260221.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20260220.1':
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20260221.1':
     optional: true
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20260220.1':
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20260221.1':
     optional: true
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260220.1':
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20260221.1':
     optional: true
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20260220.1':
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20260221.1':
     optional: true
 
-  '@typescript/native-preview@7.0.0-dev.20260220.1':
+  '@typescript/native-preview@7.0.0-dev.20260221.1':
     optionalDependencies:
-      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20260220.1
-      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20260220.1
-      '@typescript/native-preview-linux-arm': 7.0.0-dev.20260220.1
-      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20260220.1
-      '@typescript/native-preview-linux-x64': 7.0.0-dev.20260220.1
-      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20260220.1
-      '@typescript/native-preview-win32-x64': 7.0.0-dev.20260220.1
+      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20260221.1
+      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20260221.1
+      '@typescript/native-preview-linux-arm': 7.0.0-dev.20260221.1
+      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20260221.1
+      '@typescript/native-preview-linux-x64': 7.0.0-dev.20260221.1
+      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20260221.1
+      '@typescript/native-preview-win32-x64': 7.0.0-dev.20260221.1
 
   '@vitest/eslint-plugin@1.6.7(eslint@10.0.1(jiti@2.5.1))(typescript@5.9.3)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -7585,6 +7612,8 @@ snapshots:
 
   defu@6.1.4: {}
 
+  denque@1.5.1: {}
+
   denque@2.1.0: {}
 
   depd@2.0.0: {}
@@ -7649,7 +7678,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  effect@3.19.18:
+  effect@3.19.19:
     dependencies:
       '@standard-schema/spec': 1.0.0
       fast-check: 3.23.2
@@ -8327,19 +8356,19 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono-pino@0.10.3(hono@4.12.0)(pino@10.3.1):
+  hono-pino@0.10.3(hono@4.12.1)(pino@10.3.1):
     dependencies:
       defu: 6.1.4
-      hono: 4.12.0
+      hono: 4.12.1
       pino: 10.3.1
 
-  hono-rate-limiter@0.5.3(hono@4.12.0)(unstorage@1.17.3(ioredis@5.9.3)):
+  hono-rate-limiter@0.5.3(hono@4.12.1)(unstorage@1.17.3(ioredis@5.9.3)):
     dependencies:
-      hono: 4.12.0
+      hono: 4.12.1
     optionalDependencies:
       unstorage: 1.17.3(ioredis@5.9.3)
 
-  hono@4.12.0: {}
+  hono@4.12.1: {}
 
   html-entities@2.6.0: {}
 
@@ -8371,6 +8400,22 @@ snapshots:
 
   ini@1.3.8:
     optional: true
+
+  ioredis@4.31.0:
+    dependencies:
+      '@ioredis/commands': 1.5.0
+      cluster-key-slot: 1.1.2
+      debug: 4.4.3
+      denque: 1.5.1
+      lodash.defaults: 4.2.0
+      lodash.flatten: 4.4.0
+      lodash.isarguments: 3.1.0
+      p-map: 2.1.0
+      redis-errors: 1.2.0
+      redis-parser: 3.0.0
+      standard-as-callback: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
 
   ioredis@5.9.3:
     dependencies:
@@ -8559,6 +8604,8 @@ snapshots:
       p-locate: 5.0.0
 
   lodash.defaults@4.2.0: {}
+
+  lodash.flatten@4.4.0: {}
 
   lodash.isarguments@3.1.0: {}
 
@@ -9086,6 +9133,8 @@ snapshots:
     dependencies:
       p-limit: 3.1.0
 
+  p-map@2.1.0: {}
+
   p-map@7.0.4: {}
 
   package-manager-detector@1.3.0: {}
@@ -9320,15 +9369,15 @@ snapshots:
 
   react-refresh@0.14.2: {}
 
-  react-router-hono-server@2.24.1(@cloudflare/workers-types@4.20250820.0)(@hono/node-server@1.19.9(hono@4.12.0))(@react-router/dev@7.13.0(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tsx@4.21.0)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))(yaml@2.8.2))(@types/react@19.2.13)(hono@4.12.0)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2)):
+  react-router-hono-server@2.24.1(@cloudflare/workers-types@4.20250820.0)(@hono/node-server@1.19.9(hono@4.12.1))(@react-router/dev@7.13.0(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tsx@4.21.0)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))(yaml@2.8.2))(@types/react@19.2.13)(hono@4.12.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@drizzle-team/brocli': 0.11.0
-      '@hono/node-server': 1.19.9(hono@4.12.0)
-      '@hono/node-ws': 1.3.0(@hono/node-server@1.19.9(hono@4.12.0))(hono@4.12.0)
-      '@hono/vite-dev-server': 0.25.0(hono@4.12.0)
+      '@hono/node-server': 1.19.9(hono@4.12.1)
+      '@hono/node-ws': 1.3.0(@hono/node-server@1.19.9(hono@4.12.1))(hono@4.12.1)
+      '@hono/vite-dev-server': 0.25.0(hono@4.12.1)
       '@react-router/dev': 7.13.0(@types/node@25.3.0)(jiti@2.5.1)(lightningcss@1.31.1)(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tsx@4.21.0)(typescript@5.9.3)(vite@8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2))(yaml@2.8.2)
       '@types/react': 19.2.13
-      hono: 4.12.0
+      hono: 4.12.1
       react-router: 7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       vite: 8.0.0-beta.15(@types/node@25.3.0)(esbuild@0.25.4)(jiti@2.5.1)(tsx@4.21.0)(yaml@2.8.2)
     optionalDependencies:

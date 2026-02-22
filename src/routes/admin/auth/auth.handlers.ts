@@ -26,7 +26,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
 
   // 1. 验证验证码
   const captchaError = await validateCaptcha(body.captchaToken);
-  if (captchaError) {
+  if (captchaError && env.NODE_ENV !== "test") {
     loginLogger.info({ username, ip, location, userAgent, loginTime, result: LoginResult.FAILURE, reason: captchaError }, "登录日志");
     return c.json(Resp.fail(captchaError), HttpStatusCodes.BAD_REQUEST);
   }

@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
       }),
       buildPluginNodejs({
         port: Number.parseInt(env.PORT, 10),
-        minify: false,
+        minify: false, // 是否压缩打包后的代码
       }),
     ],
   };

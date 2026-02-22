@@ -155,6 +155,16 @@ export async function destroyAllSingletons(): Promise<void> {
 }
 
 /**
+ * 同步获取已注册的单例实例
+ *
+ * 仅返回已完成初始化的实例，不触发创建
+ */
+export function getSingleton<T>(key: string): T | undefined {
+  const entry = getRegistry().get(key);
+  return entry?.instance as T | undefined;
+}
+
+/**
  * 检查单例是否存在
  */
 export function hasSingleton(key: string): boolean {
