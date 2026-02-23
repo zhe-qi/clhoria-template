@@ -7,7 +7,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-现代化企业级后端模板,基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式,结合 Hono + OpenAPI + Zod 完整技术体系,实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层,完整的 RBAC 权限体系,提供比传统后台管理系统更稳定、更高效的开发体验。
+可用于生产环境的现代化后端开发模板,基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式,结合 Hono + OpenAPI + Zod 完整技术体系,实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层,完整的 RBAC 权限体系,提供比传统后台管理系统更稳定、更高效的开发体验。
 
 Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优雅,每一个功能都如花般绽放。选择 Clhoria,就是选择与未来同行。
 
@@ -216,7 +216,25 @@ export const createUserRequestSchema: z.ZodType<CreateUserRequest>
 
 ### 架构策略
 
-**简单 CRUD（80%）**：Handler 直接操作 Drizzle，复杂逻辑抽到 helpers。**复杂业务（20%）**：根据场景选择 DDD / 六边形架构，Domain 层纯净不依赖外部，通过 Port/Adapter 依赖反转。
+**本项目默认采用 Vertical Slice Architecture（垂直切片架构）+ Transaction Script 模式**：按功能特性组织代码（`routes/{tier}/{feature}/`），每个切片自包含 routes、handlers、types、schema，Handler 内直接操作 Drizzle 完成业务逻辑。选择这种架构是因为大多数后台管理场景本质是数据进出，分层架构（Controller → Service → Repository）在简单 CRUD 中只是增加了透传样板代码，垂直切片让每个功能模块高内聚、低耦合，新增/删除功能不影响其他模块，也更利于 AI 理解和生成代码。复杂逻辑抽到 helpers 即可。
+
+**复杂业务（约 20%）** 当业务规则、状态流转、跨模块编排等复杂度超出 Transaction Script 承载范围时，根据场景选择合适的架构模式：
+
+| 场景               | 推荐架构      | 说明                                                                                            |
+| ------------------ | ------------- | ----------------------------------------------------------------------------------------------- |
+| 需要技术解耦       | 六边形架构    | Port/Adapter 隔离外部依赖                                                                       |
+| 复杂业务规则       | DDD           | 领域模型封装业务规则                                                                            |
+| 复杂 + 解耦        | DDD + 六边形  | 两者结合                                                                                        |
+| 纯函数优先         | FCIS          | Functional Core 纯逻辑 + Imperative Shell 处理副作用，核心可独立测试                            |
+| 纯函数 + 解耦      | FCIS + 六边形 | 纯函数核心 + Port/Adapter 隔离 I/O，兼顾可测试性与可替换性                                      |
+| 类型安全副作用管理 | Effect-TS     | 基于 Effect 的函数式架构，类型安全的依赖注入、错误处理、结构化并发，副作用在类型层面可追踪      |
+| 读写模型差异大     | 单体 CQRS     | 同一数据库内读写分离模型，Query 侧可扁平化 DTO/视图优化查询，Command 侧走领域逻辑，无需消息总线 |
+
+**核心思路**：DDD 关注领域建模，六边形关注依赖隔离，FCIS 关注纯函数与副作用分离，Effect-TS 将副作用提升到类型系统，单体 CQRS 解决读写模型不对称问题。可根据业务复杂度自由组合。
+
+> **单体 CQRS vs 数据库读写分离**：云厂商 PG 集群 Proxy（如阿里云 PolarDB、RDS Proxy）解决的是**数据库负载**问题——同一条 SQL 自动路由到主/只读节点，应用代码无感知。单体 CQRS 解决的是**应用模型**问题——写入走富领域模型保证业务一致性，查询走扁平 DTO/数据库视图跳过领域层直达数据，两者用不同的数据结构和代码路径。前者是运维层面的水平扩展，后者是代码层面的关注点分离，互不冲突且可叠加使用。
+
+> **Effect-TS 深度集成**：Effect 的 `Context.Tag` + `Layer` 体系天然就是六边形架构——`Tag` 声明接口（Port），`Layer` 提供实现（Adapter），业务逻辑通过 `Effect.gen` 编排，只依赖 Tag 抽象而不依赖具体实现。测试时替换 `Layer` 即可注入 mock，无需额外的 interface 文件。同时 Effect 的类型通道 `Effect<Success, Error, Requirements>` 让依赖、错误、成功值全部显式声明在函数签名中——编译器强制你处理每一种错误路径，遗漏直接报红。相比手写 Port/Adapter + try/catch，Effect 用一套机制同时解决了依赖注入、错误处理和并发控制，适合状态机、工作流、跨服务编排等真正复杂的业务场景。本项目已在基础设施层（分布式锁 `withLock`、任务队列、资源初始化）使用 Effect，业务层可按需渐进采用。
 
 ```text
 src/domain/[module]/                     # 领域层（纯业务逻辑）
@@ -235,6 +253,18 @@ src/infrastructure/persistence/          # 基础设施层（Adapter 实现）
 ### 🧩 单例管理系统
 
 统一管理 PostgreSQL、Redis、Casbin 等长连接资源，解决 Vite HMR 模式下的连接泄漏问题，支持自动资源清理
+
+### 💉 三层依赖注入
+
+本项目没有使用传统 DI 容器（如 InversifyJS），而是采用更轻量直接的三层注入策略：
+
+| 层级             | 机制                                                               | 作用域 | 典型用途                                                                                          |
+| ---------------- | ------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------- |
+| **模块单例**     | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | 进程级 | DB 连接池、Redis 客户端、Casbin Enforcer、Logger 等长生命周期资源                                 |
+| **请求上下文**   | Hono `c.set()` / `c.get()` + `AppBindings` 类型约束                | 请求级 | JWT 负载、请求 ID、tierBasePath 等请求作用域数据，中间件写入 → Handler 读取                       |
+| **Effect Layer** | `Context.Tag` + `Layer.mergeAll`                                   | 可组合 | 基础设施服务（DB、Logger、pg-boss）的类型安全组合，用于分布式锁、任务队列等需要 Effect 编排的场景 |
+
+**为什么不用 DI 容器**：后台管理系统的依赖图天然简单——长连接资源是进程级单例，请求数据通过 Hono Context 传递，两层已覆盖 90% 场景。Effect Layer 补充了需要类型安全组合的剩余 10%（如 `withLock` 分布式锁）。引入 DI 容器只会增加间接层和注册仪式，对于这种规模的项目来说过度设计。
 
 #### 核心思路
 

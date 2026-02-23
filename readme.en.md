@@ -7,7 +7,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-A modern enterprise-grade backend template built on the Hono framework. Designed with AI-driven development in mind, combining Hono + OpenAPI + Zod for complete type safety and enhanced development efficiency. Features Drizzle ORM + PostgreSQL data layer and comprehensive RBAC permission system, providing a more stable and efficient development experience than traditional backend management systems.
+A modern, production-ready backend boilerplate built on the Hono framework for high-performance TypeScript applications. Designed with AI-driven development in mind, combining Hono + OpenAPI + Zod for a complete type-safe ecosystem that truly enhances development efficiency. Integrates Drizzle ORM + PostgreSQL data layer with a comprehensive RBAC permission system, providing a more stable and efficient development experience than traditional backend management systems.
 
 Clhoria simplifies complex technical architectures, making every coding session elegant and every feature bloom beautifully. Choose Clhoria, choose to move forward with the future.
 
@@ -16,7 +16,7 @@ Clhoria simplifies complex technical architectures, making every coding session 
 ## Features
 
 - **Modern Tech Stack**: Hono + TypeScript + Vite + Drizzle ORM + PostgreSQL
-- **Progressive Layering**: Functional development standards, multi-tier routing structure, optional DDD for complex business
+- **Progressive Layering**: Functional development standards, multi-tier routing structure, optional DDD for complex business logic
 - **Automated Documentation**: OpenAPI 3.1 spec + Scalar UI, code as documentation with online debugging and type generation
 - **Multi-layer Auth**: Dual JWT keys (Admin/Client isolation) + Casbin RBAC + KeyMatch3 RESTful path matching, no backend permission identifier storage needed
 - **Declarative Paginator**: Secure declarative queries based on Refine spec, extended Refine query with backend-only JOIN support
@@ -33,27 +33,16 @@ Clhoria simplifies complex technical architectures, making every coding session 
 - **Declarative DSL Architecture**: `defineConfig` drives application assembly, `defineMiddleware` declares middleware chains, entry file stays minimal
 - **AI-driven Development**: Claude Code + CLAUDE.md + MCP plugin ecosystem, AI understands project architecture, auto-generates test cases (Vitest)
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
-- **Excel Processing**: High-performance Excel import/export based on excelize-wasm, singleton lazy loading, Docker deployment compatible
-
-## Project Preview
-
-<div align="center">
-  <img src="https://r2.promptez.cn/github/studio.png" width="45%" alt="Drizzle Studio">
-  <img src="https://r2.promptez.cn/github/test.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/login.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/user.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/swagger.png" width="45%" alt="Swagger API Documentation">
-  <img src="https://r2.promptez.cn/github/list.png" width="45%" alt="Swagger API Documentation">
-</div>
+- **Excel Processing**: High-performance Excel processing based on excelize-wasm, singleton lazy loading, same as the Go version
 
 ## Quick Start
 
 ### Local Development Environment
 
-- Node.js >= 24
-- pnpm >= 10
-- PostgreSQL >= 18
-- Redis >= 7
+- Node.js >= 24 (latest recommended)
+- pnpm >= 10 (use the version specified in packageManager field of package.json)
+- PostgreSQL >= 18 (if using 17, refer to the downgrade guide in this README for easy downgrade)
+- Redis >= 7 (7 or latest both work)
 
 #### Installation Steps
 
@@ -80,10 +69,17 @@ Clhoria simplifies complex technical architectures, making every coding session 
 4. **Initialize database**
 
    ```bash
-   # Push database schema to development environment
-   pnpm push
+   # Start PostgreSQL service (optional, quickly set up PostgreSQL database in local Docker environment)
+   docker compose --env-file .env run -d --service-ports postgres
 
-   # Seed initial data (optional, will auto-initialize on app startup)
+   # Start Redis service (optional, quickly set up Redis in local Docker environment)
+   docker compose --env-file .env run -d --service-ports redis
+
+   # Execute database migration (for rapid dev iteration use pnpm push directly, reserve generate and migrate for important milestones)
+   pnpm migrate
+
+   # Seed initial data (optional, app will auto-check and initialize on startup)
+   npm install -g bun
    pnpm seed
    ```
 
@@ -103,13 +99,17 @@ Visit <http://localhost:9999> to view the API documentation.
 
 ## TypeScript 5.9+ and ts-go Support
 
-This project supports using the experimental ts-go to enhance TypeScript type checking and language service performance. With the current project scale, ts-go provides significant performance improvements and the language service is relatively stable, so it is recommended.
+This project supports using the experimental ts-go to enhance TypeScript type checking and language service performance. At the current project scale, ts-go provides very significant performance improvements and the language service is relatively stable, so it is recommended.
 
 ### Using ts-go (Recommended)
 
 Install the VSCode extension: [TypeScript Native Preview](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)
 
-> **Note**: Currently ts-go is only used for type checking and language service. Development and bundling are based on Vite (Rolldown), runtime uses tsx.
+> **Note**: Currently ts-go is only used for type checking and language service. Development and bundling are based on Vite (Rolldown).
+
+> **Cache Issues**: If you encounter TS service errors or type cache anomalies, use `Cmd + Shift + P` to open the command palette, type `restart`, and find **TypeScript: Restart TS Server** to restart the TS service and restore normal operation.
+
+> **Performance Tip**: Zod has significant performance overhead on type services. ts-go notably improves this. If you can tolerate occasional cache issues, it is still recommended to use ts-go for a better development experience.
 
 ### Not Using ts-go
 
@@ -127,137 +127,17 @@ This project adopts the **Spec-Driven Development (SDD)** methodology. SDD inver
 
 ### Claude Code Development Workflow
 
-When developing features with Claude Code, follow this 6-stage standard workflow:
+Follow the 6-stage standard workflow: `Spec → Generate Code → Generate Tests → Iterative Optimization → Module Documentation`
 
-```
-1. Spec (Requirements + Architecture + Test Planning) → 2. Generate Code →
-3. Generate Tests → 4-5. Iterative Optimization → 6. Generate Module Docs
-```
+| Stage              | Output                                                       |
+| ------------------ | ------------------------------------------------------------ |
+| Spec               | `docs/{feature}/spec.md` (requirements, architecture, test strategy) |
+| Generate Code      | Complete API code (Schema + Handlers) + migration            |
+| Generate Tests     | `__tests__/int.test.ts`                                      |
+| Iterative Optimization | Continuously improve until acceptance criteria met       |
+| Module Documentation   | `docs/{feature}/module.md` (file index, functions, key points) |
 
-#### Core Points of Each Stage
-
-| Stage                       | Goal                                               | Output                                                                  |
-| --------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
-| 1. Spec                     | Requirements analysis, architecture, test planning | `docs/{feature}/spec.md` (requirements, architecture, test strategy)    |
-| 2. Generate Code            | Generate complete code at once (Schema + Handlers) | Complete API code + migration                                           |
-| 3. Generate Tests           | Generate executable tests based on API types       | `__tests__/int.test.ts`                                                 |
-| 4-5. Iterative Optimization | Continuously improve until acceptance criteria met | Code passing acceptance                                                 |
-| 6. Module Documentation     | Generate docs for future AI dev/maintenance        | `docs/{feature}/module.md` (related files, code functions, tech points) |
-
-#### Acceptance Criteria (Done Criteria)
-
-- ✅ All tests pass (**Required**)
-- ✅ Complies with CLAUDE.md specs (**Required**)
-- ✅ No obvious performance issues (**Required**)
-- ✅ Code quality meets standards (**Optional**)
-
-#### Documentation Output
-
-After completing each feature module, should include the following docs:
-
-```
-docs/{feature}/
-├── spec.md    # Spec document (requirements + architecture + test strategy)
-└── module.md  # Module document (for future AI dev/maintenance)
-```
-
-<details>
-<summary>📋 Document Template Examples (Click to expand)</summary>
-
-**spec.md Template**
-
-```markdown
-# {Feature Name} Spec
-
-## Requirements Analysis
-
-### Feature Overview
-
-{Brief description}
-
-### Business Requirements
-
-- {Requirement 1}
-- {Requirement 2}
-
-## Technical Architecture Design
-
-### Database Design
-
-- Table Structure: {table name, fields, types}
-- Relations: {table relationships}
-- Indexes: {indexing strategy}
-
-### API Design
-
-| Path                 | Method | Description | Permission |
-| -------------------- | ------ | ----------- | ---------- |
-| /api/admin/{feature} | GET    | List query  | admin      |
-| /api/admin/{feature} | POST   | Create      | admin      |
-
-### Tech Stack
-
-- {Selected technologies and reasons}
-
-### Key Technical Decisions
-
-- {Important architectural decisions and rationale}
-
-## Test Strategy
-
-### Test Scenario Matrix
-
-| API    | Normal Flow | Error Flow                | Edge Cases            |
-| ------ | ----------- | ------------------------- | --------------------- |
-| Create | ✓           | Duplicate, Invalid format | Field length limits   |
-| Query  | ✓           | Non-existent ID           | Pagination boundaries |
-```
-
-**module.md Template**
-
-> This document is for future AI to continue development or maintenance of this module, providing quick understanding of related files and code functions.
-
-```markdown
-# {Feature Name} - Module Documentation
-
-## Module File Index
-
-| File Path                                          | Purpose           |
-| -------------------------------------------------- | ----------------- |
-| `src/routes/admin/{feature}/{feature}.index.ts`    | Route entry       |
-| `src/routes/admin/{feature}/{feature}.routes.ts`   | Route definition  |
-| `src/routes/admin/{feature}/{feature}.handlers.ts` | Business handlers |
-| `src/routes/admin/{feature}/{feature}.types.ts`    | Type definitions  |
-| `src/routes/admin/{feature}/__tests__/int.test.ts` | Integration tests |
-| `src/db/schema/admin/{feature}/{entity}.ts`        | Database Schema   |
-
-## Related Modules
-
-- **Dependencies**: {List modules this module depends on}
-- **Dependents**: {List modules that depend on this module}
-
-## Core Function Descriptions
-
-### {Feature Point 1}
-
-- **Entry Function**: `{function name}`
-- **Implementation Logic**: {Brief description of logic}
-
-## Data Flow Diagram
-
-\`\`\`
-Request → JWT Auth → RBAC → Zod Validation → Business Logic → Resp.ok()
-\`\`\`
-
-## Technical Notes & Pitfall Guide
-
-- ⚠️ Responses must use `Resp.ok()` / `Resp.fail()` wrapper
-- ⚠️ Use `logger.info()` not console.log
-- ⚠️ DB Schema uses `snake_case`, TS uses `camelCase`
-- {Other module-specific technical notes}
-```
-
-</details>
+**Acceptance Criteria**: All tests pass + Complies with CLAUDE.md specs + No obvious performance issues
 
 ---
 
@@ -265,72 +145,128 @@ Request → JWT Auth → RBAC → Zod Validation → Business Logic → Resp.ok(
 
 ```text
 routes/{tier}/{feature}/
-├── {feature}.handlers.ts    # Business logic handlers
-├── {feature}.routes.ts      # Route definitions and OpenAPI schema
-├── {feature}.schema.ts      # Zod validation schema (type constraints and API docs)
-└── {feature}.index.ts       # Unified exports
+├── {feature}.handlers.ts       # Business handlers (required)
+├── {feature}.routes.ts         # Route definitions + OpenAPI (required)
+├── {feature}.index.ts          # Unified exports (required)
+├── {feature}.types.ts          # Type definitions (required)
+├── {feature}.schema.ts         # Route-level Zod Schema (optional, for complex schemas)
+├── {feature}.helpers.ts        # Helper functions (optional, for complex business logic or intra-module reuse)
+└── __tests__/                  # Test directory (recommended)
 ```
+
+Simple DB operations stay inline in handlers, complex business logic goes to helpers. Cross-tier shared services go in `src/services/{service}/`
 
 ### Database Schema
 
 ```text
 src/db/schema/
-├── {entity}.ts             # Drizzle table definitions
-└── index.ts                # Unified exports
+├── _shard/                     # Shared base components
+│   ├── base-columns.ts         # Common fields (id/createdAt/updatedAt, etc.)
+│   └── enums.ts                # PostgreSQL enum definitions
+├── {tier}/{feature}/           # Business table definitions (organized by tier and feature)
+│   ├── {entity}.ts             # Drizzle table definitions
+│   └── index.ts                # Feature module table exports
+└── index.ts                    # Root exports (aggregate all schemas)
 ```
+
+**Directory Notes:**
+
+- **`_shard/` directory**: Stores shared base components across features
+  - `base-columns.ts`: Exports `baseColumns` object, all tables extend via `...baseColumns`
+  - `enums.ts`: Defines database enum types using `pgEnum()`
+
+- **Business table organization**: Layered by `{tier}/{feature}` (e.g., `admin/system/users.ts`), corresponding to route structure
 
 ### Zod Schema Layering
 
-| Layer  | Location             | Content                                  |
-| ------ | -------------------- | ---------------------------------------- |
-| db     | `db/schema/*.ts`     | `select*Schema` / `insert*Schema` (base) |
-| routes | `routes/*/schema.ts` | `*PatchSchema` / `*Response` (business)  |
+- **DB Layer** (`db/schema/{entity}.ts`): Generate base schemas from Drizzle table definitions via `createSelectSchema` / `createInsertSchema`, `.meta({ description })` added only at this layer
+- **Route Layer** (`routes/{tier}/{feature}/*.schema.ts`): Inherit DB schemas with pick/omit/extend composition, recommend using `z.ZodType<Interface>` for type safety
+- Simple CRUD can use DB schemas directly in `routes.ts` without a separate schema file
+
+```typescript
+// DB Layer: Generate base schema
+export const selectUserSchema = createSelectSchema(users, {
+  username: schema => schema.meta({ description: "Username" }),
+});
+// Route Layer: Compose business schema
+export const createUserRequestSchema: z.ZodType<CreateUserRequest>
+  = insertUserSchema.pick({ username: true, email: true });
+```
+
+**PostgreSQL Version Notes**:
+
+- **PostgreSQL 18 and above**: No modifications needed, works out of the box. The project uses PostgreSQL 18's `uuidv7()` function by default.
+- **Below PostgreSQL 18**: You need to manually modify `src/db/schema/_shard/base-columns.ts`:
+  1. Install the `uuid` library:
+     ```bash
+     pnpm add uuid
+     pnpm add -D @types/uuid
+     ```
+  2. Add import at the top of `base-columns.ts`:
+     ```typescript
+     import { uuidV7 } from "uuid";
+     ```
+  3. Modify the `id` field definition:
+     ```typescript
+     // Change from
+     uuid().primaryKey().notNull().default(sql`uuidv7()`);
+     // To
+     uuid().primaryKey().notNull().$defaultFn(() => uuidV7());
+     ```
 
 ### Architecture Strategy
 
-**Simple CRUD (80%)**: Handler directly operates database, extract complex logic to helpers
+**This project defaults to Vertical Slice Architecture + Transaction Script pattern**: Code is organized by feature (`routes/{tier}/{feature}/`), each slice is self-contained with routes, handlers, types, and schema, Handlers directly operate Drizzle to fulfill business logic. This architecture is chosen because most admin management scenarios are essentially data in and out — layered architecture (Controller → Service → Repository) only adds pass-through boilerplate for simple CRUD. Vertical slices keep each feature module highly cohesive and loosely coupled, adding or removing features doesn't affect other modules, and it's more conducive to AI understanding and code generation. Complex logic is extracted to helpers as needed.
 
-**Complex Business (20%)**: Choose architecture pattern based on scenario
+**Complex Business (~20%)** When business rules, state transitions, cross-module orchestration, etc. exceed the capacity of Transaction Script, choose the appropriate architecture pattern based on scenario:
 
-| Scenario               | Recommended     | Description                         |
-| ---------------------- | --------------- | ----------------------------------- |
-| Simple CRUD            | 3-tier          | Handler directly operates Drizzle   |
-| Need Tech Decoupling   | Hexagonal       | Port/Adapter isolates external deps |
-| Complex Business Logic | DDD             | Domain model encapsulates rules     |
-| Complex + Decoupling   | DDD + Hexagonal | Combine both                        |
+| Scenario | Recommended | Description |
+| --- | --- | --- |
+| Need Tech Decoupling | Hexagonal | Port/Adapter isolates external dependencies |
+| Complex Business Rules | DDD | Domain model encapsulates business rules |
+| Complex + Decoupling | DDD + Hexagonal | Combine both approaches |
+| Pure Functions First | FCIS | Functional Core for pure logic + Imperative Shell handles side effects, core independently testable |
+| Pure Functions + Decoupling | FCIS + Hexagonal | Pure functional core + Port/Adapter isolates I/O, balancing testability and replaceability |
+| Type-safe Side Effect Management | Effect-TS | Effect-based functional architecture with type-safe DI, error handling, structured concurrency, side effects trackable at the type level |
+| Read/Write Model Asymmetry | Monolith CQRS | Separate read/write models within a single database, Query side uses flattened DTOs/views for optimized reads, Command side uses domain logic, no message bus needed |
 
-**DDD / Hexagonal Architecture Directory Structure**:
+**Core Ideas**: DDD focuses on domain modeling, Hexagonal on dependency isolation, FCIS on separating pure functions from side effects, Effect-TS elevates side effects into the type system, Monolith CQRS addresses read/write model asymmetry. Combine freely based on business complexity.
+
+> **Monolith CQRS vs Database Read/Write Splitting**: Cloud PG cluster proxies (e.g., Alibaba Cloud PolarDB, RDS Proxy) solve **database load** problems — the same SQL is automatically routed to primary/read-only nodes, transparent to application code. Monolith CQRS solves **application model** problems — writes go through rich domain models to ensure business consistency, queries use flattened DTOs/database views bypassing the domain layer to reach data directly, each with different data structures and code paths. The former is horizontal scaling at the infrastructure level, the latter is separation of concerns at the code level. They don't conflict and can be stacked together.
+
+> **Effect-TS Deep Integration**: Effect's `Context.Tag` + `Layer` system is naturally hexagonal architecture — `Tag` declares the interface (Port), `Layer` provides the implementation (Adapter), business logic is orchestrated through `Effect.gen`, depending only on Tag abstractions rather than concrete implementations. Swap out a `Layer` in tests to inject mocks, no extra interface files needed. Meanwhile, Effect's type channel `Effect<Success, Error, Requirements>` makes dependencies, errors, and success values all explicitly declared in the function signature — the compiler forces you to handle every error path, missing one is a compile error. Compared to hand-written Port/Adapter + try/catch, Effect solves dependency injection, error handling, and concurrency control with a single mechanism, suitable for state machines, workflows, cross-service orchestration, and other truly complex business scenarios. This project already uses Effect at the infrastructure layer (distributed locks `withLock`, task queues, resource initialization), and the business layer can adopt it incrementally as needed.
 
 ```text
-src/domain/[module]/                  # Domain layer (pure business, no external deps)
-├── [module].entity.ts                # Domain entity: business rules, state changes
-├── [module].service.ts               # Domain service: cross-entity logic, orchestration
-└── [module].repository.port.ts       # Repository interface (Port)
-
-src/infrastructure/persistence/       # Infrastructure layer (Adapter)
-├── mappers/[module].mapper.ts        # Domain ↔ Drizzle mapping
-└── repositories/[module].repository.ts  # Repository impl (Drizzle ORM)
-
-src/routes/{tier}/{feature}/handlers.ts  # Presentation: HTTP + call domain services
+src/domain/[module]/                     # Domain layer (pure business logic)
+├── [module].entity.ts                   # Domain entity
+├── [module].service.ts                  # Domain service
+└── [module].repository.port.ts          # Repository interface (Port)
+src/infrastructure/persistence/          # Infrastructure layer (Adapter implementation)
 ```
-
-**Core Principle**: Pure Domain (no Drizzle/Redis deps) → Port defines abstraction → Adapter implements details → Dependency Inversion
 
 ## Core Architecture Features
 
 ### 🔄 Auto Route Loading
 
-Auto-scans and registers route modules using `import.meta.glob`. Just create a directory to add new modules. Supports HMR with millisecond-level hot updates.
+Auto-scans and registers route modules from `routes/{tier}/**/*.index.ts` using `import.meta.glob`. Just create a directory to add new modules, HMR takes effect in milliseconds after saving. Each module must `export default` the route instance in `{feature}.index.ts`.
 
 ### 🧩 Singleton Management System
 
 Unified management for long-lived connections like PostgreSQL, Redis, and Casbin. Solves connection leak issues in Vite HMR mode with automatic resource cleanup.
 
-### 🎯 Integrated Permission + Menu + Dictionary Solution
+### 💉 Three-Layer Dependency Injection
 
-Modern architecture based on **Casbin + Refine + PostgreSQL Enum + OpenAPI**, thoroughly simplifying traditional backend management system complexity.
+This project does not use a traditional DI container (e.g., InversifyJS), opting for a lighter and more direct three-layer injection strategy:
 
-#### Core Concept
+| Layer | Mechanism | Scope | Typical Usage |
+| --- | --- | --- | --- |
+| **Module Singleton** | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | Process | DB connection pool, Redis client, Casbin Enforcer, Logger and other long-lived resources |
+| **Request Context** | Hono `c.set()` / `c.get()` + `AppBindings` type constraint | Request | JWT payload, request ID, tierBasePath and other request-scoped data, written by middleware → read by handlers |
+| **Effect Layer** | `Context.Tag` + `Layer.mergeAll` | Composable | Type-safe composition of infrastructure services (DB, Logger, pg-boss), used for distributed locks, task queues, and other scenarios requiring Effect orchestration |
+
+**Why no DI container**: The dependency graph in admin management systems is inherently simple — long-lived resources are process-level singletons, request data flows through Hono Context, these two layers cover 90% of scenarios. Effect Layer supplements the remaining 10% that needs type-safe composition (e.g., `withLock` distributed locks). Introducing a DI container would only add indirection and registration ceremony, which is over-engineering for this scale of project.
+
+#### Core Concepts
 
 **Permission System**: Based on RESTful API paths + Casbin KeyMatch3, code as permissions, no database permission identifier storage needed
 **Menu System**: Refine Resource compile-time routing, zero runtime overhead, code as menus
@@ -338,12 +274,24 @@ Modern architecture based on **Casbin + Refine + PostgreSQL Enum + OpenAPI**, th
 
 #### Comparison with Traditional Solutions
 
-| Dimension       | This Project                                                            | Traditional Solution                                                                    |
-| --------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Dimension       | This Project                                                            | Traditional Solution                                                         |
+| --------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | **Permission**  | OpenAPI route definition, Casbin policy matching, auto-sync             | Database permission tables + association tables, manual maintenance, easy inconsistency |
-| **Menu**        | Compile-time route tree generation, type-safe, zero runtime overhead    | Database-stored menus, runtime query parsing, needs admin interface                     |
-| **Dictionary**  | Single source of truth, compile-time type checking, 4-byte Enum storage | Database dictionary tables, runtime queries, needs JOIN, easy inconsistency             |
-| **Maintenance** | Change once auto-sync everywhere, TypeScript compile-time errors        | Multiple manual syncs: database → backend → frontend → docs                             |
+| **Menu**        | Compile-time route tree generation, type-safe, zero runtime overhead    | Database-stored menus, runtime query parsing, needs admin interface           |
+| **Dictionary**  | Single source of truth, compile-time type checking, 4-byte Enum storage | Database dictionary tables, runtime queries, needs JOIN, easy inconsistency  |
+| **Maintenance** | Change once auto-sync everywhere, TypeScript compile-time errors        | Multiple manual syncs: database → backend → frontend → docs                  |
+
+### 📝 Logging System
+
+Built on pino transport architecture, supporting multi-target output (dev `pino-pretty` / production stdout JSON / optional Alibaba Cloud SLS). Three child loggers auto-inject `type` field: `logger` (system), `operationLogger` (CRUD audit, type: `OPERATION`), `loginLogger` (login records, type: `LOGIN`).
+
+Operation log middleware is globally configured in admin tier (parameterless mode stores raw `urlPath`), also supports local mode with manually specified module names:
+
+```typescript
+router.use(operationLog({ moduleName: "Order Management", description: "Create Order" }));
+```
+
+Custom Transport integration: Create `transports/sls-transport.mjs` in project root, build with `pino-abstract-transport`, then uncomment the SLS target in `logger.ts`'s `buildTransportTargets()`. Operation log `urlPath` naturally corresponds to Casbin keymatch3 rules and Refine resources, frontend can directly use permission tree mapping to Chinese labels as log filter dimensions.
 
 ## Deployment
 
@@ -363,12 +311,12 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 ## Development Experience Comparison
 
-| Comparison           | This Project (AI + Modern Stack)                                                        | Traditional Code Generators                                                             |
-| -------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Efficiency**       | Claude Code intelligently understands requirements, generates compliant code in seconds | Manual template configuration tedious, generates rigid code needing heavy modifications |
-| **API Management**   | OpenAPI + Zod auto-sync, type-safe, docs never outdated                                 | Manual API documentation maintenance, easy inconsistency                                |
-| **Code Quality**     | TypeScript full-chain type checking, catch issues at compile time                       | Generated code lacks type constraints, runtime errors frequent                          |
-| **Maintenance Cost** | Unified code standards, AI understands project architecture, simple maintenance         | Large codebase not elegant enough, hard to maintain                                     |
+| Comparison           | This Project (AI + Modern Stack)                                                        | Traditional Code Generators                                                              |
+| -------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Efficiency**       | Claude Code intelligently understands requirements, generates compliant code in seconds | Manual template configuration tedious, generates rigid code needing heavy modifications  |
+| **API Management**   | OpenAPI + Zod auto-sync, type-safe, docs never outdated                                 | Manual API documentation maintenance, easy inconsistency                                 |
+| **Code Quality**     | TypeScript full-chain type checking, catch issues at compile time                       | Generated code lacks type constraints, runtime errors frequent                           |
+| **Maintenance Cost** | Unified code standards, AI understands project architecture, simple maintenance         | Large codebase not elegant enough, hard to maintain                                      |
 
 ## CAPTCHA System Comparison
 
@@ -393,15 +341,15 @@ Detailed benchmark: [bun-http-framework-benchmark](https://github.com/SaltyAom/b
 
 ### 🚀 High Concurrency & Performance Optimization Solutions
 
-**High Concurrency Solution**: K8s/Cloud SLB load balancing + PostgreSQL/Redis HA clusters + distributed sessions, enabling stateless horizontal scaling
+**High Concurrency Solution**: K8s/Alibaba Cloud SLB load balancing + PostgreSQL/Redis HA clusters + distributed sessions, enabling stateless horizontal scaling
 
 **CPU-intensive Optimization**:
 
-| Scenario                  | Recommended    | Use Case                                                       |
-| ------------------------- | -------------- | -------------------------------------------------------------- |
-| **Repeated Calls**        | napi-rs        | Image processing, encryption/decryption, data compression      |
-| **Single Intensive Calc** | WASM           | Complex algorithms, scientific computing, single recalculation |
-| **Parallel Multi-task**   | Worker Threads | Many independent tasks, concurrent data processing             |
+| Scenario                  | Recommended    | Use Case                                            |
+| ------------------------- | -------------- | --------------------------------------------------- |
+| **Repeated Calls**        | napi-rs        | Image processing, encryption/decryption, data compression |
+| **Single Intensive Calc** | WASM           | Complex algorithms, scientific computing, single heavy computation |
+| **Parallel Multi-task**   | Worker Threads | Many independent tasks, concurrent data processing  |
 
 ## Claude Code Deep Integration (Optional)
 
@@ -416,31 +364,12 @@ This project is designed for AI-driven development, providing complete CLAUDE.md
 
 The project includes built-in code snippet templates for CRUD development (`.vscode/crud.code-snippets`). Type the prefix in a TypeScript file and press `Tab` to quickly generate code.
 
-### Complete Module Templates
-
 | Prefix          | Description                                              |
 | --------------- | -------------------------------------------------------- |
 | `crud-schema`   | Complete schema.ts template                              |
 | `crud-routes`   | Complete routes.ts template (with all 5 CRUD routes)     |
 | `crud-handlers` | Complete handlers.ts template (with all 5 CRUD handlers) |
 | `crud-index`    | Complete index.ts template                               |
-
-### Individual Route/Handler
-
-| Prefix                                                    | Description                       |
-| --------------------------------------------------------- | --------------------------------- |
-| `r-list` / `r-create` / `r-get` / `r-update` / `r-remove` | Individual route definitions      |
-| `h-list` / `h-create` / `h-get` / `h-update` / `h-remove` | Individual handler functions      |
-| `r-custom` / `h-custom`                                   | Custom route or handler templates |
-
-### Common Code Snippets
-
-| Prefix                                     | Description                                           |
-| ------------------------------------------ | ----------------------------------------------------- |
-| `ir` / `ih` / `is`                         | Import common dependencies for routes/handlers/schema |
-| `rok` / `rcreated` / `rfail` / `rnotfound` | Response shortcuts                                    |
-| `logi` / `loge`                            | Logger shortcuts                                      |
-| `db-tx`                                    | Database transaction template                         |
 
 ## Testing
 

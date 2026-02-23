@@ -59,7 +59,7 @@
     "@hono/vite-dev-server": "^0.25.0",
     "@pg-boss/dashboard": "^1.1.0",
     "@types/node": "25.3.0",
-    "@typescript/native-preview": "7.0.0-dev.20260221.1",
+    "@typescript/native-preview": "7.0.0-dev.20260222.1",
     "drizzle-kit": "^0.31.9",
     "eslint": "^10.0.1",
     "eslint-plugin-format": "^1.4.0",
