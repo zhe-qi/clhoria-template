@@ -6,47 +6,47 @@ import { parseEnvOrExit } from "@/utils/zod";
 config({ path: path.resolve(process.cwd(), process.env.NODE_ENV === "test" ? ".env.test" : ".env") });
 
 const EnvSchema = z.object({
-  /** 环境变量 */
+  /** Environment variable / 环境变量 */
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  /** 端口 */
+  /** Port / 端口 */
   PORT: z.coerce.number().default(9999),
-  /** 日志级别 */
+  /** Log level / 日志级别 */
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),
-  /** 数据库连接字符串 */
+  /** Database connection string / 数据库连接字符串 */
   DATABASE_URL: z.string().refine(
     val => process.env.NODE_ENV !== "production" || val !== "",
     { message: "生产环境下数据库连接字符串不能为空" },
   ),
-  /** 数据库连接池大小 */
+  /** Database connection pool size / 数据库连接池大小 */
   DB_POOL_SIZE: z.coerce.number().int().positive().default(10),
-  /** Redis连接字符串 */
+  /** Redis connection string / Redis连接字符串 */
   REDIS_URL: z.string().refine(
     val => process.env.NODE_ENV !== "production" || val !== "",
     { message: "生产环境下redis连接字符串不能为空" },
   ),
-  /** Redis 集群模式开关 */
+  /** Redis cluster mode toggle / Redis 集群模式开关 */
   REDIS_CLUSTER_ENABLED: z.enum(["true", "false"]).default("false"),
-  /** Redis 集群节点列表（逗号分隔：host:port,host:port） */
+  /** Redis cluster node list (comma-separated: host:port,host:port) / Redis 集群节点列表（逗号分隔：host:port,host:port） */
   REDIS_CLUSTER_NODES: z.string().optional(),
-  /** 客户端JWT密钥 */
+  /** Client JWT secret / 客户端JWT密钥 */
   CLIENT_JWT_SECRET: z.string().min(32, "JWT密钥长度至少32字符,建议使用强随机字符串"),
-  /** 管理端JWT密钥 */
+  /** Admin JWT secret / 管理端JWT密钥 */
   ADMIN_JWT_SECRET: z.string().min(32, "JWT密钥长度至少32字符,建议使用强随机字符串"),
 
-  /** 云服务商R2访问密钥ID */
+  /** Cloud provider R2 access key ID / 云服务商R2访问密钥ID */
   ACCESS_KEY_ID: z.string(),
-  /** 云服务商R2访问密钥 */
+  /** Cloud provider R2 secret access key / 云服务商R2访问密钥 */
   SECRET_ACCESS_KEY: z.string(),
-  /** 云服务商R2终端节点 */
+  /** Cloud provider R2 endpoint / 云服务商R2终端节点 */
   ENDPOINT: z.url(),
-  /** 云服务商R2存储桶名称 */
+  /** Cloud provider R2 bucket name / 云服务商R2存储桶名称 */
   BUCKET_NAME: z.string().default("default-bucket"),
 
-  /** Sentry错误追踪 */
+  /** Sentry error tracking / Sentry错误追踪 */
   SENTRY_DSN: z.string().optional(),
 
-  /** 信任的代理IP */
+  /** Trusted proxy IPs / 信任的代理IP */
   TRUSTED_PROXY_IPS: z.string().default(""),
 });
 

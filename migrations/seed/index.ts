@@ -4,7 +4,7 @@ import db from "@/db";
 import { systemUsers, systemRoles, casbinRule, systemUserRoles } from "@/db/schema";
 import { Status } from "@/lib/enums/common";
 
-// 使用 logger，避免 console.log。这里只为 seed 脚本，允许必要时用 console，但建议更换 logger
+// Use logger, avoid console.log. This is only for seed scripts, console is allowed when necessary / 使用 logger，避免 console.log。这里只为 seed 脚本，允许必要时用 console，但建议更换 logger
 const logPrefix = "[数据种子]";
 
 async function seedUsers() {
@@ -24,7 +24,7 @@ async function seedUsers() {
       .onConflictDoNothing()
       .returning();
 
-    // 如果插入冲突，从数据库查询
+    // If insert conflicts, query from database / 如果插入冲突，从数据库查询
     if (!adminUser) {
       [adminUser] = await db.select().from(systemUsers).where(eq(systemUsers.username, "admin"));
     }
@@ -40,7 +40,7 @@ async function seedUsers() {
       .onConflictDoNothing()
       .returning();
 
-    // 如果插入冲突，从数据库查询
+    // If insert conflicts, query from database / 如果插入冲突，从数据库查询
     if (!regularUser) {
       [regularUser] = await db.select().from(systemUsers).where(eq(systemUsers.username, "user"));
     }
@@ -67,7 +67,7 @@ async function seedRoles() {
       .onConflictDoNothing()
       .returning();
 
-    // 如果插入冲突，从数据库查询
+    // If insert conflicts, query from database / 如果插入冲突，从数据库查询
     if (!adminRole) {
       [adminRole] = await db.select().from(systemRoles).where(eq(systemRoles.id, "admin"));
     }
@@ -82,7 +82,7 @@ async function seedRoles() {
       .onConflictDoNothing()
       .returning();
 
-    // 如果插入冲突，从数据库查询
+    // If insert conflicts, query from database / 如果插入冲突，从数据库查询
     if (!userRole) {
       [userRole] = await db.select().from(systemRoles).where(eq(systemRoles.id, "user"));
     }
@@ -176,10 +176,10 @@ async function seedCasbinRules(roles: any) {
 }
 
 async function main() {
-  // 标记整体 process 是否有 seed 失败
+  // Track whether any seed data insertion failed / 标记整体 process 是否有 seed 失败
   let hasError = false;
   console.info(`${logPrefix} 🚀 开始种子数据写入...`);
-  // 每个 seed 单独 try-catch，任何失败不影响下一个
+  // Each seed has its own try-catch, any failure does not affect the next / 每个 seed 单独 try-catch，任何失败不影响下一个
   let users: any = {};
   let roles: any = {};
   try {

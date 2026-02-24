@@ -3,6 +3,8 @@ import { pgEnum } from "drizzle-orm/pg-core";
 import { Gender, ParamValueType, RealNameAuthStatus, RealNameAuthType, Status, UserStatus, VerificationStatus } from "@/lib/enums";
 
 /**
+ * Type-safe enum value extraction function
+ * Converts object values to the tuple type required by pgEnum
  * 类型安全的枚举值提取函数
  * 将对象的值转换为 pgEnum 所需的元组类型
  */
@@ -16,7 +18,7 @@ function extractEnumValues<T extends Record<string, string>>(
   return values as [T[keyof T], ...T[keyof T][]];
 }
 
-// 定义所有数据库枚举类型
+// Define all database enum types / 定义所有数据库枚举类型
 export const statusEnum = pgEnum("status", extractEnumValues(Status));
 export const genderEnum = pgEnum("gender", extractEnumValues(Gender));
 export const userStatusEnum = pgEnum("user_status", extractEnumValues(UserStatus));

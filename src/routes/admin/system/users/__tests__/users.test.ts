@@ -26,8 +26,8 @@ function createSysUsersApp() {
 
 const client = testClient(createSysUsersApp());
 
-// 测试数据
-const testUsername = `t123`; // 基础用户名要短，因为会添加后缀
+// Test data / 测试数据
+const testUsername = `t123`; // Base username should be short since suffixes will be added / 基础用户名要短，因为会添加后缀
 const testUser = {
   username: testUsername,
   password: "test123456",
@@ -37,21 +37,23 @@ const testUser = {
 };
 
 /**
+ * Clean up test-created user data
+ * Delete all users matching the test user pattern
  * 清理测试创建的用户数据
  * 删除所有符合测试用户模式的用户
  */
 async function cleanupTestUsers(): Promise<void> {
   try {
     await db.transaction(async (tx) => {
-      // 查找所有测试用户（以 t 开头，后面跟数字的用户名模式）
+      // Find all test users (username pattern starting with t followed by digits) / 查找所有测试用户（以 t 开头，后面跟数字的用户名模式）
       const testUsers = await tx
         .select({ id: systemUsers.id, username: systemUsers.username })
         .from(systemUsers)
         .where(
           or(
-            like(systemUsers.username, "t123_%"), // 主要的测试用户模式
-            like(systemUsers.username, "test_%"), // 其他可能的测试用户
-            like(systemUsers.username, "t%_test"), // 其他测试模式
+            like(systemUsers.username, "t123_%"), // Primary test user pattern / 主要的测试用户模式
+            like(systemUsers.username, "test_%"), // Other possible test users / 其他可能的测试用户
+            like(systemUsers.username, "t%_test"), // Other test patterns / 其他测试模式
           ),
         );
 
@@ -61,12 +63,12 @@ async function cleanupTestUsers(): Promise<void> {
 
       const userIds = testUsers.map(u => u.id);
 
-      // 删除用户角色关联
+      // Delete user-role associations / 删除用户角色关联
       await tx
         .delete(systemUserRoles)
         .where(or(...userIds.map(id => eq(systemUserRoles.userId, id))));
 
-      // 删除 Casbin 规则（如果有用户相关的规则）
+      // Delete Casbin rules (if there are user-related rules) / 删除 Casbin 规则（如果有用户相关的规则）
       await tx
         .delete(casbinRule)
         .where(
@@ -76,7 +78,7 @@ async function cleanupTestUsers(): Promise<void> {
           ),
         );
 
-      // 删除用户本身
+      // Delete users themselves / 删除用户本身
       await tx
         .delete(systemUsers)
         .where(
@@ -99,14 +101,14 @@ describe("system user routes", () => {
   let userToken: string;
 
   beforeAll(async () => {
-    // 清理可能存在的遗留测试数据
+    // Clean up potentially leftover test data / 清理可能存在的遗留测试数据
     await cleanupTestUsers();
 
     adminToken = await getAdminToken();
     userToken = await getUserToken();
   });
 
-  // 确保测试结束后清理所有测试数据
+  // Ensure all test data is cleaned up after tests / 确保测试结束后清理所有测试数据
   afterAll(async () => {
     await cleanupTestUsers();
   });
@@ -228,7 +230,7 @@ describe("system user routes", () => {
     it("should validate required fields", async () => {
       const response = await client.system.users.$post(
         {
-          // @ts-expect-error - 测试必填字段验证，故意传入不完整的数据
+          // @ts-expect-error - Testing required field validation, intentionally passing incomplete data / 测试必填字段验证，故意传入不完整的数据
           json: {
             username: `${testUsername}_required`,
           },
@@ -336,7 +338,7 @@ describe("system user routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      // 数据库唯一约束错误由全局 onError 处理，返回 409
+      // Database unique constraint error handled by global onError, returns 409 / 数据库唯一约束错误由全局 onError 处理，返回 409
       expect(response2.status).toBe(HttpStatusCodes.CONFLICT);
 
       const json = await response2.json() as { message: string };
@@ -595,7 +597,7 @@ describe("system user routes", () => {
     });
 
     it("should delete user successfully", async () => {
-      // 先创建一个用户用于测试删除功能
+      // Create a user first for testing delete functionality / 先创建一个用户用于测试删除功能
       const createResponse = await client.system.users.$post(
         {
           json: {
@@ -614,7 +616,7 @@ describe("system user routes", () => {
       const json = await createResponse.json();
       const deleteTestUserId = json.data.id;
 
-      // 测试删除功能
+      // Test delete functionality / 测试删除功能
       const deleteResponse = await client.system.users[":id"].$delete(
         { param: { id: deleteTestUserId } },
         { headers: getAuthHeaders(adminToken) },
@@ -628,7 +630,7 @@ describe("system user routes", () => {
         expect(deleteJson.data.id).toBe(deleteTestUserId);
       }
 
-      // 验证用户已被删除
+      // Verify user has been deleted / 验证用户已被删除
       const verifyResponse = await client.system.users[":id"].$get(
         { param: { id: deleteTestUserId } },
         { headers: getAuthHeaders(adminToken) },
@@ -758,7 +760,7 @@ describe("system user routes", () => {
         {
           param: { userId },
           json: {
-            roleIds: ["user"], // 使用实际存在的角色
+            roleIds: ["user"], // Use actually existing roles / 使用实际存在的角色
           },
         },
         { headers: getAuthHeaders(adminToken) },

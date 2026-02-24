@@ -8,6 +8,8 @@ const routePrefix = "/notifications";
 const tags = [`${routePrefix}（通知）`];
 
 /**
+ * Subscribe to real-time notifications (SSE)
+ * Clients can receive server-pushed real-time notifications through this endpoint
  * 订阅实时通知（SSE）
  * 客户端可通过此端点接收服务端推送的实时通知
  */

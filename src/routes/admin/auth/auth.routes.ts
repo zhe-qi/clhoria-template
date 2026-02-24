@@ -12,7 +12,7 @@ import { systemUsersInfoResponseSchema, systemUsersLoginSchema } from "../system
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];
 
-/** 管理端登录 */
+/** Admin login / 管理端登录 */
 export const login = createRoute({
   path: `${routePrefix}/login`,
   method: "post",
@@ -32,7 +32,7 @@ export const login = createRoute({
   },
 });
 
-/** 刷新 Token */
+/** Refresh token / 刷新 Token */
 export const refreshToken = createRoute({
   path: `${routePrefix}/refresh`,
   method: "post",
@@ -46,7 +46,7 @@ export const refreshToken = createRoute({
   },
 });
 
-/** 退出登录 */
+/** Logout / 退出登录 */
 export const logout = createRoute({
   path: `${routePrefix}/logout`,
   method: "post",
@@ -59,7 +59,7 @@ export const logout = createRoute({
   },
 });
 
-/** 获取用户信息 */
+/** Get user info / 获取用户信息 */
 export const getIdentity = createRoute({
   path: `${routePrefix}/userinfo`,
   method: "get",
@@ -72,7 +72,7 @@ export const getIdentity = createRoute({
   },
 });
 
-/** 获取用户权限 */
+/** Get user permissions / 获取用户权限 */
 export const getPermissions = createRoute({
   path: `${routePrefix}/permissions`,
   method: "get",
@@ -88,7 +88,7 @@ export const getPermissions = createRoute({
   },
 });
 
-/** 生成验证码挑战 */
+/** Generate captcha challenge / 生成验证码挑战 */
 export const createChallenge = createRoute({
   path: `${routePrefix}/challenge`,
   method: "post",
@@ -104,7 +104,7 @@ export const createChallenge = createRoute({
   },
 });
 
-/** 验证用户解答并生成验证token */
+/** Verify user solution and generate verification token / 验证用户解答并生成验证token */
 export const redeemChallenge = createRoute({
   path: `${routePrefix}/redeem`,
   method: "post",

@@ -1,128 +1,128 @@
-/** 通用状态枚举，用于表示实体的启用/禁用状态 */
+/** Common status enum for entity enabled/disabled state / 通用状态枚举，用于表示实体的启用/禁用状态 */
 export const Status = {
-  /** 启用状态 */
+  /** Enabled / 启用状态 */
   ENABLED: "ENABLED",
 
-  /** 禁用状态 */
+  /** Disabled / 禁用状态 */
   DISABLED: "DISABLED",
 } as const;
 
-/** 状态类型 */
+/** Status type / 状态类型 */
 export type StatusType = (typeof Status)[keyof typeof Status];
 
-/** 日志类型枚举 */
+/** Log type enum / 日志类型枚举 */
 export const LogType = {
-  /** 操作日志 */
+  /** Operation log / 操作日志 */
   OPERATION: "OPERATION",
 
-  /** 登录日志 */
+  /** Login log / 登录日志 */
   LOGIN: "LOGIN",
 } as const;
 
-/** 日志类型类型 */
+/** Log type / 日志类型类型 */
 export type LogTypeType = (typeof LogType)[keyof typeof LogType];
 
-/** 性别枚举 */
+/** Gender enum / 性别枚举 */
 export const Gender = {
-  /** 未知 */
+  /** Unknown / 未知 */
   UNKNOWN: "UNKNOWN",
 
-  /** 男性 */
+  /** Male / 男性 */
   MALE: "MALE",
 
-  /** 女性 */
+  /** Female / 女性 */
   FEMALE: "FEMALE",
 } as const;
 
-/** 性别类型 */
+/** Gender type / 性别类型 */
 export type GenderType = (typeof Gender)[keyof typeof Gender];
 
-/** 用户状态枚举 */
+/** User status enum / 用户状态枚举 */
 export const UserStatus = {
-  /** 正常 */
+  /** Normal / 正常 */
   NORMAL: "NORMAL",
 
-  /** 禁用 */
+  /** Disabled / 禁用 */
   DISABLED: "DISABLED",
 
-  /** 审核中 */
+  /** Pending review / 审核中 */
   PENDING: "PENDING",
 
-  /** 审核拒绝 */
+  /** Review rejected / 审核拒绝 */
   REJECTED: "REJECTED",
 } as const;
 
-/** 用户状态类型 */
+/** User status type / 用户状态类型 */
 export type UserStatusType = (typeof UserStatus)[keyof typeof UserStatus];
 
-/** 验证状态枚举 */
+/** Verification status enum / 验证状态枚举 */
 export const VerificationStatus = {
-  /** 未验证 */
+  /** Unverified / 未验证 */
   UNVERIFIED: "UNVERIFIED",
 
-  /** 已验证 */
+  /** Verified / 已验证 */
   VERIFIED: "VERIFIED",
 } as const;
 
-/** 验证状态类型 */
+/** Verification status type / 验证状态类型 */
 export type VerificationStatusType = (typeof VerificationStatus)[keyof typeof VerificationStatus];
 
-/** 实名认证类型枚举 */
+/** Real name authentication type enum / 实名认证类型枚举 */
 export const RealNameAuthType = {
-  /** 个人用户 */
+  /** Individual user / 个人用户 */
   INDIVIDUAL: "INDIVIDUAL",
 
-  /** 企业用户 */
+  /** Enterprise user / 企业用户 */
   ENTERPRISE: "ENTERPRISE",
 } as const;
 
-/** 实名认证类型 */
+/** Real name authentication type / 实名认证类型 */
 export type RealNameAuthTypeType = (typeof RealNameAuthType)[keyof typeof RealNameAuthType];
 
-/** 实名认证状态枚举 */
+/** Real name authentication status enum / 实名认证状态枚举 */
 export const RealNameAuthStatus = {
-  /** 未认证 */
+  /** Unauthenticated / 未认证 */
   UNAUTHENTICATED: "UNAUTHENTICATED",
 
-  /** 等待认证 */
+  /** Pending authentication / 等待认证 */
   PENDING: "PENDING",
 
-  /** 认证通过 */
+  /** Verified / 认证通过 */
   VERIFIED: "VERIFIED",
 
-  /** 认证失败 */
+  /** Failed / 认证失败 */
   FAILED: "FAILED",
 } as const;
 
-/** 实名认证状态类型 */
+/** Real name authentication status type / 实名认证状态类型 */
 export type RealNameAuthStatusType = (typeof RealNameAuthStatus)[keyof typeof RealNameAuthStatus];
 
-/** 登录结果枚举 */
+/** Login result enum / 登录结果枚举 */
 export const LoginResult = {
-  /** 登录成功 */
+  /** Login success / 登录成功 */
   SUCCESS: "SUCCESS",
 
-  /** 登录失败 */
+  /** Login failure / 登录失败 */
   FAILURE: "FAILURE",
 } as const;
 
-/** 登录结果类型 */
+/** Login result type / 登录结果类型 */
 export type LoginResultType = (typeof LoginResult)[keyof typeof LoginResult];
 
-/** 参数值类型枚举 */
+/** Parameter value type enum / 参数值类型枚举 */
 export const ParamValueType = {
-  /** 字符串 */
+  /** String / 字符串 */
   STRING: "STRING",
 
-  /** 数字 */
+  /** Number / 数字 */
   NUMBER: "NUMBER",
 
-  /** 布尔值 */
+  /** Boolean / 布尔值 */
   BOOLEAN: "BOOLEAN",
 
-  /** JSON 对象 */
+  /** JSON object / JSON 对象 */
   JSON: "JSON",
 } as const;
 
-/** 参数值类型 */
+/** Parameter value type / 参数值类型 */
 export type ParamValueTypeType = (typeof ParamValueType)[keyof typeof ParamValueType];

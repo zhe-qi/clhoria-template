@@ -10,6 +10,8 @@ const Ipv4Schema = z.ipv4();
 const Ipv6Schema = z.ipv6();
 
 /**
+ * Get IP version (4/6), returns 0 for invalid IPs.
+ * Uses Zod v4 built-in `z.ipv4()/z.ipv6()`, compatible with Bun and other runtimes.
  * 获取 IP 版本（4/6），非法则返回 0。
  * 使用 Zod v4 内置 `z.ipv4()/z.ipv6()`，可兼容 Bun 等运行时。
  */
@@ -29,7 +31,7 @@ const keyOf = (ip: string) => `ip:location:${ip}`;
 const timeoutSignal = (ms: number) => {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), ms);
-  // 不阻止进程退出（Node/Bun 都支持）
+  // Do not prevent process exit (supported by both Node/Bun) / 不阻止进程退出（Node/Bun 都支持）
   (timer as unknown as { unref?: () => void }).unref?.();
   return { signal: ac.signal, clear: () => clearTimeout(timer) };
 };
@@ -62,11 +64,11 @@ const getOrFetch = async (ip: string) => {
   return val;
 };
 
-/** 根据IP地址获取城市地址信息 */
+/** Get city address info by IP address / 根据IP地址获取城市地址信息 */
 export async function getIPAddress(ip: string): Promise<string> {
   const n = normalizeIp(ip, UNKNOWN);
   if (n === UNKNOWN)
-    return LOCAL; // 保持你当前行为：unknown 也按“本地”处理
+    return LOCAL; // Keep current behavior: unknown is also treated as "local" / 保持你当前行为：unknown 也按"本地"处理
   const v = getIpVersion(n);
   if (!n || v === 0)
     return UNKNOWN;

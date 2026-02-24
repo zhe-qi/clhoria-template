@@ -1,400 +1,400 @@
-# Clhoria 基于 Hono 的快速开发模板
+# Clhoria - Hono-based Rapid Development Template
 
-简体中文 | [English](./readme.en.md)
+English | [简体中文](./README.zh-CN.md)
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-可用于生产环境的现代化后端开发模板,基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式,结合 Hono + OpenAPI + Zod 完整技术体系,实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层,完整的 RBAC 权限体系,提供比传统后台管理系统更稳定、更高效的开发体验。
+A modern, production-ready backend boilerplate built on the Hono framework for high-performance TypeScript applications. Designed with AI-driven development in mind, combining Hono + OpenAPI + Zod for a complete type-safe ecosystem that truly enhances development efficiency. Integrates Drizzle ORM + PostgreSQL data layer with a comprehensive RBAC permission system, providing a more stable and efficient development experience than traditional backend management systems.
 
-Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优雅,每一个功能都如花般绽放。选择 Clhoria,就是选择与未来同行。
+Clhoria simplifies complex technical architectures, making every coding session elegant and every feature bloom beautifully. Choose Clhoria, choose to move forward with the future.
 
-> 模板配套的后台管理前端部分基于 Refine + Shadcn 开发:[https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
+> Frontend admin panel based on Refine + Shadcn: [https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
 
-## 功能特性
+## Features
 
-- **现代化技术栈**: Hono + TypeScript + Vite + Drizzle ORM + PostgreSQL
-- **渐进式分层**: 函数式开发规范、多层级路由结构、复杂业务可选DDD
-- **自动化文档**: OpenAPI 3.1 规范 + Scalar UI,代码即文档,支持在线调试和类型生成
-- **多层认证授权**: JWT 双密钥(Admin/Client 隔离)+ Casbin RBAC + KeyMatch3 RESTful,无需存储权限标识
-- **声明式分页器**: 基于 Refine 规范的安全声明式查询,拓展 refine 查询支持仅后端联表查询
-- **完整权限体系**: 用户管理 + 角色管理 + Casbin 权限策略 + Refine Resource 编译时菜单路由,零运行时开销
-- **业务和系统字典**: 业务字典支持运行时动态配置(JSONB + Redis缓存),系统字典使用Pg枚举编译时类型检查
-- **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
-- **高性能缓存**: Redis 缓存（支持集群模式）+ 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
-- **任务队列和定时任务**: 基于 pg-boss 的后台任务队列管理和定时任务调度（分布式安全，多节点只执行一次）
-- **函数式基础设施**: 基于 Effect-TS 构建基础设施层，类型安全的依赖注入、可组合的错误处理、结构化并发
-- **对象存储**: 集成 S3 兼容对象存储(支持 Cloudflare R2、阿里云 OSS、AWS S3 等)
-- **智能验证码**: 集成 Cap.js,基于 SHA-256 工作量证明的轻量级现代验证码,隐私友好无追踪
-- **类型安全体系**: Hono + Zod + TypeScript 全链路类型推导,编译时发现问题
-- **即时反馈开发**: 基于 Vite 的热重载开发环境,代码变更毫秒级生效,开发体验极致流畅
-- **声明式 DSL 架构**: `defineConfig` 配置驱动应用组装,`defineMiddleware` 声明中间件链,入口文件简洁
-- **AI 驱动开发**: Claude Code + CLAUDE.md + MCP 插件生态,AI 理解项目架构,自动生成测试用例(Vitest)
-- **监控系统**: 集成 Sentry 错误追踪,支持自建或云原生方案(小团队推荐云服务,免运维)
-- **Excel 处理**: 基于 excelize-wasm 的高性能 Excel 处理，单例延迟加载，golang 同款
+- **Modern Tech Stack**: Hono + TypeScript + Vite + Drizzle ORM + PostgreSQL
+- **Progressive Layering**: Functional development standards, multi-tier routing structure, optional DDD for complex business logic
+- **Automated Documentation**: OpenAPI 3.1 spec + Scalar UI, code as documentation with online debugging and type generation
+- **Multi-layer Auth**: Dual JWT keys (Admin/Client isolation) + Casbin RBAC + KeyMatch3 RESTful path matching, no backend permission identifier storage needed
+- **Declarative Paginator**: Secure declarative queries based on Refine spec, extended Refine query with backend-only JOIN support
+- **Complete Permission System**: User management + Role management + Casbin policies + Refine Resource compile-time menu routing, zero runtime overhead
+- **Business + System Dictionary**: Business dictionaries support runtime dynamic configuration (JSONB + Redis cache), system dictionaries use PostgreSQL Enum for compile-time type checking
+- **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
+- **High-performance Cache**: Redis caching (cluster mode supported) + multi-layer rate limiting + permission caching + session management + distributed locks
+- **Task Queue & Scheduling**: Background task queue management and scheduled tasks based on pg-boss (distributed-safe, single execution across nodes)
+- **Functional Infrastructure**: Infrastructure layer built on Effect-TS with type-safe dependency injection, composable error handling, structured concurrency
+- **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, Alibaba Cloud OSS, AWS S3, etc.)
+- **Smart CAPTCHA**: Integrated Cap.js, lightweight modern CAPTCHA based on SHA-256 proof-of-work, privacy-friendly with zero tracking
+- **Type-safe System**: Hono + Zod + TypeScript full-chain type inference, catch issues at compile time
+- **Instant Feedback Development**: Vite-powered hot-reload dev environment, millisecond-level code updates for ultimate development experience
+- **Declarative DSL Architecture**: `defineConfig` drives application assembly, `defineMiddleware` declares middleware chains, entry file stays minimal
+- **AI-driven Development**: Claude Code + CLAUDE.md + MCP plugin ecosystem, AI understands project architecture, auto-generates test cases (Vitest)
+- **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
+- **Excel Processing**: High-performance Excel processing based on excelize-wasm, singleton lazy loading, same as the Go version
 
-## 快速开始
+## Quick Start
 
-### 本地开发环境
+### Local Development Environment
 
-- Node.js >= 24(建议使用latest)
-- pnpm >= 10(根据package.json里的packageManager版本号来即可)
-- PostgreSQL >= 18(如果使用17请参考readme中的降级指南很轻松的降级)
-- Redis >= 7(这个无所谓，7或者latest都行)
+- Node.js >= 24 (latest recommended)
+- pnpm >= 10 (use the version specified in packageManager field of package.json)
+- PostgreSQL >= 18 (if using 17, refer to the downgrade guide in this README for easy downgrade)
+- Redis >= 7 (7 or latest both work)
 
-#### 安装步骤
+#### Installation Steps
 
-1. **克隆项目**
+1. **Clone the repository**
 
    ```bash
    git clone https://github.com/zhe-qi/clhoria-template
    cd clhoria-template
    ```
 
-2. **安装依赖**
+2. **Install dependencies**
 
    ```bash
    npm i -g corepack
    pnpm install
    ```
 
-3. **配置环境变量**
+3. **Configure environment variables**
 
    ```bash
    cp .env.example .env
    ```
 
-4. **初始化数据库**
+4. **Initialize database**
 
    ```bash
-   # 启动postgres服务(可选,在本地docker环境下快速搭建postgres数据库)
+   # Start PostgreSQL service (optional, quickly set up PostgreSQL database in local Docker environment)
    docker compose --env-file .env run -d --service-ports postgres
 
-   # 启动redis服务(可选,在本地docker环境下快速搭建redis)
+   # Start Redis service (optional, quickly set up Redis in local Docker environment)
    docker compose --env-file .env run -d --service-ports redis
 
-   # 执行数据库迁移(开发环境快速迭代请直接使用 pnpm push，尽可能保证 generate 和 migrate 用在重要节点)
+   # Execute database migration (for rapid dev iteration use pnpm push directly, reserve generate and migrate for important milestones)
    pnpm migrate
 
-   # 填充初始数据(可选,应用启动时会自动检查并初始化)
+   # Seed initial data (optional, app will auto-check and initialize on startup)
    npm install -g bun
    pnpm seed
    ```
 
-   **生产环境部署**需要先验证迁移:
+   **For production deployment**, verify migrations first:
 
    ```bash
-   pnpm generate  # 生成迁移文件
-   pnpm migrate   # 执行迁移
+   pnpm generate  # Generate migration files
+   pnpm migrate   # Execute migrations
    ```
 
-5. **启动开发服务器**
+5. **Start development server**
    ```bash
    pnpm dev
    ```
 
-访问 <http://localhost:9999> 查看 API 文档。
+Visit <http://localhost:9999> to view the API documentation.
 
-## TypeScript 5.9+ 和 ts-go 支持
+## TypeScript 5.9+ and ts-go Support
 
-本项目支持使用实验性的 ts-go 来提升 TypeScript 的类型检查和语言服务性能。在当前项目规模下，ts-go 的性能提升非常明显，且语言服务相对稳定，推荐使用。
+This project supports using the experimental ts-go to enhance TypeScript type checking and language service performance. At the current project scale, ts-go provides very significant performance improvements and the language service is relatively stable, so it is recommended.
 
-### 使用 ts-go（推荐）
+### Using ts-go (Recommended)
 
-安装 VSCode 插件：[TypeScript Native Preview](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)
+Install the VSCode extension: [TypeScript Native Preview](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)
 
-> **注意**：目前 ts-go 仅用于类型检查和语言服务，开发和打包基于 Vite (Rolldown)。
+> **Note**: Currently ts-go is only used for type checking and language service. Development and bundling are based on Vite (Rolldown).
 
-> **缓存问题**：如果遇到 ts 服务报错或类型缓存异常，使用 `Cmd + Shift + P` 打开命令面板，输入 `restart`，找到 **TypeScript: Restart TS Server** 重启 TS 服务即可恢复正常。
+> **Cache Issues**: If you encounter TS service errors or type cache anomalies, use `Cmd + Shift + P` to open the command palette, type `restart`, and find **TypeScript: Restart TS Server** to restart the TS service and restore normal operation.
 
-> **性能提示**：Zod 对类型服务的性能消耗较大，ts-go 在这方面有明显改善。如果能接受偶尔的缓存问题，仍然建议继续使用 ts-go 以获得更好的开发体验。
+> **Performance Tip**: Zod has significant performance overhead on type services. ts-go notably improves this. If you can tolerate occasional cache issues, it is still recommended to use ts-go for a better development experience.
 
-### 不使用 ts-go
+### Not Using ts-go
 
-如果不希望使用 ts-go，可以按以下步骤回退：
+If you prefer not to use ts-go, follow these steps to revert:
 
-1. 移除 `.vscode/settings.json` 里的 `"typescript.experimental.useTsgo": true`
-2. 执行 `pnpm remove @typescript/native-preview`
-3. 修改 `package.json` 中的 `typecheck` 命令，将 `npx tsgo` 改为 `tsc`
+1. Remove `"typescript.experimental.useTsgo": true` from `.vscode/settings.json`
+2. Run `pnpm remove @typescript/native-preview`
+3. Modify the `typecheck` command in `package.json`, changing `npx tsgo` to `tsc`
 
-## 开发规范
+## Development Guidelines
 
-本项目采用 **规范驱动开发（Spec-Driven Development, SDD）** 方法论。SDD 颠覆了传统的开发层级关系——让规范成为主导，代码成为规范的实现。通过 AI 能力，精确的规范可以直接生成可工作的代码，同时通过结构化流程避免混乱。
+This project adopts the **Spec-Driven Development (SDD)** methodology. SDD inverts the traditional development hierarchy—specifications become the primary artifact, and code becomes an implementation of the spec. Through AI capabilities, precise specifications can directly generate working code while structured processes prevent chaos.
 
-> 📖 延伸阅读：[Spec-Driven Development](https://github.com/github/spec-kit/blob/main/spec-driven.md)
+> 📖 Further reading: [Spec-Driven Development](https://github.com/github/spec-kit/blob/main/spec-driven.md)
 
-### Claude Code 开发流程
+### Claude Code Development Workflow
 
-遵循 6 阶段标准流程：`Spec → 生成代码 → 生成测试 → 循环优化 → 模块文档`
+Follow the 6-stage standard workflow: `Spec → Generate Code → Generate Tests → Iterative Optimization → Module Documentation`
 
-| 阶段     | 输出                                               |
-| -------- | -------------------------------------------------- |
-| Spec     | `docs/{feature}/spec.md`（需求、架构、测试策略）   |
-| 生成代码 | 完整接口代码（Schema + Handlers）+ migration       |
-| 生成测试 | `__tests__/int.test.ts`                            |
-| 循环优化 | 持续改进直到通过验收                               |
-| 模块文档 | `docs/{feature}/module.md`（文件索引、功能、要点） |
+| Stage                  | Output                                                               |
+| ---------------------- | -------------------------------------------------------------------- |
+| Spec                   | `docs/{feature}/spec.md` (requirements, architecture, test strategy) |
+| Generate Code          | Complete API code (Schema + Handlers) + migration                    |
+| Generate Tests         | `__tests__/int.test.ts`                                              |
+| Iterative Optimization | Continuously improve until acceptance criteria met                   |
+| Module Documentation   | `docs/{feature}/module.md` (file index, functions, key points)       |
 
-**验收标准**：所有测试通过 + 符合 CLAUDE.md 规范 + 无明显性能问题
+**Acceptance Criteria**: All tests pass + Complies with CLAUDE.md specs + No obvious performance issues
 
 ---
 
-### 路由模块结构
+### Route Module Structure
 
 ```text
 routes/{tier}/{feature}/
-├── {feature}.handlers.ts       # 业务处理器（必需）
-├── {feature}.routes.ts         # 路由定义 + OpenAPI（必需）
-├── {feature}.index.ts          # 统一导出（必需）
-├── {feature}.types.ts          # 类型定义（必需）
-├── {feature}.schema.ts         # 路由级 Zod Schema（可选，复杂 Schema 时）
-├── {feature}.helpers.ts        # 辅助函数（可选，复杂业务逻辑或模块内复用）
-└── __tests__/                  # 测试目录（推荐）
+├── {feature}.handlers.ts       # Business handlers (required)
+├── {feature}.routes.ts         # Route definitions + OpenAPI (required)
+├── {feature}.index.ts          # Unified exports (required)
+├── {feature}.types.ts          # Type definitions (required)
+├── {feature}.schema.ts         # Route-level Zod Schema (optional, for complex schemas)
+├── {feature}.helpers.ts        # Helper functions (optional, for complex business logic or intra-module reuse)
+└── __tests__/                  # Test directory (recommended)
 ```
 
-简单 DB 操作直接在 handlers 中内联，复杂业务逻辑抽到 helpers。跨层级复用的服务放在 `src/services/{service}/`
+Simple DB operations stay inline in handlers, complex business logic goes to helpers. Cross-tier shared services go in `src/services/{service}/`
 
-### 数据库架构
+### Database Schema
 
 ```text
 src/db/schema/
-├── _shard/                     # 共享基础组件
-│   ├── base-columns.ts         # 通用字段（id/createdAt/updatedAt等）
-│   └── enums.ts                # PostgreSQL 枚举定义
-├── {tier}/{feature}/           # 业务表定义（按层级和功能组织）
-│   ├── {entity}.ts             # Drizzle 表定义
-│   └── index.ts                # 该功能模块的表导出
-└── index.ts                    # 根导出（汇总所有 schema）
+├── _shard/                     # Shared base components
+│   ├── base-columns.ts         # Common fields (id/createdAt/updatedAt, etc.)
+│   └── enums.ts                # PostgreSQL enum definitions
+├── {tier}/{feature}/           # Business table definitions (organized by tier and feature)
+│   ├── {entity}.ts             # Drizzle table definitions
+│   └── index.ts                # Feature module table exports
+└── index.ts                    # Root exports (aggregate all schemas)
 ```
 
-**目录说明:**
+**Directory Notes:**
 
-- **`_shard/` 目录**: 存放跨功能的共享基础组件
-  - `base-columns.ts`: 导出 `baseColumns` 对象，所有表通过 `...baseColumns` 扩展
-  - `enums.ts`: 使用 `pgEnum()` 定义数据库枚举类型
+- **`_shard/` directory**: Stores shared base components across features
+  - `base-columns.ts`: Exports `baseColumns` object, all tables extend via `...baseColumns`
+  - `enums.ts`: Defines database enum types using `pgEnum()`
 
-- **业务表组织**: 按 `{tier}/{feature}` 分层（如 `admin/system/users.ts`），与路由结构对应
+- **Business table organization**: Layered by `{tier}/{feature}` (e.g., `admin/system/users.ts`), corresponding to route structure
 
-### Zod Schema 分层
+### Zod Schema Layering
 
-- **DB 层**（`db/schema/{entity}.ts`）：通过 `createSelectSchema` / `createInsertSchema` 从 Drizzle 表定义生成基础 Schema，`.meta({ description })` 仅在此层添加
-- **路由层**（`routes/{tier}/{feature}/*.schema.ts`）：继承 DB Schema 进行 pick/omit/extend 组合，推荐用 `z.ZodType<Interface>` 约束类型安全
-- 简单 CRUD 可直接在 `routes.ts` 中使用 DB Schema，无需单独 schema 文件
+- **DB Layer** (`db/schema/{entity}.ts`): Generate base schemas from Drizzle table definitions via `createSelectSchema` / `createInsertSchema`, `.meta({ description })` added only at this layer
+- **Route Layer** (`routes/{tier}/{feature}/*.schema.ts`): Inherit DB schemas with pick/omit/extend composition, recommend using `z.ZodType<Interface>` for type safety
+- Simple CRUD can use DB schemas directly in `routes.ts` without a separate schema file
 
 ```typescript
-// DB 层：生成基础 Schema
+// DB Layer: Generate base schema
 export const selectUserSchema = createSelectSchema(users, {
-  username: schema => schema.meta({ description: "用户名" }),
+  username: schema => schema.meta({ description: "Username" }),
 });
-// 路由层：组合业务 Schema
+// Route Layer: Compose business schema
 export const createUserRequestSchema: z.ZodType<CreateUserRequest>
   = insertUserSchema.pick({ username: true, email: true });
 ```
 
-**PostgreSQL 版本说明**:
+**PostgreSQL Version Notes**:
 
-- **PostgreSQL 18 及以上**: 无需任何修改,直接使用即可。项目默认使用 PostgreSQL 18 的 `uuidv7()` 函数。
-- **PostgreSQL 18 以下**: 需要手动修改 `src/db/schema/_shard/base-columns.ts` 文件:
-  1. 安装 `uuid` 库:
+- **PostgreSQL 18 and above**: No modifications needed, works out of the box. The project uses PostgreSQL 18's `uuidv7()` function by default.
+- **Below PostgreSQL 18**: You need to manually modify `src/db/schema/_shard/base-columns.ts`:
+  1. Install the `uuid` library:
      ```bash
      pnpm add uuid
      pnpm add -D @types/uuid
      ```
-  2. 修改 `base-columns.ts` 文件,在文件顶部添加导入:
+  2. Add import at the top of `base-columns.ts`:
      ```typescript
      import { uuidV7 } from "uuid";
      ```
-  3. 修改 `id` 字段定义:
+  3. Modify the `id` field definition:
      ```typescript
-     // 将
+     // Change from
      uuid().primaryKey().notNull().default(sql`uuidv7()`);
-     // 改为
+     // To
      uuid().primaryKey().notNull().$defaultFn(() => uuidV7());
      ```
 
-### 架构策略
+### Architecture Strategy
 
-**本项目默认采用 Vertical Slice Architecture（垂直切片架构）+ Transaction Script 模式**：按功能特性组织代码（`routes/{tier}/{feature}/`），每个切片自包含 routes、handlers、types、schema，Handler 内直接操作 Drizzle 完成业务逻辑。选择这种架构是因为大多数后台管理场景本质是数据进出，分层架构（Controller → Service → Repository）在简单 CRUD 中只是增加了透传样板代码，垂直切片让每个功能模块高内聚、低耦合，新增/删除功能不影响其他模块，也更利于 AI 理解和生成代码。复杂逻辑抽到 helpers 即可。
+**This project defaults to Vertical Slice Architecture + Transaction Script pattern**: Code is organized by feature (`routes/{tier}/{feature}/`), each slice is self-contained with routes, handlers, types, and schema, Handlers directly operate Drizzle to fulfill business logic. This architecture is chosen because most admin management scenarios are essentially data in and out — layered architecture (Controller → Service → Repository) only adds pass-through boilerplate for simple CRUD. Vertical slices keep each feature module highly cohesive and loosely coupled, adding or removing features doesn't affect other modules, and it's more conducive to AI understanding and code generation. Complex logic is extracted to helpers as needed.
 
-**复杂业务（约 20%）** 当业务规则、状态流转、跨模块编排等复杂度超出 Transaction Script 承载范围时，根据场景选择合适的架构模式：
+**Complex Business (~20%)** When business rules, state transitions, cross-module orchestration, etc. exceed the capacity of Transaction Script, choose the appropriate architecture pattern based on scenario:
 
-| 场景               | 推荐架构      | 说明                                                                                            |
-| ------------------ | ------------- | ----------------------------------------------------------------------------------------------- |
-| 需要技术解耦       | 六边形架构    | Port/Adapter 隔离外部依赖                                                                       |
-| 复杂业务规则       | DDD           | 领域模型封装业务规则                                                                            |
-| 复杂 + 解耦        | DDD + 六边形  | 两者结合                                                                                        |
-| 纯函数优先         | FCIS          | Functional Core 纯逻辑 + Imperative Shell 处理副作用，核心可独立测试                            |
-| 纯函数 + 解耦      | FCIS + 六边形 | 纯函数核心 + Port/Adapter 隔离 I/O，兼顾可测试性与可替换性                                      |
-| 类型安全副作用管理 | Effect-TS     | 基于 Effect 的函数式架构，类型安全的依赖注入、错误处理、结构化并发，副作用在类型层面可追踪      |
-| 读写模型差异大     | 单体 CQRS     | 同一数据库内读写分离模型，Query 侧可扁平化 DTO/视图优化查询，Command 侧走领域逻辑，无需消息总线 |
+| Scenario                         | Recommended      | Description                                                                                                                                                          |
+| -------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Need Tech Decoupling             | Hexagonal        | Port/Adapter isolates external dependencies                                                                                                                          |
+| Complex Business Rules           | DDD              | Domain model encapsulates business rules                                                                                                                             |
+| Complex + Decoupling             | DDD + Hexagonal  | Combine both approaches                                                                                                                                              |
+| Pure Functions First             | FCIS             | Functional Core for pure logic + Imperative Shell handles side effects, core independently testable                                                                  |
+| Pure Functions + Decoupling      | FCIS + Hexagonal | Pure functional core + Port/Adapter isolates I/O, balancing testability and replaceability                                                                           |
+| Type-safe Side Effect Management | Effect-TS        | Effect-based functional architecture with type-safe DI, error handling, structured concurrency, side effects trackable at the type level                             |
+| Read/Write Model Asymmetry       | Monolith CQRS    | Separate read/write models within a single database, Query side uses flattened DTOs/views for optimized reads, Command side uses domain logic, no message bus needed |
 
-**核心思路**：DDD 关注领域建模，六边形关注依赖隔离，FCIS 关注纯函数与副作用分离，Effect-TS 将副作用提升到类型系统，单体 CQRS 解决读写模型不对称问题。可根据业务复杂度自由组合。
+**Core Ideas**: DDD focuses on domain modeling, Hexagonal on dependency isolation, FCIS on separating pure functions from side effects, Effect-TS elevates side effects into the type system, Monolith CQRS addresses read/write model asymmetry. Combine freely based on business complexity.
 
-> **单体 CQRS vs 数据库读写分离**：云厂商 PG 集群 Proxy（如阿里云 PolarDB、RDS Proxy）解决的是**数据库负载**问题——同一条 SQL 自动路由到主/只读节点，应用代码无感知。单体 CQRS 解决的是**应用模型**问题——写入走富领域模型保证业务一致性，查询走扁平 DTO/数据库视图跳过领域层直达数据，两者用不同的数据结构和代码路径。前者是运维层面的水平扩展，后者是代码层面的关注点分离，互不冲突且可叠加使用。
+> **Monolith CQRS vs Database Read/Write Splitting**: Cloud PG cluster proxies (e.g., Alibaba Cloud PolarDB, RDS Proxy) solve **database load** problems — the same SQL is automatically routed to primary/read-only nodes, transparent to application code. Monolith CQRS solves **application model** problems — writes go through rich domain models to ensure business consistency, queries use flattened DTOs/database views bypassing the domain layer to reach data directly, each with different data structures and code paths. The former is horizontal scaling at the infrastructure level, the latter is separation of concerns at the code level. They don't conflict and can be stacked together.
 
-> **Effect-TS 深度集成**：Effect 的 `Context.Tag` + `Layer` 体系天然就是六边形架构——`Tag` 声明接口（Port），`Layer` 提供实现（Adapter），业务逻辑通过 `Effect.gen` 编排，只依赖 Tag 抽象而不依赖具体实现。测试时替换 `Layer` 即可注入 mock，无需额外的 interface 文件。同时 Effect 的类型通道 `Effect<Success, Error, Requirements>` 让依赖、错误、成功值全部显式声明在函数签名中——编译器强制你处理每一种错误路径，遗漏直接报红。相比手写 Port/Adapter + try/catch，Effect 用一套机制同时解决了依赖注入、错误处理和并发控制，适合状态机、工作流、跨服务编排等真正复杂的业务场景。本项目已在基础设施层（分布式锁 `withLock`、任务队列、资源初始化）使用 Effect，业务层可按需渐进采用。
+> **Effect-TS Deep Integration**: Effect's `Context.Tag` + `Layer` system is naturally hexagonal architecture — `Tag` declares the interface (Port), `Layer` provides the implementation (Adapter), business logic is orchestrated through `Effect.gen`, depending only on Tag abstractions rather than concrete implementations. Swap out a `Layer` in tests to inject mocks, no extra interface files needed. Meanwhile, Effect's type channel `Effect<Success, Error, Requirements>` makes dependencies, errors, and success values all explicitly declared in the function signature — the compiler forces you to handle every error path, missing one is a compile error. Compared to hand-written Port/Adapter + try/catch, Effect solves dependency injection, error handling, and concurrency control with a single mechanism, suitable for state machines, workflows, cross-service orchestration, and other truly complex business scenarios. This project already uses Effect at the infrastructure layer (distributed locks `withLock`, task queues, resource initialization), and the business layer can adopt it incrementally as needed.
 
 ```text
-src/domain/[module]/                     # 领域层（纯业务逻辑）
-├── [module].entity.ts                   # 领域实体
-├── [module].service.ts                  # 领域服务
-└── [module].repository.port.ts          # 仓储接口（Port）
-src/infrastructure/persistence/          # 基础设施层（Adapter 实现）
+src/domain/[module]/                     # Domain layer (pure business logic)
+├── [module].entity.ts                   # Domain entity
+├── [module].service.ts                  # Domain service
+└── [module].repository.port.ts          # Repository interface (Port)
+src/infrastructure/persistence/          # Infrastructure layer (Adapter implementation)
 ```
 
-## 核心架构特性
+## Core Architecture Features
 
-### 🔄 自动路由加载
+### 🔄 Auto Route Loading
 
-基于 `import.meta.glob` 自动扫描 `routes/{tier}/**/*.index.ts` 并注册路由模块。新增模块只需创建目录，保存后 HMR 毫秒级生效。每个模块必须在 `{feature}.index.ts` 中 `export default` 路由实例。
+Auto-scans and registers route modules from `routes/{tier}/**/*.index.ts` using `import.meta.glob`. Just create a directory to add new modules, HMR takes effect in milliseconds after saving. Each module must `export default` the route instance in `{feature}.index.ts`.
 
-### 🧩 单例管理系统
+### 🧩 Singleton Management System
 
-统一管理 PostgreSQL、Redis、Casbin 等长连接资源，解决 Vite HMR 模式下的连接泄漏问题，支持自动资源清理
+Unified management for long-lived connections like PostgreSQL, Redis, and Casbin. Solves connection leak issues in Vite HMR mode with automatic resource cleanup.
 
-### 💉 三层依赖注入
+### 💉 Three-Layer Dependency Injection
 
-本项目没有使用传统 DI 容器（如 InversifyJS），而是采用更轻量直接的三层注入策略：
+This project does not use a traditional DI container (e.g., InversifyJS), opting for a lighter and more direct three-layer injection strategy:
 
-| 层级             | 机制                                                               | 作用域 | 典型用途                                                                                          |
-| ---------------- | ------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------- |
-| **模块单例**     | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | 进程级 | DB 连接池、Redis 客户端、Casbin Enforcer、Logger 等长生命周期资源                                 |
-| **请求上下文**   | Hono `c.set()` / `c.get()` + `AppBindings` 类型约束                | 请求级 | JWT 负载、请求 ID、tierBasePath 等请求作用域数据，中间件写入 → Handler 读取                       |
-| **Effect Layer** | `Context.Tag` + `Layer.mergeAll`                                   | 可组合 | 基础设施服务（DB、Logger、pg-boss）的类型安全组合，用于分布式锁、任务队列等需要 Effect 编排的场景 |
+| Layer                | Mechanism                                                          | Scope      | Typical Usage                                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Module Singleton** | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | Process    | DB connection pool, Redis client, Casbin Enforcer, Logger and other long-lived resources                                                                            |
+| **Request Context**  | Hono `c.set()` / `c.get()` + `AppBindings` type constraint         | Request    | JWT payload, request ID, tierBasePath and other request-scoped data, written by middleware → read by handlers                                                       |
+| **Effect Layer**     | `Context.Tag` + `Layer.mergeAll`                                   | Composable | Type-safe composition of infrastructure services (DB, Logger, pg-boss), used for distributed locks, task queues, and other scenarios requiring Effect orchestration |
 
-**为什么不用 DI 容器**：后台管理系统的依赖图天然简单——长连接资源是进程级单例，请求数据通过 Hono Context 传递，两层已覆盖 90% 场景。Effect Layer 补充了需要类型安全组合的剩余 10%（如 `withLock` 分布式锁）。引入 DI 容器只会增加间接层和注册仪式，对于这种规模的项目来说过度设计。
+**Why no DI container**: The dependency graph in admin management systems is inherently simple — long-lived resources are process-level singletons, request data flows through Hono Context, these two layers cover 90% of scenarios. Effect Layer supplements the remaining 10% that needs type-safe composition (e.g., `withLock` distributed locks). Introducing a DI container would only add indirection and registration ceremony, which is over-engineering for this scale of project.
 
-#### 核心思路
+#### Core Concepts
 
-**权限系统**:基于 RESTful API 路径 + Casbin KeyMatch3,代码即权限,无需数据库存储权限标识
-**菜单系统**:Refine Resource 编译时路由,运行时零开销,代码即菜单
-**字典系统**:TypeScript 枚举 → PostgreSQL Enum → OpenAPI 自动生成,前后端 100% 同步
+**Permission System**: Based on RESTful API paths + Casbin KeyMatch3, code as permissions, no database permission identifier storage needed
+**Menu System**: Refine Resource compile-time routing, zero runtime overhead, code as menus
+**Dictionary System**: TypeScript enum → PostgreSQL Enum → OpenAPI auto-generation, 100% frontend-backend sync
 
-#### 对比传统方案
+#### Comparison with Traditional Solutions
 
-| 维度     | 本项目方案                                 | 传统方案                                     |
-| -------- | ------------------------------------------ | -------------------------------------------- |
-| **权限** | OpenAPI 路由定义,Casbin 策略匹配,自动同步  | 数据库权限表 + 关联表,手动维护,容易不一致    |
-| **菜单** | 编译时生成路由树,类型安全,零运行时开销     | 数据库存储菜单,运行时查询解析,需要管理界面   |
-| **字典** | 单一数据源,编译时类型检查,4 字节 Enum 存储 | 数据库字典表,运行时查询,需要 JOIN,容易不同步 |
-| **维护** | 改一处自动同步,TypeScript 编译时报错       | 多处手动同步:数据库 → 后端 → 前端 → 文档     |
+| Dimension       | This Project                                                            | Traditional Solution                                                                    |
+| --------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Permission**  | OpenAPI route definition, Casbin policy matching, auto-sync             | Database permission tables + association tables, manual maintenance, easy inconsistency |
+| **Menu**        | Compile-time route tree generation, type-safe, zero runtime overhead    | Database-stored menus, runtime query parsing, needs admin interface                     |
+| **Dictionary**  | Single source of truth, compile-time type checking, 4-byte Enum storage | Database dictionary tables, runtime queries, needs JOIN, easy inconsistency             |
+| **Maintenance** | Change once auto-sync everywhere, TypeScript compile-time errors        | Multiple manual syncs: database → backend → frontend → docs                             |
 
-### 📝 日志系统
+### 📝 Logging System
 
-基于 pino transport 架构，支持多目标输出（开发 `pino-pretty` / 生产 stdout JSON / 可选阿里云 SLS）。三种 child logger 自动注入 `type` 字段：`logger`（系统）、`operationLogger`（CRUD 审计，type: `OPERATION`）、`loginLogger`（登录记录，type: `LOGIN`）。
+Built on pino transport architecture, supporting multi-target output (dev `pino-pretty` / production stdout JSON / optional Alibaba Cloud SLS). Three child loggers auto-inject `type` field: `logger` (system), `operationLogger` (CRUD audit, type: `OPERATION`), `loginLogger` (login records, type: `LOGIN`).
 
-操作日志中间件已在 admin tier 全局配置（无参数模式存储原始 `urlPath`），也支持局部模式手动指定模块名：
+Operation log middleware is globally configured in admin tier (parameterless mode stores raw `urlPath`), also supports local mode with manually specified module names:
 
 ```typescript
-router.use(operationLog({ moduleName: "订单管理", description: "创建订单" }));
+router.use(operationLog({ moduleName: "Order Management", description: "Create Order" }));
 ```
 
-自定义 Transport 接入：在项目根目录创建 `transports/sls-transport.mjs`，使用 `pino-abstract-transport` 构建，然后在 `logger.ts` 的 `buildTransportTargets()` 中取消注释 SLS target。操作日志 `urlPath` 与 Casbin keymatch3 规则和 Refine resource 天然对应，前端可直接用权限树映射中文标签作为日志筛选维度。
+Custom Transport integration: Create `transports/sls-transport.mjs` in project root, build with `pino-abstract-transport`, then uncomment the SLS target in `logger.ts`'s `buildTransportTargets()`. Operation log `urlPath` naturally corresponds to Casbin keymatch3 rules and Refine resources, frontend can directly use permission tree mapping to Chinese labels as log filter dimensions.
 
-## 部署
+## Deployment
 
-### Docker 部署
+### Docker Deployment
 
 ```bash
-# 构建镜像
+# Build image
 docker build -t clhoria-template .
 
-# 运行容器
+# Run container
 docker run -p 9999:9999 --env-file .env clhoria-template
 ```
 
-## 部署特性
+## Deployment Features
 
-**可选 SaaS 依赖**: sentry、Cloudflare R2 对象存储等第三方服务均为可选,可完全部署在内网环境。技术栈符合信创要求,支持迁移至国产数据库(如人大金仓、华为高斯等)。
+**Optional SaaS Dependencies**: Sentry, Cloudflare R2 object storage and other third-party services are all optional, can be fully deployed in intranet environments. Tech stack meets localization requirements, supports migration to domestic databases (e.g., Kingbase, Huawei GaussDB, etc.).
 
-## 开发体验对比
+## Development Experience Comparison
 
-| 对比维度     | 本项目 (AI + Modern Stack)                      | 传统代码生成器                           |
-| ------------ | ----------------------------------------------- | ---------------------------------------- |
-| **开发效率** | Claude Code 智能理解需求,秒级生成符合规范的代码 | 手动配置模板麻烦,生成僵化代码,需大量修改 |
-| **接口管理** | OpenAPI + Zod 自动同步,类型安全,文档永不过期    | 手工维护接口文档,容易不同步              |
-| **代码质量** | TypeScript 全链路类型检查,编译时发现问题        | 生成代码缺乏类型约束,运行时错误频发      |
-| **维护成本** | 代码规范统一,AI 理解项目架构,维护简单           | 代码量大不够优雅,不好维护                |
+| Comparison           | This Project (AI + Modern Stack)                                                        | Traditional Code Generators                                                             |
+| -------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Efficiency**       | Claude Code intelligently understands requirements, generates compliant code in seconds | Manual template configuration tedious, generates rigid code needing heavy modifications |
+| **API Management**   | OpenAPI + Zod auto-sync, type-safe, docs never outdated                                 | Manual API documentation maintenance, easy inconsistency                                |
+| **Code Quality**     | TypeScript full-chain type checking, catch issues at compile time                       | Generated code lacks type constraints, runtime errors frequent                          |
+| **Maintenance Cost** | Unified code standards, AI understands project architecture, simple maintenance         | Large codebase not elegant enough, hard to maintain                                     |
 
-## 验证码系统对比
+## CAPTCHA System Comparison
 
 ### 🔐 Cap.js vs svg-captcha
 
-| 对比维度     | Cap.js (本项目采用)                          | svg-captcha                    |
-| ------------ | -------------------------------------------- | ------------------------------ |
-| **安全性**   | SHA-256 工作量证明,无视觉破解面,抗自动化     | 基于图像识别,易被 OCR 工具破解 |
-| **用户体验** | 无视觉谜题,后台静默计算,支持 Widget/隐形模式 | 传统图片验证,识别扭曲文字      |
-| **隐私**     | 自托管,零追踪零遥测,完全掌控数据             | 内存存储,功能固定              |
+| Comparison          | Cap.js (Used in This Project)                                           | svg-captcha                                              |
+| ------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Security**        | SHA-256 proof-of-work, no visual attack surface, anti-automation        | Image-based recognition, easily cracked by OCR tools     |
+| **User Experience** | No visual puzzles, background silent computation, Widget/Invisible mode | Traditional image verification, recognize distorted text |
+| **Privacy**         | Self-hosted, zero tracking & telemetry, full data control               | Memory storage, fixed functionality                      |
 
-## 性能对比
+## Performance Comparison
 
-### Hono vs Fastify 性能分析
+### Hono vs Fastify Performance Analysis
 
-在 Node.js 22 环境下,Fastify 依然保持性能优势,但差距已经不大:
+In Node.js 22 environment, Fastify still maintains performance advantage, but the gap is small:
 
 - **Fastify (Node.js)**: 142,695 req/s
 - **Hono (Node.js)**: 129,234 req/s
 
-详细基准测试:[bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
+Detailed benchmark: [bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
 
-### 🚀 高并发与性能优化方案
+### 🚀 High Concurrency & Performance Optimization Solutions
 
-**高并发解决方案**:K8s/阿里云 SLB 负载均衡 + PostgreSQL/Redis 高可用集群 + 分布式会话,实现无状态水平扩展
+**High Concurrency Solution**: K8s/Alibaba Cloud SLB load balancing + PostgreSQL/Redis HA clusters + distributed sessions, enabling stateless horizontal scaling
 
-**计算密集型优化**:
+**CPU-intensive Optimization**:
 
-| 场景             | 推荐方案       | 适用场景                       |
-| ---------------- | -------------- | ------------------------------ |
-| **多次重复调用** | napi-rs        | 图像处理、加密解密、数据压缩   |
-| **单次密集计算** | WASM           | 复杂算法、科学计算、单次重计算 |
-| **并行多任务**   | Worker Threads | 大量独立任务、并发数据处理     |
+| Scenario                  | Recommended    | Use Case                                                           |
+| ------------------------- | -------------- | ------------------------------------------------------------------ |
+| **Repeated Calls**        | napi-rs        | Image processing, encryption/decryption, data compression          |
+| **Single Intensive Calc** | WASM           | Complex algorithms, scientific computing, single heavy computation |
+| **Parallel Multi-task**   | Worker Threads | Many independent tasks, concurrent data processing                 |
 
-## Claude Code 深度集成(可选)
+## Claude Code Deep Integration (Optional)
 
-本项目专为 AI 驱动开发而设计,提供完整的 CLAUDE.md 配置,让 AI 深度理解项目架构。
+This project is designed for AI-driven development, providing complete CLAUDE.md configuration for deep AI understanding of project architecture.
 
-**推荐 MCP 插件**:
+**Recommended MCP Plugins**:
 
-- **[Serena](https://github.com/SerenaAI/serena-mcp)**:智能代码分析和重构建议
-- **[Context7](https://github.com/context7/mcp-plugin)**:实时技术文档查询和代码示例
+- **[Serena](https://github.com/SerenaAI/serena-mcp)**: Intelligent code analysis and refactoring suggestions
+- **[Context7](https://github.com/context7/mcp-plugin)**: Real-time technical documentation queries and code examples
 
-## VSCode 代码片段
+## VSCode Code Snippets
 
-项目内置了 CRUD 开发常用的代码片段模板（`.vscode/crud.code-snippets`），在 TypeScript 文件中输入前缀后按 `Tab` 键即可快速生成代码。
+The project includes built-in code snippet templates for CRUD development (`.vscode/crud.code-snippets`). Type the prefix in a TypeScript file and press `Tab` to quickly generate code.
 
-| 前缀            | 说明                                          |
-| --------------- | --------------------------------------------- |
-| `crud-schema`   | 完整 schema.ts 模板                           |
-| `crud-routes`   | 完整 routes.ts 模板（含 CRUD 五个路由）       |
-| `crud-handlers` | 完整 handlers.ts 模板（含 CRUD 五个处理函数） |
-| `crud-index`    | 完整 index.ts 模板                            |
+| Prefix          | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| `crud-schema`   | Complete schema.ts template                              |
+| `crud-routes`   | Complete routes.ts template (with all 5 CRUD routes)     |
+| `crud-handlers` | Complete handlers.ts template (with all 5 CRUD handlers) |
+| `crud-index`    | Complete index.ts template                               |
 
-## 测试
+## Testing
 
-使用 Vitest 测试框架,支持完整的单元测试和集成测试,可以在 tests 下添加端到端测试。
+Uses Vitest testing framework, supports complete unit testing and integration testing, can add end-to-end tests under tests directory.
 
 ```bash
-# 运行测试
+# Run tests
 pnpm test
 ```
 
-## 引用
+## References
 
 - [hono-open-api-starter](https://github.com/w3cj/hono-open-api-starter)
 - [stoker](https://github.com/w3cj/stoker)
 
-## 支持
+## Support
 
-如有问题或建议,请创建 [Issue](https://github.com/zhe-qi/clhoria-template/issues) 或联系维护者。
+For questions or suggestions, please create an [Issue](https://github.com/zhe-qi/clhoria-template/issues) or contact the maintainer.
 
-**QQ 交流群**: 1076889416
+**QQ Group**: 1076889416
 
-## 贡献指南
+## Contributing Guidelines
 
-欢迎贡献!请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范,提交 PR 前确保 `pnpm test` 和 `pnpm lint` 通过。
+Contributions welcome! Please follow [Conventional Commits](https://www.conventionalcommits.org/) specifications, ensure `pnpm test` and `pnpm lint` pass before submitting PR.
 
-## 许可证
+## License
 
-MIT License - 查看 [LICENSE](https://github.com/zhe-qi/clhoria-template/blob/main/LICENSE) 文件了解详情。
+MIT License - see [LICENSE](https://github.com/zhe-qi/clhoria-template/blob/main/LICENSE) file for details.

@@ -23,7 +23,7 @@ function getWasmPath(): string {
   throw new Error(`excelize wasm file not found. Searched: ${wasmPath}, ${fallbackPath}`);
 }
 
-/** 初始化 excelize wasm（在 bootstrap 中调用） */
+/** Initialize excelize wasm (called in bootstrap) / 初始化 excelize wasm（在 bootstrap 中调用） */
 export const initExcelize = Effect.gen(function* () {
   if (hasSingleton(KEY)) return;
 
@@ -33,7 +33,7 @@ export const initExcelize = Effect.gen(function* () {
   createSingleton(KEY, () => instance);
 });
 
-/** 获取 excelize 实例（必须在 bootstrap 之后调用） */
+/** Get excelize instance (must be called after bootstrap) / 获取 excelize 实例（必须在 bootstrap 之后调用） */
 export function getExcelize(): Excelize {
   const instance = getSingleton<Excelize>(KEY);
 

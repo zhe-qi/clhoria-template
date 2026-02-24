@@ -12,7 +12,7 @@ const HealthResponseSchema = z.object({
   timestamp: z.string().meta({ description: "时间戳" }),
 });
 
-/** 健康检查接口 */
+/** Health check endpoint / 健康检查接口 */
 export const get = createRoute({
   tags,
   path: routePrefix,

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getIPAddress } from "./index";
 
-// Mock Redis 客户端
+// Mock Redis client / Mock Redis 客户端
 vi.mock("@/lib/services/redis", () => ({
   default: {
     get: vi.fn(),

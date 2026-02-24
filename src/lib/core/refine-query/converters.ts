@@ -8,11 +8,11 @@ import { and, asc, between, desc, eq, gt, gte, ilike, inArray, isNotNull, isNull
 
 import logger from "@/lib/services/logger";
 
-// ============================================================================
-// 过滤器转换器
-// ============================================================================
+// ============ Filters Converter / 过滤器转换器 ============
 
 /**
+ * Filters converter class
+ * Converts Refine CrudFilters to Drizzle SQL conditions
  * 过滤器转换器类
  * 将 Refine CrudFilters 转换为 Drizzle SQL 条件
  */
@@ -23,7 +23,7 @@ export class FiltersConverter {
     this.table = table;
   }
 
-  /** 转换 CrudFilters 为 SQL 条件 */
+  /** Convert CrudFilters to SQL conditions / 转换 CrudFilters 为 SQL 条件 */
   convert(filters?: CrudFilters): SQL<unknown> | undefined {
     if (!filters || filters.length === 0)
       return undefined;
@@ -161,14 +161,14 @@ export class FiltersConverter {
   }
 }
 
-/** 便捷函数：转换过滤器 */
+/** Convenience function: convert filters / 便捷函数：转换过滤器 */
 export function convertFiltersToSQL(filters: CrudFilters | undefined, table: PgTable): SQL<unknown> | undefined {
   if (!filters)
     return undefined;
   return new FiltersConverter(table).convert(filters);
 }
 
-/** 验证过滤器字段 */
+/** Validate filter fields / 验证过滤器字段 */
 export function validateFilterFields(
   filters: CrudFilters,
   table: PgTable,
@@ -192,11 +192,11 @@ export function validateFilterFields(
   return { valid: invalidFields.length === 0, invalidFields: [...new Set(invalidFields)] };
 }
 
-// ============================================================================
-// 排序转换器
-// ============================================================================
+// ============ Sorting Converter / 排序转换器 ============
 
 /**
+ * Sorting converter class
+ * Converts Refine CrudSorting to Drizzle ORDER BY conditions
  * 排序转换器类
  * 将 Refine CrudSorting 转换为 Drizzle ORDER BY 条件
  */
@@ -207,7 +207,7 @@ export class SortersConverter {
     this.table = table;
   }
 
-  /** 转换 CrudSorting 为 SQL ORDER BY 条件 */
+  /** Convert CrudSorting to SQL ORDER BY conditions / 转换 CrudSorting 为 SQL ORDER BY 条件 */
   convert(sorters?: CrudSorting): SQL<unknown>[] {
     if (!sorters || sorters.length === 0) {
       return [];
@@ -253,14 +253,14 @@ export class SortersConverter {
   }
 }
 
-/** 便捷函数：转换排序条件 */
+/** Convenience function: convert sorting conditions / 便捷函数：转换排序条件 */
 export function convertSortersToSQL(sorters: CrudSorting | undefined, table: PgTable): SQL<unknown>[] {
   if (!sorters)
     return [];
   return new SortersConverter(table).convert(sorters);
 }
 
-/** 验证排序字段 */
+/** Validate sorting fields / 验证排序字段 */
 export function validateSorterFields(
   sorters: CrudSorting,
   table: PgTable,
@@ -274,7 +274,7 @@ export function validateSorterFields(
   return { valid: invalidFields.length === 0, invalidFields: [...new Set(invalidFields)] };
 }
 
-/** 添加默认排序 */
+/** Add default sorting / 添加默认排序 */
 export function addDefaultSorting(
   sorters: CrudSorting | undefined,
   defaultField: string = "createdAt",

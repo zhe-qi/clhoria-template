@@ -22,7 +22,7 @@ function createDictsApp() {
 
 const client = testClient(createDictsApp());
 
-// 测试数据
+// Test data / 测试数据
 const testDictCode = "public_test_dict";
 const testDict = {
   code: testDictCode,
@@ -37,16 +37,17 @@ const testDict = {
 };
 
 /**
+ * Clean up test dict data
  * 清理测试字典数据
  */
 async function cleanupTestDicts(): Promise<void> {
   try {
-    // 从数据库删除所有测试字典（code 以 public_test_ 开头）
+    // Delete all test dicts from database (code starts with public_test_) / 从数据库删除所有测试字典（code 以 public_test_ 开头）
     await db
       .delete(systemDicts)
       .where(like(systemDicts.code, "public_test_%"));
 
-    // 清理 Redis 缓存
+    // Clean up Redis cache / 清理 Redis 缓存
     const keys = await redisClient.keys("dict:public_test_*");
     if (keys.length > 0) {
       await redisClient.del(...keys);
@@ -60,10 +61,10 @@ async function cleanupTestDicts(): Promise<void> {
 
 describe("public dicts routes", () => {
   beforeAll(async () => {
-    // 清理可能存在的遗留测试数据
+    // Clean up possible leftover test data / 清理可能存在的遗留测试数据
     await cleanupTestDicts();
 
-    // 创建测试字典
+    // Create test dict / 创建测试字典
     await db.insert(systemDicts).values(testDict);
   });
 
@@ -95,7 +96,7 @@ describe("public dicts routes", () => {
     });
 
     it("should return 404 for disabled dict", async () => {
-      // 创建一个禁用的字典
+      // Create a disabled dict / 创建一个禁用的字典
       const disabledCode = "public_test_disabled";
       await db.insert(systemDicts).values({
         ...testDict,
@@ -123,7 +124,7 @@ describe("public dicts routes", () => {
         expect(json.data.code).toBe(testDictCode);
         expect(json.data.name).toBe(testDict.name);
         expect(json.data.items).toBeInstanceOf(Array);
-        // 禁用的选项应该被过滤掉
+        // Disabled options should be filtered out / 禁用的选项应该被过滤掉
         expect(json.data.items).toHaveLength(2);
         expect(json.data.items.every((item: { disabled?: boolean }) => !item.disabled)).toBe(true);
       }
@@ -132,29 +133,29 @@ describe("public dicts routes", () => {
     it("should use Redis cache on subsequent requests", async () => {
       const cacheKey = `dict:${testDictCode}`;
 
-      // 先清除缓存
+      // Clear cache first / 先清除缓存
       await redisClient.del(cacheKey);
 
-      // 第一次请求（应该从数据库查询）
+      // First request (should query from database) / 第一次请求（应该从数据库查询）
       const response1 = await client.dicts[":code"].$get({
         param: { code: testDictCode },
       });
 
       expect(response1.status).toBe(HttpStatusCodes.OK);
 
-      // 验证缓存已写入
+      // Verify cache has been written / 验证缓存已写入
       const cached = await redisClient.get(cacheKey);
 
       expect(cached).not.toBeNull();
 
-      // 第二次请求（应该从缓存获取）
+      // Second request (should get from cache) / 第二次请求（应该从缓存获取）
       const response2 = await client.dicts[":code"].$get({
         param: { code: testDictCode },
       });
 
       expect(response2.status).toBe(HttpStatusCodes.OK);
 
-      // 两次请求的数据应该一致
+      // Data from both requests should be consistent / 两次请求的数据应该一致
       if (response1.status === HttpStatusCodes.OK && response2.status === HttpStatusCodes.OK) {
         const json1 = await response1.json();
         const json2 = await response2.json();

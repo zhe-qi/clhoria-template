@@ -7,34 +7,35 @@ import { z } from "@hono/zod-openapi";
 import logger from "@/lib/services/logger";
 
 /**
+ * Refine CRUD operators Schema
  * Refine CRUD 操作符 Schema
  */
 export const CrudOperatorsSchema = z.enum([
-  // 相等性操作符
+  // Equality operators / 相等性操作符
   "eq",
   "ne",
-  // 比较操作符
+  // Comparison operators / 比较操作符
   "lt",
   "gt",
   "lte",
   "gte",
-  // 数组操作符
+  // Array operators / 数组操作符
   "in",
   "nin",
   "ina",
   "nina",
-  // 字符串操作符
+  // String operators / 字符串操作符
   "contains",
   "ncontains",
   "containss",
   "ncontainss",
-  // 范围操作符
+  // Range operators / 范围操作符
   "between",
   "nbetween",
-  // 空值操作符
+  // Null operators / 空值操作符
   "null",
   "nnull",
-  // 字符串匹配操作符
+  // String matching operators / 字符串匹配操作符
   "startswith",
   "nstartswith",
   "startswiths",
@@ -43,12 +44,13 @@ export const CrudOperatorsSchema = z.enum([
   "nendswith",
   "endswiths",
   "nendswiths",
-  // 逻辑操作符
+  // Logical operators / 逻辑操作符
   "or",
   "and",
 ]);
 
 /**
+ * Logical filter Schema
  * 逻辑过滤器 Schema
  */
 export const LogicalFilterSchema = z.object({
@@ -58,6 +60,7 @@ export const LogicalFilterSchema = z.object({
 });
 
 /**
+ * Conditional filter Schema (recursive definition)
  * 条件过滤器 Schema (递归定义)
  */
 export const ConditionalFilterSchema: z.ZodType<any> = z.lazy(() =>
@@ -69,6 +72,7 @@ export const ConditionalFilterSchema: z.ZodType<any> = z.lazy(() =>
 );
 
 /**
+ * CRUD filter Schema
  * CRUD 过滤器 Schema
  */
 export const CrudFilterSchema = z.union([
@@ -77,11 +81,13 @@ export const CrudFilterSchema = z.union([
 ]);
 
 /**
+ * CRUD filters array Schema
  * CRUD 过滤器数组 Schema
  */
 export const CrudFiltersSchema = z.array(CrudFilterSchema);
 
 /**
+ * CRUD sorting Schema
  * CRUD 排序 Schema
  */
 export const CrudSortSchema = z.object({
@@ -90,11 +96,13 @@ export const CrudSortSchema = z.object({
 });
 
 /**
+ * CRUD sorting array Schema
  * CRUD 排序数组 Schema
  */
 export const CrudSortingSchema = z.array(CrudSortSchema);
 
 /**
+ * Pagination Schema
  * 分页 Schema
  */
 export const PaginationSchema = z.object({
@@ -104,11 +112,12 @@ export const PaginationSchema = z.object({
 });
 
 /**
+ * Helper function: check object depth
  * 辅助函数：检查对象深度
  */
 function getDepth(obj: any, depth = 0): number {
   if (depth > 10)
-    return depth; // 防止无限递归
+    return depth; // Prevent infinite recursion / 防止无限递归
   if (typeof obj !== "object" || obj === null)
     return depth;
 
@@ -122,6 +131,8 @@ function getDepth(obj: any, depth = 0): number {
 }
 
 /**
+ * JSON string preprocessor
+ * Safely parses JSON string parameters
  * JSON 字符串预处理函数
  * 安全地解析 JSON 字符串参数
  */
@@ -133,13 +144,13 @@ function safeJsonPreprocess(val: unknown): unknown {
   if (typeof val === "string") {
     const trimmed = val.trim();
 
-    // 增加长度限制，防止DoS攻击
+    // Length limit to prevent DoS attacks / 增加长度限制，防止DoS攻击
     if (trimmed.length > 10000) {
       logger.warn("[查询参数]: JSON字符串过长，已截断");
       return undefined;
     }
 
-    // 检查基本的安全模式
+    // Check basic safety patterns / 检查基本的安全模式
     if (trimmed === "" || trimmed === "null" || trimmed === "undefined") {
       return undefined;
     }
@@ -152,7 +163,7 @@ function safeJsonPreprocess(val: unknown): unknown {
 
     try {
       const parsed = JSON.parse(trimmed);
-      // 递归深度限制，防止深层嵌套攻击
+      // Recursive depth limit to prevent deep nesting attacks / 递归深度限制，防止深层嵌套攻击
       if (getDepth(parsed) > 5) {
         logger.warn("[查询参数]: JSON嵌套层级过深");
         return undefined;
@@ -160,7 +171,7 @@ function safeJsonPreprocess(val: unknown): unknown {
       return parsed;
     }
     catch (error) {
-      // 记录解析错误但不暴露详细信息
+      // Log parse error without exposing details / 记录解析错误但不暴露详细信息
       logger.warn({ error: error instanceof Error ? error.message : String(error) }, "[查询参数]: JSON解析失败");
       return undefined;
     }
@@ -170,11 +181,13 @@ function safeJsonPreprocess(val: unknown): unknown {
 }
 
 /**
+ * Refine query parameters Schema
+ * Used to validate query parameters from the frontend
  * Refine 查询参数 Schema
  * 用于验证来自前端的查询参数
  */
 export const RefineQueryParamsSchema = z.object({
-  // 分页参数
+  // Pagination parameters / 分页参数
   current: z.coerce.number().int().positive().optional().default(1).openapi({
     description: "当前页码",
     example: 1,
@@ -190,7 +203,7 @@ export const RefineQueryParamsSchema = z.object({
     example: "server",
   }),
 
-  // 过滤条件（支持 JSON 字符串）
+  // Filter conditions (supports JSON string) / 过滤条件（支持 JSON 字符串）
   filters: z.preprocess(
     safeJsonPreprocess,
     CrudFiltersSchema.optional(),
@@ -203,7 +216,7 @@ export const RefineQueryParamsSchema = z.object({
     ]),
   }),
 
-  // 排序条件（支持 JSON 字符串）
+  // Sorting conditions (supports JSON string) / 排序条件（支持 JSON 字符串）
   sorters: z.preprocess(
     safeJsonPreprocess,
     CrudSortingSchema.optional(),
@@ -218,6 +231,8 @@ export const RefineQueryParamsSchema = z.object({
 }).partial();
 
 /**
+ * Result Schema
+ * Used for API response structure definition
  * 结果 Schema
  * 用于 API 响应的结构定义
  */
@@ -228,6 +243,7 @@ export function RefineResultSchema<T extends z.ZodTypeAny>(dataSchema: T) {
 }
 
 /**
+ * Type definitions inferred from Zod schemas
  * 从 Zod schemas 推导的类型定义
  */
 export type CrudOperators = z.infer<typeof CrudOperatorsSchema>;
@@ -240,17 +256,15 @@ export type CrudSorting = z.infer<typeof CrudSortingSchema>;
 export type Pagination = z.infer<typeof PaginationSchema>;
 export type RefineQueryParams = z.infer<typeof RefineQueryParamsSchema>;
 
-// ============================================================================
-// 查询配置和工具类型
-// ============================================================================
+// ============ Query Configuration and Utility Types / 查询配置和工具类型 ============
 
-/** Refine 查询结果接口 */
+/** Refine query result interface / Refine 查询结果接口 */
 export type RefineQueryResult<T> = {
   data: T[];
   total: number;
 };
 
-/** 查询错误类型 */
+/** Query error type / 查询错误类型 */
 export class RefineQueryError extends Error {
   code?: string;
   constructor(message: string, code?: string) {
@@ -260,24 +274,24 @@ export class RefineQueryError extends Error {
   }
 }
 
-/** Join 类型 */
+/** Join type / Join 类型 */
 export type JoinType = "inner" | "left" | "right";
 
-/** Join 定义接口 */
+/** Join definition interface / Join 定义接口 */
 export type JoinDefinition = Simplify<{
   table: PgTable;
   type: JoinType;
   on: SQL<unknown>;
 }>;
 
-/** Join 查询配置接口 */
+/** Join query configuration interface / Join 查询配置接口 */
 export type JoinConfig = Simplify<{
   joins: readonly JoinDefinition[];
   selectFields?: Readonly<Record<string, PgColumn | SQL<unknown>>> | EmptyObject;
   groupBy?: readonly PgColumn[];
 }>;
 
-/** Refine 查询执行配置接口 */
+/** Refine query execution configuration interface / Refine 查询执行配置接口 */
 export type RefineQueryConfig<_T = UnknownRecord> = Simplify<{
   table: PgTable;
   queryParams: Simplify<{
@@ -289,7 +303,7 @@ export type RefineQueryConfig<_T = UnknownRecord> = Simplify<{
   allowedFields?: readonly string[];
 }>;
 
-/** 查询执行参数接口 */
+/** Query execution parameters interface / 查询执行参数接口 */
 export type QueryExecutionParams<_T = UnknownRecord> = Simplify<{
   resource: PgTable;
   filters?: CrudFilters;
@@ -300,5 +314,5 @@ export type QueryExecutionParams<_T = UnknownRecord> = Simplify<{
   allowedFields?: readonly string[];
 }>;
 
-/** 元组结果类型，用于错误处理 */
+/** Tuple result type for error handling / 元组结果类型，用于错误处理 */
 export type Result<T, E = RefineQueryError> = [E, null] | [null, T];

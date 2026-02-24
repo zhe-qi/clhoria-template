@@ -1,8 +1,9 @@
 /**
+ * Pick specified properties from an object
+ * @param obj Object / 对象
+ * @param keys Array of property names / 属性名数组
+ * @returns New object / 新对象
  * 从对象中选择指定的属性
- * @param obj 对象
- * @param keys 属性名数组
- * @returns 新对象
  */
 export function pick<T extends ParamsType, K extends keyof T>(obj: T, keys: readonly K[]) {
   return keys.reduce((acc, key) => {
@@ -14,10 +15,11 @@ export function pick<T extends ParamsType, K extends keyof T>(obj: T, keys: read
 }
 
 /**
+ * Omit specified properties from an object
+ * @param obj Object / 对象
+ * @param keys Array of property names to omit / 要排除的属性名数组
+ * @returns New object / 新对象
  * 从对象中排除指定的属性
- * @param obj 对象
- * @param keys 要排除的属性名数组
- * @returns 新对象
  */
 export function omit<T extends ParamsType, K extends keyof T>(obj: T, keys: K[]) {
   const keysSet = new Set(keys);
@@ -29,7 +31,7 @@ export function omit<T extends ParamsType, K extends keyof T>(obj: T, keys: K[])
   }, {} as Omit<T, K>);
 }
 
-/** 工具函数：将字段数组转换为查询所需的格式 */
+/** Utility: convert field array to query-required format / 工具函数：将字段数组转换为查询所需的格式 */
 export function toColumns<T extends string>(fields: readonly T[]) {
   return Object.fromEntries(
     fields.map(key => [key, true]),

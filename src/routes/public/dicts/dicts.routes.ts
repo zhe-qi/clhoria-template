@@ -10,7 +10,7 @@ import { dictCodeParamsSchema, dictItemsResponseSchema } from "./dicts.schema";
 const routePrefix = "/dicts";
 const tags = [`${routePrefix}（业务字典查询）`];
 
-/** 根据编码查询字典项 */
+/** Get dict items by code / 根据编码查询字典项 */
 export const getByCode = createRoute({
   tags,
   summary: "根据编码查询字典项",

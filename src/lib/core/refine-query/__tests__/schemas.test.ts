@@ -192,7 +192,7 @@ describe("refine-query Schemas", () => {
       };
       const result = ConditionalFilterSchema.safeParse(filter);
 
-      // 空数组是有效的数组，所以这个应该通过
+      // Empty array is a valid array, so this should pass / 空数组是有效的数组，所以这个应该通过
       expect(result.success).toBe(true);
     });
   });
@@ -486,7 +486,7 @@ describe("refine-query Schemas", () => {
         };
         const result = RefineQueryParamsSchema.safeParse(params);
 
-        // {} 不是有效的 filters 数组，应该验证失败
+        // {} is not a valid filters array, should fail validation / {} 不是有效的 filters 数组，应该验证失败
         expect(result.success).toBe(false);
       });
 
@@ -515,13 +515,13 @@ describe("refine-query Schemas", () => {
         expect(result.success).toBe(true);
 
         if (result.success) {
-          // 超长字符串被截断后返回 undefined
+          // Truncated string returns undefined / 超长字符串被截断后返回 undefined
           expect(result.data.filters).toBeUndefined();
         }
       });
 
       it("应该拒绝超深嵌套 JSON (>5层)", () => {
-        // 创建超过 5 层嵌套的结构
+        // Create a structure with more than 5 levels of nesting / 创建超过 5 层嵌套的结构
         const deepNested = {
           operator: "or",
           value: [{
@@ -549,7 +549,7 @@ describe("refine-query Schemas", () => {
         expect(result.success).toBe(true);
 
         if (result.success) {
-          // 超深嵌套被拒绝后返回 undefined
+          // Returns undefined after deeply nested structure is rejected / 超深嵌套被拒绝后返回 undefined
           expect(result.data.filters).toBeUndefined();
         }
       });

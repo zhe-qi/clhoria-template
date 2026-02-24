@@ -11,7 +11,7 @@ import { systemParamCreateSchema, systemParamListResponseSchema, systemParamPatc
 const routePrefix = "/system/params";
 const tags = [`${routePrefix}（系统参数管理）`];
 
-/** 获取参数列表 */
+/** Get parameter list / 获取参数列表 */
 export const list = createRoute({
   tags,
   summary: "获取参数列表",
@@ -27,7 +27,7 @@ export const list = createRoute({
   },
 });
 
-/** 创建参数 */
+/** Create parameter / 创建参数 */
 export const create = createRoute({
   tags,
   summary: "创建参数",
@@ -42,7 +42,7 @@ export const create = createRoute({
   },
 });
 
-/** 获取参数详情 */
+/** Get parameter details / 获取参数详情 */
 export const get = createRoute({
   tags,
   summary: "获取参数详情",
@@ -58,7 +58,7 @@ export const get = createRoute({
   },
 });
 
-/** 更新参数 */
+/** Update parameter / 更新参数 */
 export const update = createRoute({
   tags,
   summary: "更新参数",
@@ -74,7 +74,7 @@ export const update = createRoute({
   },
 });
 
-/** 删除参数 */
+/** Delete parameter / 删除参数 */
 export const remove = createRoute({
   tags,
   summary: "删除参数",

@@ -13,10 +13,12 @@ import { addDefaultSorting, convertFiltersToSQL, convertSortersToSQL, validateFi
 import { calculatePagination, validatePagination } from "./pagination";
 import { RefineQueryError } from "./schemas";
 
-/** 数据库实例类型 */
+/** Database instance type / 数据库实例类型 */
 export type DbInstance = typeof defaultDb;
 
 /**
+ * Query executor class
+ * Integrates filtering, sorting, and pagination to execute Refine standard queries
  * 查询执行器类
  * 整合过滤、排序、分页功能，执行 Refine 标准查询
  */
@@ -30,20 +32,21 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   }
 
   /**
+   * Execute Refine query
    * 执行 Refine 查询
    */
   async execute(params: QueryExecutionParams<T>): Promise<Result<RefineQueryResult<T>>> {
     try {
-      // 1. 验证参数
+      // 1. Validate parameters / 验证参数
       const validationResult = this.validateParams(params);
       if (!validationResult.valid) {
         return [new RefineQueryError(validationResult.errors.join("; ")), null];
       }
 
-      // 2. 构建基础查询条件
+      // 2. Build base query conditions / 构建基础查询条件
       const baseConditions: SQL<unknown>[] = [];
 
-      // 3. 应用过滤条件
+      // 3. Apply filter conditions / 应用过滤条件
       if (params.filters && params.filters.length > 0) {
         const filterSQL = convertFiltersToSQL(params.filters, this.table);
         if (filterSQL) {
@@ -55,18 +58,18 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
         ? and(...baseConditions)
         : undefined;
 
-      // 4. 计算分页参数
+      // 4. Calculate pagination parameters / 计算分页参数
       const paginationCalc = calculatePagination(params.pagination);
 
-      // 5. 处理排序条件
+      // 5. Process sorting conditions / 处理排序条件
       let finalSorters = params.sorters;
       if (paginationCalc.mode === "server") {
-        // 添加默认排序以确保结果稳定
+        // Add default sorting to ensure stable results / 添加默认排序以确保结果稳定
         finalSorters = addDefaultSorting(params.sorters);
       }
       const orderByClause = convertSortersToSQL(finalSorters, this.table);
 
-      // 6. 根据是否有 Join 配置选择不同的查询方式
+      // 6. Choose query method based on join configuration / 根据是否有 Join 配置选择不同的查询方式
       if (params.joinConfig) {
         return await this.executeJoinQuery(params, whereCondition, orderByClause, paginationCalc);
       }
@@ -81,6 +84,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   }
 
   /**
+   * Execute simple query (original logic)
    * 执行简单查询(原有逻辑)
    */
   private async executeSimpleQuery(
@@ -88,7 +92,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
     orderByClause: SQL<unknown>[],
     paginationCalc: PaginationCalculation,
   ): Promise<Result<RefineQueryResult<T>>> {
-    // 6. 执行计数查询
+    // 6. Execute count query / 执行计数查询
     let total = 0;
     if (paginationCalc.mode === "server") {
       const countQuery = this.db
@@ -103,30 +107,30 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
       total = countResult[0]?.count || 0;
     }
 
-    // 7. 构建数据查询
+    // 7. Build data query / 构建数据查询
     let dataQuery = this.db.select().from(this.table);
 
-    // 应用 WHERE 条件
+    // Apply WHERE conditions / 应用 WHERE 条件
     if (whereCondition) {
       dataQuery = dataQuery.where(whereCondition) as any;
     }
 
-    // 应用排序
+    // Apply sorting / 应用排序
     if (orderByClause.length > 0) {
       dataQuery = dataQuery.orderBy(...orderByClause) as any;
     }
 
-    // 应用分页（仅服务端分页）
+    // Apply pagination (server mode only) / 应用分页（仅服务端分页）
     if (paginationCalc.mode === "server") {
       dataQuery = dataQuery
         .limit(paginationCalc.limit)
         .offset(paginationCalc.offset) as any;
     }
 
-    // 8. 执行查询
+    // 8. Execute query / 执行查询
     const data = await dataQuery as T[];
 
-    // 9. 处理客户端分页
+    // 9. Handle client-side pagination / 处理客户端分页
     let finalData = data;
     if (paginationCalc.mode === "client") {
       total = data.length;
@@ -147,6 +151,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   }
 
   /**
+   * Execute Join query
    * 执行 Join 查询
    */
   private async executeJoinQuery(
@@ -160,7 +165,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
       throw new Error("Join config is required");
     }
 
-    // 6. 执行计数查询
+    // 6. Execute count query / 执行计数查询
     let total = 0;
     if (paginationCalc.mode === "server") {
       let countQuery = this.buildJoinCountQuery(joinConfig);
@@ -169,7 +174,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
         countQuery = countQuery.where(whereCondition) as any;
       }
 
-      // 如果有 groupBy，需要使用子查询计数
+      // If groupBy exists, use subquery for counting / 如果有 groupBy，需要使用子查询计数
       if (joinConfig.groupBy && joinConfig.groupBy.length > 0) {
         countQuery = countQuery.groupBy(...joinConfig.groupBy) as any;
         const countResult = await countQuery;
@@ -181,35 +186,35 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
       }
     }
 
-    // 7. 构建 Join 数据查询
+    // 7. Build Join data query / 构建 Join 数据查询
     let dataQuery = this.buildJoinQuery(joinConfig);
 
-    // 应用 WHERE 条件
+    // Apply WHERE conditions / 应用 WHERE 条件
     if (whereCondition) {
       dataQuery = dataQuery.where(whereCondition) as any;
     }
 
-    // 应用 GROUP BY
+    // Apply GROUP BY / 应用 GROUP BY
     if (joinConfig.groupBy && joinConfig.groupBy.length > 0) {
       dataQuery = dataQuery.groupBy(...joinConfig.groupBy) as any;
     }
 
-    // 应用排序
+    // Apply sorting / 应用排序
     if (orderByClause.length > 0) {
       dataQuery = dataQuery.orderBy(...orderByClause) as any;
     }
 
-    // 应用分页（仅服务端分页）
+    // Apply pagination (server mode only) / 应用分页（仅服务端分页）
     if (paginationCalc.mode === "server") {
       dataQuery = dataQuery
         .limit(paginationCalc.limit)
         .offset(paginationCalc.offset) as any;
     }
 
-    // 8. 执行查询
+    // 8. Execute query / 执行查询
     const data = await dataQuery as T[];
 
-    // 9. 处理客户端分页
+    // 9. Handle client-side pagination / 处理客户端分页
     let finalData = data;
     if (paginationCalc.mode === "client") {
       total = data.length;
@@ -230,12 +235,13 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   }
 
   /**
+   * Validate query parameters
    * 验证查询参数
    */
   private validateParams(params: QueryExecutionParams<T>): Readonly<{ valid: boolean; errors: readonly string[] }> {
     const errors: string[] = [];
 
-    // 验证分页参数
+    // Validate pagination parameters / 验证分页参数
     if (params.pagination) {
       const paginationValidation = validatePagination(params.pagination);
       if (!paginationValidation.valid) {
@@ -243,7 +249,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
       }
     }
 
-    // 验证过滤字段
+    // Validate filter fields / 验证过滤字段
     if (params.filters && params.filters.length > 0) {
       const allowedFieldsArray = params.allowedFields ? [...params.allowedFields] : undefined;
       const filterValidation = validateFilterFields(params.filters, this.table, allowedFieldsArray);
@@ -252,7 +258,7 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
       }
     }
 
-    // 验证排序字段
+    // Validate sorting fields / 验证排序字段
     if (params.sorters && params.sorters.length > 0) {
       const allowedFieldsArray = params.allowedFields ? [...params.allowedFields] : undefined;
       const sorterValidation = validateSorterFields(params.sorters, this.table, allowedFieldsArray);
@@ -268,12 +274,13 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   }
 
   /**
+   * Build Join query
    * 构建 Join 查询
    */
   private buildJoinQuery(joinConfig: JoinConfig) {
     let query = this.db.select(joinConfig.selectFields || {}).from(this.table);
 
-    // 应用所有 joins
+    // Apply all joins / 应用所有 joins
     for (const join of joinConfig.joins) {
       switch (join.type) {
         case "left":
@@ -293,12 +300,13 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
   }
 
   /**
+   * Build Join count query
    * 构建 Join 计数查询
    */
   private buildJoinCountQuery(joinConfig: JoinConfig) {
     let query = this.db.select({ count: count() }).from(this.table);
 
-    // 应用所有 joins
+    // Apply all joins / 应用所有 joins
     for (const join of joinConfig.joins) {
       switch (join.type) {
         case "left":
@@ -319,9 +327,11 @@ export class RefineQueryExecutor<T extends UnknownRecord = UnknownRecord> {
 }
 
 /**
+ * Convenience function: execute Refine query
+ * @param config Query configuration / 查询配置
+ * @param db Optional database instance for injecting mocks in tests / 可选的数据库实例，用于测试时注入 mock
+ *
  * 便捷函数：执行 Refine 查询
- * @param config 查询配置
- * @param db 可选的数据库实例，用于测试时注入 mock
  */
 export async function executeRefineQuery<T extends UnknownRecord = UnknownRecord>(
   config: RefineQueryConfig<T>,

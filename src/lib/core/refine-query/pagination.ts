@@ -5,22 +5,24 @@ import type { Pagination } from "./schemas";
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/constants";
 
 /**
+ * Pagination calculation result interface
  * 分页计算结果接口
  */
 export type PaginationCalculation = Simplify<{
-  /** 偏移量（跳过的记录数） */
+  /** Offset (number of records to skip) / 偏移量（跳过的记录数） */
   offset: number;
-  /** 限制数量（每页记录数） */
+  /** Limit (records per page) / 限制数量（每页记录数） */
   limit: number;
-  /** 当前页码 */
+  /** Current page number / 当前页码 */
   current: number;
-  /** 每页大小 */
+  /** Page size / 每页大小 */
   pageSize: number;
-  /** 分页模式 */
+  /** Pagination mode / 分页模式 */
   mode: "client" | "server" | "off";
 }>;
 
 /**
+ * Pagination handler class
  * 分页处理器类
  */
 export class PaginationHandler {
@@ -28,6 +30,7 @@ export class PaginationHandler {
   private maxPageSize = MAX_PAGE_SIZE;
 
   /**
+   * Calculate pagination parameters
    * 计算分页参数
    */
   calculate(pagination?: Pagination): PaginationCalculation {
@@ -51,6 +54,7 @@ export class PaginationHandler {
   }
 
   /**
+   * Validate pagination parameters
    * 验证分页参数
    */
   validate(pagination?: Pagination): Readonly<{ valid: boolean; errors: readonly string[] }> {
@@ -93,10 +97,11 @@ export class PaginationHandler {
   }
 }
 
-// 全局分页处理器实例
+// Global pagination handler instance / 全局分页处理器实例
 export const paginationHandler = new PaginationHandler();
 
 /**
+ * Convenience function: calculate pagination parameters
  * 便捷函数：计算分页参数
  */
 export function calculatePagination(pagination?: Pagination): PaginationCalculation {
@@ -104,6 +109,7 @@ export function calculatePagination(pagination?: Pagination): PaginationCalculat
 }
 
 /**
+ * Convenience function: validate pagination parameters
  * 便捷函数：验证分页参数
  */
 export function validatePagination(pagination?: Pagination): Readonly<{ valid: boolean; errors: readonly string[] }> {

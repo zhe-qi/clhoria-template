@@ -2,7 +2,10 @@
  * This code is based on the stoker project by w3cj
  * Source: https://github.com/w3cj/stoker
  *
+ * Since English doesn't fully meet the needs of Chinese users, this version is copied for Chinese users.
+ * English users can install the original package directly (`pnpm add stoker`) and remove this folder.
  * 由于英文不能很好的满足中文用户的需求，所以这个版本拷贝过来用于中文用户。
+ * 英文用户可以直接安装原版依赖（`pnpm add stoker`），然后移除此文件夹。
  *
  * MIT License
  *

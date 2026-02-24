@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-**CRITICAL: Always respond in Simplified Chinese**
-
 ## Commands
 
 ```bash

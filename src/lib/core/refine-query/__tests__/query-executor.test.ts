@@ -8,15 +8,15 @@ import { Status } from "@/lib/enums";
 
 import { executeRefineQuery, RefineQueryExecutor } from "../query-executor";
 
-// 确保在测试环境运行
+// Ensure running in test environment / 确保在测试环境运行
 if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
 }
 
-// 测试数据前缀
+// Test data prefix / 测试数据前缀
 const TEST_PREFIX = "test_refine_query_";
 
-// 测试数据
+// Test data / 测试数据
 const testRoles = [
   { id: `${TEST_PREFIX}role1`, name: "测试角色1", status: Status.ENABLED, description: "测试角色描述1" },
   { id: `${TEST_PREFIX}role2`, name: "测试角色2", status: Status.ENABLED, description: "测试角色描述2" },
@@ -26,16 +26,16 @@ const testRoles = [
 ];
 
 describe("refine-query QueryExecutor", () => {
-  // 设置测试数据
+  // Set up test data / 设置测试数据
   beforeAll(async () => {
-    // 清理可能存在的测试数据
+    // Clean up possibly existing test data / 清理可能存在的测试数据
     await db.delete(systemRoles).where(like(systemRoles.id, `${TEST_PREFIX}%`));
 
-    // 插入测试数据
+    // Insert test data / 插入测试数据
     await db.insert(systemRoles).values(testRoles);
   });
 
-  // 清理测试数据
+  // Clean up test data / 清理测试数据
   afterAll(async () => {
     await db.delete(systemRoles).where(like(systemRoles.id, `${TEST_PREFIX}%`));
   });
@@ -82,7 +82,7 @@ describe("refine-query QueryExecutor", () => {
         expect(error).toBeNull();
         expect(result).toBeDefined();
         expect(result!.data.length).toBe(5);
-        // 验证排序
+        // Verify sorting / 验证排序
         expect(result!.data[0].id).toBe(`${TEST_PREFIX}role1`);
         expect(result!.data[4].id).toBe(`${TEST_PREFIX}role5`);
       });
@@ -115,7 +115,7 @@ describe("refine-query QueryExecutor", () => {
         expect(error).toBeNull();
         expect(result).toBeDefined();
         expect(result!.data.length).toBe(2);
-        expect(result!.total).toBe(5); // 总数应该是所有记录数
+        expect(result!.total).toBe(5); // Total should be the count of all records / 总数应该是所有记录数
         expect(result!.data[0].id).toBe(`${TEST_PREFIX}role1`);
       });
 
@@ -161,7 +161,7 @@ describe("refine-query QueryExecutor", () => {
 
         expect(error).toBeNull();
         expect(result).toBeDefined();
-        expect(result!.data.length).toBe(5); // 返回全部
+        expect(result!.data.length).toBe(5); // Return all / 返回全部
         expect(result!.total).toBe(5);
       });
     });
@@ -306,7 +306,7 @@ describe("refine-query QueryExecutor", () => {
     });
 
     it("应该支持自定义 db 实例", async () => {
-      // 使用默认的 db 实例（通过参数传入）
+      // Use the default db instance (passed via parameter) / 使用默认的 db 实例（通过参数传入）
       const [error, result] = await executeRefineQuery(
         {
           table: systemRoles,
@@ -314,7 +314,7 @@ describe("refine-query QueryExecutor", () => {
             filters: [{ field: "id", operator: "eq", value: `${TEST_PREFIX}role1` }],
           },
         },
-        db, // 显式传入 db 实例
+        db, // Explicitly pass db instance / 显式传入 db 实例
       );
 
       expect(error).toBeNull();
@@ -362,7 +362,7 @@ describe("refine-query QueryExecutor", () => {
 
       expect(error).toBeNull();
       expect(result).toBeDefined();
-      // 应该返回所有数据（可能包括其他测试创建的数据）
+      // Should return all data (may include data created by other tests) / 应该返回所有数据（可能包括其他测试创建的数据）
       expect(result!.data.length).toBeGreaterThanOrEqual(5);
     });
 
@@ -416,7 +416,7 @@ describe("refine-query QueryExecutor", () => {
 
       expect(error).toBeNull();
       expect(result).toBeDefined();
-      expect(result!.data.length).toBe(1); // 第3页只有1条记录
+      expect(result!.data.length).toBe(1); // Page 3 has only 1 record / 第3页只有1条记录
       expect(result!.total).toBe(5);
     });
   });
@@ -425,7 +425,7 @@ describe("refine-query QueryExecutor", () => {
     const executor = new RefineQueryExecutor(systemRoles);
 
     describe("值注入尝试", () => {
-      // 经典 SQL 注入模式
+      // Classic SQL injection patterns / 经典 SQL 注入模式
       const sqlInjectionPayloads = [
         "'; DROP TABLE system_roles; --",
         "1' OR '1'='1",
@@ -442,11 +442,11 @@ describe("refine-query QueryExecutor", () => {
           filters: [{ field: "id", operator: "eq", value: payload }],
         });
 
-        // 查询应该成功执行，但不会匹配任何记录（因为没有 id 等于这些恶意字符串的记录）
+        // Query should execute successfully but match no records (no id equals these malicious strings) / 查询应该成功执行，但不会匹配任何记录（因为没有 id 等于这些恶意字符串的记录）
         expect(error).toBeNull();
         expect(result).toBeDefined();
         expect(result!.data.length).toBe(0);
-        // 重要：数据库应该仍然正常工作，没有被注入攻击
+        // Important: database should still work normally, not compromised by injection / 重要：数据库应该仍然正常工作，没有被注入攻击
       });
 
       it.each(sqlInjectionPayloads)("contains 操作符应该安全处理恶意值: %s", async (payload) => {
@@ -458,10 +458,10 @@ describe("refine-query QueryExecutor", () => {
           ],
         });
 
-        // 查询应该成功执行，恶意字符串被当作普通搜索文本
+        // Query should execute successfully, malicious strings treated as plain search text / 查询应该成功执行，恶意字符串被当作普通搜索文本
         expect(error).toBeNull();
         expect(result).toBeDefined();
-        // 不会匹配任何记录
+        // Should not match any records / 不会匹配任何记录
         expect(result!.data.length).toBe(0);
       });
 
@@ -473,7 +473,7 @@ describe("refine-query QueryExecutor", () => {
 
         expect(error).toBeNull();
         expect(result).toBeDefined();
-        // 不会匹配任何记录
+        // Should not match any records / 不会匹配任何记录
         expect(result!.data.length).toBe(0);
       });
     });
@@ -493,7 +493,7 @@ describe("refine-query QueryExecutor", () => {
           filters: [{ field: maliciousField, operator: "eq", value: "test" }],
         });
 
-        // 应该返回验证错误
+        // Should return validation error / 应该返回验证错误
         expect(error).toBeDefined();
         expect(error!.message).toContain("无效的过滤字段");
         expect(result).toBeNull();
@@ -529,16 +529,16 @@ describe("refine-query QueryExecutor", () => {
           filters: [{ field: "name", operator: "contains", value }],
         });
 
-        // 查询应该成功执行，特殊字符被正确转义
+        // Query should execute successfully, special characters properly escaped / 查询应该成功执行，特殊字符被正确转义
         expect(error).toBeNull();
         expect(result).toBeDefined();
-        // 可能返回 0 或多条记录，关键是查询成功执行
+        // May return 0 or more records, the key is that the query executes successfully / 可能返回 0 或多条记录，关键是查询成功执行
       });
     });
 
     describe("验证数据库完整性", () => {
       it("执行多个注入尝试后数据库数据应保持完整", async () => {
-        // 尝试各种注入攻击
+        // Attempt various injection attacks / 尝试各种注入攻击
         const attacks = [
           { field: "id", operator: "eq", value: "'; DROP TABLE system_roles; --" },
           { field: "name", operator: "contains", value: "'; DELETE FROM system_roles; --" },
@@ -552,7 +552,7 @@ describe("refine-query QueryExecutor", () => {
           });
         }
 
-        // 验证测试数据仍然存在
+        // Verify test data still exists / 验证测试数据仍然存在
         const [error, result] = await executor.execute({
           resource: systemRoles,
           filters: [{ field: "id", operator: "startswith", value: TEST_PREFIX }],
@@ -560,7 +560,7 @@ describe("refine-query QueryExecutor", () => {
 
         expect(error).toBeNull();
         expect(result).toBeDefined();
-        // 所有 5 条测试数据应该仍然存在
+        // All 5 test data records should still exist / 所有 5 条测试数据应该仍然存在
         expect(result!.data.length).toBe(5);
       });
     });
@@ -583,7 +583,7 @@ describe("refine-query QueryExecutor", () => {
 
         expect(error).toBeNull();
         expect(result).toBeDefined();
-        // 不会匹配任何记录（因为没有名字包含这些恶意字符串的记录）
+        // Should not match any records (no records with names containing these malicious strings) / 不会匹配任何记录（因为没有名字包含这些恶意字符串的记录）
         expect(result!.data.length).toBe(0);
       });
 

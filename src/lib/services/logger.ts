@@ -14,8 +14,8 @@ function buildTransportTargets(): TransportTargetOptions[] {
     targets.push({ target: "pino/file", level: env.LOG_LEVEL || "info", options: { destination: 1 } });
   }
 
-  // 可选：阿里云 SLS transport（用户自行实现 transport 文件）
-  // 参考 README 文档中的 SLS Transport 接入指南
+  // Optional: Alibaba Cloud SLS transport (user implements transport file) / 可选：阿里云 SLS transport（用户自行实现 transport 文件）
+  // See SLS Transport integration guide in README / 参考 README 文档中的 SLS Transport 接入指南
   // if (env.SLS_ENDPOINT && env.SLS_PROJECT && env.SLS_LOGSTORE) {
   //   targets.push({
   //     target: join(process.cwd(), "transports", "sls-transport.mjs"),
@@ -32,8 +32,8 @@ const logger = createSingleton("logger", () =>
 
 export default logger;
 
-/** 操作日志 logger */
+/** Operation logger / 操作日志 logger */
 export const operationLogger = logger.child({ type: "OPERATION" });
 
-/** 登录日志 logger */
+/** Login logger / 登录日志 logger */
 export const loginLogger = logger.child({ type: "LOGIN" });

@@ -11,9 +11,10 @@ import { withLock } from "@/lib/infrastructure";
 import { enforcerPromise } from "@/lib/services/casbin";
 
 /**
+ * Get all parent roles for a role
+ * @param roleId Role ID / 角色ID
+ * @returns Parent role ID array / 上级角色ID数组
  * 获取角色的所有上级角色
- * @param roleId 角色ID
- * @returns 上级角色ID数组
  */
 export async function getRoleParents(roleId: string): Promise<string[]> {
   const enforcer = await enforcerPromise;
@@ -21,9 +22,10 @@ export async function getRoleParents(roleId: string): Promise<string[]> {
 }
 
 /**
+ * Set parent roles for a role (clears existing relationships first)
+ * @param roleId Role ID / 角色ID
+ * @param parentIds New parent role ID array / 新的上级角色ID数组
  * 设置角色的上级角色（会先清除原有关系）
- * @param roleId 角色ID
- * @param parentIds 新的上级角色ID数组
  */
 export async function setRoleParents(roleId: string, parentIds: string[]): Promise<void> {
   await Effect.runPromise(withLock(
@@ -31,10 +33,10 @@ export async function setRoleParents(roleId: string, parentIds: string[]): Promi
     Effect.promise(async () => {
       const enforcer = await enforcerPromise;
 
-      // 先移除所有现有的上级角色关系
+      // Remove all existing parent role relationships first / 先移除所有现有的上级角色关系
       await enforcer.removeFilteredGroupingPolicy(0, roleId);
 
-      // 如果有新的上级角色，批量添加
+      // If there are new parent roles, add them in batch / 如果有新的上级角色，批量添加
       if (parentIds.length > 0) {
         const rules = parentIds.map(parentId => [roleId, parentId]);
         await enforcer.addGroupingPolicies(rules);
@@ -44,18 +46,19 @@ export async function setRoleParents(roleId: string, parentIds: string[]): Promi
 }
 
 /**
+ * Check if circular inheritance would occur
+ * @param roleId Current role ID / 当前角色ID
+ * @param parentIds Parent role IDs to set / 要设置的上级角色ID数组
+ * @returns true if circular, false if normal / true表示会产生循环，false表示正常
  * 检查是否会产生循环继承
- * @param roleId 当前角色ID
- * @param parentIds 要设置的上级角色ID数组
- * @returns true表示会产生循环，false表示正常
  */
 export async function checkCircularInheritance(roleId: string, parentIds: string[]): Promise<boolean> {
   const enforcer = await enforcerPromise;
 
-  // 一次性获取所有角色继承关系，避免递归中多次调用 enforcer
+  // Get all role inheritance relationships at once to avoid multiple enforcer calls during recursion / 一次性获取所有角色继承关系，避免递归中多次调用 enforcer
   const allGroupingPolicies = await enforcer.getGroupingPolicy();
 
-  // 构建本地图：child -> parents
+  // Build local map: child -> parents / 构建本地图：child -> parents
   const parentMap = new Map<string, string[]>();
   for (const [child, parent] of allGroupingPolicies) {
     if (!parentMap.has(child)) {
@@ -64,7 +67,7 @@ export async function checkCircularInheritance(roleId: string, parentIds: string
     parentMap.get(child)!.push(parent);
   }
 
-  // 使用本地图进行 DFS 检查循环
+  // Use local map for DFS cycle detection / 使用本地图进行 DFS 检查循环
   const hasCycle = (currentId: string, visited: Set<string>): boolean => {
     if (visited.has(currentId)) return false;
     visited.add(currentId);
@@ -77,11 +80,11 @@ export async function checkCircularInheritance(roleId: string, parentIds: string
     return false;
   };
 
-  // 检查每个要设置的上级角色
+  // Check each parent role to be set / 检查每个要设置的上级角色
   for (const parentId of parentIds) {
-    // 自己不能是自己的上级
+    // Cannot be its own parent / 自己不能是自己的上级
     if (parentId === roleId) return true;
-    // 检查祖先链中是否包含 roleId
+    // Check if ancestor chain contains roleId / 检查祖先链中是否包含 roleId
     if (hasCycle(parentId, new Set<string>())) return true;
   }
 
@@ -89,9 +92,10 @@ export async function checkCircularInheritance(roleId: string, parentIds: string
 }
 
 /**
+ * Enrich a single role object with parent role info
+ * @param role Role object / 角色对象
+ * @returns Role object with parent role info / 包含上级角色信息的角色对象
  * 为单个角色对象添加上级角色信息
- * @param role 角色对象
- * @returns 包含上级角色信息的角色对象
  */
 export async function enrichRoleWithParents(role: Role): Promise<RoleWithParents> {
   const parentRoles = await getRoleParents(role.id);
@@ -99,17 +103,18 @@ export async function enrichRoleWithParents(role: Role): Promise<RoleWithParents
 }
 
 /**
+ * Batch enrich role list with parent role info
+ * @param roles Role list / 角色列表
+ * @returns Role list with parent role info / 包含上级角色信息的角色列表
  * 批量为角色列表添加上级角色信息
- * @param roles 角色列表
- * @returns 包含上级角色信息的角色列表
  */
 export async function enrichRolesWithParents(roles: Role[]): Promise<RoleWithParents[]> {
   const enforcer = await enforcerPromise;
 
-  // 获取所有的角色继承关系
+  // Get all role inheritance relationships / 获取所有的角色继承关系
   const allGroupingPolicies = await enforcer.getGroupingPolicy();
 
-  // 构建角色ID到上级角色的映射
+  // Build mapping from role ID to parent roles / 构建角色ID到上级角色的映射
   const parentMap = new Map<string, string[]>();
   for (const [child, parent] of allGroupingPolicies) {
     if (!parentMap.has(child)) {
@@ -118,7 +123,7 @@ export async function enrichRolesWithParents(roles: Role[]): Promise<RoleWithPar
     parentMap.get(child)!.push(parent);
   }
 
-  // 为每个角色添加上级角色信息
+  // Add parent role info for each role / 为每个角色添加上级角色信息
   return roles.map(role => ({
     ...role,
     parentRoles: parentMap.get(role.id) || [],
@@ -126,22 +131,24 @@ export async function enrichRolesWithParents(roles: Role[]): Promise<RoleWithPar
 }
 
 /**
+ * Clean up all inheritance relationships for a role (used when deleting a role)
+ * @param roleId Role ID / 角色ID
  * 清理角色的所有继承关系（删除角色时使用）
- * @param roleId 角色ID
  */
 export async function cleanRoleInheritance(roleId: string): Promise<void> {
   const enforcer = await enforcerPromise;
 
-  // 删除作为子角色的关系（roleId继承自其他角色）
+  // Delete relationships as child role (roleId inherits from other roles) / 删除作为子角色的关系（roleId继承自其他角色）
   await enforcer.removeFilteredGroupingPolicy(0, roleId);
 
-  // 删除作为父角色的关系（其他角色继承自roleId）
+  // Delete relationships as parent role (other roles inherit from roleId) / 删除作为父角色的关系（其他角色继承自roleId）
   await enforcer.removeFilteredGroupingPolicy(1, roleId);
 }
 
 /**
+ * Validate parent roles exist
+ * @returns null if all exist, otherwise returns list of non-existent role IDs / null 表示验证通过，否则返回不存在的角色 ID 列表
  * 验证父角色是否存在
- * @returns null 表示验证通过，否则返回不存在的角色 ID 列表
  */
 export async function validateParentRolesExist(parentRoleIds: string[]): Promise<string[] | null> {
   if (parentRoleIds.length === 0) return null;
@@ -158,8 +165,9 @@ export async function validateParentRolesExist(parentRoleIds: string[]): Promise
 }
 
 /**
+ * Update role's parent role relationships
+ * @returns { success: true } or { success: false, error: string } / { success: true } 或 { success: false, error: string }
  * 更新角色的父角色关系
- * @returns { success: true } 或 { success: false, error: string }
  */
 export async function updateRoleParents(roleId: string, parentRoleIds: string[]): Promise<UpdateRoleParentsResult> {
   if (parentRoleIds.length > 0) {
@@ -179,6 +187,7 @@ export async function updateRoleParents(roleId: string, parentRoleIds: string[])
 }
 
 /**
+ * Get role by ID
  * 根据 ID 获取角色
  */
 export async function getRoleById(id: string) {
@@ -187,6 +196,7 @@ export async function getRoleById(id: string) {
 }
 
 /**
+ * Check if role exists
  * 检查角色是否存在
  */
 export async function roleExists(id: string): Promise<boolean> {
@@ -195,6 +205,7 @@ export async function roleExists(id: string): Promise<boolean> {
 }
 
 /**
+ * Save role permissions
  * 保存角色权限
  */
 export async function saveRolePermissions(roleId: string, permissions: Array<[string, string]>): Promise<SavePermissionsResult | SavePermissionsError> {
@@ -203,10 +214,10 @@ export async function saveRolePermissions(roleId: string, permissions: Array<[st
     Effect.promise(async () => {
       const enforcer = await enforcerPromise;
 
-      // 获取角色的直接权限（不包括继承的）
+      // Get role's direct permissions (excluding inherited) / 获取角色的直接权限（不包括继承的）
       const directPermissions = await enforcer.getPermissionsForUser(roleId.toString());
 
-      // 获取所有隐式权限（包括继承的）
+      // Get all implicit permissions (including inherited) / 获取所有隐式权限（包括继承的）
       const allImplicitPermissions = await enforcer.getImplicitPermissionsForUser(roleId.toString());
       const directPermSet = new Set(
         directPermissions.map(p => `${p[1]}:${p[2]}`),
@@ -217,7 +228,7 @@ export async function saveRolePermissions(roleId: string, permissions: Array<[st
           .map(p => `${p[1]}:${p[2]}`),
       );
 
-      // 检查是否尝试添加已经继承的权限
+      // Check if attempting to add already inherited permissions / 检查是否尝试添加已经继承的权限
       const duplicateInheritedPerms: string[] = [];
       for (const [resource, action] of permissions) {
         const key = `${resource}:${action}`;
@@ -233,14 +244,14 @@ export async function saveRolePermissions(roleId: string, permissions: Array<[st
         } as SavePermissionsError;
       }
 
-      // 构建新权限的数组格式
+      // Build new permissions in array format / 构建新权限的数组格式
       const oldPolicies = directPermissions;
       const newPolicies = permissions.map(([resource, action]) => [roleId.toString(), resource, action]);
 
       let removedCount = 0;
       let addedCount = 0;
 
-      // 删除所有现有直接权限
+      // Delete all existing direct permissions / 删除所有现有直接权限
       if (oldPolicies.length > 0) {
         const removeSuccess = await enforcer.removePolicies(oldPolicies);
         if (!removeSuccess) {
@@ -249,12 +260,12 @@ export async function saveRolePermissions(roleId: string, permissions: Array<[st
         removedCount = oldPolicies.length;
       }
 
-      // 添加新权限
+      // Add new permissions / 添加新权限
       if (newPolicies.length > 0) {
         try {
           const addSuccess = await enforcer.addPolicies(newPolicies);
           if (!addSuccess) {
-            // 添加失败，尝试回滚
+            // Add failed, attempt rollback / 添加失败，尝试回滚
             if (oldPolicies.length > 0) {
               await enforcer.addPolicies(oldPolicies);
             }
@@ -263,13 +274,13 @@ export async function saveRolePermissions(roleId: string, permissions: Array<[st
           addedCount = newPolicies.length;
         }
         catch {
-          // 添加异常，尝试回滚
+          // Add exception, attempt rollback / 添加异常，尝试回滚
           if (oldPolicies.length > 0) {
             try {
               await enforcer.addPolicies(oldPolicies);
             }
             catch {
-              // 回滚也失败
+              // Rollback also failed / 回滚也失败
             }
           }
           throw new Error("添加新权限时发生异常");
@@ -282,12 +293,13 @@ export async function saveRolePermissions(roleId: string, permissions: Array<[st
 }
 
 /**
+ * Get role's permissions and inheritance relationships
  * 获取角色的权限和继承关系
  */
 export async function getRolePermissionsAndGroupings(roleId: string) {
   const enforcer = await enforcerPromise;
 
-  // 获取所有隐式权限（包括继承的）
+  // Get all implicit permissions (including inherited) / 获取所有隐式权限（包括继承的）
   const allImplicitPermissions = await enforcer.getImplicitPermissionsForUser(roleId.toString());
 
   const permissions = allImplicitPermissions.map(p => ({
@@ -295,7 +307,7 @@ export async function getRolePermissionsAndGroupings(roleId: string) {
     action: p[2],
   }));
 
-  // 获取所有角色继承关系
+  // Get all role inheritance relationships / 获取所有角色继承关系
   const allGroupings = await enforcer.getGroupingPolicy();
   const groupings = allGroupings.map(g => ({
     child: g[0],

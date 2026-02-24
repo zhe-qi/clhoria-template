@@ -29,6 +29,8 @@ export type GetEntryContentOptions = {
    */
   preset?: Preset;
   /**
+   * Whether to wrap the original app with mainApp
+   * When enabled, creates a Hono instance to wrap the original app for Edge Runtime compatibility
    * 是否使用 mainApp 包装原始 app
    * 启用后会创建一个 Hono 实例包装原始 app，兼容 Edge Runtime
    * @default false
@@ -77,7 +79,7 @@ export const getEntryContent = async (options: GetEntryContentOptions) => {
   };
 
   if (wrapWithMainApp) {
-    // 使用 mainApp 包装原始 app，兼容 Edge Runtime
+    // Wrap original app with mainApp for Edge Runtime compatibility / 使用 mainApp 包装原始 app，兼容 Edge Runtime
     const appStr = `const modules = import.meta.glob([${globStr}], { import: 'default', eager: true })
       let added = false
       for (const [, app] of Object.entries(modules)) {
@@ -118,7 +120,7 @@ ${await hooksToString("mainApp", options.entryContentAfterHooks)}
 ${await hooksToString("mainApp", [defaultExportHook])}`;
   }
 
-  // 简化版：直接使用导入的 app，无 mainApp 包装
+  // Simplified version: directly use the imported app without mainApp wrapping / 简化版：直接使用导入的 app，无 mainApp 包装
   const defaultExportHook
     = options.entryContentDefaultExportHook ?? (() => "export default app");
 

@@ -1,4 +1,23 @@
 /**
+ * Singleton cache utility
+ *
+ * Solves the problem of duplicate initialization during Vite HMR, provides type-safe singleton management
+ *
+ * HMR Cache Guide
+ *
+ * To determine whether to cache in globalThis, ask yourself these 3 questions:
+ *
+ * 1. Does it maintain TCP/WebSocket long connections?
+ *    Yes -> Must cache (PostgreSQL, Redis, WebSocket, gRPC)
+ *
+ * 2. Does it have internal state/timers/background tasks?
+ *    Yes -> Must cache (PgBoss, task queues, timers, EventEmitter)
+ *
+ * 3. Is creation overhead significant? (initialization > 100ms or lots of configuration)
+ *    Yes -> Recommended to cache (S3Client, Casbin, large config objects)
+ *
+ * If all 3 are No -> No caching needed
+ *
  * 单例缓存工具
  *
  * 解决 Vite HMR 时重复初始化的问题，提供类型安全的单例管理
@@ -22,7 +41,7 @@
 type DestroyFn<T> = (instance: T) => void | Promise<void>;
 
 type SingletonOptions<T> = {
-  /** 可选的销毁函数，用于优雅关闭 */
+  /** Optional destroy function for graceful shutdown / 可选的销毁函数，用于优雅关闭 */
   destroy?: DestroyFn<T>;
 };
 
@@ -31,6 +50,7 @@ type SingletonEntry = {
   destroy?: DestroyFn<unknown>;
 };
 
+// Use Symbol.for to ensure cross-module uniqueness, avoids maintaining types in global.d.ts
 // 使用 Symbol.for 保证跨模块唯一性，避免在 global.d.ts 中维护类型
 const SINGLETON_REGISTRY_KEY = Symbol.for("__singleton_registry__");
 
@@ -39,6 +59,7 @@ type GlobalWithRegistry = typeof globalThis & {
 };
 
 /**
+ * Get global singleton registry
  * 获取全局单例注册表
  */
 function getRegistry(): Map<string, SingletonEntry> {
@@ -52,6 +73,7 @@ function getRegistry(): Map<string, SingletonEntry> {
 }
 
 /**
+ * Create synchronous singleton
  * 创建同步单例
  *
  * @example
@@ -74,13 +96,14 @@ export function createSingleton<T>(key: string, factory: () => T, options?: Sing
 }
 
 /**
+ * Create lazy-initialized singleton (returns getter function)
  * 创建延迟初始化单例（返回 getter 函数）
  *
  * @example
  * const getQueryClient = createLazySingleton('postgres', () => postgres(url), {
  *   destroy: (sql) => sql.end(),
  * });
- * // 使用时
+ * // Usage / 使用时
  * const client = getQueryClient();
  */
 export function createLazySingleton<T>(key: string, factory: () => T, options?: SingletonOptions<T>): () => T {
@@ -88,6 +111,7 @@ export function createLazySingleton<T>(key: string, factory: () => T, options?: 
 }
 
 /**
+ * Create async singleton (returns Promise)
  * 创建异步单例（返回 Promise）
  *
  * @example
@@ -100,9 +124,10 @@ export function createAsyncSingleton<T>(key: string, factory: () => Promise<T>, 
   const registry = getRegistry();
 
   if (!registry.has(key)) {
+    // Store Promise immediately to avoid duplicate initialization on concurrent calls
     // 立即存入 Promise，避免并发调用时重复初始化
     const promise = factory().then((instance) => {
-      // 更新为已解析的实例
+      // Update with resolved instance / 更新为已解析的实例
       registry.set(key, {
         instance,
         destroy: options?.destroy as DestroyFn<unknown> | undefined,
@@ -110,7 +135,7 @@ export function createAsyncSingleton<T>(key: string, factory: () => Promise<T>, 
       return instance;
     });
 
-    // 先存入 Promise
+    // Store Promise first / 先存入 Promise
     registry.set(key, {
       instance: promise,
       destroy: options?.destroy as DestroyFn<unknown> | undefined,
@@ -121,6 +146,7 @@ export function createAsyncSingleton<T>(key: string, factory: () => Promise<T>, 
 }
 
 /**
+ * Destroy specified singleton
  * 销毁指定单例
  */
 export async function destroySingleton(key: string): Promise<void> {
@@ -129,6 +155,7 @@ export async function destroySingleton(key: string): Promise<void> {
 
   if (entry) {
     if (entry.destroy) {
+      // If instance is a Promise, wait for resolution before destroying
       // 如果实例是 Promise，等待其解析后再销毁
       const instance = entry.instance instanceof Promise
         ? await entry.instance
@@ -140,6 +167,7 @@ export async function destroySingleton(key: string): Promise<void> {
 }
 
 /**
+ * Destroy all singletons
  * 销毁所有单例
  */
 export async function destroyAllSingletons(): Promise<void> {
@@ -155,8 +183,9 @@ export async function destroyAllSingletons(): Promise<void> {
 }
 
 /**
+ * Synchronously get a registered singleton instance
+ * Only returns completed instances, does not trigger creation
  * 同步获取已注册的单例实例
- *
  * 仅返回已完成初始化的实例，不触发创建
  */
 export function getSingleton<T>(key: string): T | undefined {
@@ -165,6 +194,7 @@ export function getSingleton<T>(key: string): T | undefined {
 }
 
 /**
+ * Check if singleton exists
  * 检查单例是否存在
  */
 export function hasSingleton(key: string): boolean {
@@ -172,6 +202,7 @@ export function hasSingleton(key: string): boolean {
 }
 
 /**
+ * Get all registered singleton keys (for debugging)
  * 获取所有已注册的单例键（用于调试）
  */
 export function getSingletonKeys(): string[] {

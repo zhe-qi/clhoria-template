@@ -29,12 +29,12 @@ export function operationLog(options?: OperationLogOptions) {
 
     await next();
 
-    // 同步 clone 响应（确保 Response 对象可用）
+    // Synchronously clone response (ensure Response object is available) / 同步 clone 响应（确保 Response 对象可用）
     const resClone = c.res.clone();
     const requestId = c.get("requestId");
     const payload = c.get("jwtPayload");
 
-    // fire-and-forget：不阻塞响应返回
+    // Fire-and-forget: do not block response / fire-and-forget：不阻塞响应返回
     Promise.resolve().then(async () => {
       if (!payload) return;
 
@@ -55,7 +55,7 @@ export function operationLog(options?: OperationLogOptions) {
         }
       }
       catch {
-        // 忽略解析失败
+        // Ignore parse failure / 忽略解析失败
       }
 
       operationLogger.info({

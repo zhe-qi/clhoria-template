@@ -20,6 +20,8 @@ export type NodeBuildOptions = {
    */
   shutdownTimeoutMs?: number | undefined;
   /**
+   * Whether to wrap the original app with mainApp
+   * When enabled, creates a Hono instance to wrap the original app for Edge Runtime compatibility
    * 是否使用 mainApp 包装原始 app
    * 启用后会创建一个 Hono 实例包装原始 app，兼容 Edge Runtime
    * @default false
@@ -38,7 +40,7 @@ const nodeBuildPlugin = (pluginOptions?: NodeBuildOptions): Plugin => {
         wrapWithMainApp,
         entryContentBeforeHooks: [
           async (appName, options) => {
-            // 只在有静态文件时才导入 serveStatic
+            // Only import serveStatic when there are static files / 只在有静态文件时才导入 serveStatic
             const staticPaths = options?.staticPaths ?? [];
             if (staticPaths.length === 0)
               return "";
@@ -54,7 +56,7 @@ const nodeBuildPlugin = (pluginOptions?: NodeBuildOptions): Plugin => {
         entryContentAfterHooks: [
           async (appName) => {
             let code = "import { serve } from '@hono/node-server'\n";
-            // 使用环境变量，回退到配置的端口
+            // Use environment variable, fall back to configured port / 使用环境变量，回退到配置的端口
             const portCode = `process.env.PORT ? parseInt(process.env.PORT, 10) : ${port}`;
 
             if (shutdownTimeoutMs !== undefined) {
@@ -71,7 +73,7 @@ const nodeBuildPlugin = (pluginOptions?: NodeBuildOptions): Plugin => {
             else {
               code += `serve({ fetch: ${appName}.fetch, port: ${portCode} })\n`;
             }
-            // 添加启动日志
+            // Add startup log / 添加启动日志
             code += `console.log('[服务]: 启动成功, 端口:', ${portCode})`;
             return code;
           },

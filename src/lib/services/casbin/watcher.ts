@@ -8,7 +8,7 @@ import { createAsyncSingleton } from "@/lib/core/singleton";
 
 const CHANNEL = "casbin-policy";
 
-/** 创建 Casbin Redis Watcher（自动适配单机/集群模式） */
+/** Create Casbin Redis Watcher (auto-adapts to standalone/cluster mode) / 创建 Casbin Redis Watcher（自动适配单机/集群模式） */
 function createCasbinWatcher(): Promise<RedisWatcher> {
   const isClusterMode = env.REDIS_CLUSTER_ENABLED === "true";
 

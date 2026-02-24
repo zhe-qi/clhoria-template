@@ -10,20 +10,20 @@ import logger from "@/lib/services/logger";
 import redisClient from "@/lib/services/redis";
 import { Resp } from "@/utils";
 
-/** Redis 缓存 Key 前缀 */
+/** Redis cache key prefix / Redis 缓存 Key 前缀 */
 const PARAM_CACHE_PREFIX = "param:";
 
-/** 缓存过期时间（秒） */
-const PARAM_CACHE_TTL = 300; // 5 分钟
+/** Cache expiration time (seconds) / 缓存过期时间（秒） */
+const PARAM_CACHE_TTL = 300; // 5 minutes / 5 分钟
 
-/** 根据键查询参数 */
+/** Get param by key / 根据键查询参数 */
 export const getByKey: ParamRouteHandlerType<"getByKey"> = async (c) => {
   const { key } = c.req.valid("param");
 
   const cacheKey = `${PARAM_CACHE_PREFIX}${key}`;
 
   try {
-    // 尝试从 Redis 缓存获取
+    // Try to get from Redis cache / 尝试从 Redis 缓存获取
     const cached = await redisClient.get(cacheKey);
     if (cached) {
       logger.debug({ key, cacheKey }, "[参数]: 从缓存获取参数");
@@ -31,11 +31,11 @@ export const getByKey: ParamRouteHandlerType<"getByKey"> = async (c) => {
     }
   }
   catch (error) {
-    // Redis 错误不影响主流程，记录日志后继续查询数据库
+    // Redis error does not affect main flow, log and continue querying database / Redis 错误不影响主流程，记录日志后继续查询数据库
     logger.warn({ error, key }, "[参数]: Redis 缓存读取失败");
   }
 
-  // 查询参数（只查询启用状态的参数）
+  // Query param (only enabled ones) / 查询参数（只查询启用状态的参数）
   const param = await db.query.systemParams.findFirst({
     where: and(
       eq(systemParams.key, key),
@@ -60,7 +60,7 @@ export const getByKey: ParamRouteHandlerType<"getByKey"> = async (c) => {
     name: param.name,
   };
 
-  // 异步写入 Redis 缓存（不阻塞响应）
+  // Async write to Redis cache (non-blocking) / 异步写入 Redis 缓存（不阻塞响应）
   void redisClient.setex(cacheKey, PARAM_CACHE_TTL, JSON.stringify(result))
     .catch(error => logger.warn({ error, key }, "[参数]: Redis 缓存写入失败"));
 

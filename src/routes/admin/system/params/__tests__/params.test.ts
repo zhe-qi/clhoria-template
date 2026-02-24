@@ -28,7 +28,7 @@ function createSysParamApp() {
 
 const client = testClient(createSysParamApp());
 
-// 测试数据
+// Test data / 测试数据
 const testParamKey = "test_param";
 const testParam = {
   key: testParamKey,
@@ -40,16 +40,17 @@ const testParam = {
 };
 
 /**
+ * Clean up test parameter data
  * 清理测试参数数据
  */
 async function cleanupTestParams(): Promise<void> {
   try {
-    // 从数据库删除所有测试参数（key 以 test_ 开头）
+    // Delete all test params from database (key starts with test_) / 从数据库删除所有测试参数（key 以 test_ 开头）
     await db
       .delete(systemParams)
       .where(like(systemParams.key, "test_%"));
 
-    // 清理 Redis 缓存
+    // Clean up Redis cache / 清理 Redis 缓存
     const keys = await redisClient.keys("param:test_*");
     if (keys.length > 0) {
       await redisClient.del(...keys);
@@ -65,15 +66,15 @@ describe("system params routes", () => {
   let adminToken: string;
 
   beforeAll(async () => {
-    // 清理可能存在的遗留测试数据
+    // Clean up any leftover test data / 清理可能存在的遗留测试数据
     await cleanupTestParams();
 
-    // 获取 admin token
+    // Get admin token / 获取 admin token
     const { getAdminToken } = await import("~/tests/auth-utils");
     adminToken = await getAdminToken();
   });
 
-  // 确保测试结束后清理所有测试数据
+  // Ensure all test data is cleaned up after tests / 确保测试结束后清理所有测试数据
   afterAll(async () => {
     await cleanupTestParams();
   });
@@ -116,7 +117,7 @@ describe("system params routes", () => {
     });
 
     it("should support filtering by key", async () => {
-      // 先创建一个参数
+      // Create a param first / 先创建一个参数
       await client.system.params.$post(
         {
           json: {
@@ -155,7 +156,7 @@ describe("system params routes", () => {
     it("should validate required fields", async () => {
       const response = await client.system.params.$post(
         {
-          // @ts-expect-error - 测试必填字段验证
+          // @ts-expect-error - Testing required field validation / 测试必填字段验证
           json: {
             name: "测试参数",
           },
@@ -171,7 +172,7 @@ describe("system params routes", () => {
         {
           json: {
             ...testParam,
-            key: "Invalid-Key!", // 包含非法字符
+            key: "Invalid-Key!", // Contains illegal characters / 包含非法字符
           },
         },
         { headers: getAuthHeaders(adminToken) },
@@ -206,7 +207,7 @@ describe("system params routes", () => {
     it("should return 409 for duplicate key", async () => {
       const duplicateKey = "test_duplicate";
 
-      // 创建第一个参数
+      // Create the first param / 创建第一个参数
       const response1 = await client.system.params.$post(
         {
           json: {
@@ -219,7 +220,7 @@ describe("system params routes", () => {
 
       expect(response1.status).toBe(HttpStatusCodes.CREATED);
 
-      // 尝试创建重复的参数
+      // Attempt to create a duplicate param / 尝试创建重复的参数
       const response2 = await client.system.params.$post(
         {
           json: {
@@ -230,7 +231,7 @@ describe("system params routes", () => {
         { headers: getAuthHeaders(adminToken) },
       );
 
-      // 数据库唯一约束错误由全局 onError 处理，返回 409
+      // Database unique constraint error handled by global onError, returns 409 / 数据库唯一约束错误由全局 onError 处理，返回 409
       expect(response2.status).toBe(HttpStatusCodes.CONFLICT);
 
       const json = await response2.json() as { message: string };
@@ -243,7 +244,7 @@ describe("system params routes", () => {
     let paramId: string;
 
     beforeAll(async () => {
-      // 创建一个参数用于测试
+      // Create a param for testing / 创建一个参数用于测试
       const response = await client.system.params.$post(
         {
           json: {
@@ -302,7 +303,7 @@ describe("system params routes", () => {
     let paramId: string;
 
     beforeAll(async () => {
-      // 创建一个参数用于测试
+      // Create a param for testing / 创建一个参数用于测试
       const response = await client.system.params.$post(
         {
           json: {
@@ -382,7 +383,7 @@ describe("system params routes", () => {
     });
 
     it("should delete param successfully", async () => {
-      // 先创建一个参数用于测试删除功能
+      // Create a param first for testing deletion / 先创建一个参数用于测试删除功能
       const createResponse = await client.system.params.$post(
         {
           json: {
@@ -401,7 +402,7 @@ describe("system params routes", () => {
       const json = await createResponse.json();
       const deleteTestParamId = json.data.id;
 
-      // 测试删除功能
+      // Test deletion / 测试删除功能
       const deleteResponse = await client.system.params[":id"].$delete(
         { param: { id: deleteTestParamId } },
         { headers: getAuthHeaders(adminToken) },
@@ -415,7 +416,7 @@ describe("system params routes", () => {
         expect(deleteJson.data.id).toBe(deleteTestParamId);
       }
 
-      // 验证参数已被删除
+      // Verify the param has been deleted / 验证参数已被删除
       const verifyResponse = await client.system.params[":id"].$get(
         { param: { id: deleteTestParamId } },
         { headers: getAuthHeaders(adminToken) },

@@ -5,17 +5,17 @@ import type { JWTPayload } from "hono/utils/jwt/types";
 
 export type AppBindings = {
   Variables: {
-    /** 日志记录器 */
+    /** Logger / 日志记录器 */
     logger: PinoLogger;
-    /** 请求 ID */
+    /** Request ID / 请求 ID */
     requestId: string;
-    /** 当前 tier 的 basePath，由框架自动注入 */
+    /** Current tier's basePath, auto-injected by framework / 当前 tier 的 basePath，由框架自动注入 */
     tierBasePath: string;
-    /** JWT 负载 */
+    /** JWT payload / JWT 负载 */
     jwtPayload: JWTPayload & {
-      /** 用户角色 */
+      /** User roles / 用户角色 */
       roles: string[];
-      /** 用户 ID */
+      /** User ID / 用户 ID */
       sub: string;
     };
   };

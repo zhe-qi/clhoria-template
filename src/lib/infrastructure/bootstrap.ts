@@ -10,19 +10,19 @@ import boss from "./pg-boss-adapter";
 
 const KEY = "bootstrap";
 
-/** 初始化基础设施 */
+/** Initialize infrastructure / 初始化基础设施 */
 export function bootstrap(): Promise<void> {
   if (hasSingleton(KEY)) return Promise.resolve();
 
   const program = Effect.gen(function* () {
-    // 配置 Zod 使用中文错误消息
+    // Configure Zod to use Chinese error messages / 配置 Zod 使用中文错误消息
     z.config(z.locales.zhCN());
 
-    // 1. 初始化 pg-boss（必须先于其他组件）
+    // 1. Initialize pg-boss (must be before other components) / 初始化 pg-boss（必须先于其他组件）
     yield* Effect.promise(() => boss.start());
     logger.info("[PgBossAdapter]: pg-boss 已启动");
 
-    // 2. 初始化 excelize wasm
+    // 2. Initialize excelize wasm / 初始化 excelize wasm
     yield* initExcelize;
     logger.info("[Bootstrap]: excelize wasm 已加载");
 
@@ -32,7 +32,7 @@ export function bootstrap(): Promise<void> {
   return Effect.runPromise(program);
 }
 
-/** 关闭基础设施 */
+/** Shutdown infrastructure / 关闭基础设施 */
 export function shutdown(): Promise<void> {
   if (!hasSingleton(KEY)) return Promise.resolve();
 

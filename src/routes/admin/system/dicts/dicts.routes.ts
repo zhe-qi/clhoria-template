@@ -11,7 +11,7 @@ import { systemDictCreateSchema, systemDictListResponseSchema, systemDictPatchSc
 const routePrefix = "/system/dicts";
 const tags = [`${routePrefix}（业务字典管理）`];
 
-/** 获取字典列表 */
+/** Get dictionary list / 获取字典列表 */
 export const list = createRoute({
   tags,
   summary: "获取字典列表",
@@ -27,7 +27,7 @@ export const list = createRoute({
   },
 });
 
-/** 创建字典 */
+/** Create dictionary / 创建字典 */
 export const create = createRoute({
   tags,
   summary: "创建字典",
@@ -42,7 +42,7 @@ export const create = createRoute({
   },
 });
 
-/** 获取字典详情 */
+/** Get dictionary details / 获取字典详情 */
 export const get = createRoute({
   tags,
   summary: "获取字典详情",
@@ -58,7 +58,7 @@ export const get = createRoute({
   },
 });
 
-/** 更新字典 */
+/** Update dictionary / 更新字典 */
 export const update = createRoute({
   tags,
   summary: "更新字典",
@@ -74,7 +74,7 @@ export const update = createRoute({
   },
 });
 
-/** 删除字典 */
+/** Delete dictionary / 删除字典 */
 export const remove = createRoute({
   tags,
   summary: "删除字典",

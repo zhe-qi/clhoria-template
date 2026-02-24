@@ -248,7 +248,7 @@ describe("Response Utils", () => {
           issues: [
             {
               code: "invalid_type",
-              // 缺少 path 和 message
+              // Missing path and message / 缺少 path 和 message
             },
           ],
         },
@@ -283,7 +283,7 @@ describe("Response Utils", () => {
     it("应该验证 error.name 必须是字符串", () => {
       const result = respErrSchema.safeParse({
         error: {
-          name: 123, // 应该是字符串
+          name: 123, // Should be a string / 应该是字符串
         },
       });
 
@@ -297,7 +297,7 @@ describe("Response Utils", () => {
           issues: [
             {
               code: "test",
-              path: ["valid", 1, { invalid: true }], // 对象不允许
+              path: ["valid", 1, { invalid: true }], // Objects not allowed / 对象不允许
               message: "测试",
             },
           ],
@@ -322,7 +322,7 @@ describe("Response Utils", () => {
         {
           code: "invalid_type",
           expected: "string",
-          // @ts-expect-error - 测试用例需要
+          // @ts-expect-error - Required for test case / 测试用例需要
           received: "number",
           path: ["field"],
           message: "类型错误",

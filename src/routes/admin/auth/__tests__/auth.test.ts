@@ -16,15 +16,15 @@ if (env.NODE_ENV !== "test") {
   throw new Error("NODE_ENV must be 'test'");
 }
 
-// ===== 测试应用 =====
+// ===== Test app / 测试应用 =====
 function createAuthApp() {
   return createTestApp().route("/", authRouter);
 }
 
 const client = testClient(createAuthApp());
 
-// ===== 工具函数 =====
-/** 从响应头提取 refreshToken cookie 值 */
+// ===== Utility functions / 工具函数 =====
+/** Extract refreshToken cookie value from response headers / 从响应头提取 refreshToken cookie 值 */
 function extractRefreshToken(response: { headers: Headers }): string | null {
   const setCookie = response.headers.get("set-cookie");
   if (!setCookie) return null;
@@ -32,7 +32,7 @@ function extractRefreshToken(response: { headers: Headers }): string | null {
   return match ? match[1] : null;
 }
 
-/** 登录并返回 accessToken 和 refreshToken */
+/** Login and return accessToken and refreshToken / 登录并返回 accessToken 和 refreshToken */
 async function loginAs(credentials: { username: string; password: string }) {
   const response = await client.auth.login.$post({
     json: { ...credentials, captchaToken: "test" },
@@ -46,15 +46,15 @@ async function loginAs(credentials: { username: string; password: string }) {
   };
 }
 
-// ===== 测试常量 =====
+// ===== Test constants / 测试常量 =====
 const ADMIN_CREDENTIALS = { username: "admin", password: "123456" };
 const USER_CREDENTIALS = { username: "user", password: "123456" };
 const DISABLED_USERNAME = "test_disabled_auth";
 
-// ===== 测试主体 =====
+// ===== Test body / 测试主体 =====
 describe("auth routes", () => {
   beforeAll(async () => {
-    // 创建禁用测试用户
+    // Create disabled test user / 创建禁用测试用户
     const passwordHash = await hash("123456");
     await db.insert(systemUsers).values({
       username: DISABLED_USERNAME,
@@ -66,7 +66,7 @@ describe("auth routes", () => {
   });
 
   afterAll(async () => {
-    // 清理 Redis 中的 refresh token
+    // Clean up refresh tokens in Redis / 清理 Redis 中的 refresh token
     const adminUser = await db.query.systemUsers.findFirst({
       where: eq(systemUsers.username, "admin"),
       columns: { id: true },
@@ -78,7 +78,7 @@ describe("auth routes", () => {
     if (adminUser) await cleanupRefreshTokens(adminUser.id);
     if (regularUser) await cleanupRefreshTokens(regularUser.id);
 
-    // 清理禁用测试用户
+    // Clean up disabled test user / 清理禁用测试用户
     await db.delete(systemUsers).where(eq(systemUsers.username, DISABLED_USERNAME));
   });
 
@@ -202,18 +202,18 @@ describe("auth routes", () => {
     });
 
     it("should return 401 with revoked refresh token", async () => {
-      // 登录获取 refreshToken
+      // Login to get refreshToken / 登录获取 refreshToken
       const { accessToken, refreshToken } = await loginAs(ADMIN_CREDENTIALS);
 
       expect(refreshToken).toBeDefined();
 
-      // 退出登录，吊销所有 refresh token
+      // Logout, revoke all refresh tokens / 退出登录，吊销所有 refresh token
       await client.auth.logout.$post(
         {},
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );
 
-      // 使用已吊销的 refreshToken 尝试刷新
+      // Attempt to refresh with revoked refreshToken / 使用已吊销的 refreshToken 尝试刷新
       const response = await client.auth.refresh.$post(
         {},
         { headers: { Cookie: `refreshToken=${refreshToken}` } },
@@ -253,22 +253,22 @@ describe("auth routes", () => {
       const setCookie = response.headers.get("set-cookie");
 
       expect(setCookie).toBeDefined();
-      // 删除 cookie 时值为空或 Max-Age=0
+      // Cookie value is empty or Max-Age=0 when deleted / 删除 cookie 时值为空或 Max-Age=0
       expect(setCookie).toContain("refreshToken=");
     });
 
     it("should revoke all refresh tokens (subsequent refresh fails)", async () => {
-      // 登录两次生成两个 refreshToken
+      // Login twice to generate two refreshTokens / 登录两次生成两个 refreshToken
       const login1 = await loginAs(ADMIN_CREDENTIALS);
       const login2 = await loginAs(ADMIN_CREDENTIALS);
 
-      // 使用第一次登录的 accessToken 退出
+      // Logout using the first login's accessToken / 使用第一次登录的 accessToken 退出
       await client.auth.logout.$post(
         {},
         { headers: { Authorization: `Bearer ${login1.accessToken}` } },
       );
 
-      // 两个旧 refreshToken 都应该失效
+      // Both old refreshTokens should be invalidated / 两个旧 refreshToken 都应该失效
       const refresh1 = await client.auth.refresh.$post(
         {},
         { headers: { Cookie: `refreshToken=${login1.refreshToken}` } },

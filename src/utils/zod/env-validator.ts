@@ -9,6 +9,7 @@ export type ValidationResult<T> = {
 };
 
 /**
+ * Safely parse environment variable schema
  * 安全解析环境变量schema
  */
 export function safeParseEnv<T extends z.ZodType>(
@@ -27,20 +28,20 @@ export function safeParseEnv<T extends z.ZodType>(
   const fieldErrors: Record<string, string[]> = {};
 
   result.error.issues.forEach((issue) => {
-    // 确保路径元素是字符串 (Symbol 不能作为索引类型)
+    // Ensure path elements are strings (Symbol cannot be used as index type) / 确保路径元素是字符串 (Symbol 不能作为索引类型)
     const field = issue.path
       .filter((p): p is string => typeof p === "string")
-      .join("."); // 处理嵌套路径，尽管环境变量是扁平的
+      .join("."); // Handle nested paths, although env vars are flat / 处理嵌套路径，尽管环境变量是扁平的
 
     if (field) {
-      // 将错误添加到对应字段
+      // Add error to corresponding field / 将错误添加到对应字段
       if (!fieldErrors[field]) {
         fieldErrors[field] = [];
       }
       fieldErrors[field].push(issue.message);
     }
     else {
-      // 处理无字段关联的错误（如根级错误）
+      // Handle errors not associated with a field (e.g., root-level errors) / 处理无字段关联的错误（如根级错误）
       const rootKey = "_";
       if (!fieldErrors[rootKey]) {
         fieldErrors[rootKey] = [];
@@ -56,6 +57,7 @@ export function safeParseEnv<T extends z.ZodType>(
 }
 
 /**
+ * Parse environment variables and exit process on failure
  * 解析环境变量并在失败时退出进程
  */
 export function parseEnvOrExit<T extends z.ZodType>(

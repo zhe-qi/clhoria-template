@@ -19,12 +19,12 @@ import { enforcerPromise } from "@/lib/services/casbin";
 import redisClient from "@/lib/services/redis";
 import { toColumns } from "@/utils";
 
-// ===== 配置 =====
+// ===== Configuration / 配置 =====
 const ACCESS_TOKEN_SECRET = env.ADMIN_JWT_SECRET;
 const ACCESS_TOKEN_DURATION = { minutes: ACCESS_TOKEN_EXPIRES_MINUTES };
 const REFRESH_TOKEN_DURATION = { days: REFRESH_TOKEN_EXPIRES_DAYS };
 
-// 工具: 根据配置计算过期时间
+// Utility: calculate expiration based on config / 工具: 根据配置计算过期时间
 function calculateExpiration(duration: { minutes?: number; days?: number; hours?: number }) {
   const now = new Date();
 
@@ -40,17 +40,17 @@ function calculateExpiration(duration: { minutes?: number; days?: number; hours?
   throw new Error("Invalid duration configuration");
 }
 
-// 计算 TTL 秒数
+// Calculate TTL in seconds / 计算 TTL 秒数
 const REFRESH_TTL_SECONDS = differenceInSeconds(
   calculateExpiration(REFRESH_TOKEN_DURATION),
   new Date(),
 );
 
-// ===== Redis Key 约定（使用 Hash Tag 确保同一用户的 key 在同一 slot） =====
+// ===== Redis Key convention (using Hash Tag to ensure same user's keys are in the same slot) / Redis Key 约定（使用 Hash Tag 确保同一用户的 key 在同一 slot） =====
 export const refreshKey = (userId: string | number, token: string) => `{user.${userId}}:rt:${token}`;
 export const refreshIndexKey = (userId: string | number) => `{user.${userId}}:rtidx`;
 
-// ===== Access Token 生成 =====
+// ===== Access Token generation / Access Token 生成 =====
 export async function generateAccessToken(user: UserTokenInfo) {
   const expirationDate = calculateExpiration(ACCESS_TOKEN_DURATION);
 
@@ -61,17 +61,17 @@ export async function generateAccessToken(user: UserTokenInfo) {
     {
       roles: user.roles,
       sub: user.id,
-      iat, // 签发时间（Unix 秒级时间戳）
-      exp, // 过期时间（Unix 秒级时间戳）
+      iat, // Issued at (Unix seconds timestamp) / 签发时间（Unix 秒级时间戳）
+      exp, // Expiration time (Unix seconds timestamp) / 过期时间（Unix 秒级时间戳）
     },
     ACCESS_TOKEN_SECRET,
   );
 }
 
-// ===== Refresh Token 生成 =====
+// ===== Refresh Token generation / Refresh Token 生成 =====
 export async function generateRefreshToken(user: UserTokenInfo) {
   const randomPart = crypto.randomBytes(32).toString("hex"); // 256 bit
-  const token = `${user.id}:${randomPart}`; // 包含 userId 便于解析
+  const token = `${user.id}:${randomPart}`; // Contains userId for easy parsing / 包含 userId 便于解析
 
   const pipeline = redisClient.pipeline();
   pipeline.set(refreshKey(user.id, randomPart), JSON.stringify(user), "EX", REFRESH_TTL_SECONDS);
@@ -82,6 +82,7 @@ export async function generateRefreshToken(user: UserTokenInfo) {
 }
 
 /**
+ * Generate a pair of tokens during login/registration
  * 登录/注册时生成一对 Token
  */
 export async function generateTokens(user: UserTokenInfo) {
@@ -93,10 +94,11 @@ export async function generateTokens(user: UserTokenInfo) {
 }
 
 /**
+ * Refresh access token
  * 刷新 Access Token
  */
 export async function refreshAccessToken(refreshToken: string) {
-  // 解析 token 获取 userId
+  // Parse token to get userId / 解析 token 获取 userId
   const separatorIndex = refreshToken.indexOf(":");
   if (separatorIndex === -1) {
     throw new Error("Invalid refresh token format");
@@ -116,12 +118,12 @@ export async function refreshAccessToken(refreshToken: string) {
 
   const user: UserTokenInfo = JSON.parse(userDataStr);
 
-  // 验证 token 中的 userId 与存储的一致
+  // Verify userId in token matches stored data / 验证 token 中的 userId 与存储的一致
   if (String(user.id) !== userId) {
     throw new Error("Token user mismatch");
   }
 
-  // 轮换：删除旧 refresh，发新 refresh
+  // Rotation: delete old refresh, issue new refresh / 轮换：删除旧 refresh，发新 refresh
   await redisClient.del(refreshKey(userId, randomPart));
   await redisClient.srem(refreshIndexKey(userId), randomPart);
 
@@ -134,6 +136,7 @@ export async function refreshAccessToken(refreshToken: string) {
 }
 
 /**
+ * Logout: revoke all user's refresh tokens
  * 登出：吊销用户所有 Refresh Token
  */
 export async function logout(userId: string | number) {
@@ -144,15 +147,16 @@ export async function logout(userId: string | number) {
   }
 
   const pipeline = redisClient.pipeline();
-  // 所有 key 都带有相同的 Hash Tag {user.${userId}}，确保在同一 slot
+  // All keys share the same Hash Tag {user.${userId}}, ensuring they are in the same slot / 所有 key 都带有相同的 Hash Tag {user.${userId}}，确保在同一 slot
   tokens.forEach(t => pipeline.del(refreshKey(userId, t)));
   pipeline.del(refreshIndexKey(userId));
   await pipeline.exec();
 }
 
 /**
+ * Validate captcha
+ * @returns null if validation passes, otherwise returns error message / null 表示验证通过，否则返回错误信息
  * 验证验证码
- * @returns null 表示验证通过，否则返回错误信息
  */
 export async function validateCaptcha(captchaToken: string): Promise<string | null> {
   const { success } = await cap.validateToken(captchaToken);
@@ -163,8 +167,9 @@ export async function validateCaptcha(captchaToken: string): Promise<string | nu
 }
 
 /**
+ * Login validation
+ * @returns On success returns user info, on failure returns { error, status } / 成功返回用户信息，失败返回 { error, status }
  * 登录验证
- * @returns 成功返回用户信息，失败返回 { error, status }
  */
 export async function validateLogin(username: string, password: string): Promise<ValidateLoginResult> {
   const user = await db.query.systemUsers.findFirst({
@@ -204,6 +209,7 @@ export async function validateLogin(username: string, password: string): Promise
 }
 
 /**
+ * Get user identity info
  * 获取用户身份信息
  */
 export async function getIdentityById(userId: string) {
@@ -228,6 +234,7 @@ export async function getIdentityById(userId: string) {
 }
 
 /**
+ * Get user permissions (role-based Casbin policies)
  * 获取用户权限（基于角色的 Casbin 策略）
  */
 export async function getPermissionsByRoles(roles: string[]) {
@@ -239,7 +246,7 @@ export async function getPermissionsByRoles(roles: string[]) {
     roles.map(role => casbinEnforcer.getImplicitPermissionsForUser(role)),
   );
 
-  // 处理所有角色的权限
+  // Process permissions for all roles / 处理所有角色的权限
   for (const perms of allPermsArrays) {
     for (const perm of perms) {
       if (!perm || perm.length === 0) continue;
@@ -252,7 +259,7 @@ export async function getPermissionsByRoles(roles: string[]) {
     }
   }
 
-  // 获取所有角色继承关系
+  // Get all role inheritance relationships / 获取所有角色继承关系
   const allGroupings = await casbinEnforcer.getGroupingPolicy();
   for (const grouping of allGroupings) {
     if (!grouping || grouping.length === 0) continue;

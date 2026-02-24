@@ -1,9 +1,10 @@
 /**
  * Refine List Query
+ * Not recommended for unauthenticated or client-facing endpoints
  * 不建议用于没经过认证的接口和c端接口
  */
 
-// 转换器功能
+// Converter functions / 转换器功能
 export {
   addDefaultSorting,
   convertFiltersToSQL,
@@ -14,7 +15,7 @@ export {
   validateSorterFields,
 } from "./converters";
 
-// 分页功能
+// Pagination functions / 分页功能
 export {
   calculatePagination,
   type PaginationCalculation,
@@ -23,14 +24,14 @@ export {
   validatePagination,
 } from "./pagination";
 
-// 查询执行器
+// Query executor / 查询执行器
 export {
   type DbInstance,
   executeRefineQuery,
   RefineQueryExecutor,
 } from "./query-executor";
 
-// Zod Schemas 和类型
+// Zod Schemas and types / Zod Schemas 和类型
 export {
   type ConditionalFilter,
   ConditionalFilterSchema,

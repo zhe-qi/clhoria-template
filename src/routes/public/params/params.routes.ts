@@ -10,7 +10,7 @@ import { paramKeyParamsSchema, paramResponseSchema } from "./params.schema";
 const routePrefix = "/params";
 const tags = [`${routePrefix}（系统参数查询）`];
 
-/** 根据键查询参数 */
+/** Get param by key / 根据键查询参数 */
 export const getByKey = createRoute({
   tags,
   summary: "根据键查询参数",

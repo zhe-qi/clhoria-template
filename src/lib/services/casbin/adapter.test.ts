@@ -16,6 +16,7 @@ if (env.NODE_ENV !== "test") {
 }
 
 /**
+ * Test whether policies contain expected subset (DB may have seed data)
  * 测试策略是否包含预期子集（DB 中可能有 seed 数据）
  */
 const testGetPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
@@ -25,6 +26,7 @@ const testGetPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
 };
 
 /**
+ * Test whether role inheritance policies contain expected subset
  * 测试角色继承策略是否包含预期子集
  */
 const testGetGroupingPolicy = async (e: Enforcer, res: string[][]): Promise<void> => {
@@ -34,10 +36,11 @@ const testGetGroupingPolicy = async (e: Enforcer, res: string[][]): Promise<void
 };
 
 /**
+ * Clean up test data (only delete test rules, preserve admin and other production data)
  * 清理测试数据（只删除测试用的规则，保留 admin 等生产数据）
  */
 async function cleanupTestData(): Promise<void> {
-  // 只删除测试中使用的特定主体的规则
+  // Only delete rules for specific subjects used in tests / 只删除测试中使用的特定主体的规则
   const testSubjects = ["alice", "bob", "data2_admin", "data1_admin", "user", "charlie", "user1", "user2", "user3", "role", "new_user", "new_user2", "final_user"];
   await db.delete(casbinRule).where(inArray(casbinRule.v0, testSubjects));
 }
@@ -52,25 +55,25 @@ describe("drizzle casbin adapter", () => {
     model = newModel();
     model.loadModelFromText(casbinModelText);
 
-    // 仅清理测试主体数据，保留 admin 等 seed 数据
+    // Only clean up test subject data, preserve admin and other seed data / 仅清理测试主体数据，保留 admin 等 seed 数据
     await cleanupTestData();
 
-    // 初始化基础测试数据
+    // Initialize base test data / 初始化基础测试数据
     const initialEnforcer = await newEnforcer(model, adapter);
 
-    // 添加初始策略
+    // Add initial policies / 添加初始策略
     await initialEnforcer.addPolicy("alice", "data1", "read");
     await initialEnforcer.addPolicy("bob", "data2", "write");
     await initialEnforcer.addPolicy("data2_admin", "data2", "read");
     await initialEnforcer.addPolicy("data2_admin", "data2", "write");
 
-    // 添加角色继承
+    // Add role inheritance / 添加角色继承
     await initialEnforcer.addGroupingPolicy("alice", "data2_admin");
     await initialEnforcer.addGroupingPolicy("bob", "data1_admin");
   });
 
   beforeEach(async () => {
-    // 每个测试前重新加载 enforcer，确保状态一致
+    // Reload enforcer before each test to ensure consistent state / 每个测试前重新加载 enforcer，确保状态一致
     const testModel = newModel();
     testModel.loadModelFromText(casbinModelText);
     enforcer = await newEnforcer(testModel, adapter);
@@ -87,7 +90,7 @@ describe("drizzle casbin adapter", () => {
     });
 
     it("应该从数据库加载策略", async () => {
-      // beforeEach 已经加载了策略，这里直接验证
+      // beforeEach already loaded the policies, verify directly here / beforeEach 已经加载了策略，这里直接验证
       await testGetPolicy(enforcer, [
         ["alice", "data1", "read"],
         ["bob", "data2", "write"],
@@ -212,10 +215,10 @@ describe("drizzle casbin adapter", () => {
 
   describe("过滤加载策略", () => {
     beforeEach(async () => {
-      // 确保有正确的测试数据
+      // Ensure correct test data exists / 确保有正确的测试数据
       const dbRules = await db.select().from(casbinRule);
       if (dbRules.length === 0 || !dbRules.some(r => r.v0 === "alice" && r.v1 === "data1")) {
-        // 重新初始化测试数据
+        // Reinitialize test data / 重新初始化测试数据
         await cleanupTestData();
         const e = await newEnforcer(model, adapter);
         await e.addPolicy("alice", "data1", "read");
@@ -262,10 +265,10 @@ describe("drizzle casbin adapter", () => {
 
   describe("权限判断", () => {
     beforeEach(async () => {
-      // 确保有正确的测试数据
+      // Ensure correct test data exists / 确保有正确的测试数据
       const dbRules = await db.select().from(casbinRule);
       if (dbRules.length === 0 || !dbRules.some(r => r.v0 === "alice" && r.v1 === "data1")) {
-        // 重新初始化测试数据
+        // Reinitialize test data / 重新初始化测试数据
         await cleanupTestData();
         const e = await newEnforcer(model, adapter);
         await e.addPolicy("alice", "data1", "read");
@@ -275,7 +278,7 @@ describe("drizzle casbin adapter", () => {
         await e.addGroupingPolicy("alice", "data2_admin");
         await e.addGroupingPolicy("bob", "data1_admin");
 
-        // 重新加载 enforcer
+        // Reload enforcer / 重新加载 enforcer
         const testModel = newModel();
         testModel.loadModelFromText(casbinModelText);
         enforcer = await newEnforcer(testModel, adapter);
@@ -291,19 +294,19 @@ describe("drizzle casbin adapter", () => {
 
       expect(result2).toBe(true);
 
-      // alice 有 data2_admin 角色，所以也有 data2 的 write 权限
+      // alice has data2_admin role, so also has write permission on data2 / alice 有 data2_admin 角色，所以也有 data2 的 write 权限
       const result3 = await enforcer.enforce("alice", "data2", "write");
 
       expect(result3).toBe(true);
 
-      // alice 没有 data1 的 write 权限
+      // alice does not have write permission on data1 / alice 没有 data1 的 write 权限
       const result4 = await enforcer.enforce("alice", "data1", "write");
 
       expect(result4).toBe(false);
     });
 
     it("应该支持角色继承的权限判断", async () => {
-      // alice 有 data2_admin 角色，data2_admin 有 data2 的读写权限
+      // alice has data2_admin role, data2_admin has read/write permission on data2 / alice 有 data2_admin 角色，data2_admin 有 data2 的读写权限
       const result1 = await enforcer.enforce("alice", "data2", "read");
 
       expect(result1).toBe(true);
@@ -350,12 +353,12 @@ describe("drizzle casbin adapter", () => {
     let savedRules: typeof casbinRule.$inferSelect[] = [];
 
     beforeEach(async () => {
-      // 保存当前所有规则（包括 admin 规则）
+      // Save all current rules (including admin rules) / 保存当前所有规则（包括 admin 规则）
       savedRules = await db.select().from(casbinRule);
     });
 
     afterEach(async () => {
-      // 恢复规则
+      // Restore rules / 恢复规则
       await db.delete(casbinRule);
       if (savedRules.length > 0) {
         await db.insert(casbinRule).values(savedRules);
@@ -374,7 +377,7 @@ describe("drizzle casbin adapter", () => {
 
       expect(result).toBe(true);
 
-      // 验证已保存
+      // Verify saved / 验证已保存
       const e = await newEnforcer(testModel, adapter);
       const policies = await e.getPolicy();
 
@@ -394,7 +397,7 @@ describe("drizzle casbin adapter", () => {
 
       await adapter.savePolicy(testModel);
 
-      // 验证只有新策略存在
+      // Verify only new policies exist / 验证只有新策略存在
       const e = await newEnforcer(testModel, adapter);
       const policies = await e.getPolicy();
 
@@ -405,25 +408,25 @@ describe("drizzle casbin adapter", () => {
 
   describe("获取权限和角色", () => {
     beforeEach(async () => {
-      // 清空并添加此测试套件专用的数据
+      // Clear and add data specific to this test suite / 清空并添加此测试套件专用的数据
       await cleanupTestData();
       const e = await newEnforcer(model, adapter);
 
-      // 重新添加测试数据
+      // Re-add test data / 重新添加测试数据
       await e.addPolicy("alice", "/api/user", "GET");
       await e.addPolicy("alice", "/api/user", "POST");
       await e.addPolicy("bob", "/api/admin", "GET");
       await e.addGroupingPolicy("alice", "user_role");
       await e.addGroupingPolicy("bob", "admin_role");
 
-      // 重新加载 enforcer
+      // Reload enforcer / 重新加载 enforcer
       const testModel = newModel();
       testModel.loadModelFromText(casbinModelText);
       enforcer = await newEnforcer(testModel, adapter);
     });
 
     afterEach(async () => {
-      // 恢复原始测试数据
+      // Restore original test data / 恢复原始测试数据
       await cleanupTestData();
       const e = await newEnforcer(model, adapter);
 
@@ -470,32 +473,32 @@ describe("drizzle casbin adapter", () => {
     });
 
     it("应该获取用户的所有隐式权限(包括角色继承)", async () => {
-      // 清空并准备测试数据
+      // Clear and prepare test data / 清空并准备测试数据
       await cleanupTestData();
       const e = await newEnforcer(model, adapter);
 
-      // 添加一个角色的权限
+      // Add permissions for a role / 添加一个角色的权限
       await e.addPolicy("admin_role", "/api/admin", "GET");
       await e.addPolicy("admin_role", "/api/admin", "POST");
       await e.addPolicy("user_role", "/api/user", "GET");
 
-      // alice 直接有一个权限
+      // alice has a direct permission / alice 直接有一个权限
       await e.addPolicy("alice", "/api/profile", "GET");
 
-      // alice 拥有 user_role 角色
+      // alice has user_role / alice 拥有 user_role 角色
       await e.addGroupingPolicy("alice", "user_role");
 
-      // 重新加载 enforcer
+      // Reload enforcer / 重新加载 enforcer
       const testModel = newModel();
       testModel.loadModelFromText(casbinModelText);
       const enforcer = await newEnforcer(testModel, adapter);
 
-      // 获取隐式权限(包括通过角色继承得到的权限)
+      // Get implicit permissions (including those inherited from roles) / 获取隐式权限(包括通过角色继承得到的权限)
       const implicitPermissions = await enforcer.getImplicitPermissionsForUser("alice");
 
-      // alice 应该有 2 个权限:
-      // 1. 自己直接的权限: ["alice", "/api/profile", "GET"]
-      // 2. 从 user_role 继承的权限: ["user_role", "/api/user", "GET"]
+      // alice should have 2 permissions: / alice 应该有 2 个权限:
+      // 1. Direct permission: ["alice", "/api/profile", "GET"] / 1. 自己直接的权限: ["alice", "/api/profile", "GET"]
+      // 2. Inherited from user_role: ["user_role", "/api/user", "GET"] / 2. 从 user_role 继承的权限: ["user_role", "/api/user", "GET"]
       expect(implicitPermissions.length).toBeGreaterThanOrEqual(2);
       expect(implicitPermissions).toContainEqual(["alice", "/api/profile", "GET"]);
       expect(implicitPermissions).toContainEqual(["user_role", "/api/user", "GET"]);

@@ -15,6 +15,7 @@ import { executeRefineQuery } from "@/lib/core/refine-query";
 type CreateUserInput = z.infer<typeof insertSystemUsersSchema>;
 
 /**
+ * Query user list (including role info)
  * 查询用户列表（包含角色信息）
  */
 export async function listUsers(queryParams: RefineQueryParams) {
@@ -50,6 +51,7 @@ export async function listUsers(queryParams: RefineQueryParams) {
 }
 
 /**
+ * Create user
  * 创建用户
  */
 export async function createUser(data: CreateUserInput, createdBy: string) {
@@ -69,8 +71,9 @@ export async function createUser(data: CreateUserInput, createdBy: string) {
 }
 
 /**
+ * Validate roles exist
+ * @returns null if all exist, otherwise returns list of non-existent role IDs / null 表示全部存在，否则返回不存在的角色 ID 列表
  * 验证角色是否存在
- * @returns null 表示全部存在，否则返回不存在的角色 ID 列表
  */
 export async function validateRolesExist(roleIds: string[]): Promise<string[] | null> {
   if (roleIds.length === 0)
@@ -89,6 +92,7 @@ export async function validateRolesExist(roleIds: string[]): Promise<string[] | 
 }
 
 /**
+ * Save user roles (incremental update)
  * 保存用户角色（增量更新）
  */
 export async function saveUserRoles(
@@ -99,18 +103,18 @@ export async function saveUserRoles(
   const currentRoleSet = new Set(currentRoleIds);
   const newRoleSet = new Set(roleIds);
 
-  // 计算需要删除的角色（在当前角色中但不在新角色中）
+  // Calculate roles to remove (in current roles but not in new roles) / 计算需要删除的角色（在当前角色中但不在新角色中）
   const rolesToRemove = currentRoleIds.filter(roleId => !newRoleSet.has(roleId));
 
-  // 计算需要添加的角色（在新角色中但不在当前角色中）
+  // Calculate roles to add (in new roles but not in current roles) / 计算需要添加的角色（在新角色中但不在当前角色中）
   const rolesToAdd = roleIds.filter(roleId => !currentRoleSet.has(roleId));
 
   let removedCount = 0;
   let addedCount = 0;
 
-  // 使用事务确保数据一致性
+  // Use transaction to ensure data consistency / 使用事务确保数据一致性
   await db.transaction(async (tx) => {
-    // 删除不需要的角色
+    // Delete unnecessary roles / 删除不需要的角色
     if (rolesToRemove.length > 0) {
       const deleteResult = await tx.delete(systemUserRoles).where(
         and(
@@ -122,7 +126,7 @@ export async function saveUserRoles(
       removedCount = deleteResult.length;
     }
 
-    // 添加新的角色
+    // Add new roles / 添加新的角色
     if (rolesToAdd.length > 0) {
       const valuesToInsert = rolesToAdd.map(roleId => ({ userId, roleId }));
       const insertResult = await tx.insert(systemUserRoles).values(valuesToInsert).returning();

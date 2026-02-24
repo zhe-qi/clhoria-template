@@ -3,19 +3,19 @@ import { index, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
 export const casbinRule = pgTable("casbin_rule", {
-  /** 策略类型：p（权限策略）/g（角色继承） */
-  ptype: varchar({ length: 8 }).notNull(), // 非空：所有规则必含 ptype
-  /** 主体：角色或用户（p策略=sub，g策略=上级角色/用户） */
-  v0: varchar({ length: 64 }).notNull(), // 非空：p/g 策略均需主体
-  /** 对象：业务资源（p策略=obj，g策略=下级角色/用户） */
-  v1: varchar({ length: 254 }).notNull(), // 非空：p/g 策略均需对象
-  /** 动作：业务动作（仅p策略使用，g策略为空字符串） */
-  v2: varchar({ length: 64 }).notNull().default(""), // 默认空字符串：兼容g策略
-  /** 保留字段（暂不使用，默认空字符串） */
+  /** Policy type: p (permission policy) / g (role inheritance) / 策略类型：p（权限策略）/g（角色继承） */
+  ptype: varchar({ length: 8 }).notNull(), // Not null: all rules must contain ptype / 非空：所有规则必含 ptype
+  /** Subject: role or user (p=sub, g=parent role/user) / 主体：角色或用户（p策略=sub，g策略=上级角色/用户） */
+  v0: varchar({ length: 64 }).notNull(), // Not null: both p/g policies require subject / 非空：p/g 策略均需主体
+  /** Object: business resource (p=obj, g=child role/user) / 对象：业务资源（p策略=obj，g策略=下级角色/用户） */
+  v1: varchar({ length: 254 }).notNull(), // Not null: both p/g policies require object / 非空：p/g 策略均需对象
+  /** Action: business action (only used by p policy, empty string for g) / 动作：业务动作（仅p策略使用，g策略为空字符串） */
+  v2: varchar({ length: 64 }).notNull().default(""), // Default empty string: compatible with g policy / 默认空字符串：兼容g策略
+  /** Reserved field (not in use, defaults to empty string) / 保留字段（暂不使用，默认空字符串） */
   v3: varchar({ length: 64 }).notNull().default(""),
-  /** 保留字段（暂不使用，默认空字符串） */
+  /** Reserved field (not in use, defaults to empty string) / 保留字段（暂不使用，默认空字符串） */
   v4: varchar({ length: 64 }).notNull().default(""),
-  /** 保留字段（暂不使用，默认空字符串） */
+  /** Reserved field (not in use, defaults to empty string) / 保留字段（暂不使用，默认空字符串） */
   v5: varchar({ length: 64 }).notNull().default(""),
 }, table => [
   primaryKey({ name: "casbin_rule_pkey", columns: [table.ptype, table.v0, table.v1, table.v2] }),
@@ -23,7 +23,7 @@ export const casbinRule = pgTable("casbin_rule", {
   index("idx_casbin_v1").on(table.ptype, table.v1),
 ]);
 
-// Zod Schema 适配字段非空+默认值约束
+// Zod Schema adapted for not-null + default value constraints / Zod Schema 适配字段非空+默认值约束
 export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
   ptype: schema =>
     schema.meta({ description: "策略类型: p=策略 g=角色继承" }),
@@ -41,10 +41,10 @@ export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
     schema.meta({ description: "保留字段" }),
 });
 
-// 类型来源：z.infer<typeof selectCasbinRuleSchema> 是 selectSchema 的解析类型，omit 后得到插入类型
+// Type source: z.infer<typeof selectCasbinRuleSchema> is the parsed type of selectSchema, omit yields insert type / 类型来源：z.infer<typeof selectCasbinRuleSchema> 是 selectSchema 的解析类型，omit 后得到插入类型
 type InsertCasbinRuleType = z.infer<typeof selectCasbinRuleSchema>;
 
-/** 基础插入 schema（不含 refine，用于 partial 等操作） */
+/** Base insert schema (without refine, for partial operations) / 基础插入 schema（不含 refine，用于 partial 等操作） */
 export const baseCasbinRuleSchema = selectCasbinRuleSchema;
 
 type InsertCasbinRuleInput = z.infer<typeof baseCasbinRuleSchema>;
@@ -80,7 +80,7 @@ export const patchCasbinRuleSchema = z
     fromOriginalRule: z.object({
       ptype: selectCasbinRuleSchema.shape.ptype,
     }).meta({ description: "原规则的基础信息（仅需ptype，用于校验更新合法性）" }),
-    // Zod v4.3+: 包含 refine 的 schema 不能调用 partial()，使用基础 schema
+    // Zod v4.3+: schema with refine cannot call partial(), use base schema / Zod v4.3+: 包含 refine 的 schema 不能调用 partial()，使用基础 schema
     updateData: baseCasbinRuleSchema.partial().meta({ description: "待更新的规则字段（部分可选）" }),
   })
   .refine((data: PatchCasbinRuleInput) => {
@@ -88,7 +88,7 @@ export const patchCasbinRuleSchema = z
     const originalPtype = fromOriginalRule.ptype;
     const { ptype: newPtype, v2: newV2, v0: newV0, v1: newV1 } = updateData;
 
-    // 场景1：更新 ptype（从g改p或p改g）
+    // Scenario 1: Updating ptype (changing between g and p) / 场景1：更新 ptype（从g改p或p改g）
     if ((newPtype !== undefined) && (newPtype !== originalPtype)) {
       if (newPtype === "g") {
         if ((newV2 !== undefined) && (newV2 !== "")) {
@@ -103,7 +103,7 @@ export const patchCasbinRuleSchema = z
       }
     }
 
-    // 场景2：未更新 ptype（保持原类型）
+    // Scenario 2: ptype not updated (keeping original type) / 场景2：未更新 ptype（保持原类型）
     if ((newPtype === undefined) || (newPtype === originalPtype)) {
       if (originalPtype === "g") {
         if (newV2 !== undefined) {
@@ -118,7 +118,7 @@ export const patchCasbinRuleSchema = z
       }
     }
 
-    // 场景3：更新 v0/v1 的额外校验
+    // Scenario 3: Additional validation for v0/v1 updates / 场景3：更新 v0/v1 的额外校验
     if ((newV0 !== undefined) && (newV0.includes("@"))) {
       throw new Error("主体（v0）不允许包含「@」字符，请修改后重试");
     }

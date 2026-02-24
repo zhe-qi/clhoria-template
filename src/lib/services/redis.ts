@@ -5,10 +5,10 @@ import { parseURL } from "ioredis/built/utils/index.js";
 import env from "@/env";
 import { createSingleton } from "@/lib/core/singleton";
 
-/** Redis 客户端类型（单机或集群） */
+/** Redis client type (standalone or cluster) / Redis 客户端类型（单机或集群） */
 export type RedisClient = Redis | Cluster;
 
-/** 解析集群节点配置 */
+/** Parse cluster node configuration / 解析集群节点配置 */
 function parseClusterNodes(nodesStr: string): Array<{ host: string; port: number }> {
   return nodesStr.split(",").map((node) => {
     const [host, portStr] = node.trim().split(":");
@@ -19,7 +19,7 @@ function parseClusterNodes(nodesStr: string): Array<{ host: string; port: number
   });
 }
 
-/** 创建 Redis 客户端 */
+/** Create Redis client / 创建 Redis 客户端 */
 function createRedisClient(): RedisClient {
   const isClusterMode = env.REDIS_CLUSTER_ENABLED === "true";
 

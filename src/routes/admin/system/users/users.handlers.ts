@@ -69,7 +69,7 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  // 检查是否为内置用户
+  // Check if built-in user / 检查是否为内置用户
   const [user] = await db
     .select({ builtIn: systemUsers.builtIn })
     .from(systemUsers)
@@ -79,12 +79,12 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 内置用户不允许修改状态
+  // Built-in users cannot have their status modified / 内置用户不允许修改状态
   if (user.builtIn && body.status !== undefined) {
     return c.json(Resp.fail("内置用户不允许修改状态"), HttpStatusCodes.FORBIDDEN);
   }
 
-  // 不允许直接更新密码
+  // Direct password update not allowed / 不允许直接更新密码
   const updateData = omit(body, ["password"]);
 
   const [updated] = await db
@@ -108,7 +108,7 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
 export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
-  // 检查是否为内置用户
+  // Check if built-in user / 检查是否为内置用户
   const [user] = await db
     .select({ builtIn: systemUsers.builtIn })
     .from(systemUsers)
@@ -138,7 +138,7 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
   const { userId } = c.req.valid("param");
   const { roleIds } = c.req.valid("json");
 
-  // 获取用户及其当前角色
+  // Get user and their current roles / 获取用户及其当前角色
   const userWithRoles = await db.query.systemUsers.findFirst({
     where: eq(systemUsers.id, userId),
     columns: { id: true },
@@ -153,13 +153,13 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
     return c.json(Resp.fail("用户不存在"), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 验证角色存在性
+  // Validate role existence / 验证角色存在性
   const invalidRoleIds = await validateRolesExist(roleIds);
   if (invalidRoleIds) {
     return c.json(Resp.fail(`角色不存在: ${invalidRoleIds.join(", ")}`), HttpStatusCodes.NOT_FOUND);
   }
 
-  // 保存用户角色
+  // Save user roles / 保存用户角色
   const currentRoleIds = userWithRoles.systemUserRoles.map(ur => ur.roleId);
   const result = await saveUserRoles(userId, roleIds, currentRoleIds);
 

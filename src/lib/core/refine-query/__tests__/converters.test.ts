@@ -11,7 +11,7 @@ import {
   validateSorterFields,
 } from "../converters";
 
-// 创建测试用表
+// Create test table / 创建测试用表
 const testTable = pgTable("test_table", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 100 }),
@@ -626,7 +626,7 @@ describe("refine-query Converters", () => {
     const converter = new FiltersConverter(testTable);
 
     describe("值注入尝试", () => {
-      // 经典 SQL 注入模式
+      // Classic SQL injection patterns / 经典 SQL 注入模式
       const sqlInjectionPayloads = [
         "'; DROP TABLE users; --",
         "1' OR '1'='1",
@@ -647,11 +647,11 @@ describe("refine-query Converters", () => {
       ];
 
       it.each(sqlInjectionPayloads)("应该安全处理 eq 操作符中的恶意值: %s", (payload) => {
-        // 转换器应该正常生成 SQL（Drizzle 使用参数化查询）
+        // Converter should generate SQL normally (Drizzle uses parameterized queries) / 转换器应该正常生成 SQL（Drizzle 使用参数化查询）
         const result = converter.convert([{ field: "name", operator: "eq", value: payload }]);
 
         expect(result).toBeDefined();
-        // 重要：Drizzle ORM 使用参数化查询，恶意值会被当作参数传递而非 SQL 代码
+        // Important: Drizzle ORM uses parameterized queries, malicious values are passed as parameters, not SQL code / 重要：Drizzle ORM 使用参数化查询，恶意值会被当作参数传递而非 SQL 代码
       });
 
       it.each(sqlInjectionPayloads)("应该安全处理 contains 操作符中的恶意值: %s", (payload) => {
@@ -686,7 +686,7 @@ describe("refine-query Converters", () => {
       ];
 
       it.each(fieldInjectionPayloads)("应该拒绝恶意字段名: %s", (maliciousField) => {
-        // 由于恶意字段名不存在于表结构中，应该返回 undefined
+        // Since malicious field names don't exist in the table schema, should return undefined / 由于恶意字段名不存在于表结构中，应该返回 undefined
         const result = converter.convert([{ field: maliciousField, operator: "eq", value: "test" }]);
 
         expect(result).toBeUndefined();

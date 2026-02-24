@@ -10,7 +10,7 @@ import { downloadTokenRequestSchema, tokenResponseSchema, uploadTokenRequestSche
 const routePrefix = "/resources";
 const tags = [`${routePrefix}（通用资源）`];
 
-/** 获取上传预签名 URL */
+/** Get upload presigned URL / 获取上传预签名 URL */
 export const getUploadToken = createRoute({
   path: `${routePrefix}/object-storage/upload`,
   method: "post",
@@ -27,7 +27,7 @@ export const getUploadToken = createRoute({
   },
 });
 
-/** 获取下载预签名 URL */
+/** Get download presigned URL / 获取下载预签名 URL */
 export const getDownloadToken = createRoute({
   path: `${routePrefix}/object-storage/download`,
   method: "post",

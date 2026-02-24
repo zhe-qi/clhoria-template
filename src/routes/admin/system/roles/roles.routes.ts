@@ -10,7 +10,7 @@ import { savePermissionsParamsSchema, savePermissionsResponseSchema, savePermiss
 const routePrefix = "/system/roles";
 const tags = [`${routePrefix}（系统角色）`];
 
-/** 获取系统角色分页列表 */
+/** Get system role paginated list / 获取系统角色分页列表 */
 export const list = createRoute({
   tags,
   summary: "获取系统角色列表",
@@ -26,7 +26,7 @@ export const list = createRoute({
   },
 });
 
-/** 创建系统角色 */
+/** Create system role / 创建系统角色 */
 export const create = createRoute({
   tags,
   summary: "创建系统角色",
@@ -42,7 +42,7 @@ export const create = createRoute({
   },
 });
 
-/** 根据ID获取系统角色详情 */
+/** Get system role details by ID / 根据ID获取系统角色详情 */
 export const get = createRoute({
   tags,
   summary: "获取系统角色详情",
@@ -58,7 +58,7 @@ export const get = createRoute({
   },
 });
 
-/** 更新系统角色 */
+/** Update system role / 更新系统角色 */
 export const update = createRoute({
   tags,
   summary: "更新系统角色",
@@ -75,7 +75,7 @@ export const update = createRoute({
   },
 });
 
-/** 删除系统角色 */
+/** Delete system role / 删除系统角色 */
 export const remove = createRoute({
   tags,
   summary: "删除系统角色",
@@ -91,7 +91,7 @@ export const remove = createRoute({
   },
 });
 
-/** 获取角色权限 */
+/** Get role permissions / 获取角色权限 */
 export const getPermissions = createRoute({
   tags,
   summary: "获取角色权限",

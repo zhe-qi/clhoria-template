@@ -13,11 +13,11 @@ import { insertCasbinRuleSchema } from "@/db/schema";
 type TCasbinTable = InferInsertModel<typeof casbinRule>;
 type PostgresJsDatabaseSchema = PostgresJsDatabase<typeof schema>;
 
-/** 策略过滤器类型，支持单条或多条规则模式匹配 */
+/** Policy filter type, supports single or multiple rule pattern matching / 策略过滤器类型，支持单条或多条规则模式匹配 */
 export type PolicyFilter = {
-  /** p 策略过滤：单条规则 string[] 或多条规则 string[][] */
+  /** p policy filter: single rule string[] or multiple rules string[][] / p 策略过滤：单条规则 string[] 或多条规则 string[][] */
   p?: string[] | string[][];
-  /** g 角色继承过滤：单条规则 string[] 或多条规则 string[][] */
+  /** g role inheritance filter: single rule string[] or multiple rules string[][] / g 角色继承过滤：单条规则 string[] 或多条规则 string[][] */
   g?: string[] | string[][];
 };
 
@@ -44,17 +44,21 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
 
   // ---------- loadFilteredPolicy ----------
   /**
+   * Supports several common filter shapes:
+   * - { p: ['alice','data1','read'] }  => single pattern (string[])
+   * - { p: [ ['a','b'], ['c','d'] ] } => multiple patterns (string[][])
+   * - Also supports both p/g types
    * 支持 filter 的几种常见形态：
    * - { p: ['alice','data1','read'] }  => 单条 pattern（string[]）
    * - { p: [ ['a','b'], ['c','d'] ] } => 多条 pattern（string[][]）
    * - 也支持 p/g 两种类型
    */
   async loadFilteredPolicy(model: Model, filter: any): Promise<void> {
-    // 规范化 filter 为 Record<string, string[][]>（每个 entry 为若干条 rule pattern）
+    // Normalize filter to Record<string, string[][]> (each entry contains multiple rule patterns) / 规范化 filter 为 Record<string, string[][]>（每个 entry 为若干条 rule pattern）
     const normalized: Record<string, string[][]> = {};
 
     if (!filter || Object.keys(filter).length === 0) {
-      // 如果没有 filter，等同于 loadPolicy
+      // If no filter provided, equivalent to loadPolicy / 如果没有 filter，等同于 loadPolicy
       await this.loadPolicy(model);
       this.filtered = false;
       return;
@@ -66,12 +70,12 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       if (!Array.isArray(val))
         continue;
 
-      // 如果第一个元素仍是数组 -> 认为是 string[][]（多个 patterns）
+      // If first element is still an array -> treat as string[][] (multiple patterns) / 如果第一个元素仍是数组 -> 认为是 string[][]（多个 patterns）
       if (val.length > 0 && Array.isArray(val[0])) {
         normalized[ptype] = val as string[][];
       }
       else {
-        // 否则当作单条 pattern（string[]）
+        // Otherwise treat as single pattern (string[]) / 否则当作单条 pattern（string[]）
         normalized[ptype] = [val as string[]];
       }
     }
@@ -83,7 +87,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       .flat();
 
     if (whereConditions.length === 0) {
-      // 没有有效过滤条件，退回 loadPolicy
+      // No valid filter conditions, fall back to loadPolicy / 没有有效过滤条件，退回 loadPolicy
       await this.loadPolicy(model);
       this.filtered = false;
       return;
@@ -100,35 +104,35 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
 
   // ---------- savePolicy ----------
   async savePolicy(model: Model): Promise<boolean> {
-    // 核心字段（与数据库主键保持一致）
+    // Core fields (consistent with database primary key) / 核心字段（与数据库主键保持一致）
     const keyFields: (keyof TCasbinTable)[] = ["ptype", "v0", "v1", "v2"];
 
     const policies = this.extractAndValidatePolicies(model, keyFields);
 
-    // 如果没有策略，清空表
+    // If no policies, clear the table / 如果没有策略，清空表
     if (policies.length === 0) {
       await this.db.transaction(tx => tx.delete(this.schema));
       return true;
     }
 
-    // keepKeys (字符串 key)：ptype|v0|v1|v2|v3
+    // keepKeys (string key): ptype|v0|v1|v2|v3 / keepKeys (字符串 key)：ptype|v0|v1|v2|v3
     const keepKeys = new Set(
       policies.map(policy => keyFields.map(field => (policy[field] ?? "").toString()).join("|")),
     );
 
-    // 构建 SQL 表达式：ptype || '|' || v0 || '|' || v1 || '|' || v2 || '|' || v3
+    // Build SQL expression: ptype || '|' || v0 || '|' || v1 || '|' || v2 || '|' || v3 / 构建 SQL 表达式：ptype || '|' || v0 || '|' || v1 || '|' || v2 || '|' || v3
     const sqlKeyExpr = keyFields
       .map(field => this.schema[field])
       .reduce((prev, curr) => (prev ? sql`${prev} || '|' || ${curr}` : curr as any));
 
     await this.db.transaction(async (tx) => {
-      // 批量插入（冲突时跳过）
+      // Batch insert (skip on conflict) / 批量插入（冲突时跳过）
       await tx
         .insert(this.schema)
         .values(policies)
         .onConflictDoNothing({ target: keyFields.map(field => this.schema[field]) });
 
-      // 删除旧的、但不在 keepKeys 中的记录
+      // Delete old records not in keepKeys / 删除旧的、但不在 keepKeys 中的记录
       await tx
         .delete(this.schema)
         .where(not(inArray(sqlKeyExpr, Array.from(keepKeys))));
@@ -156,14 +160,14 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
             [["ptype", ptype], ...Array.from({ length: 6 }, (_, i) => [`v${i}`, rule[i] ?? ""])],
           ) as TCasbinTable;
 
-          // 验证
+          // Validate / 验证
           const validation = insertCasbinRuleSchema.safeParse(policy);
           if (!validation.success) {
             const errors = validation.error.issues.map(i => i.message).join("; ");
             throw new Error(`无效的${ptype}-规则 ${JSON.stringify(rule)}: ${errors}`);
           }
 
-          // keyFields 的存在性检查（都应该有字段，空串亦可）
+          // Check keyFields existence (fields should exist, empty string is acceptable) / keyFields 的存在性检查（都应该有字段，空串亦可）
           if (!keyFields.every(field => Object.prototype.hasOwnProperty.call(policy, field))) {
             throw new Error(`策略缺少必要字段: ${keyFields.join(", ")}`);
           }
@@ -180,7 +184,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
   async addPolicy(_sec: string, ptype: string, rule: string[]): Promise<void> {
     const policy = this.createPolicyObject(ptype, rule);
 
-    // 验证
+    // Validate / 验证
     const validation = insertCasbinRuleSchema.safeParse(policy);
     if (!validation.success) {
       const errors = validation.error.issues.map(i => i.message).join("; ");
@@ -245,7 +249,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
     for (let i = 0; i < fieldValues.length; i++) {
       const vKey = (`v${i + fieldIndex}`) as keyof TCasbinTable;
       const value = fieldValues[i];
-      // 仅在调用方明确提供（非 undefined）时构建条件
+      // Only build condition when caller explicitly provides a value (not undefined) / 仅在调用方明确提供（非 undefined）时构建条件
       if (value === undefined)
         continue;
       conditions.push(eq(this.schema[vKey], value));
@@ -260,7 +264,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
   async updatePolicy(_sec: string, ptype: string, oldRule: string[], newRule: string[]): Promise<void> {
     const newPolicy = this.createPolicyObject(ptype, newRule);
 
-    // 验证新策略
+    // Validate new policy / 验证新策略
     const validation = insertCasbinRuleSchema.safeParse(newPolicy);
     if (!validation.success) {
       const errors = validation.error.issues.map(i => i.message).join("; ");
@@ -268,12 +272,12 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
     }
 
     await this.db.transaction(async (tx) => {
-      // 删除旧策略
+      // Delete old policy / 删除旧策略
       await tx
         .delete(this.schema)
         .where(this.buildRuleConditions(ptype, oldRule));
 
-      // 插入新策略
+      // Insert new policy / 插入新策略
       await tx
         .insert(this.schema)
         .values(newPolicy)
@@ -309,13 +313,13 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
     }
 
     await this.db.transaction(async (tx) => {
-      // 删除所有旧策略
+      // Delete all old policies / 删除所有旧策略
       const oldConditions = oldRules.map(rule => this.buildRuleConditions(ptype, rule));
       await tx
         .delete(this.schema)
         .where(or(...oldConditions));
 
-      // 插入所有新策略
+      // Insert all new policies / 插入所有新策略
       await tx
         .insert(this.schema)
         .values(newPolicies)
@@ -344,13 +348,13 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
 
   // ---------- loadPolicyLine ----------
   private loadPolicyLine(rule: TCasbinTable, model: Model): void {
-    // 生成 tokens，去除右侧尾随空字符串
+    // Generate tokens, remove trailing empty strings / 生成 tokens，去除右侧尾随空字符串
     const tokens = [
       rule.ptype,
       ...Array.from({ length: 6 }, (_, i) => (rule[`v${i}` as keyof TCasbinTable] ?? "")),
     ] as string[];
 
-    // 去掉尾部连续的空字符串
+    // Strip consecutive empty strings from the end / 去掉尾部连续的空字符串
     while (tokens.length > 1 && tokens[tokens.length - 1] === "") {
       tokens.pop();
     }

@@ -21,6 +21,7 @@ const s3Client = createSingleton(
 );
 
 /**
+ * Generate upload presigned URL
  * 生成上传预签名 URL
  */
 export async function generateUploadUrl(params: GenerateUploadUrlParams): Promise<PresignedUrlResult> {
@@ -39,6 +40,7 @@ export async function generateUploadUrl(params: GenerateUploadUrlParams): Promis
 }
 
 /**
+ * Generate download presigned URL
  * 生成下载预签名 URL
  */
 export async function generateDownloadUrl(params: GenerateDownloadUrlParams): Promise<PresignedUrlResult> {

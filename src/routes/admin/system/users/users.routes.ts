@@ -12,7 +12,7 @@ import { saveRolesParamsSchema, saveRolesResponseSchema, saveRolesSchema, system
 const routePrefix = "/system/users";
 const tags = [`${routePrefix}（系统用户）`];
 
-/** 获取系统用户分页列表 */
+/** Get system user paginated list / 获取系统用户分页列表 */
 export const list = createRoute({
   tags,
   summary: "获取系统用户列表",
@@ -28,7 +28,7 @@ export const list = createRoute({
   },
 });
 
-/** 创建系统用户 */
+/** Create system user / 创建系统用户 */
 export const create = createRoute({
   tags,
   summary: "创建系统用户",
@@ -43,7 +43,7 @@ export const create = createRoute({
   },
 });
 
-/** 根据ID获取系统用户详情 */
+/** Get system user details by ID / 根据ID获取系统用户详情 */
 export const get = createRoute({
   tags,
   summary: "获取系统用户详情",
@@ -59,7 +59,7 @@ export const get = createRoute({
   },
 });
 
-/** 更新系统用户 */
+/** Update system user / 更新系统用户 */
 export const update = createRoute({
   tags,
   summary: "更新系统用户",
@@ -77,7 +77,7 @@ export const update = createRoute({
   },
 });
 
-/** 删除系统用户 */
+/** Delete system user / 删除系统用户 */
 export const remove = createRoute({
   tags,
   summary: "删除系统用户",
@@ -94,7 +94,7 @@ export const remove = createRoute({
   },
 });
 
-/** 保存用户角色（全量更新） */
+/** Save user roles (full update) / 保存用户角色（全量更新） */
 export const saveRoles = createRoute({
   tags,
   summary: "保存用户角色（全量更新）",

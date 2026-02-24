@@ -11,78 +11,78 @@ import { emailField, ipAddressField, mobileField, nicknameField, passwordField, 
 
 export const clientUsers = pgTable("client_users", {
   ...baseColumns,
-  /** 用户名 */
+  /** Username / 用户名 */
   username: varchar({ length: 64 }).notNull(),
-  /** 密码，加密存储 */
+  /** Password, stored encrypted / 密码，加密存储 */
   password: varchar({ length: 128 }).notNull(),
-  /** 密码密钥版本 */
+  /** Password secret version / 密码密钥版本 */
   passwordSecretVersion: integer().default(1),
-  /** 用户昵称 */
+  /** User nickname / 用户昵称 */
   nickname: varchar({ length: 64 }),
-  /** 性别 */
+  /** Gender / 性别 */
   gender: genderEnum().default(Gender.UNKNOWN),
-  /** 用户状态 */
+  /** User status / 用户状态 */
   status: userStatusEnum().default(UserStatus.NORMAL),
-  /** 手机号码 */
+  /** Mobile number / 手机号码 */
   mobile: varchar({ length: 20 }),
-  /** 手机号验证状态 */
+  /** Mobile verification status / 手机号验证状态 */
   mobileConfirmed: verificationStatusEnum().default(VerificationStatus.UNVERIFIED),
-  /** 邮箱地址 */
+  /** Email address / 邮箱地址 */
   email: varchar({ length: 128 }),
-  /** 邮箱验证状态 */
+  /** Email verification status / 邮箱验证状态 */
   emailConfirmed: verificationStatusEnum().default(VerificationStatus.UNVERIFIED),
-  /** 头像地址 */
+  /** Avatar URL / 头像地址 */
   avatar: text(),
-  /** 部门ID列表 */
+  /** Department ID list / 部门ID列表 */
   departmentIds: jsonb().$type<string[]>().default([]),
-  /** 企业ID列表 */
+  /** Enterprise ID list / 企业ID列表 */
   enterpriseIds: jsonb().$type<string[]>().default([]),
-  /** 角色ID列表 */
+  /** Role ID list / 角色ID列表 */
   roleIds: jsonb().$type<string[]>().default([]),
-  /** 微信 unionid */
+  /** WeChat unionid / 微信 unionid */
   wxUnionid: varchar({ length: 64 }),
-  /** 微信各平台 openid */
+  /** WeChat openid for each platform / 微信各平台 openid */
   wxOpenid: jsonb().$type<WxOpenId>(),
-  /** QQ各平台 openid */
+  /** QQ openid for each platform / QQ各平台 openid */
   qqOpenid: jsonb().$type<QqOpenId>(),
-  /** QQ unionid */
+  /** QQ unionid / QQ unionid */
   qqUnionid: varchar({ length: 64 }),
-  /** 支付宝 openid */
+  /** Alipay openid / 支付宝 openid */
   aliOpenid: varchar({ length: 64 }),
-  /** 苹果登录 openid */
+  /** Apple Sign-In openid / 苹果登录 openid */
   appleOpenid: varchar({ length: 64 }),
-  /** 允许登录的客户端 appid 列表 */
+  /** Allowed client appid list for login / 允许登录的客户端 appid 列表 */
   dcloudAppids: jsonb().$type<string[]>().default([]),
-  /** 备注 */
+  /** Remark / 备注 */
   comment: text(),
-  /** 第三方平台token等信息 */
+  /** Third-party platform token info / 第三方平台token等信息 */
   thirdParty: jsonb().$type<ThirdPartyInfo>(),
-  /** 注册环境信息 */
+  /** Registration environment info / 注册环境信息 */
   registerEnv: jsonb().$type<RegisterEnv>(),
-  /** 实名认证信息 */
+  /** Real-name authentication info / 实名认证信息 */
   realnameAuth: jsonb().$type<RealNameAuth>(),
-  /** 用户积分 */
+  /** User score / 用户积分 */
   score: integer().default(0),
-  /** 注册时间 */
+  /** Registration time / 注册时间 */
   registerDate: timestamp({ mode: "string" }),
-  /** 注册时 IP 地址 */
+  /** IP address at registration / 注册时 IP 地址 */
   registerIp: varchar({ length: 45 }),
-  /** 最后登录时间 */
+  /** Last login time / 最后登录时间 */
   lastLoginDate: timestamp({ mode: "string" }),
-  /** 最后登录时 IP 地址 */
+  /** IP address at last login / 最后登录时 IP 地址 */
   lastLoginIp: varchar({ length: 45 }),
-  /** 用户token列表 */
+  /** User token list / 用户token列表 */
   tokens: jsonb().$type<string[]>().default([]),
-  /** 用户全部上级邀请者 */
+  /** All upstream inviter UIDs / 用户全部上级邀请者 */
   inviterUids: jsonb().$type<string[]>().default([]),
-  /** 受邀时间 */
+  /** Invitation time / 受邀时间 */
   inviteTime: timestamp({ mode: "string" }),
-  /** 用户自身邀请码 */
+  /** User's own invite code / 用户自身邀请码 */
   myInviteCode: varchar({ length: 32 }),
-  /** 第三方平台身份信息 */
+  /** Third-party platform identity info / 第三方平台身份信息 */
   identities: jsonb().$type<Identity[]>().default([]),
 }, table => [
-  // 唯一约束
+  // Unique constraints / 唯一约束
   unique().on(table.username),
   unique().on(table.mobile),
   unique().on(table.email),
@@ -92,7 +92,7 @@ export const clientUsers = pgTable("client_users", {
   unique().on(table.appleOpenid),
   unique().on(table.myInviteCode),
 
-  // 查询索引
+  // Query indexes / 查询索引
   index("client_users_username_idx").on(table.username),
   index("client_users_mobile_idx").on(table.mobile),
   index("client_users_email_idx").on(table.email),

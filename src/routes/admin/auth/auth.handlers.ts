@@ -15,7 +15,7 @@ import { Resp, tryit } from "@/utils";
 
 import { generateTokens, getIdentityById, getPermissionsByRoles, logout as logoutUtil, refreshAccessToken, validateCaptcha, validateLogin } from "./auth.helpers";
 
-/** 管理端登录 */
+/** Admin login / 管理端登录 */
 export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const body = c.req.valid("json");
   const { username, password } = body;
@@ -24,14 +24,14 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const loginTime = format(new Date(), "yyyy-MM-dd HH:mm:ss");
   const location = await getIPAddress(ip);
 
-  // 1. 验证验证码
+  // 1. Validate captcha / 验证验证码
   const captchaError = await validateCaptcha(body.captchaToken);
   if (captchaError && env.NODE_ENV !== "test") {
     loginLogger.info({ username, ip, location, userAgent, loginTime, result: LoginResult.FAILURE, reason: captchaError }, "登录日志");
     return c.json(Resp.fail(captchaError), HttpStatusCodes.BAD_REQUEST);
   }
 
-  // 2. 验证登录
+  // 2. Validate login / 验证登录
   const result = await validateLogin(username, password);
   if (!result.success) {
     loginLogger.info({ username, ip, location, userAgent, loginTime, result: LoginResult.FAILURE, reason: result.error }, "登录日志");
@@ -41,10 +41,10 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
     return c.json(Resp.fail(result.error), statusCode);
   }
 
-  // 3. 生成 Token
+  // 3. Generate tokens / 生成 Token
   const { refreshToken, accessToken } = await generateTokens(result.user);
 
-  // 4. 设置 HttpOnly Refresh Token Cookie
+  // 4. Set HttpOnly Refresh Token Cookie / 设置 HttpOnly Refresh Token Cookie
   setCookie(c, "refreshToken", refreshToken, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
@@ -57,7 +57,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   return c.json(Resp.ok({ accessToken }), HttpStatusCodes.OK);
 };
 
-/** 刷新 Token */
+/** Refresh token / 刷新 Token */
 export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
   const refreshTokenFromCookie = getCookie(c, "refreshToken");
 
@@ -84,7 +84,7 @@ export const refreshToken: AuthRouteHandlerType<"refreshToken"> = async (c) => {
   return c.json(Resp.ok({ accessToken }), HttpStatusCodes.OK);
 };
 
-/** 退出登录 */
+/** Logout / 退出登录 */
 export const logout: AuthRouteHandlerType<"logout"> = async (c) => {
   const payload = c.get("jwtPayload");
 
@@ -97,7 +97,7 @@ export const logout: AuthRouteHandlerType<"logout"> = async (c) => {
   return c.json(Resp.ok({}), HttpStatusCodes.OK);
 };
 
-/** 获取用户信息 */
+/** Get user info / 获取用户信息 */
 export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   const { sub } = c.get("jwtPayload");
 
@@ -110,7 +110,7 @@ export const getIdentity: AuthRouteHandlerType<"getIdentity"> = async (c) => {
   return c.json(Resp.ok(identity), HttpStatusCodes.OK);
 };
 
-/** 获取用户权限 */
+/** Get user permissions / 获取用户权限 */
 export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) => {
   const { roles } = c.get("jwtPayload");
 
@@ -123,13 +123,13 @@ export const getPermissions: AuthRouteHandlerType<"getPermissions"> = async (c) 
   return c.json(Resp.ok(result), HttpStatusCodes.OK);
 };
 
-/** 生成验证码挑战 */
+/** Generate captcha challenge / 生成验证码挑战 */
 export const createChallenge: AuthRouteHandlerType<"createChallenge"> = async (c) => {
   const challenge = await cap.createChallenge();
   return c.json(challenge, HttpStatusCodes.OK);
 };
 
-/** 验证用户解答并生成验证token */
+/** Verify user solution and generate verification token / 验证用户解答并生成验证token */
 export const redeemChallenge: AuthRouteHandlerType<"redeemChallenge"> = async (c) => {
   const { token, solutions } = c.req.valid("json");
   const result = await cap.redeemChallenge({ token, solutions });
