@@ -129,13 +129,13 @@ This project adopts the **Spec-Driven Development (SDD)** methodology. SDD inver
 
 Follow the 6-stage standard workflow: `Spec → Generate Code → Generate Tests → Iterative Optimization → Module Documentation`
 
-| Stage              | Output                                                       |
-| ------------------ | ------------------------------------------------------------ |
-| Spec               | `docs/{feature}/spec.md` (requirements, architecture, test strategy) |
-| Generate Code      | Complete API code (Schema + Handlers) + migration            |
-| Generate Tests     | `__tests__/int.test.ts`                                      |
-| Iterative Optimization | Continuously improve until acceptance criteria met       |
-| Module Documentation   | `docs/{feature}/module.md` (file index, functions, key points) |
+| Stage                  | Output                                                               |
+| ---------------------- | -------------------------------------------------------------------- |
+| Spec                   | `docs/{feature}/spec.md` (requirements, architecture, test strategy) |
+| Generate Code          | Complete API code (Schema + Handlers) + migration                    |
+| Generate Tests         | `__tests__/int.test.ts`                                              |
+| Iterative Optimization | Continuously improve until acceptance criteria met                   |
+| Module Documentation   | `docs/{feature}/module.md` (file index, functions, key points)       |
 
 **Acceptance Criteria**: All tests pass + Complies with CLAUDE.md specs + No obvious performance issues
 
@@ -220,15 +220,15 @@ export const createUserRequestSchema: z.ZodType<CreateUserRequest>
 
 **Complex Business (~20%)** When business rules, state transitions, cross-module orchestration, etc. exceed the capacity of Transaction Script, choose the appropriate architecture pattern based on scenario:
 
-| Scenario | Recommended | Description |
-| --- | --- | --- |
-| Need Tech Decoupling | Hexagonal | Port/Adapter isolates external dependencies |
-| Complex Business Rules | DDD | Domain model encapsulates business rules |
-| Complex + Decoupling | DDD + Hexagonal | Combine both approaches |
-| Pure Functions First | FCIS | Functional Core for pure logic + Imperative Shell handles side effects, core independently testable |
-| Pure Functions + Decoupling | FCIS + Hexagonal | Pure functional core + Port/Adapter isolates I/O, balancing testability and replaceability |
-| Type-safe Side Effect Management | Effect-TS | Effect-based functional architecture with type-safe DI, error handling, structured concurrency, side effects trackable at the type level |
-| Read/Write Model Asymmetry | Monolith CQRS | Separate read/write models within a single database, Query side uses flattened DTOs/views for optimized reads, Command side uses domain logic, no message bus needed |
+| Scenario                         | Recommended      | Description                                                                                                                                                          |
+| -------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Need Tech Decoupling             | Hexagonal        | Port/Adapter isolates external dependencies                                                                                                                          |
+| Complex Business Rules           | DDD              | Domain model encapsulates business rules                                                                                                                             |
+| Complex + Decoupling             | DDD + Hexagonal  | Combine both approaches                                                                                                                                              |
+| Pure Functions First             | FCIS             | Functional Core for pure logic + Imperative Shell handles side effects, core independently testable                                                                  |
+| Pure Functions + Decoupling      | FCIS + Hexagonal | Pure functional core + Port/Adapter isolates I/O, balancing testability and replaceability                                                                           |
+| Type-safe Side Effect Management | Effect-TS        | Effect-based functional architecture with type-safe DI, error handling, structured concurrency, side effects trackable at the type level                             |
+| Read/Write Model Asymmetry       | Monolith CQRS    | Separate read/write models within a single database, Query side uses flattened DTOs/views for optimized reads, Command side uses domain logic, no message bus needed |
 
 **Core Ideas**: DDD focuses on domain modeling, Hexagonal on dependency isolation, FCIS on separating pure functions from side effects, Effect-TS elevates side effects into the type system, Monolith CQRS addresses read/write model asymmetry. Combine freely based on business complexity.
 
@@ -258,11 +258,11 @@ Unified management for long-lived connections like PostgreSQL, Redis, and Casbin
 
 This project does not use a traditional DI container (e.g., InversifyJS), opting for a lighter and more direct three-layer injection strategy:
 
-| Layer | Mechanism | Scope | Typical Usage |
-| --- | --- | --- | --- |
-| **Module Singleton** | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | Process | DB connection pool, Redis client, Casbin Enforcer, Logger and other long-lived resources |
-| **Request Context** | Hono `c.set()` / `c.get()` + `AppBindings` type constraint | Request | JWT payload, request ID, tierBasePath and other request-scoped data, written by middleware → read by handlers |
-| **Effect Layer** | `Context.Tag` + `Layer.mergeAll` | Composable | Type-safe composition of infrastructure services (DB, Logger, pg-boss), used for distributed locks, task queues, and other scenarios requiring Effect orchestration |
+| Layer                | Mechanism                                                          | Scope      | Typical Usage                                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Module Singleton** | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | Process    | DB connection pool, Redis client, Casbin Enforcer, Logger and other long-lived resources                                                                            |
+| **Request Context**  | Hono `c.set()` / `c.get()` + `AppBindings` type constraint         | Request    | JWT payload, request ID, tierBasePath and other request-scoped data, written by middleware → read by handlers                                                       |
+| **Effect Layer**     | `Context.Tag` + `Layer.mergeAll`                                   | Composable | Type-safe composition of infrastructure services (DB, Logger, pg-boss), used for distributed locks, task queues, and other scenarios requiring Effect orchestration |
 
 **Why no DI container**: The dependency graph in admin management systems is inherently simple — long-lived resources are process-level singletons, request data flows through Hono Context, these two layers cover 90% of scenarios. Effect Layer supplements the remaining 10% that needs type-safe composition (e.g., `withLock` distributed locks). Introducing a DI container would only add indirection and registration ceremony, which is over-engineering for this scale of project.
 
@@ -274,12 +274,12 @@ This project does not use a traditional DI container (e.g., InversifyJS), opting
 
 #### Comparison with Traditional Solutions
 
-| Dimension       | This Project                                                            | Traditional Solution                                                         |
-| --------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Dimension       | This Project                                                            | Traditional Solution                                                                    |
+| --------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | **Permission**  | OpenAPI route definition, Casbin policy matching, auto-sync             | Database permission tables + association tables, manual maintenance, easy inconsistency |
-| **Menu**        | Compile-time route tree generation, type-safe, zero runtime overhead    | Database-stored menus, runtime query parsing, needs admin interface           |
-| **Dictionary**  | Single source of truth, compile-time type checking, 4-byte Enum storage | Database dictionary tables, runtime queries, needs JOIN, easy inconsistency  |
-| **Maintenance** | Change once auto-sync everywhere, TypeScript compile-time errors        | Multiple manual syncs: database → backend → frontend → docs                  |
+| **Menu**        | Compile-time route tree generation, type-safe, zero runtime overhead    | Database-stored menus, runtime query parsing, needs admin interface                     |
+| **Dictionary**  | Single source of truth, compile-time type checking, 4-byte Enum storage | Database dictionary tables, runtime queries, needs JOIN, easy inconsistency             |
+| **Maintenance** | Change once auto-sync everywhere, TypeScript compile-time errors        | Multiple manual syncs: database → backend → frontend → docs                             |
 
 ### 📝 Logging System
 
@@ -311,12 +311,12 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 ## Development Experience Comparison
 
-| Comparison           | This Project (AI + Modern Stack)                                                        | Traditional Code Generators                                                              |
-| -------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **Efficiency**       | Claude Code intelligently understands requirements, generates compliant code in seconds | Manual template configuration tedious, generates rigid code needing heavy modifications  |
-| **API Management**   | OpenAPI + Zod auto-sync, type-safe, docs never outdated                                 | Manual API documentation maintenance, easy inconsistency                                 |
-| **Code Quality**     | TypeScript full-chain type checking, catch issues at compile time                       | Generated code lacks type constraints, runtime errors frequent                           |
-| **Maintenance Cost** | Unified code standards, AI understands project architecture, simple maintenance         | Large codebase not elegant enough, hard to maintain                                      |
+| Comparison           | This Project (AI + Modern Stack)                                                        | Traditional Code Generators                                                             |
+| -------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Efficiency**       | Claude Code intelligently understands requirements, generates compliant code in seconds | Manual template configuration tedious, generates rigid code needing heavy modifications |
+| **API Management**   | OpenAPI + Zod auto-sync, type-safe, docs never outdated                                 | Manual API documentation maintenance, easy inconsistency                                |
+| **Code Quality**     | TypeScript full-chain type checking, catch issues at compile time                       | Generated code lacks type constraints, runtime errors frequent                          |
+| **Maintenance Cost** | Unified code standards, AI understands project architecture, simple maintenance         | Large codebase not elegant enough, hard to maintain                                     |
 
 ## CAPTCHA System Comparison
 
@@ -345,11 +345,11 @@ Detailed benchmark: [bun-http-framework-benchmark](https://github.com/SaltyAom/b
 
 **CPU-intensive Optimization**:
 
-| Scenario                  | Recommended    | Use Case                                            |
-| ------------------------- | -------------- | --------------------------------------------------- |
-| **Repeated Calls**        | napi-rs        | Image processing, encryption/decryption, data compression |
+| Scenario                  | Recommended    | Use Case                                                           |
+| ------------------------- | -------------- | ------------------------------------------------------------------ |
+| **Repeated Calls**        | napi-rs        | Image processing, encryption/decryption, data compression          |
 | **Single Intensive Calc** | WASM           | Complex algorithms, scientific computing, single heavy computation |
-| **Parallel Multi-task**   | Worker Threads | Many independent tasks, concurrent data processing  |
+| **Parallel Multi-task**   | Worker Threads | Many independent tasks, concurrent data processing                 |
 
 ## Claude Code Deep Integration (Optional)
 

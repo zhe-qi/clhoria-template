@@ -13,11 +13,9 @@ export const getQueryClient = createLazySingleton(
     idle_timeout: 45, // 45s 连接空闲超时
     connect_timeout: 30, // 30s 连接超时
     max_lifetime: 60 * 30, // 30min 连接最大生命周期
-    /** 数据转换 */
     transform: {
       undefined: null, // 空值转换为 null
     },
-    /** 连接配置 */
     connection: {
       statement_timeout: 15000, // 15s 语句超时
       lock_timeout: 10000, // 10s 锁等待超时
@@ -28,11 +26,8 @@ export const getQueryClient = createLazySingleton(
 
 const db = drizzle({
   client: getQueryClient(),
-  // schema同时用于提供类型
   schema,
-  // 自动在数据库使用 snake_case 命名风格
-  casing: "snake_case",
-  // 开发环境数据库日志
+  casing: "snake_case", // 自动在数据库使用 snake_case 命名风格
   logger: false, // 或者 env.NODE_ENV !== "production"
 });
 
