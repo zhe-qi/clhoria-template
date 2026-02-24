@@ -7,9 +7,7 @@ English | [简体中文](./README.zh-CN.md)
 ![TypeScript](https://img.shields.io/badge/typescript-5.9+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-A modern, production-ready backend boilerplate built on the Hono framework for high-performance TypeScript applications. Designed with AI-driven development in mind, combining Hono + OpenAPI + Zod for a complete type-safe ecosystem that truly enhances development efficiency. Integrates Drizzle ORM + PostgreSQL data layer with a comprehensive RBAC permission system, providing a more stable and efficient development experience than traditional backend management systems.
-
-Clhoria simplifies complex technical architectures, making every coding session elegant and every feature bloom beautifully. Choose Clhoria, choose to move forward with the future.
+Production-ready Hono backend template with full-stack type safety, RBAC, and OpenAPI — optimized for AI-assisted development with Claude Code.
 
 > Frontend admin panel based on Refine + Shadcn: [https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
 
@@ -387,9 +385,7 @@ pnpm test
 
 ## Support
 
-For questions or suggestions, please create an [Issue](https://github.com/zhe-qi/clhoria-template/issues) or contact the maintainer.
-
-**QQ Group**: 1076889416
+For questions or suggestions, please open an [Issue](https://github.com/zhe-qi/clhoria-template/issues).
 
 ## Contributing Guidelines
 
