@@ -20,18 +20,18 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 - **Declarative Paginator**: Secure declarative queries based on Refine spec, extended Refine query with backend-only JOIN support
 - **Complete Permission System**: User management + Role management + Casbin policies + Refine Resource compile-time menu routing, zero runtime overhead
 - **Business + System Dictionary**: Business dictionaries support runtime dynamic configuration (JSONB + Redis cache), system dictionaries use PostgreSQL Enum for compile-time type checking
-- **Logging Middleware**: Collects logs with support for multiple storage solutions (Alibaba Cloud SLS, PostgreSQL TimescaleDB, Loki, etc.)
+- **Logging Middleware**: Collects logs with support for multiple log storage backends (AWS CloudWatch, Loki, TimescaleDB, etc.)
 - **High-performance Cache**: Redis caching (cluster mode supported) + multi-layer rate limiting + permission caching + session management + distributed locks
 - **Task Queue & Scheduling**: Background task queue management and scheduled tasks based on pg-boss (distributed-safe, single execution across nodes)
 - **Functional Infrastructure**: Infrastructure layer built on Effect-TS with type-safe dependency injection, composable error handling, structured concurrency
-- **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, Alibaba Cloud OSS, AWS S3, etc.)
+- **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, AWS S3, MinIO, etc.)
 - **Smart CAPTCHA**: Integrated Cap.js, lightweight modern CAPTCHA based on SHA-256 proof-of-work, privacy-friendly with zero tracking
 - **Type-safe System**: Hono + Zod + TypeScript full-chain type inference, catch issues at compile time
 - **Instant Feedback Development**: Vite-powered hot-reload dev environment, millisecond-level code updates for ultimate development experience
 - **Declarative DSL Architecture**: `defineConfig` drives application assembly, `defineMiddleware` declares middleware chains, entry file stays minimal
 - **AI-driven Development**: Claude Code + CLAUDE.md + MCP plugin ecosystem, AI understands project architecture, auto-generates test cases (Vitest)
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
-- **Excel Processing**: High-performance Excel processing based on excelize-wasm, singleton lazy loading, same as the Go version
+- **Excel Processing**: High-performance Excel processing based on excelize-wasm, singleton lazy loading, powered by Go-native excelize via WASM
 
 ## Quick Start
 
@@ -77,6 +77,7 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
    pnpm migrate
 
    # Seed initial data (optional, app will auto-check and initialize on startup)
+   # Bun is used as a fast TS runner for seed scripts
    npm install -g bun
    pnpm seed
    ```
@@ -230,7 +231,7 @@ export const createUserRequestSchema: z.ZodType<CreateUserRequest>
 
 **Core Ideas**: DDD focuses on domain modeling, Hexagonal on dependency isolation, FCIS on separating pure functions from side effects, Effect-TS elevates side effects into the type system, Monolith CQRS addresses read/write model asymmetry. Combine freely based on business complexity.
 
-> **Monolith CQRS vs Database Read/Write Splitting**: Cloud PG cluster proxies (e.g., Alibaba Cloud PolarDB, RDS Proxy) solve **database load** problems — the same SQL is automatically routed to primary/read-only nodes, transparent to application code. Monolith CQRS solves **application model** problems — writes go through rich domain models to ensure business consistency, queries use flattened DTOs/database views bypassing the domain layer to reach data directly, each with different data structures and code paths. The former is horizontal scaling at the infrastructure level, the latter is separation of concerns at the code level. They don't conflict and can be stacked together.
+> **Monolith CQRS vs Database Read/Write Splitting**: Cloud PG cluster proxies (e.g., AWS RDS Proxy, PgBouncer) solve **database load** problems — the same SQL is automatically routed to primary/read-only nodes, transparent to application code. Monolith CQRS solves **application model** problems — writes go through rich domain models to ensure business consistency, queries use flattened DTOs/database views bypassing the domain layer to reach data directly, each with different data structures and code paths. The former is horizontal scaling at the infrastructure level, the latter is separation of concerns at the code level. They don't conflict and can be stacked together.
 
 > **Effect-TS Deep Integration**: Effect's `Context.Tag` + `Layer` system is naturally hexagonal architecture — `Tag` declares the interface (Port), `Layer` provides the implementation (Adapter), business logic is orchestrated through `Effect.gen`, depending only on Tag abstractions rather than concrete implementations. Swap out a `Layer` in tests to inject mocks, no extra interface files needed. Meanwhile, Effect's type channel `Effect<Success, Error, Requirements>` makes dependencies, errors, and success values all explicitly declared in the function signature — the compiler forces you to handle every error path, missing one is a compile error. Compared to hand-written Port/Adapter + try/catch, Effect solves dependency injection, error handling, and concurrency control with a single mechanism, suitable for state machines, workflows, cross-service orchestration, and other truly complex business scenarios. This project already uses Effect at the infrastructure layer (distributed locks `withLock`, task queues, resource initialization), and the business layer can adopt it incrementally as needed.
 
@@ -281,7 +282,7 @@ This project does not use a traditional DI container (e.g., InversifyJS), opting
 
 ### 📝 Logging System
 
-Built on pino transport architecture, supporting multi-target output (dev `pino-pretty` / production stdout JSON / optional Alibaba Cloud SLS). Three child loggers auto-inject `type` field: `logger` (system), `operationLogger` (CRUD audit, type: `OPERATION`), `loginLogger` (login records, type: `LOGIN`).
+Built on pino transport architecture, supporting multi-target output (dev `pino-pretty` / production stdout JSON / optional custom transports). Three child loggers auto-inject `type` field: `logger` (system), `operationLogger` (CRUD audit, type: `OPERATION`), `loginLogger` (login records, type: `LOGIN`).
 
 Operation log middleware is globally configured in admin tier (parameterless mode stores raw `urlPath`), also supports local mode with manually specified module names:
 
@@ -305,7 +306,7 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 
 ## Deployment Features
 
-**Optional SaaS Dependencies**: Sentry, Cloudflare R2 object storage and other third-party services are all optional, can be fully deployed in intranet environments. Tech stack meets localization requirements, supports migration to domestic databases (e.g., Kingbase, Huawei GaussDB, etc.).
+**Optional SaaS Dependencies**: Sentry, Cloudflare R2 object storage and other third-party services are all optional, can be fully deployed in intranet environments. Supports migration to other PostgreSQL-compatible databases.
 
 ## Development Experience Comparison
 
@@ -339,7 +340,7 @@ Detailed benchmark: [bun-http-framework-benchmark](https://github.com/SaltyAom/b
 
 ### 🚀 High Concurrency & Performance Optimization Solutions
 
-**High Concurrency Solution**: K8s/Alibaba Cloud SLB load balancing + PostgreSQL/Redis HA clusters + distributed sessions, enabling stateless horizontal scaling
+**High Concurrency Solution**: K8s + load balancer (Nginx, AWS ALB, etc.) + PostgreSQL/Redis HA clusters + distributed sessions, enabling stateless horizontal scaling
 
 **CPU-intensive Optimization**:
 
