@@ -14,9 +14,7 @@
     },
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/@types"],
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "allowImportingTsExtensions": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
