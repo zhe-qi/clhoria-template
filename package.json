@@ -22,7 +22,7 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^8.4.1",
+    "@asteasolutions/zod-to-openapi": "^8.4.2",
     "@aws-sdk/client-s3": "^3.1000.0",
     "@aws-sdk/s3-request-presigner": "^3.1000.0",
     "@cap.js/server": "^4.0.5",
@@ -39,7 +39,7 @@
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
     "effect": "^3.19.19",
-    "excelize-wasm": "^0.1.1",
+    "excelize-wasm": "^0.1.2",
     "hono": "^4.12.3",
     "hono-pino": "^0.10.3",
     "hono-rate-limiter": "^0.5.3",
@@ -49,7 +49,7 @@
     "pino": "^10.3.1",
     "postgres": "^3.4.8",
     "rate-limit-redis": "^4.3.1",
-    "redlock": "5.0.0-beta.2",
+    "redlock-universal": "^0.8.2",
     "zod": "4.3.6"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "@hono/vite-dev-server": "^0.25.0",
     "@pg-boss/dashboard": "^1.1.1",
     "@types/node": "25.3.3",
-    "@typescript/native-preview": "7.0.0-dev.20260301.1",
+    "@typescript/native-preview": "7.0.0-dev.20260302.1",
     "drizzle-kit": "^0.31.9",
     "eslint": "^10.0.2",
     "eslint-plugin-format": "^2.0.1",

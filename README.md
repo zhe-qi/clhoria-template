@@ -21,7 +21,7 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 - **Complete Permission System**: User management + Role management + Casbin policies + Refine Resource compile-time menu routing, zero runtime overhead
 - **Business + System Dictionary**: Business dictionaries support runtime dynamic configuration (JSONB + Redis cache), system dictionaries use PostgreSQL Enum for compile-time type checking
 - **Logging Middleware**: Collects logs with support for multiple log storage backends (AWS CloudWatch, Loki, TimescaleDB, etc.)
-- **High-performance Cache**: Redis caching (cluster mode supported) + multi-layer rate limiting + permission caching + session management + distributed locks
+- **High-performance Cache**: Redis caching + multi-layer rate limiting + permission caching + session management + distributed locks
 - **Task Queue & Scheduling**: Background task queue management and scheduled tasks based on pg-boss (distributed-safe, single execution across nodes)
 - **Functional Infrastructure**: Infrastructure layer built on Effect-TS with type-safe dependency injection, composable error handling, structured concurrency
 - **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, AWS S3, MinIO, etc.)
@@ -307,6 +307,10 @@ docker run -p 9999:9999 --env-file .env clhoria-template
 ## Deployment Features
 
 **Optional SaaS Dependencies**: Sentry, Cloudflare R2 object storage and other third-party services are all optional, can be fully deployed in intranet environments. Supports migration to other PostgreSQL-compatible databases.
+
+### Redis Cluster / Sentinel
+
+This template uses standalone Redis. For Redis Cluster/Sentinel, replace initialization logic in `src/lib/services/redis.ts` or use cloud provider Proxy mode (Aliyun Redis, AWS ElastiCache, etc.).
 
 ## Development Experience Comparison
 

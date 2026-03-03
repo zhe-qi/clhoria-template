@@ -9,5 +9,5 @@ export type { Excelize } from "./excelize";
 export { default as boss, postgresAdapter } from "./pg-boss-adapter";
 
 // Distributed lock / 分布式锁
-export { redlock, withLock } from "./redis-lock";
+export { withLock } from "./redis-lock";
 export type { LockOptions } from "./redis-lock";
