@@ -173,13 +173,13 @@ export async function destroySingleton(key: string): Promise<void> {
 export async function destroyAllSingletons(): Promise<void> {
   const registry = getRegistry();
 
-  const destroyPromises = Array.from(registry.keys()).map(key =>
-    destroySingleton(key).catch((error) => {
+  // 逆序销毁：后创建的先销毁，确保依赖关系正确（如 pg-boss → postgres）
+  const keys = Array.from(registry.keys()).reverse();
+  for (const key of keys) {
+    await destroySingleton(key).catch((error) => {
       console.error(`[单例]: 销毁 ${key} 失败`, error);
-    }),
-  );
-
-  await Promise.all(destroyPromises);
+    });
+  }
 }
 
 /**

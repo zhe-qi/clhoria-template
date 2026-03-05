@@ -27,8 +27,11 @@ function buildTransportTargets(): TransportTargetOptions[] {
   return targets;
 }
 
-const logger = createSingleton("logger", () =>
-  pino({ level: env.LOG_LEVEL || "info" }, pino.transport({ targets: buildTransportTargets() })));
+const logger = createSingleton(
+  "logger",
+  () => pino({ level: env.LOG_LEVEL || "info" }, pino.transport({ targets: buildTransportTargets() })),
+  { destroy: instance => new Promise<void>(resolve => instance.flush(() => resolve())) },
+);
 
 export default logger;
 

@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
       buildPluginNodejs({
         port: Number.parseInt(env.PORT, 10),
         minify: false, // Whether to minify the bundled code / 是否压缩打包后的代码
+        shutdownTimeoutMs: 30000, // 30秒优雅关闭超时
       }),
     ],
   };

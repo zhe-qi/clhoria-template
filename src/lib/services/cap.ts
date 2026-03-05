@@ -20,81 +20,97 @@ function calculateTtlSeconds(expires: number | Date): number {
   return Math.max(ttl, 0);
 }
 
-const cap = createSingleton("cap", () => new Cap({
-  storage: {
-    challenges: {
-      store: async (token, challengeData) => {
+const cap = createSingleton("cap", () => {
+  // Cap.js 会在构造函数中注册 SIGTERM/SIGINT/SIGQUIT 信号处理器并调用 process.exit
+  // 我们自己管理优雅关闭，需要阻止 Cap.js 劫持进程退出
+  const signals = ["SIGINT", "SIGTERM", "SIGQUIT"] as const;
+  const savedListeners = signals.map(s => [s, process.listeners(s)] as const);
+
+  const instance = new Cap({
+    storage: {
+      challenges: {
+        store: async (token, challengeData) => {
         // Reuse utility functions to generate key and calculate TTL / 复用工具函数生成Key和计算TTL
-        const key = getRedisKey("challenge", token);
-        const ttlSeconds = calculateTtlSeconds(challengeData.expires);
+          const key = getRedisKey("challenge", token);
+          const ttlSeconds = calculateTtlSeconds(challengeData.expires);
 
-        if (ttlSeconds > 0) {
-          await redisClient.setex(key, ttlSeconds, JSON.stringify(challengeData));
-        }
-      },
+          if (ttlSeconds > 0) {
+            await redisClient.setex(key, ttlSeconds, JSON.stringify(challengeData));
+          }
+        },
 
-      read: async (token) => {
-        const key = getRedisKey("challenge", token);
-        const data = await redisClient.get(key);
+        read: async (token) => {
+          const key = getRedisKey("challenge", token);
+          const data = await redisClient.get(key);
 
-        if (!data)
-          return null;
+          if (!data)
+            return null;
 
-        const challengeData = JSON.parse(data);
-        // Optionally validate challengeData.expires with isValid for robustness / 此处可额外用isValid校验challengeData.expires，增强鲁棒性
-        if (!isValid(new Date(challengeData.expires)))
-          return null;
+          const challengeData = JSON.parse(data);
+          // Optionally validate challengeData.expires with isValid for robustness / 此处可额外用isValid校验challengeData.expires，增强鲁棒性
+          if (!isValid(new Date(challengeData.expires)))
+            return null;
 
-        return {
-          challenge: challengeData,
-          expires: challengeData.expires,
-        };
-      },
+          return {
+            challenge: challengeData,
+            expires: challengeData.expires,
+          };
+        },
 
-      delete: async (token) => {
-        const key = getRedisKey("challenge", token);
-        await redisClient.del(key);
-      },
+        delete: async (token) => {
+          const key = getRedisKey("challenge", token);
+          await redisClient.del(key);
+        },
 
-      deleteExpired: async () => {
+        deleteExpired: async () => {
         // Redis handles expiration automatically, no manual cleanup needed / Redis自动过期，无需手动清理
+        },
       },
-    },
 
-    tokens: {
-      store: async (tokenKey, expires) => {
+      tokens: {
+        store: async (tokenKey, expires) => {
         // Reuse utility functions, same logic as challenges.store / 复用工具函数，逻辑与challenges.store统一
-        const key = getRedisKey("token", tokenKey);
-        const ttlSeconds = calculateTtlSeconds(expires);
+          const key = getRedisKey("token", tokenKey);
+          const ttlSeconds = calculateTtlSeconds(expires);
 
-        if (ttlSeconds > 0) {
+          if (ttlSeconds > 0) {
           // Store expiration time as string (preserving original logic) / 存入过期时间的字符串形式（保持原逻辑）
-          await redisClient.setex(key, ttlSeconds, expires.toString());
-        }
-      },
+            await redisClient.setex(key, ttlSeconds, expires.toString());
+          }
+        },
 
-      get: async (tokenKey) => {
-        const key = getRedisKey("token", tokenKey);
-        const expiresStr = await redisClient.get(key);
+        get: async (tokenKey) => {
+          const key = getRedisKey("token", tokenKey);
+          const expiresStr = await redisClient.get(key);
 
-        if (!expiresStr)
-          return null;
+          if (!expiresStr)
+            return null;
 
-        const expires = Number.parseInt(expiresStr, 10);
-        // Validate parsed expiration time (prevent invalid values) / 校验解析后的过期时间是否合法（避免无效数值）
-        return isValid(new Date(expires)) ? expires : null;
-      },
+          const expires = Number.parseInt(expiresStr, 10);
+          // Validate parsed expiration time (prevent invalid values) / 校验解析后的过期时间是否合法（避免无效数值）
+          return isValid(new Date(expires)) ? expires : null;
+        },
 
-      delete: async (tokenKey) => {
-        const key = getRedisKey("token", tokenKey);
-        await redisClient.del(key);
-      },
+        delete: async (tokenKey) => {
+          const key = getRedisKey("token", tokenKey);
+          await redisClient.del(key);
+        },
 
-      deleteExpired: async () => {
+        deleteExpired: async () => {
         // Redis handles expiration automatically, no manual cleanup needed / Redis自动过期，无需手动清理
+        },
       },
     },
-  },
-}));
+  });
+
+  // 移除 Cap.js 注册的信号处理器，恢复原有的
+  for (const [signal, listeners] of savedListeners) {
+    process.removeAllListeners(signal);
+    for (const listener of listeners)
+      process.on(signal, listener as (...args: unknown[]) => void);
+  }
+
+  return instance;
+});
 
 export default cap;

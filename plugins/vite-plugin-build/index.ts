@@ -60,15 +60,49 @@ const nodeBuildPlugin = (pluginOptions?: NodeBuildOptions): Plugin => {
             const portCode = `process.env.PORT ? parseInt(process.env.PORT, 10) : ${port}`;
 
             if (shutdownTimeoutMs !== undefined) {
+              // 导入 bootstrap shutdown 函数
+              code += "import { shutdown as bootstrapShutdown } from '@/lib/infrastructure/bootstrap'\n";
+
               code += `const server = serve({ fetch: ${appName}.fetch, port: ${portCode} })\n`;
-              code += "const gracefulShutdown = () => {\n";
-              code += "  server.close(() => process.exit(0))\n";
+              code += "const gracefulShutdownHandler = async () => {\n";
               if (shutdownTimeoutMs > 0) {
-                code += `  setTimeout(() => process.exit(1), ${shutdownTimeoutMs}).unref()\n`;
+                code += `  const forceExitTimer = setTimeout(() => {\n`;
+                code += `    console.error('[服务]: 优雅关闭超时，强制退出')\n`;
+                code += `    process.exit(1)\n`;
+                code += `  }, ${shutdownTimeoutMs})\n`;
               }
+              code += "  try {\n";
+              code += "    console.log('[服务]: 收到关闭信号，开始优雅关闭')\n";
+              // 步骤 1: 停止接受新连接，等待现有请求完成（10 秒超时后继续清理资源）
+              code += "    await new Promise((resolve) => {\n";
+              code += "      const closeTimeout = setTimeout(() => {\n";
+              code += "        console.error('[服务]: 等待请求完成超时，继续关闭资源')\n";
+              code += "        resolve()\n";
+              code += "      }, 10000)\n";
+              code += "      server.close((err) => {\n";
+              code += "        clearTimeout(closeTimeout)\n";
+              code += "        if (err) console.error('[服务]: 服务器关闭出错', err)\n";
+              code += "        console.log('[服务]: 所有请求已完成')\n";
+              code += "        resolve()\n";
+              code += "      })\n";
+              code += "    })\n";
+              // 步骤 2: 关闭应用资源
+              code += "    await bootstrapShutdown()\n";
+              code += "    console.log('[服务]: 优雅关闭完成')\n";
+              if (shutdownTimeoutMs > 0) {
+                code += `    clearTimeout(forceExitTimer)\n`;
+              }
+              code += "    process.exit(0)\n";
+              code += "  } catch (error) {\n";
+              code += "    console.error('[服务]: 资源清理失败', error)\n";
+              if (shutdownTimeoutMs > 0) {
+                code += `    clearTimeout(forceExitTimer)\n`;
+              }
+              code += "    process.exit(1)\n";
+              code += "  }\n";
               code += "}\n";
-              code += "process.on('SIGINT', gracefulShutdown)\n";
-              code += "process.on('SIGTERM', gracefulShutdown)\n";
+              code += "process.on('SIGINT', gracefulShutdownHandler)\n";
+              code += "process.on('SIGTERM', gracefulShutdownHandler)\n";
             }
             else {
               code += `serve({ fetch: ${appName}.fetch, port: ${portCode} })\n`;

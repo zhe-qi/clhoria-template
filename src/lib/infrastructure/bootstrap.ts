@@ -2,7 +2,7 @@ import { Effect } from "effect";
 
 import * as z from "zod";
 
-import { createSingleton, destroySingleton, hasSingleton } from "@/lib/core/singleton";
+import { createSingleton, destroyAllSingletons, hasSingleton } from "@/lib/core/singleton";
 import logger from "@/lib/services/logger";
 
 import { initExcelize } from "./excelize";
@@ -33,14 +33,25 @@ export function bootstrap(): Promise<void> {
 }
 
 /** Shutdown infrastructure / 关闭基础设施 */
-export function shutdown(): Promise<void> {
-  if (!hasSingleton(KEY)) return Promise.resolve();
+export async function shutdown(): Promise<void> {
+  if (!hasSingleton(KEY)) return;
 
-  const program = Effect.gen(function* () {
-    yield* Effect.promise(() => boss.stop());
+  logger.info("[Bootstrap]: 开始优雅关闭");
+
+  try {
+    logger.info("[Bootstrap]: 正在停止 pg-boss");
+    await boss.stop();
     logger.info("[Bootstrap]: pg-boss 已停止");
-    yield* Effect.promise(() => destroySingleton(KEY));
-  });
 
-  return Effect.runPromise(program);
+    // 销毁所有单例资源
+    // 框架自动调用各单例的 destroy：Redis.quit()、PostgreSQL.end() 等
+    // pg-boss 的 destroy(instance.stop()) 会被二次调用但被 catch，不影响其他资源
+    logger.info("[Bootstrap]: 正在关闭所有连接");
+    await destroyAllSingletons();
+    logger.info("[Bootstrap]: 所有连接已关闭");
+  }
+  catch (error) {
+    logger.error({ error }, "[Bootstrap]: 关闭过程出错");
+    throw error;
+  }
 }
