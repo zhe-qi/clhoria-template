@@ -79,14 +79,10 @@ export const update: SystemParamRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  const [updated] = await db
-    .update(systemParams)
-    .set({
-      ...body,
-      updatedBy: sub,
-    })
-    .where(eq(systemParams.id, id))
-    .returning();
+  const [updated] = await db.update(systemParams).set({
+    ...body,
+    updatedBy: sub,
+  }).where(eq(systemParams.id, id)).returning();
 
   // If no records were updated, the parameter does not exist / 如果没有更新任何记录，说明参数不存在
   if (!updated) {
@@ -106,8 +102,7 @@ export const remove: SystemParamRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // Delete directly, get deleted record via returning / 直接删除，通过 returning 获取被删除的记录
-  const [deleted] = await db
-    .delete(systemParams)
+  const [deleted] = await db.delete(systemParams)
     .where(eq(systemParams.id, id))
     .returning({ id: systemParams.id, key: systemParams.key });
 

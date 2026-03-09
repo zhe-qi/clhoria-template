@@ -19,19 +19,15 @@ export function safeParseEnv<T extends z.ZodType>(
   const result = schema.safeParse(env);
 
   if (result.success) {
-    return {
-      success: true,
-      data: result.data,
-    };
+    return { success: true, data: result.data };
   }
 
   const fieldErrors: Record<string, string[]> = {};
 
   result.error.issues.forEach((issue) => {
     // Ensure path elements are strings (Symbol cannot be used as index type) / 确保路径元素是字符串 (Symbol 不能作为索引类型)
-    const field = issue.path
-      .filter((p): p is string => typeof p === "string")
-      .join("."); // Handle nested paths, although env vars are flat / 处理嵌套路径，尽管环境变量是扁平的
+    // Handle nested paths, although env vars are flat / 处理嵌套路径，尽管环境变量是扁平的
+    const field = issue.path.filter((p): p is string => typeof p === "string").join(".");
 
     if (field) {
       // Add error to corresponding field / 将错误添加到对应字段
@@ -50,10 +46,7 @@ export function safeParseEnv<T extends z.ZodType>(
     }
   });
 
-  return {
-    success: false,
-    fieldErrors,
-  };
+  return { success: false, fieldErrors };
 }
 
 /**

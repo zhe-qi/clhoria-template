@@ -49,22 +49,21 @@ export const baseCasbinRuleSchema = selectCasbinRuleSchema;
 
 type InsertCasbinRuleInput = z.infer<typeof baseCasbinRuleSchema>;
 
-export const insertCasbinRuleSchema = baseCasbinRuleSchema
-  .refine((data: InsertCasbinRuleInput) => {
-    if (data.ptype === "g") {
-      if (data.v2 !== "") {
-        throw new Error("角色继承规则（g）不允许设置「动作（v2）」，请留空");
-      }
+export const insertCasbinRuleSchema = baseCasbinRuleSchema.refine((data: InsertCasbinRuleInput) => {
+  if (data.ptype === "g") {
+    if (data.v2 !== "") {
+      throw new Error("角色继承规则（g）不允许设置「动作（v2）」，请留空");
     }
+  }
 
-    if (data.ptype === "p") {
-      if (data.v2 === "") {
-        throw new Error("权限策略（p）必须设置「动作（v2，如GET/POST）」");
-      }
+  if (data.ptype === "p") {
+    if (data.v2 === "") {
+      throw new Error("权限策略（p）必须设置「动作（v2，如GET/POST）」");
     }
+  }
 
-    return true;
-  });
+  return true;
+});
 
 type FromOriginalRuleType = {
   ptype: InsertCasbinRuleType["ptype"];
@@ -75,57 +74,54 @@ type PatchCasbinRuleInput = {
   updateData: Partial<UpdateDataInput>;
 };
 
-export const patchCasbinRuleSchema = z
-  .object({
-    fromOriginalRule: z.object({
-      ptype: selectCasbinRuleSchema.shape.ptype,
-    }).meta({ description: "原规则的基础信息（仅需ptype，用于校验更新合法性）" }),
-    // Zod v4.3+: schema with refine cannot call partial(), use base schema / Zod v4.3+: 包含 refine 的 schema 不能调用 partial()，使用基础 schema
-    updateData: baseCasbinRuleSchema.partial().meta({ description: "待更新的规则字段（部分可选）" }),
-  })
-  .refine((data: PatchCasbinRuleInput) => {
-    const { fromOriginalRule, updateData } = data;
-    const originalPtype = fromOriginalRule.ptype;
-    const { ptype: newPtype, v2: newV2, v0: newV0, v1: newV1 } = updateData;
+export const patchCasbinRuleSchema = z.object({
+  fromOriginalRule: z.object({
+    ptype: selectCasbinRuleSchema.shape.ptype,
+  }).meta({ description: "原规则的基础信息（仅需ptype，用于校验更新合法性）" }),
+  // Zod v4.3+: schema with refine cannot call partial(), use base schema / Zod v4.3+: 包含 refine 的 schema 不能调用 partial()，使用基础 schema
+  updateData: baseCasbinRuleSchema.partial().meta({ description: "待更新的规则字段（部分可选）" }),
+}).refine((data: PatchCasbinRuleInput) => {
+  const { fromOriginalRule, updateData } = data;
+  const originalPtype = fromOriginalRule.ptype;
+  const { ptype: newPtype, v2: newV2, v0: newV0, v1: newV1 } = updateData;
 
-    // Scenario 1: Updating ptype (changing between g and p) / 场景1：更新 ptype（从g改p或p改g）
-    if ((newPtype !== undefined) && (newPtype !== originalPtype)) {
-      if (newPtype === "g") {
-        if ((newV2 !== undefined) && (newV2 !== "")) {
-          throw new Error(`规则类型从「${originalPtype}」改为「g（角色继承）」后，不允许设置「动作（v2）」`);
-        }
-      }
-
-      if (newPtype === "p") {
-        if ((newV2 === undefined) || (newV2 === "")) {
-          throw new Error(`规则类型从「${originalPtype}」改为「p（权限）」后，必须设置「动作（v2）」`);
-        }
+  // Scenario 1: Updating ptype (changing between g and p) / 场景1：更新 ptype（从g改p或p改g）
+  if ((newPtype !== undefined) && (newPtype !== originalPtype)) {
+    if (newPtype === "g") {
+      if ((newV2 !== undefined) && (newV2 !== "")) {
+        throw new Error(`规则类型从「${originalPtype}」改为「g（角色继承）」后，不允许设置「动作（v2）」`);
       }
     }
 
-    // Scenario 2: ptype not updated (keeping original type) / 场景2：未更新 ptype（保持原类型）
-    if ((newPtype === undefined) || (newPtype === originalPtype)) {
-      if (originalPtype === "g") {
-        if (newV2 !== undefined) {
-          throw new Error(`原规则为「g（角色继承）」，不允许更新「动作（v2）」，请移除此字段`);
-        }
-      }
-
-      if (originalPtype === "p") {
-        if ((newV2 !== undefined) && (newV2 === "")) {
-          throw new Error(`原规则为「p（权限）」，更新「动作（v2）」时不能为空（如GET/POST）`);
-        }
+    if (newPtype === "p") {
+      if ((newV2 === undefined) || (newV2 === "")) {
+        throw new Error(`规则类型从「${originalPtype}」改为「p（权限）」后，必须设置「动作（v2）」`);
       }
     }
+  }
 
-    // Scenario 3: Additional validation for v0/v1 updates / 场景3：更新 v0/v1 的额外校验
-    if ((newV0 !== undefined) && (newV0.includes("@"))) {
-      throw new Error("主体（v0）不允许包含「@」字符，请修改后重试");
-    }
-    if ((newV1 !== undefined) && (newV1.length > 254)) {
-      throw new Error(`对象（v1）长度不能超过254个字符，当前长度：${newV1.length}`);
+  // Scenario 2: ptype not updated (keeping original type) / 场景2：未更新 ptype（保持原类型）
+  if ((newPtype === undefined) || (newPtype === originalPtype)) {
+    if (originalPtype === "g") {
+      if (newV2 !== undefined) {
+        throw new Error(`原规则为「g（角色继承）」，不允许更新「动作（v2）」，请移除此字段`);
+      }
     }
 
-    return true;
-  })
-  .meta({ description: "Casbin规则更新Schema（支持部分字段更新，结合原规则类型做全场景校验）" });
+    if (originalPtype === "p") {
+      if ((newV2 !== undefined) && (newV2 === "")) {
+        throw new Error(`原规则为「p（权限）」，更新「动作（v2）」时不能为空（如GET/POST）`);
+      }
+    }
+  }
+
+  // Scenario 3: Additional validation for v0/v1 updates / 场景3：更新 v0/v1 的额外校验
+  if ((newV0 !== undefined) && (newV0.includes("@"))) {
+    throw new Error("主体（v0）不允许包含「@」字符，请修改后重试");
+  }
+  if ((newV1 !== undefined) && (newV1.length > 254)) {
+    throw new Error(`对象（v1）长度不能超过254个字符，当前长度：${newV1.length}`);
+  }
+
+  return true;
+}).meta({ description: "Casbin规则更新Schema（支持部分字段更新，结合原规则类型做全场景校验）" });

@@ -1,8 +1,5 @@
 /**
  * Pick specified properties from an object
- * @param obj Object / 对象
- * @param keys Array of property names / 属性名数组
- * @returns New object / 新对象
  * 从对象中选择指定的属性
  */
 export function pick<T extends ParamsType, K extends keyof T>(obj: T, keys: readonly K[]) {
@@ -16,9 +13,6 @@ export function pick<T extends ParamsType, K extends keyof T>(obj: T, keys: read
 
 /**
  * Omit specified properties from an object
- * @param obj Object / 对象
- * @param keys Array of property names to omit / 要排除的属性名数组
- * @returns New object / 新对象
  * 从对象中排除指定的属性
  */
 export function omit<T extends ParamsType, K extends keyof T>(obj: T, keys: K[]) {

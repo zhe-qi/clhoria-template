@@ -11,21 +11,21 @@ import { LoginResult } from "@/lib/enums";
 import cap from "@/lib/services/cap";
 import { loginLogger } from "@/lib/services/logger";
 import { getIPAddress } from "@/services/ip";
-import { Resp, tryit } from "@/utils";
+import { getIPAddressFromHeaders, Resp, tryit } from "@/utils";
 
 import { generateTokens, getIdentityById, getPermissionsByRoles, logout as logoutUtil, refreshAccessToken, validateCaptcha, validateLogin } from "./auth.helpers";
 
 /** Admin login / 管理端登录 */
 export const login: AuthRouteHandlerType<"login"> = async (c) => {
-  const body = c.req.valid("json");
-  const { username, password } = body;
-  const ip = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
-  const userAgent = c.req.header("user-agent") || "";
+  const { username, password, captchaToken } = c.req.valid("json");
+
   const loginTime = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+  const ip = getIPAddressFromHeaders(c.req.raw.headers);
+  const userAgent = c.req.header("user-agent") || "";
   const location = await getIPAddress(ip);
 
   // 1. Validate captcha / 验证验证码
-  const captchaError = await validateCaptcha(body.captchaToken);
+  const captchaError = await validateCaptcha(captchaToken);
   if (captchaError && env.NODE_ENV !== "test") {
     loginLogger.info({ username, ip, location, userAgent, loginTime, result: LoginResult.FAILURE, reason: captchaError }, "登录日志");
     return c.json(Resp.fail(captchaError), HttpStatusCodes.BAD_REQUEST);
@@ -35,9 +35,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const result = await validateLogin(username, password);
   if (!result.success) {
     loginLogger.info({ username, ip, location, userAgent, loginTime, result: LoginResult.FAILURE, reason: result.error }, "登录日志");
-    const statusCode = result.status === "forbidden"
-      ? HttpStatusCodes.FORBIDDEN
-      : HttpStatusCodes.UNAUTHORIZED;
+    const statusCode = result.status === "forbidden" ? HttpStatusCodes.FORBIDDEN : HttpStatusCodes.UNAUTHORIZED;
     return c.json(Resp.fail(result.error), statusCode);
   }
 

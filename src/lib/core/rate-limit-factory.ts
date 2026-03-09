@@ -73,8 +73,7 @@ function validateIp(ip: string): string | null {
 
 function normalizeIp(ip: string) {
   // Node often provides IPv4-mapped IPv6 / Node 经常给出 IPv4-mapped IPv6
-  if (ip.startsWith("::ffff:"))
-    return ip.slice(7);
+  if (ip.startsWith("::ffff:")) return ip.slice(7);
   return ip;
 }
 
@@ -90,19 +89,16 @@ function getSocketIp(c: Context<AppBindings>) {
   return ip ? normalizeIp(ip) : null;
 }
 
-const TRUSTED_PROXY_IPS = (env.TRUSTED_PROXY_IPS)
-  .split(",")
+const TRUSTED_PROXY_IPS = env.TRUSTED_PROXY_IPS.split(",")
   .map(s => s.trim())
   .filter(Boolean);
 
 function isPrivateIpv4(ip: string) {
   const parts = ip.split(".");
-  if (parts.length !== 4)
-    return false;
+  if (parts.length !== 4) return false;
 
   const nums = parts.map(n => Number(n));
-  if (nums.some(n => !Number.isInteger(n) || n < 0 || n > 255))
-    return false;
+  if (nums.some(n => !Number.isInteger(n) || n < 0 || n > 255)) return false;
 
   const [a, b] = nums;
 

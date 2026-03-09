@@ -7,21 +7,6 @@
  *
  * 将函数转换为错误优先的函数
  * 支持同步和异步函数
- *
- * @example
- * ```typescript
- * // Call with arguments / 带参数调用
- * const [err, res] = await tryit(fetch)("https://api.example.com");
- *
- * // Call without arguments / 无参数调用
- * const [err, res] = await tryit(someFunc)();
- *
- * if (err) {
- *   // err is Error, res is null / err 是 Error, res 是 null
- *   return;
- * }
- * // err is null, res is Result (type already narrowed) / err 是 null, res 是 Result (已自动收窄类型)
- * console.log(res.data);
  * ```
  */
 export function tryit<TFunction extends (...args: any[]) => any>(

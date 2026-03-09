@@ -79,14 +79,10 @@ export const update: SystemDictRouteHandlerType<"update"> = async (c) => {
   const body = c.req.valid("json");
   const { sub } = c.get("jwtPayload");
 
-  const [updated] = await db
-    .update(systemDicts)
-    .set({
-      ...body,
-      updatedBy: sub,
-    })
-    .where(eq(systemDicts.id, id))
-    .returning();
+  const [updated] = await db.update(systemDicts).set({
+    ...body,
+    updatedBy: sub,
+  }).where(eq(systemDicts.id, id)).returning();
 
   // If no records were updated, the dictionary does not exist / 如果没有更新任何记录，说明字典不存在
   if (!updated) {
@@ -106,8 +102,7 @@ export const remove: SystemDictRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // Delete directly, get deleted record via returning / 直接删除，通过 returning 获取被删除的记录
-  const [deleted] = await db
-    .delete(systemDicts)
+  const [deleted] = await db.delete(systemDicts)
     .where(eq(systemDicts.id, id))
     .returning({ id: systemDicts.id, code: systemDicts.code });
 

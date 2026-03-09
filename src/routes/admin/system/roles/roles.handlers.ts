@@ -95,14 +95,10 @@ export const update: SystemRolesRouteHandlerType<"update"> = async (c) => {
 
   let updated;
   if (Object.keys(roleData).length > 0) {
-    [updated] = await db
-      .update(systemRoles)
-      .set({
-        ...roleData,
-        updatedBy: sub,
-      })
-      .where(eq(systemRoles.id, id))
-      .returning();
+    [updated] = await db.update(systemRoles).set({
+      ...roleData,
+      updatedBy: sub,
+    }).where(eq(systemRoles.id, id)).returning();
   }
   else {
     updated = await getRoleById(id);
@@ -122,8 +118,7 @@ export const remove: SystemRolesRouteHandlerType<"remove"> = async (c) => {
 
   await cleanRoleInheritance(id);
 
-  const [deleted] = await db
-    .delete(systemRoles)
+  const [deleted] = await db.delete(systemRoles)
     .where(eq(systemRoles.id, id))
     .returning({ id: systemRoles.id });
 

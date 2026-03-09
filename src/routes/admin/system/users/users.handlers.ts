@@ -70,8 +70,7 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   const { sub } = c.get("jwtPayload");
 
   // Check if built-in user / 检查是否为内置用户
-  const [user] = await db
-    .select({ builtIn: systemUsers.builtIn })
+  const [user] = await db.select({ builtIn: systemUsers.builtIn })
     .from(systemUsers)
     .where(eq(systemUsers.id, id));
 
@@ -87,14 +86,10 @@ export const update: SystemUsersRouteHandlerType<"update"> = async (c) => {
   // Direct password update not allowed / 不允许直接更新密码
   const updateData = omit(body, ["password"]);
 
-  const [updated] = await db
-    .update(systemUsers)
-    .set({
-      ...updateData,
-      updatedBy: sub,
-    })
-    .where(eq(systemUsers.id, id))
-    .returning();
+  const [updated] = await db.update(systemUsers).set({
+    ...updateData,
+    updatedBy: sub,
+  }).where(eq(systemUsers.id, id)).returning();
 
   if (!updated) {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
@@ -109,8 +104,7 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
   const { id } = c.req.valid("param");
 
   // Check if built-in user / 检查是否为内置用户
-  const [user] = await db
-    .select({ builtIn: systemUsers.builtIn })
+  const [user] = await db.select({ builtIn: systemUsers.builtIn })
     .from(systemUsers)
     .where(eq(systemUsers.id, id));
 
@@ -122,8 +116,7 @@ export const remove: SystemUsersRouteHandlerType<"remove"> = async (c) => {
     return c.json(Resp.fail("内置用户不允许删除"), HttpStatusCodes.FORBIDDEN);
   }
 
-  const [deleted] = await db
-    .delete(systemUsers)
+  const [deleted] = await db.delete(systemUsers)
     .where(eq(systemUsers.id, id))
     .returning({ id: systemUsers.id });
 
