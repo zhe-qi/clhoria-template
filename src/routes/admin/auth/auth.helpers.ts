@@ -272,7 +272,7 @@ export async function getPermissionsByRoles(roles: string[]) {
   }
 
   return {
-    permissions: Array.from(permissionsSet),
-    groupings: Array.from(groupingsSet),
+    permissions: [...permissionsSet],
+    groupings: [...groupingsSet],
   };
 }

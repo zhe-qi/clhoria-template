@@ -94,6 +94,7 @@ export default function resourceMonitorPlugin(options?: ResourceMonitorOptions):
   const threshold = options?.threshold ?? 2;
   const delay = options?.delay ?? 500;
   const watchTypes = options?.watchTypes ?? DEFAULT_WATCH_TYPES;
+  // eslint-disable-next-line e18e/prefer-static-regex
   const exclude = options?.exclude ?? [/node_modules/, /\.test\.ts$/, /\.spec\.ts$/];
   const stabilizeCount = options?.stabilizeCount ?? 2;
   const windowSize = options?.windowSize ?? 3;
@@ -171,12 +172,12 @@ export default function resourceMonitorPlugin(options?: ResourceMonitorOptions):
     }
 
     // Calculate detailed changes relative to baseline / 计算相对于基线的详细变化
-    const currentSnapshot = snapshotHistory[snapshotHistory.length - 1].snapshot;
+    const currentSnapshot = snapshotHistory.at(-1)?.snapshot;
     const details: Array<{ type: string; baseline: number; current: number; diff: number }> = [];
 
     for (const type of watchTypes) {
       const baselineCount = baselineSnapshot[type] || 0;
-      const currentCount = currentSnapshot[type] || 0;
+      const currentCount = currentSnapshot?.[type] || 0;
       const diff = currentCount - baselineCount;
 
       if (diff > 0) {

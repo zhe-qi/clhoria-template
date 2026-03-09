@@ -40,6 +40,7 @@ export type GetEntryContentOptions = {
 
 const normalizePaths = (paths: string[]) => {
   return paths.map((p) => {
+    // eslint-disable-next-line e18e/prefer-static-regex
     let normalizedPath = normalize(p).replace(/\\/g, "/");
     if (normalizedPath.startsWith("./")) {
       normalizedPath = normalizedPath.substring(2);

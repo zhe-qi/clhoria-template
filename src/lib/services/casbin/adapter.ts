@@ -135,7 +135,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       // Delete old records not in keepKeys / 删除旧的、但不在 keepKeys 中的记录
       await tx
         .delete(this.schema)
-        .where(not(inArray(sqlKeyExpr, Array.from(keepKeys))));
+        .where(not(inArray(sqlKeyExpr, [...keepKeys])));
     });
 
     return true;
@@ -154,7 +154,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
       if (!policyAsts)
         continue;
 
-      for (const ast of Array.from(policyAsts.values())) {
+      for (const ast of [...policyAsts.values()]) {
         for (const rule of ast.policy) {
           const policy = Object.fromEntries(
             [["ptype", ptype], ...Array.from({ length: 6 }, (_, i) => [`v${i}`, rule[i] ?? ""])],
@@ -168,7 +168,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
           }
 
           // Check keyFields existence (fields should exist, empty string is acceptable) / keyFields 的存在性检查（都应该有字段，空串亦可）
-          if (!keyFields.every(field => Object.prototype.hasOwnProperty.call(policy, field))) {
+          if (!keyFields.every(field => Object.hasOwn(policy, field))) {
             throw new Error(`策略缺少必要字段: ${keyFields.join(", ")}`);
           }
 
@@ -355,7 +355,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
     ] as string[];
 
     // Strip consecutive empty strings from the end / 去掉尾部连续的空字符串
-    while (tokens.length > 1 && tokens[tokens.length - 1] === "") {
+    while (tokens.length > 1 && tokens.at(-1) === "") {
       tokens.pop();
     }
 

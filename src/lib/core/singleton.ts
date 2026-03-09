@@ -174,7 +174,7 @@ export async function destroyAllSingletons(): Promise<void> {
   const registry = getRegistry();
 
   // 逆序销毁：后创建的先销毁，确保依赖关系正确（如 pg-boss → postgres）
-  const keys = Array.from(registry.keys()).reverse();
+  const keys = [...registry.keys()].toReversed();
   for (const key of keys) {
     await destroySingleton(key).catch((error) => {
       console.error(`[单例]: 销毁 ${key} 失败`, error);
@@ -206,5 +206,5 @@ export function hasSingleton(key: string): boolean {
  * 获取所有已注册的单例键（用于调试）
  */
 export function getSingletonKeys(): string[] {
-  return Array.from(getRegistry().keys());
+  return [...getRegistry().keys()];
 }

@@ -98,7 +98,7 @@ const buildPlugin = (options: BuildOptions): Plugin => {
           }
         });
 
-        staticPaths.push(...Array.from(uniqueStaticPaths));
+        staticPaths.push(...[...uniqueStaticPaths]);
 
         const entry = options.entry ?? defaultOptions.entry;
         return await getEntryContent({
@@ -124,6 +124,7 @@ const buildPlugin = (options: BuildOptions): Plugin => {
           minify: options?.minify ?? defaultOptions.minify,
           ssr: true,
           rolldownOptions: {
+            // eslint-disable-next-line e18e/prefer-static-regex
             external: [...builtinModules, /^node:/, /node_modules/],
             input: virtualEntryId,
             output: {

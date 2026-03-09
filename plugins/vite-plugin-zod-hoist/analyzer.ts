@@ -450,7 +450,8 @@ export function analyze(
     VariableDeclaration(node: VariableDeclaration) {
       // Collect variable declarations inside functions / 收集函数内部的变量声明
       if (functionStack.length > 0) {
-        const scope = functionStack[functionStack.length - 1];
+        const scope = functionStack.at(-1);
+        if (!scope) return;
         for (const decl of node.declarations) {
           // ESTree uses Identifier, OXC uses BindingIdentifier / ESTree 使用 Identifier，OXC 使用 BindingIdentifier
           const id = decl.id as unknown as Record<string, unknown>;
@@ -466,10 +467,9 @@ export function analyze(
         return;
 
       const isZod = isZodCall(node, result.zodIdentifier!);
-      if (!isZod)
-        return;
-
-      const scope = functionStack[functionStack.length - 1];
+      if (!isZod) return;
+      const scope = functionStack.at(-1);
+      if (!scope) return;
       candidates.push({
         node,
         depth: scope.depth,

@@ -58,7 +58,7 @@
     "@hono/vite-dev-server": "^0.25.0",
     "@pg-boss/dashboard": "^1.1.1",
     "@types/node": "25.3.5",
-    "@typescript/native-preview": "7.0.0-dev.20260308.1",
+    "@typescript/native-preview": "7.0.0-dev.20260309.1",
     "drizzle-kit": "^0.31.9",
     "eslint": "^10.0.3",
     "eslint-plugin-format": "^2.0.1",
@@ -67,7 +67,7 @@
     "simple-git-hooks": "^2.13.1",
     "type-fest": "^5.4.4",
     "typescript": "5.9.3",
-    "vite": "8.0.0-beta.16",
+    "vite": "8.0.0-beta.18",
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {

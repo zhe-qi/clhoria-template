@@ -67,7 +67,7 @@ describe("tryit Utils", () => {
     it("should handle function that returns promise", async () => {
       const promiseFn = (delay: number) => {
         return new Promise<string>((resolve) => {
-          setTimeout(() => resolve(`Resolved after ${delay}ms`), delay);
+          setTimeout(resolve, delay, `Resolved after ${delay}ms`);
         });
       };
       const wrappedFn = tryit(promiseFn);

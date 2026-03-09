@@ -35,6 +35,7 @@ function resolveTierRoutes(tier: TierConfig, _allRoutes: Record<string, { defaul
   const dirName = tier.routeDir ?? tier.name;
   return Object.fromEntries(
     Object.entries(_allRoutes).filter(([path]) => {
+      // eslint-disable-next-line e18e/prefer-static-regex
       const match = path.match(/\/routes\/([^/]+)\//);
       return match?.[1] === dirName;
     }),
