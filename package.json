@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.3",
-    "@aws-sdk/client-s3": "^3.1007.0",
-    "@aws-sdk/s3-request-presigner": "^3.1007.0",
+    "@aws-sdk/client-s3": "^3.1008.0",
+    "@aws-sdk/s3-request-presigner": "^3.1008.0",
     "@cap.js/server": "^4.0.5",
     "@casbin/redis-watcher": "^1.2.0",
     "@dotenvx/dotenvx": "^1.54.1",
@@ -33,7 +33,7 @@
     "@hono/sentry": "^1.2.2",
     "@hono/zod-openapi": "^1.2.2",
     "@node-rs/argon2": "^2.0.2",
-    "@scalar/hono-api-reference": "^0.10.2",
+    "@scalar/hono-api-reference": "^0.10.3",
     "casbin": "^5.49.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
@@ -53,12 +53,12 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^7.7.0",
+    "@antfu/eslint-config": "^7.7.2",
     "@clhoria/vite-plugin": "workspace:*",
     "@hono/vite-dev-server": "^0.25.1",
     "@pg-boss/dashboard": "^1.1.1",
-    "@types/node": "25.4.0",
-    "@typescript/native-preview": "7.0.0-dev.20260311.1",
+    "@types/node": "25.5.0",
+    "@typescript/native-preview": "7.0.0-dev.20260312.1",
     "drizzle-kit": "^0.31.9",
     "eslint": "^10.0.3",
     "eslint-plugin-format": "^2.0.1",
@@ -67,8 +67,8 @@
     "simple-git-hooks": "^2.13.1",
     "type-fest": "^5.4.4",
     "typescript": "5.9.3",
-    "vite": "8.0.0-beta.18",
-    "vitest": "^4.0.18"
+    "vite": "8.0.0",
+    "vitest": "^4.1.0"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm nano-staged"

@@ -28,7 +28,7 @@ const client = testClient(createAuthApp());
 function extractRefreshToken(response: { headers: Headers }): string | null {
   const setCookie = response.headers.get("set-cookie");
   if (!setCookie) return null;
-  // eslint-disable-next-line e18e/prefer-static-regex
+
   const match = setCookie.match(/refreshToken=([^;]+)/);
   return match ? match[1] : null;
 }
