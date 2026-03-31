@@ -1,11 +1,11 @@
 import { Layer } from "effect";
 
+import { BullMQServiceLive } from "../services/bullmq";
 import { DbServiceLive } from "../services/db";
 import { LoggerServiceLive } from "../services/logger";
-import { PgBossServiceLive } from "../services/pg-boss";
 
 export const InfraLayer = Layer.mergeAll(
   DbServiceLive,
-  PgBossServiceLive,
+  BullMQServiceLive,
   LoggerServiceLive,
 );

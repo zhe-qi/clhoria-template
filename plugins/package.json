@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "magic-string": "^0.30.21",
-    "oxc-parser": "^0.118.0"
+    "oxc-parser": "^0.121.0"
   },
   "devDependencies": {
-    "@oxc-project/types": "^0.118.0",
-    "vite": "8.0.0"
+    "@oxc-project/types": "^0.123.0",
+    "vite": "8.0.3"
   }
 }

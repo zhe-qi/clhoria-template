@@ -57,8 +57,8 @@ export const orders = pgTable("orders", {
 });
 
 // 情况2：基础设施表 - 只需要部分字段（无需审计）
-// 如：Saga、队列任务、系统日志等
-export const sagas = pgTable("sagas", {
+// 如：队列任务、系统日志等
+export const queueJobs = pgTable("queue_jobs", {
   id: baseColumns.id,           // 只要 id
   createdAt: baseColumns.createdAt,  // 只要创建时间
   // 不需要 createdBy, updatedAt, updatedBy

@@ -12,11 +12,3 @@ export class LockAcquisitionError extends Data.TaggedError("LockAcquisitionError
   readonly key: string;
   readonly cause?: unknown;
 }> {}
-
-/** Saga step execution failed / Saga 步骤执行失败 */
-export class SagaStepError extends Data.TaggedError("SagaStepError")<{
-  readonly sagaId: string;
-  readonly stepIndex: number;
-  readonly stepName: string;
-  readonly message: string;
-}> {}

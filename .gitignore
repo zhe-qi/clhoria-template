@@ -20,6 +20,11 @@ logs/
 pnpm-debug.log*
 lerna-debug.log*
 
+# test coverage
+coverage/
+.nyc_output/
+*.lcov
+
 # misc
 .DS_Store
 

@@ -22,7 +22,7 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 - **Business + System Dictionary**: Business dictionaries support runtime dynamic configuration (JSONB + Redis cache), system dictionaries use PostgreSQL Enum for compile-time type checking
 - **Logging Middleware**: Collects logs with support for multiple log storage backends (AWS CloudWatch, Loki, TimescaleDB, etc.)
 - **High-performance Cache**: Redis caching + multi-layer rate limiting + permission caching + session management + distributed locks
-- **Task Queue & Scheduling**: Background task queue management and scheduled tasks based on pg-boss (distributed-safe, single execution across nodes)
+- **Task Queue & Scheduling**: Background task queue management and scheduled tasks based on BullMQ + Redis (distributed-safe, supports repeatable jobs, Bull Board UI)
 - **Functional Infrastructure**: Infrastructure layer built on Effect-TS with type-safe dependency injection, composable error handling, structured concurrency
 - **Object Storage**: Integrated S3-compatible object storage (supports Cloudflare R2, AWS S3, MinIO, etc.)
 - **Smart CAPTCHA**: Integrated Cap.js, lightweight modern CAPTCHA based on SHA-256 proof-of-work, privacy-friendly with zero tracking
@@ -291,6 +291,77 @@ router.use(operationLog({ moduleName: "Order Management", description: "Create O
 ```
 
 Custom Transport integration: Create `transports/sls-transport.mjs` in project root, build with `pino-abstract-transport`, then uncomment the SLS target in `logger.ts`'s `buildTransportTargets()`. Operation log `urlPath` naturally corresponds to Casbin keymatch3 rules and Refine resources, frontend can directly use permission tree mapping to Chinese labels as log filter dimensions.
+
+### 📋 Task Queue System (BullMQ)
+
+Built on BullMQ + Redis, providing high-performance task queue management and scheduled task scheduling with Effect-TS functional encapsulation for type-safe operations.
+
+**Access Bull Board UI**:
+
+```bash
+pnpm dev
+# Visit http://localhost:3000/api/admin/queue-board
+```
+
+**Basic Usage - Add Job**:
+
+```typescript
+import { Effect } from "effect";
+import { queueManager } from "@/lib/infrastructure";
+
+// Add immediate job
+const program = queueManager.addJob("email", "send-welcome", {
+  email: "user@example.com",
+  subject: "Welcome!",
+});
+
+await Effect.runPromise(program);
+```
+
+**Register Worker**:
+
+```typescript
+import { Effect } from "effect";
+import { queueManager } from "@/lib/infrastructure";
+
+// Register worker to process jobs
+const program = queueManager.registerWorker("email", async (job) => {
+  console.log("Processing email:", job.data);
+  // Email sending logic
+  return { success: true };
+});
+
+Effect.runSync(program);
+```
+
+**Scheduled Jobs (Repeatable Jobs)**:
+
+```typescript
+import { Effect } from "effect";
+import { queueManager } from "@/lib/infrastructure";
+
+// Run daily cleanup at 3 AM
+const program = queueManager.scheduleJob(
+  "cleanup",
+  "daily-cleanup",
+  { type: "cleanup" },
+  {
+    pattern: "0 3 * * *",
+    tz: "Asia/Shanghai",
+  }
+);
+
+await Effect.runPromise(program);
+```
+
+**Redis Configuration Requirements**:
+
+BullMQ requires specific Redis settings:
+
+- **maxmemory-policy**: `noeviction` (prevents task data eviction)
+- **Data Persistence**: Enable AOF or RDB
+
+Local development (Docker Compose) is auto-configured. For Aliyun Redis, manually set `maxmemory-policy` in the console.
 
 ## Deployment
 
