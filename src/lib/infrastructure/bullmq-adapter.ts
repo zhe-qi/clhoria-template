@@ -5,7 +5,7 @@ import type { JobNameType, QueueNameType } from "@/lib/enums/bullmq";
 import { Queue as BullQueue, Worker as BullWorker } from "bullmq";
 
 import { Effect } from "effect";
-import IORedis from "ioredis";
+import RedisClient from "ioredis";
 import { parseURL } from "ioredis/built/utils/index.js";
 import env from "@/env";
 import { createSingleton } from "@/lib/core/singleton";
@@ -45,14 +45,13 @@ class QueueManager {
   /**
    * 获取或创建队列（原始方法，用于内部和 Bull Board）
    */
-  getQueue<T = any>(name: string, options?: Partial<QueueOptions>): Queue<T> {
+  getQueue<T extends ParamsType = ParamsType>(name: string, options?: Partial<QueueOptions>): Queue<T> {
     if (!this.queues.has(name)) {
       const queue = new BullQueue<T>(name, {
         connection: this.connection,
         ...options,
       });
       this.queues.set(name, queue);
-      logger.debug({ queueName: name }, "[BullMQ]: 队列已创建");
     }
     return this.queues.get(name) as Queue<T>;
   }
@@ -79,7 +78,7 @@ class QueueManager {
           this.queues.set(queueName, queue);
         }
 
-        return addToQueue(queue, jobName as string, validatedData as any, opts);
+        return addToQueue(queue, jobName as string, validatedData as JobDataByName<N>, opts);
       },
       catch: (error) => {
         logger.error({ queueName, jobName, error }, "[BullMQ]: 添加任务失败");
@@ -90,34 +89,20 @@ class QueueManager {
   /**
    * 类型安全地注册 Worker（Effect 封装 + Zod 验证）
    */
-  registerWorker = <Q extends QueueNameType>(
+  registerWorker = <Q extends QueueNameType, R = void>(
     queueName: Q,
-    processor: (job: Job<JobDataByName<QueueJobsMapping[Q]>>) => Promise<any>,
+    processor: (job: Job<JobDataByName<QueueJobsMapping[Q]>>) => Promise<R>,
     options?: Partial<WorkerOptions>,
   ) =>
     Effect.sync(() => {
-      if (this.workers.has(queueName)) {
-        return this.workers.get(queueName) as Worker;
-      }
+      if (this.workers.has(queueName)) return this.workers.get(queueName);
 
       const worker = new BullWorker<JobDataByName<QueueJobsMapping[Q]>>(
         queueName,
         async (job) => {
           // Runtime validation before processing
           const schema = JobSchemaRegistry[job.name as JobNameType];
-          if (schema) {
-            try {
-              job.data = schema.parse(job.data) as JobDataByName<QueueJobsMapping[Q]>;
-            }
-            catch (error) {
-              logger.error(
-                { queueName, jobId: job.id, jobName: job.name, error },
-                "[BullMQ]: 任务数据验证失败",
-              );
-              throw error;
-            }
-          }
-
+          if (schema) job.data = schema.parse(job.data) as JobDataByName<QueueJobsMapping[Q]>;
           return processor(job);
         },
         {
@@ -158,13 +143,11 @@ class QueueManager {
         const queue = new BullQueue<JobDataByName<N>>(queueName, {
           connection: this.connection,
         });
-        if (!this.queues.has(queueName)) {
-          this.queues.set(queueName, queue);
-        }
+
+        if (!this.queues.has(queueName)) this.queues.set(queueName, queue);
 
         // 使用 Job Schedulers API (schedulerId = queueName:jobName)
-        const schedulerId = `${queueName}:${jobName}`;
-        await (queue as any).upsertJobScheduler(schedulerId, repeatOptions, {
+        await (queue as any).upsertJobScheduler(`${queueName}:${jobName}`, repeatOptions, {
           name: jobName,
           data: validatedData,
         });
@@ -183,10 +166,12 @@ class QueueManager {
     Effect.tryPromise({
       try: () => {
         const queue = this.getQueue(queueName);
-        const schedulerId = `${queueName}:${jobName}`;
-        return queue.removeJobScheduler(schedulerId);
+        return queue.removeJobScheduler(`${queueName}:${jobName}`);
       },
-      catch: error => new Error(`Failed to unschedule job: ${error}`),
+      catch: (error) => {
+        logger.error({ queueName, jobName, schedulerId: `${queueName}:${jobName}`, error }, "[BullMQ]: 取消定时任务失败");
+        return new Error(`Failed to unschedule job: ${error}`);
+      },
     });
 
   /**
@@ -208,22 +193,18 @@ class QueueManager {
 
       // 关闭所有 Workers
       for (const [name, worker] of this.workers.entries()) {
-        closeEffects.push(
-          Effect.tryPromise({
-            try: () => worker.close(),
-            catch: error => new Error(`Failed to close worker ${name}: ${error}`),
-          }),
-        );
+        closeEffects.push(Effect.tryPromise({
+          try: () => worker.close(),
+          catch: error => new Error(`Failed to close worker ${name}: ${error}`),
+        }));
       }
 
       // 关闭所有队列
       for (const [name, queue] of this.queues.entries()) {
-        closeEffects.push(
-          Effect.tryPromise({
-            try: () => queue.close(),
-            catch: error => new Error(`Failed to close queue ${name}: ${error}`),
-          }),
-        );
+        closeEffects.push(Effect.tryPromise({
+          try: () => queue.close(),
+          catch: error => new Error(`Failed to close queue ${name}: ${error}`),
+        }));
       }
 
       // 带超时的并行关闭
@@ -238,12 +219,12 @@ class QueueManager {
       // 关闭 Redis 连接（检查状态避免重复关闭）
       yield* Effect.tryPromise({
         try: async () => {
-          if (this.connection.status === "ready" || this.connection.status === "connect") {
+          if (!["close", "end"].includes(this.connection.status)) {
             await this.connection.quit();
           }
         },
-        catch: () => {
-          // 忽略关闭错误，连接可能已被关闭
+        catch: (error) => {
+          logger.debug({ error }, "[BullMQ]: Redis 连接关闭时的预期错误");
         },
       });
     });
@@ -269,7 +250,7 @@ class QueueManager {
  */
 function createBullMQRedis() {
   const connectionOptions = parseURL(env.REDIS_URL);
-  return new IORedis({
+  return new RedisClient({
     ...connectionOptions,
     maxRetriesPerRequest: null, // BullMQ 要求
   });

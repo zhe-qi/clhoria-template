@@ -5,13 +5,11 @@ export const respErrSchema = z.object({
   stack: z.string().optional().describe("错误堆栈"),
   error: z.object({
     name: z.string().describe("错误名称"),
-    issues: z.array(
-      z.object({
-        code: z.string().describe("错误码"),
-        path: z.array(z.union([z.string(), z.number()])).describe("错误路径"),
-        message: z.string().describe("错误信息"),
-      }),
-    ).optional().describe("错误详情"),
+    issues: z.array(z.object({
+      code: z.string().describe("错误码"),
+      path: z.array(z.union([z.string(), z.number()])).describe("错误路径"),
+      message: z.string().describe("错误信息"),
+    })).optional().describe("错误详情"),
   }).optional().describe("错误对象"),
 }).catchall(z.unknown()).describe("错误响应");
 

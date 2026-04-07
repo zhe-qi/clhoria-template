@@ -124,7 +124,7 @@ export type Identity = {
   /** Identity provider / 身份源 */
   provider?: string;
   /** Third-party user info / 三方用户信息 */
-  userInfo?: Record<string, any>;
+  userInfo?: ParamsType;
   /** Third-party openid / 三方openid */
   openid?: string;
   /** Third-party unionid / 三方unionid */

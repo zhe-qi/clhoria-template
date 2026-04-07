@@ -39,8 +39,7 @@ export const CleanupDailySchema = z.object({
   // YYYY-MM-DD format
   targetDate: z.string().refine(
     (val) => {
-      if (!DATE_REGEX.test(val))
-        return false;
+      if (!DATE_REGEX.test(val)) return false;
       const date = new Date(`${val}T00:00:00Z`);
       return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(val);
     },

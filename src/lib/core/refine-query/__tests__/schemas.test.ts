@@ -10,7 +10,7 @@ import {
   LogicalFilterSchema,
   PaginationSchema,
   RefineQueryParamsSchema,
-} from "../schemas";
+} from "../types";
 
 describe("refine-query Schemas", () => {
   describe("CrudOperatorsSchema", () => {

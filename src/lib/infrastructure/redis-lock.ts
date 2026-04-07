@@ -37,7 +37,7 @@ function createLockForKey(key: string, ttl: number) {
     ttl,
     retryAttempts: 3,
     retryDelay: 200,
-    performance: "standard" as const,
+    performance: "standard",
   });
 }
 

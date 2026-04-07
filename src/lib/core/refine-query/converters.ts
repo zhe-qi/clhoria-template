@@ -2,7 +2,7 @@ import type { SQL } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { Writable } from "type-fest";
 
-import type { ConditionalFilter, CrudFilters, CrudSorting, LogicalFilter } from "./schemas";
+import type { ConditionalFilter, CrudFilters, CrudSorting, FilterFieldsValidator, LogicalFilter, SorterFieldsValidator } from "./types";
 
 import { and, asc, between, desc, eq, gt, gte, ilike, inArray, isNotNull, isNull, like, lt, lte, ne, not, notInArray, or, sql } from "drizzle-orm";
 
@@ -169,11 +169,11 @@ export function convertFiltersToSQL(filters: CrudFilters | undefined, table: PgT
 }
 
 /** Validate filter fields / 验证过滤器字段 */
-export function validateFilterFields(
-  filters: CrudFilters,
-  table: PgTable,
-  allowedFields?: readonly string[],
-): Readonly<{ valid: boolean; invalidFields: readonly string[] }> {
+export const validateFilterFields: FilterFieldsValidator = (
+  filters,
+  table,
+  allowedFields?,
+) => {
   const validColumns = allowedFields ? [...allowedFields] : Object.keys(table);
   const invalidFields: string[] = [];
 
@@ -190,7 +190,7 @@ export function validateFilterFields(
 
   filters.forEach(checkFilter);
   return { valid: invalidFields.length === 0, invalidFields: [...new Set(invalidFields)] };
-}
+};
 
 // ============ Sorting Converter / 排序转换器 ============
 
@@ -261,18 +261,14 @@ export function convertSortersToSQL(sorters: CrudSorting | undefined, table: PgT
 }
 
 /** Validate sorting fields / 验证排序字段 */
-export function validateSorterFields(
-  sorters: CrudSorting,
-  table: PgTable,
-  allowedFields?: readonly string[],
-): Readonly<{ valid: boolean; invalidFields: readonly string[] }> {
+export const validateSorterFields: SorterFieldsValidator = (sorters, table, allowedFields?) => {
   const validColumns = allowedFields ? [...allowedFields] : Object.keys(table);
   const invalidFields = sorters
     .map(sorter => sorter.field)
     .filter(field => !validColumns.includes(field));
 
   return { valid: invalidFields.length === 0, invalidFields: [...new Set(invalidFields)] };
-}
+};
 
 /** Add default sorting / 添加默认排序 */
 export function addDefaultSorting(

@@ -18,27 +18,23 @@ export const casbinRule = pgTable("casbin_rule", {
   /** Reserved field (not in use, defaults to empty string) / 保留字段（暂不使用，默认空字符串） */
   v5: varchar({ length: 64 }).notNull().default(""),
 }, table => [
+  // Primary key: ptype, v0, v1, v2 / 主键：ptype, v0, v1, v2
   primaryKey({ name: "casbin_rule_pkey", columns: [table.ptype, table.v0, table.v1, table.v2] }),
+  // Index: idx_casbin_g_v0 / 索引：idx_casbin_g_v0
   index("idx_casbin_g_v0").on(table.ptype, table.v0, table.v1),
+  // Index: idx_casbin_v1 / 索引：idx_casbin_v1
   index("idx_casbin_v1").on(table.ptype, table.v1),
 ]);
 
 // Zod Schema adapted for not-null + default value constraints / Zod Schema 适配字段非空+默认值约束
 export const selectCasbinRuleSchema = createSelectSchema(casbinRule, {
-  ptype: schema =>
-    schema.meta({ description: "策略类型: p=策略 g=角色继承" }),
-  v0: schema =>
-    schema.meta({ description: "主体: 角色或用户（p=sub，g=上级）" }),
-  v1: schema =>
-    schema.meta({ description: "对象: 资源/角色（p=obj，g=下级）" }),
-  v2: schema =>
-    schema.meta({ description: "动作: 仅p策略使用（如GET/POST）" }),
-  v3: schema =>
-    schema.meta({ description: "保留字段" }),
-  v4: schema =>
-    schema.meta({ description: "保留字段" }),
-  v5: schema =>
-    schema.meta({ description: "保留字段" }),
+  ptype: schema => schema.meta({ description: "策略类型: p=策略 g=角色继承" }),
+  v0: schema => schema.meta({ description: "主体: 角色或用户（p=sub，g=上级）" }),
+  v1: schema => schema.meta({ description: "对象: 资源/角色（p=obj，g=下级）" }),
+  v2: schema => schema.meta({ description: "动作: 仅p策略使用（如GET/POST）" }),
+  v3: schema => schema.meta({ description: "保留字段" }),
+  v4: schema => schema.meta({ description: "保留字段" }),
+  v5: schema => schema.meta({ description: "保留字段" }),
 });
 
 // Type source: z.infer<typeof selectCasbinRuleSchema> is the parsed type of selectSchema, omit yields insert type / 类型来源：z.infer<typeof selectCasbinRuleSchema> 是 selectSchema 的解析类型，omit 后得到插入类型

@@ -27,7 +27,5 @@ export function omit<T extends ParamsType, K extends keyof T>(obj: T, keys: K[])
 
 /** Utility: convert field array to query-required format / 工具函数：将字段数组转换为查询所需的格式 */
 export function toColumns<T extends string>(fields: readonly T[]) {
-  return Object.fromEntries(
-    fields.map(key => [key, true]),
-  ) as Record<T, true>;
+  return Object.fromEntries(fields.map(key => [key, true])) as Record<T, true>;
 }

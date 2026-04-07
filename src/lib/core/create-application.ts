@@ -2,7 +2,7 @@ import type { ApiReferenceConfiguration } from "@scalar/hono-api-reference";
 import type { AppConfig, MiddlewareWithExcept, OpenAPIConfig, TierConfig, TierMiddleware } from "./define-config";
 import type { AppOpenAPI } from "@/types/lib";
 
-import { Scalar } from "@scalar/hono-api-reference";
+import { Scalar as ScalarHonoAPIReference } from "@scalar/hono-api-reference";
 import { except } from "hono/combine";
 
 import env from "@/env";
@@ -15,6 +15,7 @@ const allRoutes = import.meta.glob<{ default: AppOpenAPI }>(
   "../../routes/**/*.index.ts",
   { eager: true },
 );
+
 const allMiddlewares = import.meta.glob<{ default: TierMiddleware[] }>(
   "../../routes/*/_middleware.ts",
   { eager: true },
@@ -30,27 +31,21 @@ function resolveTierBasePath(tier: TierConfig, config: AppConfig): string {
 }
 
 /** Route matching (three modes) / 路由匹配（三种模式） */
-function resolveTierRoutes(tier: TierConfig, _allRoutes: Record<string, { default: AppOpenAPI }>) {
+function resolveTierRoutes(tier: TierConfig, _allRoutes: ParamsType<{ default: AppOpenAPI }>) {
   if (tier.routes) return tier.routes;
   const dirName = tier.routeDir ?? tier.name;
-  return Object.fromEntries(
-    Object.entries(_allRoutes).filter(([path]) => {
-      // eslint-disable-next-line e18e/prefer-static-regex
-      const match = path.match(/\/routes\/([^/]+)\//);
-      return match?.[1] === dirName;
-    }),
-  );
+  return Object.fromEntries(Object.entries(_allRoutes).filter(([path]) => {
+    // eslint-disable-next-line e18e/prefer-static-regex
+    const match = path.match(/\/routes\/([^/]+)\//);
+    return match?.[1] === dirName;
+  }));
 }
 
 /** Middleware loading / 中间件加载 */
-function resolveTierMiddlewares(
-  tier: TierConfig,
-  _allMiddlewares: Record<string, { default: TierMiddleware[] }>,
-): TierMiddleware[] {
+function resolveTierMiddlewares(tier: TierConfig, _allMiddlewares: ParamsType<{ default: TierMiddleware[] }>): TierMiddleware[] {
   if (tier.middlewares) return tier.middlewares;
   const dirName = tier.routeDir ?? tier.name;
-  const key = Object.keys(_allMiddlewares)
-    .find(k => k.includes(`/routes/${dirName}/_middleware.ts`));
+  const key = Object.keys(_allMiddlewares).find(k => k.includes(`/routes/${dirName}/_middleware.ts`));
   return key ? _allMiddlewares[key].default : [];
 }
 
@@ -87,15 +82,12 @@ function configureAppDoc(router: AppOpenAPI, tier: TierConfig, config: AppConfig
   }
 }
 
+type TierApps = Array<{ tierApp: AppOpenAPI; tier: TierConfig; basePath: string }>;
+
 /** Configure Scalar documentation homepage / 配置 Scalar 文档主页 */
-function configureScalarUI(
-  app: AppOpenAPI,
-  tierApps: Array<{ tier: TierConfig; basePath: string }>,
-  config: AppConfig,
-  docEndpoint: string,
-) {
+function configureScalarUI(app: AppOpenAPI, tierApps: TierApps, config: AppConfig, docEndpoint: string) {
   const scalarConfig = config.openapi?.scalar ?? {};
-  app.get("/", Scalar({
+  app.get("/", ScalarHonoAPIReference({
     ...scalarConfig as Partial<ApiReferenceConfiguration>,
     sources: tierApps.map(({ tier, basePath }, i) => ({
       title: tier.title,
@@ -104,10 +96,9 @@ function configureScalarUI(
       default: i === 0,
     })),
     authentication: {
-      securitySchemes: Object.fromEntries(
-        tierApps
-          .filter(({ tier }) => tier.token)
-          .map(({ tier }) => [`${tier.name}Bearer`, { token: tier.token! }]),
+      securitySchemes: Object.fromEntries(tierApps
+        .filter(({ tier }) => tier.token)
+        .map(({ tier }) => [`${tier.name}Bearer`, { token: tier.token! }]),
       ),
     },
   }));
@@ -119,7 +110,7 @@ export async function createApplication(config: AppConfig): Promise<AppOpenAPI> 
   const openapiEnabled = resolveEnabled(config.openapi?.enabled);
   const docEndpoint = config.openapi?.docEndpoint ?? "/doc";
 
-  const tierApps: Array<{ tierApp: AppOpenAPI; tier: TierConfig; basePath: string }> = [];
+  const tierApps: TierApps = [];
 
   for (const tier of config.tiers) {
     const basePath = resolveTierBasePath(tier, config);
@@ -139,12 +130,7 @@ export async function createApplication(config: AppConfig): Promise<AppOpenAPI> 
     // Register middlewares / 注册中间件
     const middlewares = resolveTierMiddlewares(tier, allMiddlewares);
     for (const mw of middlewares) {
-      if (isMiddlewareWithExcept(mw)) {
-        tierApp.use("/*", except(mw.except, mw.handler));
-      }
-      else {
-        tierApp.use("/*", mw);
-      }
+      tierApp.use("/*", isMiddlewareWithExcept(mw) ? except(mw.except, mw.handler) : mw);
     }
 
     // Register routes / 注册路由

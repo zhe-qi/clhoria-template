@@ -4,7 +4,7 @@ import type { EmptyObject, Simplify, UnknownRecord } from "type-fest";
 
 import { z } from "@hono/zod-openapi";
 
-import logger from "@/lib/services/logger";
+// ============ Zod Schemas / Zod Schema 定义 ============
 
 /**
  * Refine CRUD operators Schema
@@ -111,6 +111,8 @@ export const PaginationSchema = z.object({
   mode: z.enum(["client", "server", "off"]).optional(),
 });
 
+// ============ Helper Functions / 辅助函数 ============
+
 /**
  * Helper function: check object depth
  * 辅助函数：检查对象深度
@@ -146,7 +148,6 @@ function safeJsonPreprocess(val: unknown): unknown {
 
     // Length limit to prevent DoS attacks / 增加长度限制，防止DoS攻击
     if (trimmed.length > 10000) {
-      logger.warn("[查询参数]: JSON字符串过长，已截断");
       return undefined;
     }
 
@@ -165,20 +166,19 @@ function safeJsonPreprocess(val: unknown): unknown {
       const parsed = JSON.parse(trimmed);
       // Recursive depth limit to prevent deep nesting attacks / 递归深度限制，防止深层嵌套攻击
       if (getDepth(parsed) > 5) {
-        logger.warn("[查询参数]: JSON嵌套层级过深");
         return undefined;
       }
       return parsed;
     }
-    catch (error) {
-      // Log parse error without exposing details / 记录解析错误但不暴露详细信息
-      logger.warn({ error: error instanceof Error ? error.message : String(error) }, "[查询参数]: JSON解析失败");
+    catch {
       return undefined;
     }
   }
 
   return val;
 }
+
+// ============ RefineQueryParams Schema / RefineQueryParams Schema ============
 
 /**
  * Refine query parameters Schema
@@ -242,10 +242,8 @@ export function RefineResultSchema<T extends z.ZodTypeAny>(dataSchema: T) {
   });
 }
 
-/**
- * Type definitions inferred from Zod schemas
- * 从 Zod schemas 推导的类型定义
- */
+// ============ TypeScript Types Inferred from Zod Schemas / 从 Zod Schema 推导的 TypeScript 类型 ============
+
 export type CrudOperators = z.infer<typeof CrudOperatorsSchema>;
 export type LogicalFilter = z.infer<typeof LogicalFilterSchema>;
 export type ConditionalFilter = z.infer<typeof ConditionalFilterSchema>;
@@ -256,7 +254,7 @@ export type CrudSorting = z.infer<typeof CrudSortingSchema>;
 export type Pagination = z.infer<typeof PaginationSchema>;
 export type RefineQueryParams = z.infer<typeof RefineQueryParamsSchema>;
 
-// ============ Query Configuration and Utility Types / 查询配置和工具类型 ============
+// ============ Manually Defined Types / 手动定义的类型 ============
 
 /** Refine query result interface / Refine 查询结果接口 */
 export type RefineQueryResult<T> = {
@@ -316,3 +314,50 @@ export type QueryExecutionParams<_T = UnknownRecord> = Simplify<{
 
 /** Tuple result type for error handling / 元组结果类型，用于错误处理 */
 export type Result<T, E = RefineQueryError> = [E, null] | [null, T];
+
+/** Pagination calculation result interface / 分页计算结果接口 */
+export type PaginationCalculation = Simplify<{
+  /** Offset (number of records to skip) / 偏移量（跳过的记录数） */
+  offset: number;
+  /** Limit (records per page) / 限制数量（每页记录数） */
+  limit: number;
+  /** Current page number / 当前页码 */
+  current: number;
+  /** Page size / 每页大小 */
+  pageSize: number;
+  /** Pagination mode / 分页模式 */
+  mode: "client" | "server" | "off";
+}>;
+
+/** Database instance type / 数据库实例类型 */
+export type DbInstance = typeof import("@/db");
+
+// ============ Validation Result Types / 验证结果类型 ============
+
+/** Field validation result / 字段验证结果 */
+export type FieldValidationResult = Readonly<{
+  valid: boolean;
+  invalidFields: readonly string[];
+}>;
+
+/** Validation result with error messages / 带错误消息的验证结果 */
+export type ValidationResult = Readonly<{
+  valid: boolean;
+  errors: readonly string[];
+}>;
+
+// ============ Validator Function Types / 验证器函数类型 ============
+
+/** Filter fields validator function type / 过滤器字段验证器函数类型 */
+export type FilterFieldsValidator = (
+  filters: CrudFilters,
+  table: PgTable,
+  allowedFields?: readonly string[],
+) => FieldValidationResult;
+
+/** Sorter fields validator function type / 排序字段验证器函数类型 */
+export type SorterFieldsValidator = (
+  sorters: CrudSorting,
+  table: PgTable,
+  allowedFields?: readonly string[],
+) => FieldValidationResult;

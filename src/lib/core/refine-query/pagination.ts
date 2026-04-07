@@ -1,6 +1,6 @@
 import type { Simplify } from "type-fest";
 
-import type { Pagination } from "./schemas";
+import type { Pagination, ValidationResult } from "./types";
 
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/constants";
 
@@ -57,7 +57,7 @@ export class PaginationHandler {
    * Validate pagination parameters
    * 验证分页参数
    */
-  validate(pagination?: Pagination): Readonly<{ valid: boolean; errors: readonly string[] }> {
+  validate(pagination?: Pagination): ValidationResult {
     const errors: string[] = [];
 
     if (pagination) {
@@ -112,6 +112,6 @@ export function calculatePagination(pagination?: Pagination): PaginationCalculat
  * Convenience function: validate pagination parameters
  * 便捷函数：验证分页参数
  */
-export function validatePagination(pagination?: Pagination): Readonly<{ valid: boolean; errors: readonly string[] }> {
+export function validatePagination(pagination?: Pagination): ValidationResult {
   return paginationHandler.validate(pagination);
 }

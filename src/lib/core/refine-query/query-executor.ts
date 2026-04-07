@@ -4,14 +4,14 @@ import type { UnknownRecord } from "type-fest";
 
 import type { PaginationCalculation } from "./pagination";
 
-import type { JoinConfig, QueryExecutionParams, RefineQueryConfig, RefineQueryResult, Result } from "./schemas";
+import type { JoinConfig, QueryExecutionParams, RefineQueryConfig, RefineQueryResult, Result } from "./types";
 
 import { and, count } from "drizzle-orm";
 import defaultDb from "@/db";
 
 import { addDefaultSorting, convertFiltersToSQL, convertSortersToSQL, validateFilterFields, validateSorterFields } from "./converters";
 import { calculatePagination, validatePagination } from "./pagination";
-import { RefineQueryError } from "./schemas";
+import { RefineQueryError } from "./types";
 
 /** Database instance type / 数据库实例类型 */
 export type DbInstance = typeof defaultDb;
