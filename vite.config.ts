@@ -1,4 +1,3 @@
-import type { PluginOption } from "vite";
 import buildPluginNodejs from "@clhoria/vite-plugin/build";
 import hmrNotifyPlugin from "@clhoria/vite-plugin/hmr-notify";
 
@@ -10,20 +9,6 @@ import { defineConfig, loadEnv } from "vite";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const plugins = [
-    zodHoistPlugin(),
-    hmrNotifyPlugin(),
-    resourceMonitorPlugin(),
-    devServer({
-      entry: "src/index.ts",
-      adapter: nodeAdapter(),
-    }),
-    buildPluginNodejs({
-      port: Number.parseInt(env.PORT, 10),
-      minify: false, // Whether to minify the bundled code / 是否压缩打包后的代码
-      shutdownTimeoutMs: 30000, // 30秒优雅关闭超时
-    }),
-  ] as PluginOption[];
   return {
     server: {
       port: Number.parseInt(env.PORT, 10),
@@ -31,6 +16,19 @@ export default defineConfig(({ mode }) => {
     resolve: {
       tsconfigPaths: true,
     },
-    plugins,
+    plugins: [
+      zodHoistPlugin(),
+      hmrNotifyPlugin(),
+      resourceMonitorPlugin(),
+      devServer({
+        entry: "src/index.ts",
+        adapter: nodeAdapter(),
+      }),
+      buildPluginNodejs({
+        port: Number.parseInt(env.PORT, 10),
+        minify: false, // Whether to minify the bundled code / 是否压缩打包后的代码
+        shutdownTimeoutMs: 30000, // 30秒优雅关闭超时
+      }),
+    ],
   };
 });

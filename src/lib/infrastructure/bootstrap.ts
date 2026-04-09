@@ -31,8 +31,6 @@ export function bootstrap(): Promise<void> {
 export async function shutdown(): Promise<void> {
   if (!hasSingleton(KEY)) return;
 
-  logger.info("[Bootstrap]: 开始优雅关闭");
-
   try {
     // BullMQ shutdown 由 destroyAllSingletons 自动处理
     logger.info("[Bootstrap]: 正在关闭所有连接");

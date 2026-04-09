@@ -44,13 +44,7 @@ export class PaginationHandler {
     const offset = (current - 1) * pageSize;
     const limit = pageSize;
 
-    return {
-      offset,
-      limit,
-      current,
-      pageSize,
-      mode,
-    };
+    return { offset, limit, current, pageSize, mode };
   }
 
   /**

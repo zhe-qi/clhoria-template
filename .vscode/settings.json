@@ -1,6 +1,5 @@
 {
-
-  "typescript.experimental.useTsgo": true,
+  "js/ts.experimental.useTsgo": true,
 
   // Disable the default formatter, use eslint instead
   "prettier.enable": false,

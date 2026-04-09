@@ -55,7 +55,7 @@ export class FiltersConverter {
 
     const { operator, value } = filter;
 
-    if ((value === null || value === undefined) && !["null", "nnull"].includes(operator)) {
+    if (value == null && !["null", "nnull"].includes(operator)) {
       return undefined;
     }
 
@@ -169,11 +169,7 @@ export function convertFiltersToSQL(filters: CrudFilters | undefined, table: PgT
 }
 
 /** Validate filter fields / 验证过滤器字段 */
-export const validateFilterFields: FilterFieldsValidator = (
-  filters,
-  table,
-  allowedFields?,
-) => {
+export const validateFilterFields: FilterFieldsValidator = (filters, table, allowedFields?) => {
   const validColumns = allowedFields ? [...allowedFields] : Object.keys(table);
   const invalidFields: string[] = [];
 
@@ -216,9 +212,7 @@ export class SortersConverter {
     const orderByClauses: SQL<unknown>[] = [];
     for (const sorter of sorters) {
       const clause = this.convertSorter(sorter);
-      if (clause) {
-        orderByClauses.push(clause);
-      }
+      if (clause) orderByClauses.push(clause);
     }
     return orderByClauses;
   }
@@ -255,8 +249,7 @@ export class SortersConverter {
 
 /** Convenience function: convert sorting conditions / 便捷函数：转换排序条件 */
 export function convertSortersToSQL(sorters: CrudSorting | undefined, table: PgTable): SQL<unknown>[] {
-  if (!sorters)
-    return [];
+  if (!sorters) return [];
   return new SortersConverter(table).convert(sorters);
 }
 

@@ -96,10 +96,8 @@ function configureScalarUI(app: AppOpenAPI, tierApps: TierApps, config: AppConfi
       default: i === 0,
     })),
     authentication: {
-      securitySchemes: Object.fromEntries(tierApps
-        .filter(({ tier }) => tier.token)
-        .map(({ tier }) => [`${tier.name}Bearer`, { token: tier.token! }]),
-      ),
+      securitySchemes: Object.fromEntries(tierApps.filter(({ tier }) => tier.token)
+        .map(({ tier }) => [`${tier.name}Bearer`, { token: tier.token! }])),
     },
   }));
 }
