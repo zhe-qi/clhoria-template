@@ -97,8 +97,6 @@ git clone -b drizzle-v0 https://github.com/zhe-qi/clhoria-template.git
    pnpm migrate
 
    # Seed initial data (optional, app will auto-check and initialize on startup)
-   # Bun is used as a fast TS runner for seed scripts
-   npm install -g bun
    pnpm seed
    ```
 

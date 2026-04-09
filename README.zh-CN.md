@@ -99,7 +99,6 @@ git clone -b drizzle-v0 https://github.com/zhe-qi/clhoria-template.git
    pnpm migrate
 
    # 填充初始数据(可选,应用启动时会自动检查并初始化)
-   npm install -g bun
    pnpm seed
    ```
 

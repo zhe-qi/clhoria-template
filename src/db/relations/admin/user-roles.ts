@@ -14,6 +14,9 @@ export const userRolesRelations = (r: RelationsHelper) => ({
     }),
   },
   systemRoles: {
-    users: r.many.systemUsers(),
+    users: r.many.systemUsers({
+      from: r.systemRoles.id.through(r.systemUserRoles.roleId),
+      to: r.systemUsers.id.through(r.systemUserRoles.userId),
+    }),
   },
 }) satisfies RelationsConfig;
