@@ -38,10 +38,10 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 
 This project provides two Drizzle ORM versions for you to choose from:
 
-| Branch | Drizzle Version | Description |
-|--------|----------------|-------------|
-| `main` | **v1** (1.0.0-beta) | Latest version with Relations v2, `through` many-to-many, predefined filters |
-| `drizzle-v0` | **v0** (0.x stable) | Stable version with classic Relations API, battle-tested |
+| Branch       | Drizzle Version     | Description                                                                  |
+| ------------ | ------------------- | ---------------------------------------------------------------------------- |
+| `main`       | **v1** (1.0.0-beta) | Latest version with Relations v2, `through` many-to-many, predefined filters |
+| `drizzle-v0` | **v0** (0.x stable) | Stable version with classic Relations API, battle-tested                     |
 
 ```bash
 # Use Drizzle v1 (default)
