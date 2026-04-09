@@ -45,7 +45,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NODE_ENV: development
+        NODE_ENV: production
         PORT: 9999
     container_name: hono-app
     ports:
@@ -54,7 +54,7 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
+      - NODE_ENV=${NODE_ENV:-production}
       - PORT=${PORT:-9999}
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
       - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}

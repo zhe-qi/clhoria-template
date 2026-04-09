@@ -64,7 +64,10 @@ const nodeBuildPlugin = (pluginOptions?: NodeBuildOptions): Plugin => {
               code += "import { shutdown as bootstrapShutdown } from '@/lib/infrastructure/bootstrap'\n";
 
               code += `const server = serve({ fetch: ${appName}.fetch, port: ${portCode} })\n`;
+              code += "let isShuttingDown = false\n";
               code += "const gracefulShutdownHandler = async () => {\n";
+              code += "  if (isShuttingDown) return\n";
+              code += "  isShuttingDown = true\n";
               if (shutdownTimeoutMs > 0) {
                 code += `  const forceExitTimer = setTimeout(() => {\n`;
                 code += `    console.error('[服务]: 优雅关闭超时，强制退出')\n`;

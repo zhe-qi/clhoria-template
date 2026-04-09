@@ -7,7 +7,8 @@
     "./build": "./vite-plugin-build/index.ts",
     "./hmr-notify": "./vite-plugin-hmr-notify/index.ts",
     "./resource-monitor": "./vite-plugin-resource-monitor/index.ts",
-    "./zod-hoist": "./vite-plugin-zod-hoist/index.ts"
+    "./zod-hoist": "./vite-plugin-zod-hoist/index.ts",
+    "./bull-board-static": "./vite-plugin-bull-board-static/index.ts"
   },
   "dependencies": {
     "magic-string": "^0.30.21",

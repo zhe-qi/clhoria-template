@@ -54,6 +54,7 @@
     "@antfu/eslint-config": "^8.1.1",
     "@bull-board/api": "^6.21.0",
     "@bull-board/hono": "^6.21.0",
+    "@bull-board/ui": "^6.21.0",
     "@clhoria/vite-plugin": "workspace:*",
     "@fission-ai/openspec": "^1.2.0",
     "@hono/vite-dev-server": "^0.25.1",

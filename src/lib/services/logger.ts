@@ -6,7 +6,6 @@ import { createSingleton } from "@/lib/core/singleton";
 
 function buildTransportTargets(): TransportTargetOptions[] {
   const targets: TransportTargetOptions[] = [];
-
   if (env.NODE_ENV === "development") {
     targets.push({ target: "pino-pretty", level: env.LOG_LEVEL || "info", options: {} });
   }

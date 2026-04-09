@@ -30,7 +30,7 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 - **Instant Feedback Development**: Vite-powered hot-reload dev environment, millisecond-level code updates for ultimate development experience
 - **Declarative DSL Architecture**: `defineConfig` drives application assembly, `defineMiddleware` declares middleware chains, entry file stays minimal
 - **AI-driven Development**: Claude Code + CLAUDE.md + MCP plugin ecosystem, AI understands project architecture, auto-generates test cases (Vitest)
-- **Spec-Driven Workflow**: Integrated [OpenSpec](https://github.com/Fission-AI/OpenSpec) for AI-native change management — propose, plan, implement, and archive changes with structured artifacts (`/opsx:propose` → `/opsx:apply` → `/opsx:archive`)
+- **Spec-Driven Workflow**: [OpenSpec](https://github.com/Fission-AI/OpenSpec) AI-native change management (`/opsx:propose` → `/opsx:apply` → `/opsx:archive`)
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
 - **Excel Processing**: High-performance Excel processing based on excelize-wasm, singleton lazy loading, powered by Go-native excelize via WASM
 
@@ -92,7 +92,14 @@ git clone -b drizzle-v0 https://github.com/zhe-qi/clhoria-template.git
 
    # Start Redis service (optional, quickly set up Redis in local Docker environment)
    docker compose --env-file .env run -d --service-ports redis
+   ```
 
+   > **Note**: If using Docker services above, update your `.env` to use `localhost` instead of container hostnames:
+   >
+   > - `DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres"`
+   > - `REDIS_URL="redis://localhost:6379/0"`
+
+   ```bash
    # Execute database migration (for rapid dev iteration use pnpm push directly, reserve generate and migrate for important milestones)
    pnpm migrate
 
@@ -100,12 +107,14 @@ git clone -b drizzle-v0 https://github.com/zhe-qi/clhoria-template.git
    pnpm seed
    ```
 
-   **For production deployment**, verify migrations first:
+#### Production Deployment
 
-   ```bash
-   pnpm generate  # Generate migration files
-   pnpm migrate   # Execute migrations
-   ```
+For production deployment, use migration files instead of `pnpm push`:
+
+```bash
+pnpm generate  # Generate migration files
+pnpm migrate   # Execute migrations
+```
 
 5. **Start development server**
    ```bash
@@ -404,6 +413,79 @@ docker build -t clhoria-template .
 
 # Run container
 docker run -p 9999:9999 --env-file .env clhoria-template
+```
+
+### Standalone Deployment (pm2 / Bare Metal)
+
+Bundle all JS dependencies into a single file, copy native binaries to `dist/native/`, and deploy without `node_modules`.
+
+```ts
+// vite.config.ts
+buildPluginNodejs({
+  bundleDeps: true, // Bundle all JS deps into single file
+  nativeDeps: ["@node-rs/argon2", "excelize-wasm"], // Extract .node/.wasm binaries to dist/native/
+  targetPlatform: "linux-x64", // Cross-compile: install linux binaries on macOS
+});
+```
+
+| Option           | Description                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `bundleDeps`     | `true` bundles all JS into `dist/index.js`; `false` (default) keeps `node_modules` external for Docker  |
+| `nativeDeps`     | npm packages with `.node`/`.wasm` binaries — JS is bundled, binaries extracted to `dist/native/`        |
+| `targetPlatform` | Cross-compilation target: `linux-x64` \| `linux-arm64` \| `darwin-arm64` \| `darwin-x64` \| `win32-x64` |
+
+Output structure:
+
+```
+dist/
+  index.js                        # Single-file bundle (all JS deps included)
+  native/
+    argon2.linux-x64-gnu.node     # Platform-specific native addon
+    argon2.linux-x64-musl.node    # Alpine Linux variant
+    excelize.wasm.gz              # WASM binary
+```
+
+```bash
+# Deploy: just copy dist/ and .env
+scp -r dist/ .env user@server:/app/
+ssh user@server "cd /app && pm2 start dist/index.js"
+```
+
+### Native Assets (Custom Native Files)
+
+`nativeAssets` copies your own `.wasm`/`.node` binaries to `dist/native/`. **Independent of `bundleDeps`** — works in both Docker and standalone modes.
+
+```ts
+// vite.config.ts — nativeAssets only (works in Docker mode too)
+buildPluginNodejs({
+  nativeAssets: ["src/workers/xxxxxx.wasm"],
+});
+
+// Combined with bundleDeps
+buildPluginNodejs({
+  bundleDeps: true,
+  nativeDeps: ["@node-rs/argon2"],
+  nativeAssets: ["src/workers/xxxxxx.wasm"],
+});
+```
+
+Runtime loading example (prefer `native/` build output, fallback to source path):
+
+```typescript
+import fs from "node:fs";
+import path from "node:path";
+
+function getWasmPath(): string {
+  // Prefer dist/native/ (nativeAssets build output)
+  const nativePath = path.resolve(import.meta.dirname, "native", "xxxxxx.wasm");
+  if (fs.existsSync(nativePath)) return nativePath;
+
+  // Fallback to source path (development)
+  const srcPath = path.join(process.cwd(), "src/workers/xxxxxx.wasm");
+  if (fs.existsSync(srcPath)) return srcPath;
+
+  throw new Error("xxxxxx.wasm not found");
+}
 ```
 
 ## Deployment Features

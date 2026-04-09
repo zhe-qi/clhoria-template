@@ -65,7 +65,7 @@ COPY --from=deps --chown=hono:nodejs /app/node_modules ./node_modules
 COPY --chown=hono:nodejs package.json pnpm-lock.yaml ./
 
 # Copy build artifacts from builder stage / 从构建阶段复制构建产物
-COPY --from=builder --chown=hono:nodejs /app/dist/index.js ./index.js
+COPY --from=builder --chown=hono:nodejs /app/dist ./dist
 
 # Set default port / 设置默认端口
 ARG PORT=9999
@@ -73,4 +73,4 @@ ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # Production stage entrypoint / 生产阶段入口点
-CMD ["dotenvx", "run", "--", "node", "index.js"]
+CMD ["dotenvx", "run", "--", "node", "dist/index.js"]
