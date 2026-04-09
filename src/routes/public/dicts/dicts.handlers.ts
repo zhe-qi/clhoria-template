@@ -1,10 +1,7 @@
 import type { DictRouteHandlerType } from "./dicts.types";
 import type { DictItem } from "@/db/schema/admin/system/dicts";
 
-import { and, eq } from "drizzle-orm";
-
 import db from "@/db";
-import { systemDicts } from "@/db/schema";
 import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { Status } from "@/lib/enums";
 import logger from "@/lib/services/logger";
@@ -38,10 +35,7 @@ export const getByCode: DictRouteHandlerType<"getByCode"> = async (c) => {
 
   // Query dict (only enabled ones) / 查询字典（只查询启用状态的字典）
   const dict = await db.query.systemDicts.findFirst({
-    where: and(
-      eq(systemDicts.code, code),
-      eq(systemDicts.status, Status.ENABLED),
-    ),
+    where: { code, status: Status.ENABLED },
     columns: {
       code: true,
       name: true,

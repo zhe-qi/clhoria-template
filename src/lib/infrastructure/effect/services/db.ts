@@ -1,12 +1,10 @@
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-
-import type * as schema from "@/db/schema";
+import type db from "@/db";
 
 import { Context, Layer } from "effect";
-import db from "@/db";
+import dbInstance from "@/db";
 
-type DrizzleDb = PostgresJsDatabase<typeof schema>;
+type DrizzleDb = typeof db;
 
 export class DbService extends Context.Tag("DbService")<DbService, DrizzleDb>() {}
 
-export const DbServiceLive = Layer.succeed(DbService, db);
+export const DbServiceLive = Layer.succeed(DbService, dbInstance);

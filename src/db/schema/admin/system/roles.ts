@@ -1,12 +1,11 @@
-import { relations } from "drizzle-orm";
 import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { Status } from "@/lib/enums";
 
 import { statusEnum } from "../../_shard/enums";
-import { systemUserRoles } from "./user-roles";
 
 export const systemRoles = pgTable("system_roles", {
   ...baseColumns,
@@ -15,10 +14,6 @@ export const systemRoles = pgTable("system_roles", {
   description: text(),
   status: statusEnum().default(Status.ENABLED).notNull(),
 });
-
-export const systemRolesRelations = relations(systemRoles, ({ many }) => ({
-  systemUserRoles: many(systemUserRoles),
-}));
 
 export const selectSystemRolesSchema = createSelectSchema(systemRoles, {
   id: schema => schema.meta({ description: "角色ID" }),

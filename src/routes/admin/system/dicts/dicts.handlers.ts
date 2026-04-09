@@ -63,7 +63,7 @@ export const get: SystemDictRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const dict = await db.query.systemDicts.findFirst({
-    where: eq(systemDicts.id, id),
+    where: { id },
   });
 
   if (!dict) {

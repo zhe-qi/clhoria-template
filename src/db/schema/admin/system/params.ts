@@ -1,5 +1,6 @@
 import { index, pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { paramValueTypeEnum, statusEnum } from "@/db/schema/_shard/enums";

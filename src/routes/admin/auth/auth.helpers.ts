@@ -3,13 +3,9 @@ import crypto from "node:crypto";
 
 import { verify } from "@node-rs/argon2";
 import { addDays, addMinutes, differenceInSeconds, getUnixTime } from "date-fns";
-import { eq } from "drizzle-orm";
-
 import { sign } from "hono/jwt";
 
 import db from "@/db";
-
-import { systemUserRoles, systemUsers } from "@/db/schema";
 import env from "@/env";
 
 import { ACCESS_TOKEN_EXPIRES_MINUTES, REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
@@ -173,13 +169,8 @@ export async function validateCaptcha(captchaToken: string): Promise<string | nu
  */
 export async function validateLogin(username: string, password: string): Promise<ValidateLoginResult> {
   const user = await db.query.systemUsers.findFirst({
-    where: eq(systemUsers.username, username),
-    columns: {
-      id: true,
-      username: true,
-      password: true,
-      status: true,
-    },
+    where: { username },
+    columns: toColumns(["id", "username", "password", "status"]),
   });
 
   if (!user) {
@@ -195,15 +186,17 @@ export async function validateLogin(username: string, password: string): Promise
     return { success: false, error: "用户名或密码错误", status: "unauthorized" };
   }
 
-  const userRoles = await db.query.systemUserRoles.findMany({
-    where: eq(systemUserRoles.userId, user.id),
+  const userWithRoles = await db.query.systemUsers.findFirst({
+    where: { id: user.id },
+    columns: { id: true },
+    with: { enabledRoles: { columns: { id: true } } },
   });
 
   return {
     success: true,
     user: {
       id: user.id,
-      roles: userRoles.map(({ roleId }) => roleId),
+      roles: userWithRoles?.enabledRoles.map(({ id }) => id) ?? [],
     },
   };
 }
@@ -214,23 +207,16 @@ export async function validateLogin(username: string, password: string): Promise
  */
 export async function getIdentityById(userId: string) {
   const user = await db.query.systemUsers.findFirst({
-    where: eq(systemUsers.id, userId),
+    where: { id: userId },
     columns: toColumns(["id", "username", "avatar", "nickName"]),
-    with: {
-      systemUserRoles: {
-        columns: {
-          roleId: true,
-        },
-      },
-    },
+    with: { enabledRoles: { columns: { id: true } } },
   });
 
   if (!user) return null;
 
-  const { systemUserRoles, ...userWithoutRoles } = user;
-  const roles = systemUserRoles.map(({ roleId }) => roleId);
+  const { enabledRoles, ...userWithoutRoles } = user;
 
-  return { ...userWithoutRoles, roles };
+  return { ...userWithoutRoles, roles: enabledRoles.map(({ id }) => id) };
 }
 
 /**

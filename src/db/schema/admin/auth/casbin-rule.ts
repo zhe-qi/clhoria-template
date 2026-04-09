@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import { index, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-zod";
+
+import { createSelectSchema } from "drizzle-orm/zod";
 
 export const casbinRule = pgTable("casbin_rule", {
   /** Policy type: p (permission policy) / g (role inheritance) / 策略类型：p（权限策略）/g（角色继承） */
