@@ -1,12 +1,7 @@
-import type { ExtractTablesFromSchema, RelationsBuilder } from "drizzle-orm";
-
-import type * as schema from "@/db/schema";
-
+import type { RelationsConfig, RelationsHelper } from "../types";
 import { Status } from "@/lib/enums";
 
-type Schema = ExtractTablesFromSchema<typeof schema>;
-
-export const userRolesRelations = (r: RelationsBuilder<Schema>) => ({
+export const userRolesRelations = (r: RelationsHelper) => ({
   systemUsers: {
     roles: r.many.systemRoles({
       from: r.systemUsers.id.through(r.systemUserRoles.userId),
@@ -21,4 +16,4 @@ export const userRolesRelations = (r: RelationsBuilder<Schema>) => ({
   systemRoles: {
     users: r.many.systemUsers(),
   },
-});
+}) satisfies RelationsConfig;
