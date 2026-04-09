@@ -1,9 +1,6 @@
 import type { ParamRouteHandlerType } from "./params.types";
 
-import { and, eq } from "drizzle-orm";
-
 import db from "@/db";
-import { systemParams } from "@/db/schema";
 import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { Status } from "@/lib/enums";
 import logger from "@/lib/services/logger";
@@ -37,10 +34,7 @@ export const getByKey: ParamRouteHandlerType<"getByKey"> = async (c) => {
 
   // Query param (only enabled ones) / 查询参数（只查询启用状态的参数）
   const param = await db.query.systemParams.findFirst({
-    where: and(
-      eq(systemParams.key, key),
-      eq(systemParams.status, Status.ENABLED),
-    ),
+    where: { key, status: Status.ENABLED },
     columns: {
       key: true,
       value: true,

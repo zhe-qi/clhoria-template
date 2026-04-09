@@ -69,11 +69,11 @@ describe("auth routes", () => {
   afterAll(async () => {
     // Clean up refresh tokens in Redis / 清理 Redis 中的 refresh token
     const adminUser = await db.query.systemUsers.findFirst({
-      where: eq(systemUsers.username, "admin"),
+      where: { username: "admin" },
       columns: { id: true },
     });
     const regularUser = await db.query.systemUsers.findFirst({
-      where: eq(systemUsers.username, "user"),
+      where: { username: "user" },
       columns: { id: true },
     });
     if (adminUser) await cleanupRefreshTokens(adminUser.id);

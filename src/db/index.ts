@@ -4,7 +4,7 @@ import postgres from "postgres";
 import env from "@/env";
 
 import { createLazySingleton } from "@/lib/core/singleton";
-import * as schema from "./schema";
+import { relations } from "./relations";
 
 export const getQueryClient = createLazySingleton(
   "postgres",
@@ -26,7 +26,7 @@ export const getQueryClient = createLazySingleton(
 
 const db = drizzle({
   client: getQueryClient(),
-  schema,
+  relations,
   casing: "snake_case", // 自动在数据库使用 snake_case 命名风格
   logger: false, // 或者 env.NODE_ENV !== "production"
 });

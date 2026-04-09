@@ -44,12 +44,10 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const user = await db.query.systemUsers.findFirst({
-    where: eq(systemUsers.id, id),
+    where: { id },
     with: {
-      systemUserRoles: {
-        with: {
-          role: true,
-        },
+      roles: {
+        columns: { id: true, name: true },
       },
     },
   });
@@ -58,8 +56,8 @@ export const get: SystemUsersRouteHandlerType<"get"> = async (c) => {
     return c.json(Resp.fail(HttpStatusPhrases.NOT_FOUND), HttpStatusCodes.NOT_FOUND);
   }
 
-  const roles = user.systemUserRoles.map(({ role: { id, name } }) => ({ id, name }));
-  const userWithoutPassword = omit(user, ["password", "systemUserRoles"]);
+  const { roles } = user;
+  const userWithoutPassword = omit(user, ["password", "roles"]);
 
   return c.json(Resp.ok({ ...userWithoutPassword, roles }), HttpStatusCodes.OK);
 };
@@ -133,11 +131,11 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
 
   // Get user and their current roles / 获取用户及其当前角色
   const userWithRoles = await db.query.systemUsers.findFirst({
-    where: eq(systemUsers.id, userId),
+    where: { id: userId },
     columns: { id: true },
     with: {
-      systemUserRoles: {
-        columns: { roleId: true },
+      roles: {
+        columns: { id: true },
       },
     },
   });
@@ -153,7 +151,7 @@ export const saveRoles: SystemUsersRouteHandlerType<"saveRoles"> = async (c) => 
   }
 
   // Save user roles / 保存用户角色
-  const currentRoleIds = userWithRoles.systemUserRoles.map(ur => ur.roleId);
+  const currentRoleIds = userWithRoles.roles.map(r => r.id);
   const result = await saveUserRoles(userId, roleIds, currentRoleIds);
 
   return c.json(Resp.ok(result), HttpStatusCodes.OK);

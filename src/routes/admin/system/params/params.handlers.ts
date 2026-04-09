@@ -63,7 +63,7 @@ export const get: SystemParamRouteHandlerType<"get"> = async (c) => {
   const { id } = c.req.valid("param");
 
   const param = await db.query.systemParams.findFirst({
-    where: eq(systemParams.id, id),
+    where: { id },
   });
 
   if (!param) {

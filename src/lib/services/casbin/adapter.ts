@@ -1,8 +1,7 @@
 import type { Adapter, Model, UpdatableAdapter } from "casbin";
 import type { InferInsertModel } from "drizzle-orm";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
-import type * as schema from "@/db/schema";
+import type db from "@/db";
 import type { casbinRule } from "@/db/schema";
 
 import { Helper } from "casbin";
@@ -11,7 +10,7 @@ import { and, eq, inArray, not, or, sql } from "drizzle-orm";
 import { insertCasbinRuleSchema } from "@/db/schema";
 
 type TCasbinTable = InferInsertModel<typeof casbinRule>;
-type PostgresJsDatabaseSchema = PostgresJsDatabase<typeof schema>;
+type DrizzleDb = typeof db;
 
 /** Policy filter type, supports single or multiple rule pattern matching / 策略过滤器类型，支持单条或多条规则模式匹配 */
 export type PolicyFilter = {
@@ -22,11 +21,11 @@ export type PolicyFilter = {
 };
 
 export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
-  private readonly db: PostgresJsDatabaseSchema;
+  private readonly db: DrizzleDb;
   private readonly schema: typeof casbinRule;
   private filtered = false;
 
-  constructor(db: PostgresJsDatabaseSchema, casbinRuleSchema: typeof casbinRule) {
+  constructor(db: DrizzleDb, casbinRuleSchema: typeof casbinRule) {
     this.db = db;
     this.schema = casbinRuleSchema;
   }
@@ -336,7 +335,7 @@ export class DrizzleCasbinAdapter implements Adapter, UpdatableAdapter {
 
   // ---------- factory / isFiltered ----------
   static async newAdapter(
-    db: PostgresJsDatabaseSchema,
+    db: DrizzleDb,
     casbinRuleSchema: typeof casbinRule,
   ) {
     return new DrizzleCasbinAdapter(db, casbinRuleSchema);
