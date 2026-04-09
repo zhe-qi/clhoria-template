@@ -13,7 +13,7 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 
 ## Features
 
-- **Modern Tech Stack**: Hono + TypeScript + Vite + Drizzle ORM + PostgreSQL
+- **Modern Tech Stack**: Hono + TypeScript + Vite + Drizzle ORM (v1) + PostgreSQL
 - **Progressive Layering**: Functional development standards, multi-tier routing structure, optional DDD for complex business logic
 - **Automated Documentation**: OpenAPI 3.1 spec + Scalar UI, code as documentation with online debugging and type generation
 - **Multi-layer Auth**: Dual JWT keys (Admin/Client isolation) + Casbin RBAC + KeyMatch3 RESTful path matching, no backend permission identifier storage needed
@@ -33,6 +33,25 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 - **Spec-Driven Workflow**: Integrated [OpenSpec](https://github.com/Fission-AI/OpenSpec) for AI-native change management — propose, plan, implement, and archive changes with structured artifacts (`/opsx:propose` → `/opsx:apply` → `/opsx:archive`)
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
 - **Excel Processing**: High-performance Excel processing based on excelize-wasm, singleton lazy loading, powered by Go-native excelize via WASM
+
+## Drizzle ORM Version
+
+This project provides two Drizzle ORM versions for you to choose from:
+
+| Branch | Drizzle Version | Description |
+|--------|----------------|-------------|
+| `main` | **v1** (1.0.0-beta) | Latest version with Relations v2, `through` many-to-many, predefined filters |
+| `drizzle-v0` | **v0** (0.x stable) | Stable version with classic Relations API, battle-tested |
+
+```bash
+# Use Drizzle v1 (default)
+git clone https://github.com/zhe-qi/clhoria-template.git
+
+# Use Drizzle v0 (stable)
+git clone -b drizzle-v0 https://github.com/zhe-qi/clhoria-template.git
+```
+
+> **Migration Note**: Drizzle v1 introduces breaking changes in the Relations API. See the [Drizzle v1 migration guide](https://orm.drizzle.team/docs/migrations) for details.
 
 ## Quick Start
 
