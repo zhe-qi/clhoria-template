@@ -234,28 +234,37 @@ status: myStatusEnum().default(MyStatus.ACTIVE).notNull()
 
 ## Relations 定义
 
+> **重要**：本项目使用 Drizzle v1 (Relations Query v2) 语法。详见 `/drizzle-v1` skill。
+
 ### 一对多关系
 
 ```typescript
-import { relations } from "drizzle-orm";
+// src/db/relations/{tier}/{feature}.ts
+import type { ExtractTablesFromSchema, RelationsBuilder } from "drizzle-orm";
+import type * as schema from "@/db/schema";
 
-// 父表
-export const categoriesRelations = relations(categories, ({ many }) => ({
-  products: many(products),
-}));
+type Schema = ExtractTablesFromSchema<typeof schema>;
 
-// 子表
-export const productsRelations = relations(products, ({ one }) => ({
-  category: one(categories, {
-    fields: [products.categoryId],
-    references: [categories.id],
-  }),
-}));
+export const categoryRelations = (r: RelationsBuilder<Schema>) => ({
+  categories: {
+    products: r.many.products({
+      from: r.categories.id,
+      to: r.products.categoryId,
+    }),
+  },
+  products: {
+    category: r.one.categories({
+      from: r.products.categoryId,
+      to: r.categories.id,
+    }),
+  },
+});
 ```
 
-### 多对多关系（关联表）
+### 多对多关系（关联表 + through）
 
 ```typescript
+// Schema: 关联表定义不变
 export const userRoles = pgTable("user_roles", {
   userId: uuid().notNull().references(() => users.id, { onDelete: "cascade" }),
   roleId: varchar({ length: 64 }).notNull().references(() => roles.id, { onDelete: "cascade" }),
@@ -264,11 +273,18 @@ export const userRoles = pgTable("user_roles", {
   index("user_roles_user_id_idx").on(table.userId),
 ]);
 
-// 关联表的 relations
-export const userRolesRelations = relations(userRoles, ({ one }) => ({
-  user: one(users, { fields: [userRoles.userId], references: [users.id] }),
-  role: one(roles, { fields: [userRoles.roleId], references: [roles.id] }),
-}));
+// Relations: 使用 through 直接定义多对多
+export const userRolesRelations = (r: RelationsBuilder<Schema>) => ({
+  users: {
+    roles: r.many.roles({
+      from: r.users.id.through(r.userRoles.userId),
+      to: r.roles.id.through(r.userRoles.roleId),
+    }),
+  },
+  roles: {
+    users: r.many.users(),
+  },
+});
 ```
 
 ## JSONB 使用规范

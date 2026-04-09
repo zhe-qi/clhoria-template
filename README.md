@@ -30,6 +30,7 @@ Production-ready Hono backend template with full-stack type safety, RBAC, and Op
 - **Instant Feedback Development**: Vite-powered hot-reload dev environment, millisecond-level code updates for ultimate development experience
 - **Declarative DSL Architecture**: `defineConfig` drives application assembly, `defineMiddleware` declares middleware chains, entry file stays minimal
 - **AI-driven Development**: Claude Code + CLAUDE.md + MCP plugin ecosystem, AI understands project architecture, auto-generates test cases (Vitest)
+- **Spec-Driven Workflow**: Integrated [OpenSpec](https://github.com/Fission-AI/OpenSpec) for AI-native change management — propose, plan, implement, and archive changes with structured artifacts (`/opsx:propose` → `/opsx:apply` → `/opsx:archive`)
 - **Monitoring System**: Integrated Sentry error tracking, supports self-hosted or cloud-native solutions (cloud services recommended for small teams, maintenance-free)
 - **Excel Processing**: High-performance Excel processing based on excelize-wasm, singleton lazy loading, powered by Go-native excelize via WASM
 
@@ -123,6 +124,19 @@ If you prefer not to use ts-go, follow these steps to revert:
 This project adopts the **Spec-Driven Development (SDD)** methodology. SDD inverts the traditional development hierarchy—specifications become the primary artifact, and code becomes an implementation of the spec. Through AI capabilities, precise specifications can directly generate working code while structured processes prevent chaos.
 
 > 📖 Further reading: [Spec-Driven Development](https://github.com/github/spec-kit/blob/main/spec-driven.md)
+
+### OpenSpec Change Workflow
+
+This project integrates [OpenSpec](https://github.com/Fission-AI/OpenSpec) for structured, AI-native change management. Each feature or fix gets its own artifact folder with proposal, specs, design, and tasks.
+
+```text
+/opsx:propose "add-user-export"    # Create change + generate all planning artifacts
+/opsx:apply                        # Implement tasks from the change
+/opsx:archive                      # Archive completed change
+/opsx:explore                      # Think through ideas before committing to a change
+```
+
+Generated artifacts live in `openspec/changes/<name>/` (gitignored). Slash commands are available in both Claude Code and GitHub Copilot.
 
 ### Claude Code Development Workflow
 

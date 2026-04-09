@@ -55,6 +55,7 @@
     "@bull-board/api": "^6.21.0",
     "@bull-board/hono": "^6.21.0",
     "@clhoria/vite-plugin": "workspace:*",
+    "@fission-ai/openspec": "^1.2.0",
     "@hono/vite-dev-server": "^0.25.1",
     "@types/node": "^25.5.2",
     "@typescript/native-preview": "7.0.0-dev.20260408.1",

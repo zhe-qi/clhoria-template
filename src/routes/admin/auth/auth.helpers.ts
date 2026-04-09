@@ -189,14 +189,14 @@ export async function validateLogin(username: string, password: string): Promise
   const userWithRoles = await db.query.systemUsers.findFirst({
     where: { id: user.id },
     columns: { id: true },
-    with: { roles: { columns: { id: true } } },
+    with: { enabledRoles: { columns: { id: true } } },
   });
 
   return {
     success: true,
     user: {
       id: user.id,
-      roles: userWithRoles?.roles.map(({ id }) => id) ?? [],
+      roles: userWithRoles?.enabledRoles.map(({ id }) => id) ?? [],
     },
   };
 }
@@ -209,20 +209,14 @@ export async function getIdentityById(userId: string) {
   const user = await db.query.systemUsers.findFirst({
     where: { id: userId },
     columns: toColumns(["id", "username", "avatar", "nickName"]),
-    with: {
-      roles: {
-        columns: {
-          id: true,
-        },
-      },
-    },
+    with: { enabledRoles: { columns: { id: true } } },
   });
 
   if (!user) return null;
 
-  const { roles, ...userWithoutRoles } = user;
+  const { enabledRoles, ...userWithoutRoles } = user;
 
-  return { ...userWithoutRoles, roles: roles.map(({ id }) => id) };
+  return { ...userWithoutRoles, roles: enabledRoles.map(({ id }) => id) };
 }
 
 /**
