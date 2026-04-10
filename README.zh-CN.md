@@ -97,6 +97,7 @@ git clone -b drizzle-v0 https://github.com/zhe-qi/clhoria-template.git
    ```
 
    > **注意**：如果使用上述 Docker 服务，需要将 `.env` 中的容器主机名改为 `localhost`：
+   >
    > - `DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres"`
    > - `REDIS_URL="redis://localhost:6379/0"`
 

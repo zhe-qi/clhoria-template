@@ -34,6 +34,7 @@
     "./vitest.config.ts",
     "./tests/**/*",
     "./migrations/**/*.ts",
+    "./scripts/**/*.ts",
     "./drizzle.config.ts"
   ],
   "exclude": ["node_modules", "dist"]
