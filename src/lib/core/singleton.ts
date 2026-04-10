@@ -173,7 +173,7 @@ export async function destroySingleton(key: string): Promise<void> {
 export async function destroyAllSingletons(): Promise<void> {
   const registry = getRegistry();
 
-  // 逆序销毁：后创建的先销毁，确保依赖关系正确（如 pg-boss → postgres）
+  // 逆序销毁：后创建的先销毁，确保依赖关系正确（如 BullMQ → Redis）
   const keys = [...registry.keys()].toReversed();
   for (const key of keys) {
     await destroySingleton(key).catch((error) => {

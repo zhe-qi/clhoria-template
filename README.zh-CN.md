@@ -1,40 +1,85 @@
-# Clhoria 基于 Hono 的快速开发模板
+# Clhoria — 驾驭工程后端模板
 
 [English](./README.md) | 简体中文
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.9+-blue.svg)
+![TypeScript](https://img.shields.io/badge/typescript-6.0+-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-可用于生产环境的现代化后端开发模板,基于 Hono 框架构建的高性能 TypeScript 应用。采用 AI 驱动开发模式,结合 Hono + OpenAPI + Zod 完整技术体系,实现真正的类型安全和开发效率提升。集成 Drizzle ORM + PostgreSQL 数据层,完整的 RBAC 权限体系,提供比传统后台管理系统更稳定、更高效的开发体验。
+生产就绪的 Hono 后端模板，同时也是一个 **AI Agent 驾驭系统 (Harness)** — 通过前馈引导 (Feedforward Guides)、反馈传感器 (Feedback Sensors) 和渐进式专精化 (Progressive Specialization)，让 AI 编程 Agent 可靠地生成符合架构规范的代码。
 
-Clhoria 将复杂的技术架构化繁为简,让每一次编码都如诗般优雅,每一个功能都如花般绽放。选择 Clhoria,就是选择与未来同行。
+> "软件工程团队的首要职责不再是写代码，而是设计环境、明确意图、构建反馈回路。" — [OpenAI](https://openai.com/index/harness-engineering/)
 
-> 模板配套的后台管理前端部分基于 Refine + Shadcn 开发:[https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
+> 模板配套的后台管理前端部分基于 Refine + Shadcn 开发：[https://github.com/zhe-qi/refine-project](https://github.com/zhe-qi/refine-project)
+
+## 驾驭工程 (Harness Engineering)
+
+> Agent = Model + Harness — [Birgitta Böckeler, Martin Fowler](https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html)
+
+AI 编程 Agent 的可靠性不仅取决于模型本身，更取决于围绕它的**驾驭系统 (Harness)**：在 Agent 行动前进行引导（**前馈引导 / Guides**），在 Agent 行动后进行观测（**反馈传感器 / Sensors**）。本模板是一个**项目级专精化层** — 连接通用 AI 能力与项目级正确性的桥梁。
+
+### 本模板作为 Harness
+
+| Harness 角色            | 组件                                                     | 作用                             |
+| ----------------------- | -------------------------------------------------------- | -------------------------------- |
+| **Guide** (前馈引导)    | `CLAUDE.md`                                              | 上下文工程：规则、约定、响应格式 |
+| **Guide** (前馈引导)    | Skills (`/crud`, `/db-schema`, `/bullmq`, `/drizzle-v1`) | 结构化模板，预引导代码生成       |
+| **Guide** (前馈引导)    | OpenSpec (`/opsx:propose` → `/opsx:apply`)               | 规划层：规范成为首要产物         |
+| **Guide** (前馈引导)    | Schema 流水线 (Drizzle → Zod → OpenAPI → Types)          | 架构约束，收窄解空间             |
+| **Guide** (前馈引导)    | VSCode Snippets                                          | IDE 级前馈辅助                   |
+| **Sensor** (反馈传感器) | TypeScript + tsgo                                        | 编译时类型检查，捕获结构性错误   |
+| **Sensor** (反馈传感器) | ESLint + nano-staged                                     | 每次提交时强制风格和约定校验     |
+| **Sensor** (反馈传感器) | Vitest                                                   | 行为验证：代码是否符合预期       |
+| **Sensor** (反馈传感器) | Casbin RBAC + 分层路由                                   | 权限护栏：架构级边界强制         |
+
+### 渐进式专精化 > 泛化
+
+通用 AI + 空白项目 = 高方差输出。专精化模板 + Harness = **可预测、符合架构规范的输出**。
+
+- **更深的项目理解** — Agent 在既定模式内推理，而非从零开始
+- **更高的代码质量** — 更窄的解空间 = 更少幻觉，更正确的代码
+- **更一致的模式** — 每个模块遵循相同结构，每个 Schema 遵循相同分层
+- **更好的可测性** — 约定使得模板化的全面测试生成成为可能
+- **更可靠的输出** — 前馈引导预防常见错误；反馈传感器捕获剩余问题
+
+越投入 Harness 的专精化（添加 Skills、完善 CLAUDE.md、扩展测试），AI Agent 的输出越可靠。这适用于任何 AI 编程 Agent — 不局限于 Claude Code。
 
 ## 功能特性
 
-- **现代化技术栈**: Hono + TypeScript + Vite + Drizzle ORM (v1) + PostgreSQL
-- **渐进式分层**: 函数式开发规范、多层级路由结构、复杂业务可选DDD
-- **自动化文档**: OpenAPI 3.1 规范 + Scalar UI,代码即文档,支持在线调试和类型生成
-- **多层认证授权**: JWT 双密钥(Admin/Client 隔离)+ Casbin RBAC + KeyMatch3 RESTful,无需存储权限标识
-- **声明式分页器**: 基于 Refine 规范的安全声明式查询,拓展 refine 查询支持仅后端联表查询
-- **完整权限体系**: 用户管理 + 角色管理 + Casbin 权限策略 + Refine Resource 编译时菜单路由,零运行时开销
-- **业务和系统字典**: 业务字典支持运行时动态配置(JSONB + Redis缓存),系统字典使用Pg枚举编译时类型检查
-- **日志中间件**: 收集日志,支持多种存储方案(阿里云 SLS、PostgreSQL TimescaleDB、Loki 等)
+### 前馈引导 (Feedforward Guides) — 行动前引导
+
+- **Schema 驱动流水线**: Drizzle ORM (v1) → Zod v4 → OpenAPI 3.1 → TypeScript 类型，从数据库到 API 文档的单一数据源
+- **结构化 Skills**: `/crud`, `/db-schema`, `/bullmq`, `/drizzle-v1` — 预构建模板引导 AI Agent 进行标准化代码生成
+- **OpenSpec 工作流**: [OpenSpec](https://github.com/Fission-AI/OpenSpec) AI 原生变更管理（`/opsx:propose` → `/opsx:apply` → `/opsx:archive`），将规范转化为首要开发产物
+- **CLAUDE.md 上下文工程**: 完整的项目规则、约定、响应格式和工作流编排，实现 AI Agent 对齐
+- **声明式 DSL 架构**: `defineConfig` 配置驱动应用组装，`defineMiddleware` 声明中间件链，入口文件简洁
+- **VSCode 代码片段**: IDE 级模板，快速 CRUD 脚手架
+
+### 反馈传感器 (Feedback Sensors) — 行动后验证
+
+- **全链路类型安全**: Hono + Zod + TypeScript + tsgo，编译时错误检测覆盖整个请求-响应管线
+- **Vitest 测试基础设施**: 单元测试和集成测试，与路由模块同置，AI 生成且 AI 可验证
+- **ESLint + Pre-commit Hooks**: nano-staged 在每次提交时强制 lint 和类型检查
+- **多层认证传感器**: JWT 双密钥（Admin/Client 隔离）+ Casbin RBAC + KeyMatch3 RESTful 路径匹配 — 架构级权限边界强制
+
+### 生产基础设施
+
+- **现代化技术栈**: Hono + Node.js 25 + TypeScript 6.0+ + Vite + PostgreSQL
+- **渐进式分层**: 函数式开发规范、多层级路由结构、复杂业务可选 DDD
+- **自动化文档**: OpenAPI 3.1 规范 + Scalar UI，代码即文档，支持在线调试和类型生成
+- **声明式分页器**: 基于 Refine 规范的安全声明式查询，拓展 Refine 查询支持仅后端联表查询
+- **完整权限体系**: 用户管理 + 角色管理 + Casbin 权限策略 + Refine Resource 编译时菜单路由，零运行时开销
+- **业务和系统字典**: 业务字典支持运行时动态配置（JSONB + Redis 缓存），系统字典使用 Pg 枚举编译时类型检查
+- **日志中间件**: 收集日志，支持多种存储方案（阿里云 SLS、PostgreSQL TimescaleDB、Loki 等）
 - **高性能缓存**: Redis 缓存 + 多层限流策略 + 权限缓存 + 会话管理 + 分布式锁
 - **任务队列和定时任务**: 基于 BullMQ + Redis 的后台任务队列管理和定时任务调度（分布式安全，支持定时任务，Bull Board UI）
 - **函数式基础设施**: 基于 Effect-TS 构建基础设施层，类型安全的依赖注入、可组合的错误处理、结构化并发
-- **对象存储**: 集成 S3 兼容对象存储(支持 Cloudflare R2、阿里云 OSS、AWS S3 等)
-- **智能验证码**: 集成 Cap.js,基于 SHA-256 工作量证明的轻量级现代验证码,隐私友好无追踪
-- **类型安全体系**: Hono + Zod + TypeScript 全链路类型推导,编译时发现问题
-- **即时反馈开发**: 基于 Vite 的热重载开发环境,代码变更毫秒级生效,开发体验极致流畅
-- **声明式 DSL 架构**: `defineConfig` 配置驱动应用组装,`defineMiddleware` 声明中间件链,入口文件简洁
-- **AI 驱动开发**: Claude Code + CLAUDE.md + MCP 插件生态,AI 理解项目架构,自动生成测试用例(Vitest)
-- **规范驱动工作流**: [OpenSpec](https://github.com/Fission-AI/OpenSpec) AI 原生变更管理（`/opsx:propose` → `/opsx:apply` → `/opsx:archive`）
-- **监控系统**: 集成 Sentry 错误追踪,支持自建或云原生方案(小团队推荐云服务,免运维)
+- **对象存储**: 集成 S3 兼容对象存储（支持 Cloudflare R2、阿里云 OSS、AWS S3 等）
+- **智能验证码**: 集成 Cap.js，基于 SHA-256 工作量证明的轻量级现代验证码，隐私友好无追踪
+- **监控系统**: 集成 Sentry 错误追踪，支持自建或云原生方案（小团队推荐云服务，免运维）
 - **Excel 处理**: 基于 excelize-wasm 的高性能 Excel 处理，单例延迟加载，golang 同款
+- **即时反馈开发**: 基于 Vite 的热重载开发环境，代码变更毫秒级生效，开发体验极致流畅
 
 ## Drizzle ORM 版本
 
@@ -125,7 +170,7 @@ pnpm migrate   # 执行迁移
 
 访问 <http://localhost:9999> 查看 API 文档。
 
-## TypeScript 5.9+ 和 ts-go 支持
+## TypeScript 6.0+ 和 ts-go 支持
 
 本项目支持使用实验性的 ts-go 来提升 TypeScript 的类型检查和语言服务性能。在当前项目规模下，ts-go 的性能提升非常明显，且语言服务相对稳定，推荐使用。
 
@@ -143,15 +188,67 @@ pnpm migrate   # 执行迁移
 
 如果不希望使用 ts-go，可以按以下步骤回退：
 
-1. 移除 `.vscode/settings.json` 里的 `"typescript.experimental.useTsgo": true`
+1. 移除 `.vscode/settings.json` 里的 `"js/ts.experimental.useTsgo": true`
 2. 执行 `pnpm remove @typescript/native-preview`
-3. 修改 `package.json` 中的 `typecheck` 命令，将 `npx tsgo` 改为 `tsc`
+3. 修改 `package.json` 中的 `typecheck` 命令，将 `pnpm exec tsgo --noEmit` 改为 `tsc --noEmit`
 
-## 开发规范
+## 开发方法论：SDD + TDD
 
-本项目采用 **规范驱动开发（Spec-Driven Development, SDD）** 方法论。SDD 颠覆了传统的开发层级关系——让规范成为主导，代码成为规范的实现。通过 AI 能力，精确的规范可以直接生成可工作的代码，同时通过结构化流程避免混乱。
+本项目将 **规范驱动开发 (SDD)** 与**测试驱动开发 (TDD)** 结合，由 Harness 系统编排。规范成为首要产物，测试成为验证层，代码成为实现细节。
 
-> 📖 延伸阅读：[Spec-Driven Development](https://github.com/github/spec-kit/blob/main/spec-driven.md)
+> SDD 颠覆传统开发层级 — 规范先于实现定义 _what_。TDD 增加验证维度 — 测试先于实现定义 _expected behavior_。二者结合形成**双重约束**，大幅收窄 AI Agent 的解空间。
+
+### 开发循环
+
+```text
+  ┌─────────────────────────────────┐
+  │  1. SPEC (OpenSpec)             │
+  │  定义要构建什么                  │
+  │  /opsx:propose                  │
+  └───────────┬─────────────────────┘
+              ▼
+  ┌─────────────────────────────────┐
+  │  2. SCHEMA                      │
+  │  Drizzle 表 → Zod → OpenAPI    │
+  │  /db-schema skill               │
+  └───────────┬─────────────────────┘
+              ▼
+  ┌─────────────────────────────────┐
+  │  3. TEST（先写测试）             │
+  │  定义预期行为                    │
+  │  Vitest 集成测试                │
+  └───────────┬─────────────────────┘
+              ▼
+  ┌─────────────────────────────────┐
+  │  4. IMPLEMENT                   │
+  │  Routes + Handlers              │
+  │  /crud skill                    │
+  └───────────┬─────────────────────┘
+              ▼
+  ┌─────────────────────────────────┐
+  │  5. VERIFY                      │
+  │  pnpm typecheck && lint && test │
+  └───────────┬─────────────────────┘
+              │
+     通过? ───┼─── 是 ──→ 6. DOCUMENT
+              │
+              否
+              │
+              └──────────→ 回到 4
+```
+
+### 阶段详情
+
+| 阶段   | 工具 / Skill                                   | 产出                                                  | Harness 角色 |
+| ------ | ---------------------------------------------- | ----------------------------------------------------- | ------------ |
+| Spec   | `/opsx:propose`                                | `openspec/changes/<name>/`（proposal、design、tasks） | Guide        |
+| Schema | `/db-schema` skill                             | Drizzle 表 + Zod schemas + OpenAPI 类型               | Guide        |
+| Test   | 手动 / AI                                      | `__tests__/*.test.ts`                                 | Sensor       |
+| 实现   | `/crud` skill                                  | Routes、handlers、types、index                        | —            |
+| 验证   | `pnpm typecheck && pnpm lint:fix && pnpm test` | 通过 / 失败信号                                       | Sensor       |
+| 文档   | 模块文档                                       | `docs/{feature}/module.md`（文件索引、功能、要点）    | Guide (未来) |
+
+**验收标准**：所有测试通过 + 符合 CLAUDE.md 规范 + 无明显性能问题
 
 ### OpenSpec 变更工作流
 
@@ -166,19 +263,9 @@ pnpm migrate   # 执行迁移
 
 生成的制品位于 `openspec/changes/<name>/`（已 gitignore）。斜杠命令在 Claude Code 和 GitHub Copilot 中均可使用。
 
-### Claude Code 开发流程
+### 不局限于 Claude Code
 
-遵循 6 阶段标准流程：`Spec → 生成代码 → 生成测试 → 循环优化 → 模块文档`
-
-| 阶段     | 输出                                               |
-| -------- | -------------------------------------------------- |
-| Spec     | `docs/{feature}/spec.md`（需求、架构、测试策略）   |
-| 生成代码 | 完整接口代码（Schema + Handlers）+ migration       |
-| 生成测试 | `__tests__/int.test.ts`                            |
-| 循环优化 | 持续改进直到通过验收                               |
-| 模块文档 | `docs/{feature}/module.md`（文件索引、功能、要点） |
-
-**验收标准**：所有测试通过 + 符合 CLAUDE.md 规范 + 无明显性能问题
+虽然本模板与 Claude Code 深度集成（CLAUDE.md、Skills、MCP），但 SDD + TDD 方法论和 Harness 组件适用于任何 AI 编程 Agent 或自建的驾驭系统。Schema 流水线、测试基础设施和架构约束对任何开发方式都有益 — 无论是人工还是 AI 辅助。
 
 ---
 
@@ -287,23 +374,23 @@ src/infrastructure/persistence/          # 基础设施层（Adapter 实现）
 
 ## 核心架构特性
 
-### 🔄 自动路由加载
+### 自动路由加载
 
 基于 `import.meta.glob` 自动扫描 `routes/{tier}/**/*.index.ts` 并注册路由模块。新增模块只需创建目录，保存后 HMR 毫秒级生效。每个模块必须在 `{feature}.index.ts` 中 `export default` 路由实例。
 
-### 🧩 单例管理系统
+### 单例管理系统
 
 统一管理 PostgreSQL、Redis、Casbin 等长连接资源，解决 Vite HMR 模式下的连接泄漏问题，支持自动资源清理
 
-### 💉 三层依赖注入
+### 三层依赖注入
 
 本项目没有使用传统 DI 容器（如 InversifyJS），而是采用更轻量直接的三层注入策略：
 
-| 层级             | 机制                                                               | 作用域 | 典型用途                                                                                          |
-| ---------------- | ------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------- |
-| **模块单例**     | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | 进程级 | DB 连接池、Redis 客户端、Casbin Enforcer、Logger 等长生命周期资源                                 |
-| **请求上下文**   | Hono `c.set()` / `c.get()` + `AppBindings` 类型约束                | 请求级 | JWT 负载、请求 ID、tierBasePath 等请求作用域数据，中间件写入 → Handler 读取                       |
-| **Effect Layer** | `Context.Tag` + `Layer.mergeAll`                                   | 可组合 | 基础设施服务（DB、Logger、pg-boss）的类型安全组合，用于分布式锁、任务队列等需要 Effect 编排的场景 |
+| 层级             | 机制                                                               | 作用域 | 典型用途                                                                                         |
+| ---------------- | ------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------ |
+| **模块单例**     | `createSingleton` / `createAsyncSingleton` / `createLazySingleton` | 进程级 | DB 连接池、Redis 客户端、Casbin Enforcer、Logger 等长生命周期资源                                |
+| **请求上下文**   | Hono `c.set()` / `c.get()` + `AppBindings` 类型约束                | 请求级 | JWT 负载、请求 ID、tierBasePath 等请求作用域数据，中间件写入 → Handler 读取                      |
+| **Effect Layer** | `Context.Tag` + `Layer.mergeAll`                                   | 可组合 | 基础设施服务（DB、Logger、BullMQ）的类型安全组合，用于分布式锁、任务队列等需要 Effect 编排的场景 |
 
 **为什么不用 DI 容器**：后台管理系统的依赖图天然简单——长连接资源是进程级单例，请求数据通过 Hono Context 传递，两层已覆盖 90% 场景。Effect Layer 补充了需要类型安全组合的剩余 10%（如 `withLock` 分布式锁）。引入 DI 容器只会增加间接层和注册仪式，对于这种规模的项目来说过度设计。
 
@@ -322,7 +409,7 @@ src/infrastructure/persistence/          # 基础设施层（Adapter 实现）
 | **字典** | 单一数据源,编译时类型检查,4 字节 Enum 存储 | 数据库字典表,运行时查询,需要 JOIN,容易不同步 |
 | **维护** | 改一处自动同步,TypeScript 编译时报错       | 多处手动同步:数据库 → 后端 → 前端 → 文档     |
 
-### 📝 日志系统
+### 日志系统
 
 基于 pino transport 架构，支持多目标输出（开发 `pino-pretty` / 生产 stdout JSON / 可选阿里云 SLS）。三种 child logger 自动注入 `type` 字段：`logger`（系统）、`operationLogger`（CRUD 审计，type: `OPERATION`）、`loginLogger`（登录记录，type: `LOGIN`）。
 
@@ -334,7 +421,7 @@ router.use(operationLog({ moduleName: "订单管理", description: "创建订单
 
 自定义 Transport 接入：在项目根目录创建 `transports/sls-transport.mjs`，使用 `pino-abstract-transport` 构建，然后在 `logger.ts` 的 `buildTransportTargets()` 中取消注释 SLS target。操作日志 `urlPath` 与 Casbin keymatch3 规则和 Refine resource 天然对应，前端可直接用权限树映射中文标签作为日志筛选维度。
 
-### 📋 任务队列系统（BullMQ）
+### 任务队列系统（BullMQ）
 
 基于 BullMQ + Redis 构建，提供高性能任务队列管理和定时任务调度，使用 Effect-TS 函数式封装确保类型安全。
 
@@ -342,7 +429,7 @@ router.use(operationLog({ moduleName: "订单管理", description: "创建订单
 
 ```bash
 pnpm dev
-# 访问 http://localhost:3000/api/admin/queue-board
+# 访问 http://localhost:9999/api/queue-board（仅非生产环境可用）
 ```
 
 **基础用法 - 添加任务**：
@@ -491,60 +578,27 @@ function getWasmPath(): string {
 
 模板默认使用单机 Redis。如需 Redis Cluster/Sentinel，请自行替换 `src/lib/services/redis.ts` 中的初始化逻辑，或使用云厂商 Proxy 模式（阿里云 Redis、AWS ElastiCache 等）。
 
-## 开发体验对比
+## 驾驭系统：Claude Code 集成
 
-| 对比维度     | 本项目 (AI + Modern Stack)                      | 传统代码生成器                           |
-| ------------ | ----------------------------------------------- | ---------------------------------------- |
-| **开发效率** | Claude Code 智能理解需求,秒级生成符合规范的代码 | 手动配置模板麻烦,生成僵化代码,需大量修改 |
-| **接口管理** | OpenAPI + Zod 自动同步,类型安全,文档永不过期    | 手工维护接口文档,容易不同步              |
-| **代码质量** | TypeScript 全链路类型检查,编译时发现问题        | 生成代码缺乏类型约束,运行时错误频发      |
-| **维护成本** | 代码规范统一,AI 理解项目架构,维护简单           | 代码量大不够优雅,不好维护                |
+本模板将 Claude Code 视为**主要开发界面**，而非可选附加。Harness 围绕它构建。
 
-## 验证码系统对比
+### Harness 组件
 
-### 🔐 Cap.js vs svg-captcha
+| 组件                  | 路径 / 调用方式                    | 用途                                         |
+| --------------------- | ---------------------------------- | -------------------------------------------- |
+| **CLAUDE.md**         | `./CLAUDE.md`                      | 系统提示词：规则、约定、响应格式、工作流编排 |
+| **Skill: CRUD**       | `/crud`                            | CRUD 模块脚手架，类型安全的标准化模式        |
+| **Skill: DB Schema**  | `/db-schema`                       | 数据库 Schema 设计，遵循 Drizzle 约定        |
+| **Skill: BullMQ**     | `/bullmq`                          | 队列/Worker 设置，Effect-TS 集成             |
+| **Skill: Drizzle v1** | `/drizzle-v1`                      | Relations v2 查询指导                        |
+| **OpenSpec: Propose** | `/opsx:propose`                    | 创建变更及所有规划制品                       |
+| **OpenSpec: Apply**   | `/opsx:apply`                      | 按变更执行任务                               |
+| **OpenSpec: Explore** | `/opsx:explore`                    | 设计探索的思考伙伴                           |
+| **OpenSpec: Archive** | `/opsx:archive`                    | 归档已完成的变更                             |
+| **VSCode Snippets**   | `.vscode/crud.code-snippets`       | IDE 级代码生成模板                           |
+| **Pre-commit Hooks**  | `simple-git-hooks` + `nano-staged` | 每次提交自动 lint + 类型检查                 |
 
-| 对比维度     | Cap.js (本项目采用)                          | svg-captcha                    |
-| ------------ | -------------------------------------------- | ------------------------------ |
-| **安全性**   | SHA-256 工作量证明,无视觉破解面,抗自动化     | 基于图像识别,易被 OCR 工具破解 |
-| **用户体验** | 无视觉谜题,后台静默计算,支持 Widget/隐形模式 | 传统图片验证,识别扭曲文字      |
-| **隐私**     | 自托管,零追踪零遥测,完全掌控数据             | 内存存储,功能固定              |
-
-## 性能对比
-
-### Hono vs Fastify 性能分析
-
-在 Node.js 22 环境下,Fastify 依然保持性能优势,但差距已经不大:
-
-- **Fastify (Node.js)**: 142,695 req/s
-- **Hono (Node.js)**: 129,234 req/s
-
-详细基准测试:[bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
-
-### 🚀 高并发与性能优化方案
-
-**高并发解决方案**:K8s/阿里云 SLB 负载均衡 + PostgreSQL/Redis 高可用集群 + 分布式会话,实现无状态水平扩展
-
-**计算密集型优化**:
-
-| 场景             | 推荐方案       | 适用场景                       |
-| ---------------- | -------------- | ------------------------------ |
-| **多次重复调用** | napi-rs        | 图像处理、加密解密、数据压缩   |
-| **单次密集计算** | WASM           | 复杂算法、科学计算、单次重计算 |
-| **并行多任务**   | Worker Threads | 大量独立任务、并发数据处理     |
-
-## Claude Code 深度集成(可选)
-
-本项目专为 AI 驱动开发而设计,提供完整的 CLAUDE.md 配置,让 AI 深度理解项目架构。
-
-**推荐 MCP 插件**:
-
-- **[Serena](https://github.com/SerenaAI/serena-mcp)**:智能代码分析和重构建议
-- **[Context7](https://github.com/context7/mcp-plugin)**:实时技术文档查询和代码示例
-
-## VSCode 代码片段
-
-项目内置了 CRUD 开发常用的代码片段模板（`.vscode/crud.code-snippets`），在 TypeScript 文件中输入前缀后按 `Tab` 键即可快速生成代码。
+### VSCode 代码片段
 
 | 前缀            | 说明                                          |
 | --------------- | --------------------------------------------- |
@@ -553,29 +607,135 @@ function getWasmPath(): string {
 | `crud-handlers` | 完整 handlers.ts 模板（含 CRUD 五个处理函数） |
 | `crud-index`    | 完整 index.ts 模板                            |
 
+### 推荐 MCP 插件
+
+- **[Serena](https://github.com/SerenaAI/serena-mcp)**：智能代码分析和重构建议
+- **[Context7](https://github.com/context7/mcp-plugin)**：实时技术文档查询和代码示例
+
+### CLAUDE.md 作为上下文工程
+
+`CLAUDE.md` 文件是最关键的 Harness 文档。它包含：
+
+- **技术栈声明** — 让 Agent 知道有哪些工具可用
+- **架构规则** — 路由层级、自动加载模式、命名约定
+- **关键规则** — 响应格式（`Resp.ok` / `Resp.fail`）、日志格式、状态码
+- **开发工作流** — 验证变更的精确命令序列
+- **工作流编排** — 先计划后执行、子 Agent 策略、自我改进循环
+- **核心原则** — 简洁优先、不走捷径、最小影响范围
+
+CLAUDE.md 中的每条规则都是一个前馈约束，防止 AI Agent 偏离正确模式。
+
 ## 测试
 
-使用 Vitest 测试框架,支持完整的单元测试和集成测试,可以在 tests 下添加端到端测试。
+测试是 Harness 系统中的首要**反馈传感器** — 验证 AI 生成的代码是否真正符合预期行为。
+
+### 测试基础设施
+
+- **框架**: Vitest（与 Vite 集成，共享配置）
+- **位置**: 与模块同置，`routes/{tier}/{feature}/__tests__/`
+- **模式**: 使用 `hono/testing` 的 `testClient` 进行类型安全的端点测试
+
+### 测试覆盖
+
+| 模块        | 测试文件                                             | 验证内容                       |
+| ----------- | ---------------------------------------------------- | ------------------------------ |
+| 用户 CRUD   | `admin/system/users/__tests__/users.test.ts`         | 完整 CRUD 生命周期、认证、RBAC |
+| 角色 CRUD   | `admin/system/roles/__tests__/roles.test.ts`         | 角色管理、策略同步             |
+| 字典 CRUD   | `admin/system/dicts/__tests__/dicts.test.ts`         | 字典操作                       |
+| 参数 CRUD   | `admin/system/params/__tests__/params.test.ts`       | 参数管理                       |
+| 公开字典    | `public/dicts/__tests__/dicts.test.ts`               | 公开字典访问                   |
+| 认证        | `admin/auth/__tests__/auth.test.ts`                  | 认证流程                       |
+| 分页        | `core/refine-query/__tests__/pagination.test.ts`     | 分页逻辑                       |
+| 转换器      | `core/refine-query/__tests__/converters.test.ts`     | 查询参数转换                   |
+| 查询执行    | `core/refine-query/__tests__/query-executor.test.ts` | 查询执行引擎                   |
+| Schema 验证 | `core/refine-query/__tests__/schemas.test.ts`        | 查询 Schema 验证               |
+| BullMQ      | `infrastructure/__tests__/bullmq-adapter.test.ts`    | 队列类型安全、Zod 验证         |
+
+### 运行测试
 
 ```bash
-# 运行测试
-pnpm test
+pnpm test           # 运行所有测试（watch 模式）
+pnpm test -- --run  # 运行一次，不进入 watch 模式
 ```
 
+### TDD 在 Harness 中的角色
+
+在 SDD + TDD 工作流中，测试**先于实现**编写：
+
+1. AI Agent 从 Spec 生成测试用例（预期输入/输出、边界情况）
+2. 测试最初失败（红灯）
+3. AI Agent 实现 handlers 使测试通过（绿灯）
+4. 传感器（typecheck + lint + test）验证正确性
+5. 如有传感器失败，Agent 循环回去修复
+
+这形成了**闭合反馈回路**：Spec 告诉 Agent _要构建什么_，测试告诉 Agent _是否构建正确_。Agent 自我修正直到所有传感器通过。
+
+参考测试模式：`src/routes/admin/system/users/__tests__/users.test.ts`
+
+## 开发体验对比
+
+| 对比维度     | 本项目（驾驭工程）                                           | 传统代码生成器                             |
+| ------------ | ------------------------------------------------------------ | ------------------------------------------ |
+| **开发效率** | AI Agent 在专精化 Harness 内工作，秒级生成符合架构规范的代码 | 手动配置模板麻烦，生成僵化代码，需大量修改 |
+| **接口管理** | OpenAPI + Zod 自动同步，类型安全，文档永不过期               | 手工维护接口文档，容易不同步               |
+| **代码质量** | TypeScript 全链路类型检查，编译时发现问题                    | 生成代码缺乏类型约束，运行时错误频发       |
+| **维护成本** | 代码规范统一，AI 理解项目架构，维护简单                      | 代码量大不够优雅，不好维护                 |
+
+## 验证码系统对比
+
+### Cap.js vs svg-captcha
+
+| 对比维度     | Cap.js（本项目采用）                           | svg-captcha                     |
+| ------------ | ---------------------------------------------- | ------------------------------- |
+| **安全性**   | SHA-256 工作量证明，无视觉破解面，抗自动化     | 基于图像识别，易被 OCR 工具破解 |
+| **用户体验** | 无视觉谜题，后台静默计算，支持 Widget/隐形模式 | 传统图片验证，识别扭曲文字      |
+| **隐私**     | 自托管，零追踪零遥测，完全掌控数据             | 内存存储，功能固定              |
+
+## 性能对比
+
+### Hono vs Fastify 性能分析
+
+在 Node.js 22 环境下，Fastify 依然保持性能优势，但差距已经不大：
+
+- **Fastify (Node.js)**: 142,695 req/s
+- **Hono (Node.js)**: 129,234 req/s
+
+详细基准测试：[bun-http-framework-benchmark](https://github.com/SaltyAom/bun-http-framework-benchmark)
+
+### 高并发与性能优化方案
+
+**高并发解决方案**：K8s/阿里云 SLB 负载均衡 + PostgreSQL/Redis 高可用集群 + 分布式会话，实现无状态水平扩展
+
+**计算密集型优化**：
+
+| 场景             | 推荐方案       | 适用场景                       |
+| ---------------- | -------------- | ------------------------------ |
+| **多次重复调用** | napi-rs        | 图像处理、加密解密、数据压缩   |
+| **单次密集计算** | WASM           | 复杂算法、科学计算、单次重计算 |
+| **并行多任务**   | Worker Threads | 大量独立任务、并发数据处理     |
+
 ## 引用
+
+### 驾驭工程 (Harness Engineering)
+
+- [Harness engineering for coding agent users — Birgitta Böckeler (Martin Fowler)](https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html)
+- [Harness engineering: leveraging Codex in an agent-first world — OpenAI](https://openai.com/index/harness-engineering/)
+- [Spec-Driven Development — GitHub](https://github.com/github/spec-kit/blob/main/spec-driven.md)
+
+### 技术基础
 
 - [hono-open-api-starter](https://github.com/w3cj/hono-open-api-starter)
 - [stoker](https://github.com/w3cj/stoker)
 
 ## 支持
 
-如有问题或建议,请创建 [Issue](https://github.com/zhe-qi/clhoria-template/issues) 或联系维护者。
+如有问题或建议，请创建 [Issue](https://github.com/zhe-qi/clhoria-template/issues) 或联系维护者。
 
 **QQ 交流群**: 1076889416
 
 ## 贡献指南
 
-欢迎贡献!请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范,提交 PR 前确保 `pnpm test` 和 `pnpm lint` 通过。
+欢迎贡献！请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范，提交 PR 前确保 `pnpm test` 和 `pnpm lint` 通过。
 
 ## 许可证
 
