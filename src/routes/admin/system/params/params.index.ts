@@ -1,9 +1,9 @@
-import { createRouter } from "@/lib/core/create-app";
+import { createAdminRouter } from "@/lib/core/create-app";
 
 import * as handlers from "./params.handlers";
 import * as routes from "./params.routes";
 
-const systemParamRouter = createRouter()
+const systemParamRouter = createAdminRouter()
   .openapi(routes.list, handlers.list)
   .openapi(routes.create, handlers.create)
   .openapi(routes.get, handlers.get)

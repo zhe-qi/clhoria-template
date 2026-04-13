@@ -1,6 +1,6 @@
 import { Enforcer } from "casbin";
 
-import { createMiddleware } from "@/lib/core/factory";
+import { createAdminMiddleware } from "@/lib/core/factory";
 import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
 import { enforcerPromise } from "@/lib/services/casbin";
@@ -8,12 +8,12 @@ import { Resp } from "@/utils";
 import { stripPrefix } from "@/utils/tools";
 
 /**
- * Casbin permission check middleware
+ * Casbin permission check middleware (Admin only)
  * Verifies if the current user has access to the specified endpoint
- * Casbin 权限校验中间件
+ * Casbin 权限校验中间件（仅管理端）
  * 用于校验当前用户是否有访问指定接口的权限
  */
-export const authorize = createMiddleware(async (c, next) => {
+export const authorize = createAdminMiddleware(async (c, next) => {
   // Get Casbin permission enforcer / 获取 Casbin 权限管理器
   const enforcer = await enforcerPromise;
 

@@ -3,7 +3,7 @@ import type { Store } from "hono-rate-limiter";
 import type { ConnInfo } from "hono/conninfo";
 import type { RedisReply } from "rate-limit-redis";
 
-import type { AppBindings } from "@/types/lib";
+import type { BaseBindings } from "@/types/lib";
 import { rateLimiter } from "hono-rate-limiter";
 import { RedisStore } from "rate-limit-redis";
 
@@ -40,7 +40,7 @@ const ioredisStore = createSingleton(
       const [command, ...commandArgs] = args;
       return redisClient.call(command, ...commandArgs) as Promise<RedisReply>;
     },
-  }) as unknown as Store<AppBindings>,
+  }) as unknown as Store<BaseBindings>,
 );
 
 /**
@@ -83,7 +83,7 @@ function normalizeIp(ip: string) {
  * 通过 Hono ConnInfo Helper 获取 Socket IP
  * 兼容 Node.js 和 Bun 运行时
  */
-function getSocketIp(c: Context<AppBindings>) {
+function getSocketIp(c: Context<BaseBindings>) {
   const info = getConnInfo(c);
   const ip = info.remote.address;
   return ip ? normalizeIp(ip) : null;
@@ -159,7 +159,7 @@ function wrapIpv6(ip: string) {
   return ip.includes(":") ? `v6-${ip.replaceAll(":", "-")}` : ip;
 }
 
-function getClientIdentifier(c: Context<AppBindings>) {
+function getClientIdentifier(c: Context<BaseBindings>) {
   const remoteRaw = getSocketIp(c);
   const remote = remoteRaw ? validateIp(remoteRaw) : null;
 
@@ -207,7 +207,7 @@ export type RateLimitOptions = {
   /** Maximum requests / 最大请求数 */
   limit: number;
   /** Custom key generator (optional, defaults to IP) / 自定义key生成器 (可选,默认使用IP) */
-  keyGenerator?: (c: Context<AppBindings>) => string;
+  keyGenerator?: (c: Context<BaseBindings>) => string;
   /** Whether to skip counting successful requests (default false) / 是否跳过成功的请求计数 (默认false) */
   skipSuccessfulRequests?: boolean;
   /** Whether to skip counting failed requests (default false) / 是否跳过失败的请求计数 (默认false) */

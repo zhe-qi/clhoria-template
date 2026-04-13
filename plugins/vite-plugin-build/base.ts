@@ -1,4 +1,3 @@
-/* eslint-disable e18e/prefer-static-regex */
 /* eslint-disable style/max-statements-per-line */
 /* eslint-disable no-console */
 import type { Dirent } from "node:fs";

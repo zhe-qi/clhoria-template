@@ -1,7 +1,8 @@
+import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { ApiReferenceConfiguration } from "@scalar/hono-api-reference";
 import type { AppConfig, MiddlewareWithExcept, OpenAPIConfig, TierConfig, TierMiddleware } from "./define-config";
-import type { AppOpenAPI } from "@/types/lib";
 
+import type { BaseBindings } from "@/types/lib";
 import { Scalar as ScalarHonoAPIReference } from "@scalar/hono-api-reference";
 import { except } from "hono/combine";
 
@@ -10,8 +11,10 @@ import env from "@/env";
 import packageJSON from "../../../package.json" with { type: "json" };
 import createApp, { createRouter } from "./create-app";
 
+type AnyRouter = OpenAPIHono<any>;
+
 // ── Framework internal auto-scan (import.meta.glob requires relative paths) / 框架内部自动扫描（import.meta.glob 要求相对路径）──
-const allRoutes = import.meta.glob<{ default: AppOpenAPI }>(
+const allRoutes = import.meta.glob<{ default: AnyRouter }>(
   "../../routes/**/*.index.ts",
   { eager: true },
 );
@@ -31,11 +34,10 @@ function resolveTierBasePath(tier: TierConfig, config: AppConfig): string {
 }
 
 /** Route matching (three modes) / 路由匹配（三种模式） */
-function resolveTierRoutes(tier: TierConfig, _allRoutes: ParamsType<{ default: AppOpenAPI }>) {
+function resolveTierRoutes(tier: TierConfig, _allRoutes: ParamsType<{ default: AnyRouter }>) {
   if (tier.routes) return tier.routes;
   const dirName = tier.routeDir ?? tier.name;
   return Object.fromEntries(Object.entries(_allRoutes).filter(([path]) => {
-    // eslint-disable-next-line e18e/prefer-static-regex
     const match = path.match(/\/routes\/([^/]+)\//);
     return match?.[1] === dirName;
   }));
@@ -62,7 +64,7 @@ function resolveEnabled(enabled: OpenAPIConfig["enabled"]): boolean {
 }
 
 /** Configure OpenAPI doc for a single tier / 配置单个 tier 的 OpenAPI 文档 */
-function configureAppDoc(router: AppOpenAPI, tier: TierConfig, config: AppConfig, docEndpoint: string) {
+function configureAppDoc(router: AnyRouter, tier: TierConfig, config: AppConfig, docEndpoint: string) {
   const version = config.openapi?.version ?? "3.1.0";
   const docConfig = {
     openapi: version,
@@ -82,10 +84,10 @@ function configureAppDoc(router: AppOpenAPI, tier: TierConfig, config: AppConfig
   }
 }
 
-type TierApps = Array<{ tierApp: AppOpenAPI; tier: TierConfig; basePath: string }>;
+type TierApps = Array<{ tierApp: AnyRouter; tier: TierConfig; basePath: string }>;
 
 /** Configure Scalar documentation homepage / 配置 Scalar 文档主页 */
-function configureScalarUI(app: AppOpenAPI, tierApps: TierApps, config: AppConfig, docEndpoint: string) {
+function configureScalarUI(app: AnyRouter, tierApps: TierApps, config: AppConfig, docEndpoint: string) {
   const scalarConfig = config.openapi?.scalar ?? {};
   app.get("/", ScalarHonoAPIReference({
     ...scalarConfig as Partial<ApiReferenceConfiguration>,
@@ -103,7 +105,7 @@ function configureScalarUI(app: AppOpenAPI, tierApps: TierApps, config: AppConfi
 }
 
 /** Application builder / 应用构建器 */
-export async function createApplication(config: AppConfig): Promise<AppOpenAPI> {
+export async function createApplication(config: AppConfig): Promise<OpenAPIHono<BaseBindings>> {
   const app = createApp();
   const openapiEnabled = resolveEnabled(config.openapi?.enabled);
   const docEndpoint = config.openapi?.docEndpoint ?? "/doc";

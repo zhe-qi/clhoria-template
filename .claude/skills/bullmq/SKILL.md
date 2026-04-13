@@ -1,7 +1,7 @@
 ---
 name: bullmq
 description: 创建或修改 BullMQ 队列任务。当需要创建新队列、添加任务类型、注册 Worker、设置定时任务、或用户请求"添加后台任务/队列处理"时使用
-argument-hint: [queue-name/job-name]
+argument-hint: "[queue-name/job-name]"
 ---
 
 # BullMQ 队列任务开发指南

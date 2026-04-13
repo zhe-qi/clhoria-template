@@ -1,7 +1,7 @@
 ---
 name: db-schema
 description: 创建或修改数据库 Schema。当需要创建新表、修改表结构、定义字段、设置索引约束、或涉及 Drizzle ORM / drizzle-zod 操作时使用
-argument-hint: [tier/category/feature-name]
+argument-hint: "[tier/category/feature-name]"
 ---
 
 # 数据库 Schema 开发指南

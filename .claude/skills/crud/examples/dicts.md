@@ -76,7 +76,7 @@ export const insertSystemDictsSchema = createInsertSchema(systemDicts).omit({
 import type { z } from "zod";
 import type * as routes from "./dicts.routes";
 import type { systemDictResponseSchema } from "./dicts.schema";
-import type { AppRouteHandler } from "@/types/lib";
+import type { AdminRouteHandler } from "@/types/lib";
 
 export type Dict = z.infer<typeof systemDictResponseSchema>;
 
@@ -84,7 +84,7 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type SystemDictRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type SystemDictRouteHandlerType<T extends keyof RouteTypes> = AdminRouteHandler<RouteTypes[T]>;
 ```
 
 ## 3. Zod Schema

@@ -15,7 +15,6 @@ export function normalizeIp(raw: string, unknownValue = "unknown"): string {
   }
 
   // ::ffff:192.168.0.1 (IPv4-mapped IPv6)
-  // eslint-disable-next-line e18e/prefer-static-regex
   const t = s.replace(/^::ffff:/i, "");
 
   // 1.2.3.4:3000 (only truncate when matching "IPv4 + single port" pattern) / 1.2.3.4:3000（仅当符合"IPv4 + 单端口"的形态时才截断）

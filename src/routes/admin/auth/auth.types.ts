@@ -1,6 +1,6 @@
 import type * as routes from "./auth.routes";
 
-import type { AppRouteHandler } from "@/types/lib";
+import type { AdminRouteHandler } from "@/types/lib";
 
 export type UserTokenInfo = {
   id: string | number;
@@ -15,4 +15,4 @@ type RouteTypes = {
   [K in keyof typeof routes]: typeof routes[K];
 };
 
-export type AuthRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type AuthRouteHandlerType<T extends keyof RouteTypes> = AdminRouteHandler<RouteTypes[T]>;

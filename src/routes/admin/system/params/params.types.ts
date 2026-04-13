@@ -2,7 +2,7 @@ import type { z } from "zod";
 import type * as routes from "./params.routes";
 
 import type { systemParamResponseSchema } from "./params.schema";
-import type { AppRouteHandler } from "@/types/lib";
+import type { AdminRouteHandler } from "@/types/lib";
 
 /** Parameter type / 参数类型 */
 export type Param = z.infer<typeof systemParamResponseSchema>;
@@ -13,4 +13,4 @@ type RouteTypes = {
 };
 
 /** Parameter route handler type / 参数路由 Handler 类型 */
-export type SystemParamRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type SystemParamRouteHandlerType<T extends keyof RouteTypes> = AdminRouteHandler<RouteTypes[T]>;

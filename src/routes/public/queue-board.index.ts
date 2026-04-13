@@ -1,6 +1,6 @@
-import { createRouter } from "@/lib/core/create-app";
+import { createPublicRouter } from "@/lib/core/create-app";
 
-const queueBoard = createRouter();
+const queueBoard = createPublicRouter();
 
 // Bull Board UI only in non-production (devDependency)
 // Bull Board UI 仅在非生产环境加载（devDependency）

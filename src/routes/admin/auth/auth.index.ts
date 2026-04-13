@@ -1,9 +1,9 @@
-import { createRouter } from "@/lib/core/create-app";
+import { createAdminRouter } from "@/lib/core/create-app";
 
 import * as handlers from "./auth.handlers";
 import * as routes from "./auth.routes";
 
-const auth = createRouter()
+const auth = createAdminRouter()
   .openapi(routes.login, handlers.login)
   .openapi(routes.refreshToken, handlers.refreshToken)
   .openapi(routes.logout, handlers.logout)

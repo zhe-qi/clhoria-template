@@ -1,6 +1,6 @@
 import { differenceInMilliseconds, format } from "date-fns";
 
-import { createMiddleware } from "@/lib/core/factory";
+import { createAdminMiddleware } from "@/lib/core/factory";
 import { operationLogger } from "@/lib/services/logger";
 
 type OperationLogOptions = {
@@ -9,7 +9,7 @@ type OperationLogOptions = {
 };
 
 export function operationLog(options?: OperationLogOptions) {
-  return createMiddleware(async (c, next) => {
+  return createAdminMiddleware(async (c, next) => {
     const startTime = new Date();
     const method = c.req.method;
     const urlPath = new URL(c.req.url).pathname;

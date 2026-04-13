@@ -1,6 +1,6 @@
 import type * as routes from "./dicts.routes";
 
-import type { AppRouteHandler } from "@/types/lib";
+import type { PublicRouteHandler } from "@/types/lib";
 
 /** Route type mapping / 路由类型映射 */
 type RouteTypes = {
@@ -8,4 +8,4 @@ type RouteTypes = {
 };
 
 /** Dict route handler type / 字典路由 Handler 类型 */
-export type DictRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type DictRouteHandlerType<T extends keyof RouteTypes> = PublicRouteHandler<RouteTypes[T]>;

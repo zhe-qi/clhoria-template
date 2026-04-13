@@ -1,4 +1,4 @@
-import type { AppBindings } from "@/types/lib";
+import type { AdminBindings } from "@/types/lib";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { pinoLogger } from "hono-pino";
 
@@ -9,7 +9,7 @@ import { defaultHook } from "@/lib/core/stoker/openapi";
 import logger from "@/lib/services/logger";
 
 function createRouter() {
-  return new OpenAPIHono<AppBindings>({
+  return new OpenAPIHono<AdminBindings>({
     strict: false,
     defaultHook,
   });

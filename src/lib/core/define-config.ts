@@ -1,8 +1,8 @@
+import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { ApiReferenceConfiguration } from "@scalar/hono-api-reference";
-import type { Context, MiddlewareHandler } from "hono";
 
+import type { Context, MiddlewareHandler } from "hono";
 import type { Env } from "@/env";
-import type { AppOpenAPI } from "@/types/lib";
 
 /** Middleware with conditional skip / 带条件跳过的中间件 */
 export type MiddlewareWithExcept = {
@@ -31,7 +31,7 @@ export type TierConfig = {
    * 3. routes：显式传入 import.meta.glob 结果，跳过自动匹配
    */
   routeDir?: string;
-  routes?: Record<string, { default: AppOpenAPI }>;
+  routes?: Record<string, { default: OpenAPIHono<any> }>;
   /** Explicitly provide middlewares (skip _middleware.ts auto-loading) / 显式提供中间件（跳过 _middleware.ts 自动加载） */
   middlewares?: TierMiddleware[];
 };

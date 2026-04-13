@@ -7,7 +7,7 @@
 import type { z } from "zod";
 import type * as routes from "./{feature}.routes";
 import type { {feature}ResponseSchema } from "./{feature}.schema";
-import type { AppRouteHandler } from "@/types/lib";
+import type { AdminRouteHandler } from "@/types/lib";
 
 /** 实体类型 */
 export type {Feature} = z.infer<typeof {feature}ResponseSchema>;
@@ -18,7 +18,7 @@ type RouteTypes = {
 };
 
 /** 路由 Handler 类型 */
-export type {Feature}RouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type {Feature}RouteHandlerType<T extends keyof RouteTypes> = AdminRouteHandler<RouteTypes[T]>;
 ```
 
 ## 说明

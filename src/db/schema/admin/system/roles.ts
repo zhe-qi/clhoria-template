@@ -23,7 +23,6 @@ export const selectSystemRolesSchema = createSelectSchema(systemRoles, {
 });
 
 export const insertSystemRolesSchema = createInsertSchema(systemRoles, {
-  // eslint-disable-next-line e18e/prefer-static-regex
   id: schema => schema.min(1).regex(/^[a-z0-9_]+$/),
   name: schema => schema.min(1),
 }).omit({

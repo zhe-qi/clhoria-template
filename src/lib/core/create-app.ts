@@ -1,4 +1,4 @@
-import type { AppBindings } from "@/types/lib";
+import type { AdminBindings, BaseBindings, ClientBindings, PublicBindings } from "@/types/lib";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { pinoLogger } from "hono-pino";
 import { bodyLimit } from "hono/body-limit";
@@ -19,11 +19,27 @@ import { Resp } from "@/utils";
 import logger from "../services/logger";
 import { createRateLimiter } from "./rate-limit-factory";
 
-export function createRouter() {
-  return new OpenAPIHono<AppBindings>({
+/** Generic tier router / 通用 tier 路由 */
+export function createRouter<TBindings extends BaseBindings = BaseBindings>() {
+  return new OpenAPIHono<TBindings>({
     strict: false,
     defaultHook,
   });
+}
+
+/** Dedicated alias for custom tiers / 自定义 tier 的显式别名 */
+export const createTierRouter = createRouter;
+
+export function createAdminRouter() {
+  return createTierRouter<AdminBindings>();
+}
+
+export function createClientRouter() {
+  return createTierRouter<ClientBindings>();
+}
+
+export function createPublicRouter() {
+  return createTierRouter<PublicBindings>();
 }
 
 export default function createApp() {

@@ -10,7 +10,7 @@
     "body": [
       "import type { z } from \"zod\";",
       "",
-      "import type { AppRouteHandler } from \"@/types/lib\";",
+      "import type { AdminRouteHandler } from \"@/types/lib\";",
       "",
       "import type * as routes from \"./${1:feature}.routes\";",
       "import type { ${1:feature}ResponseSchema } from \"./${1:feature}.schema\";",
@@ -24,7 +24,7 @@
       "};",
       "",
       "/** 路由 Handler 类型 */",
-      "export type ${2:Feature}RouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;",
+      "export type ${2:Feature}RouteHandlerType<T extends keyof RouteTypes> = AdminRouteHandler<RouteTypes[T]>;",
       ""
     ]
   },
@@ -778,7 +778,7 @@
     "body": [
       "import type { z } from \"zod\";",
       "",
-      "import type { AppRouteHandler } from \"@/types/lib\";",
+      "import type { AdminRouteHandler } from \"@/types/lib\";",
       "",
       "import type * as routes from \"./${1:feature}.routes\";",
       "import type { ${1:feature}ResponseSchema } from \"./${1:feature}.schema\";",

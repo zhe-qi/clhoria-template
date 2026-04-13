@@ -1,42 +1,35 @@
-import type { AppBindings } from "@/types/lib";
+import type { AdminBindings, BaseBindings, ClientBindings } from "@/types/lib";
 
 import { createFactory } from "hono/factory";
 
-/**
- * Hono Factory instance
- * Creates middlewares and handlers with automatic AppBindings type inheritance
- * Hono Factory 实例
- * 用于创建中间件和处理器，自动继承 AppBindings 类型
- */
-export const factory = createFactory<AppBindings>();
+/** Generic tier factory / 通用 tier 工厂 */
+export function createTierFactory<TBindings extends BaseBindings>() {
+  return createFactory<TBindings>();
+}
+
+// ── Base factory (framework-level, no JWT assumption) / 基础工厂（框架级，不假设 JWT） ──
+const baseFactory = createTierFactory<BaseBindings>();
+export const createMiddleware = baseFactory.createMiddleware;
+export const createHandlers = baseFactory.createHandlers;
+
+// ── Admin factory / 管理端工厂 ──
+const adminFactory = createTierFactory<AdminBindings>();
 
 /**
- * Create middleware
- * Automatically infers types like c.get('jwtPayload')
- * 创建中间件
- * 自动推断 c.get('jwtPayload') 等类型
- *
- * @example
- * ```typescript
- * export const myMiddleware = createMiddleware(async (c, next) => {
- *   const { roles } = c.get('jwtPayload') // 类型自动推断
- *   await next()
- * })
- * ```
+ * Create admin middleware with AdminBindings type
+ * c.get('jwtPayload') includes roles and sub
+ * 创建管理端中间件，c.get('jwtPayload') 包含 roles 和 sub
  */
-export const createMiddleware = factory.createMiddleware;
+export const createAdminMiddleware = adminFactory.createMiddleware;
+export const createAdminHandlers = adminFactory.createHandlers;
+
+// ── Client factory / 客户端工厂 ──
+const clientFactory = createTierFactory<ClientBindings>();
 
 /**
- * Create handler array
- * Maintains type safety when defining handlers outside of routes
- * 创建处理器数组
- * 用于在路由外部定义处理器时保持类型安全
- *
- * @example
- * ```typescript
- * const handlers = createHandlers(
- *   async (c) => c.json({ message: 'ok' })
- * )
- * ```
+ * Create client middleware with ClientBindings type
+ * c.get('jwtPayload') includes sub only
+ * 创建客户端中间件，c.get('jwtPayload') 仅包含 sub
  */
-export const createHandlers = factory.createHandlers;
+export const createClientMiddleware = clientFactory.createMiddleware;
+export const createClientHandlers = clientFactory.createHandlers;

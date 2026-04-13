@@ -33,7 +33,7 @@ type HmrNotifyOptions = {
 
 export default function hmrNotifyPlugin(options?: HmrNotifyOptions): Plugin {
   const extensions = options?.extensions ?? [".ts", ".tsx", ".js", ".jsx"];
-  // eslint-disable-next-line e18e/prefer-static-regex
+
   const exclude = options?.exclude ?? [/node_modules/, /\.test\.ts$/, /\.spec\.ts$/];
   const debounceMs = options?.debounce ?? 100;
 

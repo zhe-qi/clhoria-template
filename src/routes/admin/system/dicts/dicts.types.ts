@@ -2,7 +2,7 @@ import type { z } from "zod";
 import type * as routes from "./dicts.routes";
 
 import type { systemDictResponseSchema } from "./dicts.schema";
-import type { AppRouteHandler } from "@/types/lib";
+import type { AdminRouteHandler } from "@/types/lib";
 
 /** Dictionary type / 字典类型 */
 export type Dict = z.infer<typeof systemDictResponseSchema>;
@@ -13,4 +13,4 @@ type RouteTypes = {
 };
 
 /** Dictionary route handler type / 字典路由 Handler 类型 */
-export type SystemDictRouteHandlerType<T extends keyof RouteTypes> = AppRouteHandler<RouteTypes[T]>;
+export type SystemDictRouteHandlerType<T extends keyof RouteTypes> = AdminRouteHandler<RouteTypes[T]>;
