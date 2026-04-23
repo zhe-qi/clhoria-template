@@ -1,5 +1,3 @@
-import type { UserConfig } from "vite";
-import type { Plugin } from "vitest/config";
 import buildPluginNodejs from "@clhoria/vite-plugin/build";
 
 import bullBoardStaticPlugin from "@clhoria/vite-plugin/bull-board-static";
@@ -10,7 +8,7 @@ import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
 import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig(({ mode }): UserConfig => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
     server: {
@@ -45,6 +43,6 @@ export default defineConfig(({ mode }): UserConfig => {
         // nativeDeps: ["@node-rs/argon2", "excelize-wasm"], // Copy .node/.wasm binaries to dist / 复制原生二进制到 dist
         // targetPlatform: "linux-x64", // Target platform for native dependency installation / 原生依赖安装目标平台
       }),
-    ] as unknown as Plugin<any>[],
+    ],
   };
 });
