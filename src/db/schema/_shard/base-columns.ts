@@ -14,7 +14,7 @@ export const baseColumns = {
   /**
    * Creation time / 创建时间
    */
-  createdAt: timestamp({ mode: "string" })
+  createdAt: timestamp({ mode: "string", precision: 0 })
     .$defaultFn(() => format(new Date(), "yyyy-MM-dd HH:mm:ss")),
 
   /**
@@ -25,7 +25,7 @@ export const baseColumns = {
   /**
    * Update time (with auto-update) / 更新时间 包含自动更新
    */
-  updatedAt: timestamp({ mode: "string" })
+  updatedAt: timestamp({ mode: "string", precision: 0 })
     .$defaultFn(() => format(new Date(), "yyyy-MM-dd HH:mm:ss"))
     .$onUpdate(() => format(new Date(), "yyyy-MM-dd HH:mm:ss")),
 

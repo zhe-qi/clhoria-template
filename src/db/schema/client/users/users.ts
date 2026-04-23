@@ -65,11 +65,11 @@ export const clientUsers = pgTable("client_users", {
   /** User score / 用户积分 */
   score: integer().default(0),
   /** Registration time / 注册时间 */
-  registerDate: timestamp({ mode: "string" }),
+  registerDate: timestamp({ mode: "string", precision: 0 }),
   /** IP address at registration / 注册时 IP 地址 */
   registerIp: varchar({ length: 45 }),
   /** Last login time / 最后登录时间 */
-  lastLoginDate: timestamp({ mode: "string" }),
+  lastLoginDate: timestamp({ mode: "string", precision: 0 }),
   /** IP address at last login / 最后登录时 IP 地址 */
   lastLoginIp: varchar({ length: 45 }),
   /** User token list / 用户token列表 */
@@ -77,7 +77,7 @@ export const clientUsers = pgTable("client_users", {
   /** All upstream inviter UIDs / 用户全部上级邀请者 */
   inviterUids: jsonb().$type<string[]>().default([]),
   /** Invitation time / 受邀时间 */
-  inviteTime: timestamp({ mode: "string" }),
+  inviteTime: timestamp({ mode: "string", precision: 0 }),
   /** User's own invite code / 用户自身邀请码 */
   myInviteCode: varchar({ length: 32 }),
   /** Third-party platform identity info / 第三方平台身份信息 */

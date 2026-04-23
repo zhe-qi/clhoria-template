@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "486a2e21-2e04-4bc8-9a4d-8d5e0a883592",
+  "id": "4171ec3d-c7b7-4066-8d07-65cdac9550a7",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -153,7 +153,7 @@
       "table": "system_dicts"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -179,7 +179,7 @@
       "table": "system_dicts"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -283,7 +283,7 @@
       "table": "system_params"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -309,7 +309,7 @@
       "table": "system_params"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -426,7 +426,7 @@
       "table": "system_roles"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -452,7 +452,7 @@
       "table": "system_roles"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -556,7 +556,7 @@
       "table": "system_users"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -582,7 +582,7 @@
       "table": "system_users"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -699,7 +699,7 @@
       "table": "client_users"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -725,7 +725,7 @@
       "table": "client_users"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -1089,7 +1089,7 @@
       "table": "client_users"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -1115,7 +1115,7 @@
       "table": "client_users"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -1167,7 +1167,7 @@
       "table": "client_users"
     },
     {
-      "type": "timestamp",
+      "type": "timestamp(0)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,

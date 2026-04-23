@@ -35,7 +35,8 @@ logger.info({ userId }, "[Module]: message");  // data object FIRST
 
 - Status codes: `HttpStatusCodes` constants
 - Dates: `date-fns` library
-- Timestamps: `timestamp({ mode: "string" })`
+- Timestamps: `timestamp({ mode: "string", precision: 0 })`（秒级精度，匹配 `yyyy-MM-dd HH:mm:ss` 写入格式）
+- 时区：DB 写入时间一律用 `format(new Date(), "yyyy-MM-dd HH:mm:ss")`（date-fns，跟随系统时区，服务器默认 +8）；**禁止用 `new Date().toISOString()` 写 DB**（永远 UTC，会差 8 小时）。API 响应里给前端的时间戳不受此限制
 - UUID params: `IdUUIDParamsSchema`
 - Naming: PascalCase (classes/types), UPPER_SNAKE_CASE (enum values), kebab-case (files)
 - Folder grouping: When multiple files of same type exist (e.g., `*.helpers.ts`), create a folder (e.g., `helpers/`)

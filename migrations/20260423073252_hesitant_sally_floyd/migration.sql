@@ -11,9 +11,9 @@ CREATE TABLE "casbin_rule" (
 --> statement-breakpoint
 CREATE TABLE "system_dicts" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
-	"created_at" timestamp,
+	"created_at" timestamp(0),
 	"created_by" varchar(64),
-	"updated_at" timestamp,
+	"updated_at" timestamp(0),
 	"updated_by" varchar(64),
 	"code" varchar(64) NOT NULL UNIQUE,
 	"name" varchar(128) NOT NULL,
@@ -24,9 +24,9 @@ CREATE TABLE "system_dicts" (
 --> statement-breakpoint
 CREATE TABLE "system_params" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
-	"created_at" timestamp,
+	"created_at" timestamp(0),
 	"created_by" varchar(64),
-	"updated_at" timestamp,
+	"updated_at" timestamp(0),
 	"updated_by" varchar(64),
 	"key" varchar(128) NOT NULL UNIQUE,
 	"value" text NOT NULL,
@@ -38,9 +38,9 @@ CREATE TABLE "system_params" (
 --> statement-breakpoint
 CREATE TABLE "system_roles" (
 	"id" varchar(64) PRIMARY KEY,
-	"created_at" timestamp,
+	"created_at" timestamp(0),
 	"created_by" varchar(64),
-	"updated_at" timestamp,
+	"updated_at" timestamp(0),
 	"updated_by" varchar(64),
 	"name" varchar(64) NOT NULL,
 	"description" text,
@@ -55,9 +55,9 @@ CREATE TABLE "system_user_roles" (
 --> statement-breakpoint
 CREATE TABLE "system_users" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
-	"created_at" timestamp,
+	"created_at" timestamp(0),
 	"created_by" varchar(64),
-	"updated_at" timestamp,
+	"updated_at" timestamp(0),
 	"updated_by" varchar(64),
 	"username" varchar(64) NOT NULL UNIQUE,
 	"password" text NOT NULL,
@@ -69,9 +69,9 @@ CREATE TABLE "system_users" (
 --> statement-breakpoint
 CREATE TABLE "client_users" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
-	"created_at" timestamp,
+	"created_at" timestamp(0),
 	"created_by" varchar(64),
-	"updated_at" timestamp,
+	"updated_at" timestamp(0),
 	"updated_by" varchar(64),
 	"username" varchar(64) NOT NULL UNIQUE,
 	"password" varchar(128) NOT NULL,
@@ -99,13 +99,13 @@ CREATE TABLE "client_users" (
 	"register_env" jsonb,
 	"realname_auth" jsonb,
 	"score" integer DEFAULT 0,
-	"register_date" timestamp,
+	"register_date" timestamp(0),
 	"register_ip" varchar(45),
-	"last_login_date" timestamp,
+	"last_login_date" timestamp(0),
 	"last_login_ip" varchar(45),
 	"tokens" jsonb DEFAULT '[]',
 	"inviter_uids" jsonb DEFAULT '[]',
-	"invite_time" timestamp,
+	"invite_time" timestamp(0),
 	"my_invite_code" varchar(32) UNIQUE,
 	"identities" jsonb DEFAULT '[]'
 );
