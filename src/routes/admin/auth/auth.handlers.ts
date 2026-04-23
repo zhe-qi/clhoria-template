@@ -5,13 +5,14 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
 import env from "@/env";
 import { REFRESH_TOKEN_EXPIRES_DAYS } from "@/lib/constants";
+import { getClientIp } from "@/lib/core/rate-limit-factory";
 import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import * as HttpStatusPhrases from "@/lib/core/stoker/http-status-phrases";
 import { LoginResult } from "@/lib/enums";
 import cap from "@/lib/services/cap";
 import { loginLogger } from "@/lib/services/logger";
 import { getIPAddress } from "@/services/ip";
-import { getIPAddressFromHeaders, Resp, tryit } from "@/utils";
+import { Resp, tryit } from "@/utils";
 
 import { generateTokens, getIdentityById, getPermissionsByRoles, logout as logoutUtil, refreshAccessToken, validateCaptcha, validateLogin } from "./auth.helpers";
 
@@ -20,7 +21,7 @@ export const login: AuthRouteHandlerType<"login"> = async (c) => {
   const { username, password, captchaToken } = c.req.valid("json");
 
   const loginTime = format(new Date(), "yyyy-MM-dd HH:mm:ss");
-  const ip = getIPAddressFromHeaders(c.req.raw.headers);
+  const ip = getClientIp(c);
   const userAgent = c.req.header("user-agent") || "";
   const location = await getIPAddress(ip);
 

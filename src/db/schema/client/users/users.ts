@@ -1,12 +1,12 @@
 import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxOpenId } from "@/db/schema/_shard/types/app-user";
+import type { GenderType, UserStatusType, VerificationStatusType } from "@/lib/enums";
+
 import { index, integer, jsonb, pgTable, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
 import { z } from "zod";
-
 import { baseColumns } from "@/db/schema/_shard/base-columns";
-import { genderEnum, userStatusEnum, verificationStatusEnum } from "@/db/schema/_shard/enums";
 import { Gender, UserStatus, VerificationStatus } from "@/lib/enums";
 import { emailField, ipAddressField, mobileField, nicknameField, passwordField, StatusDescriptions, usernameField } from "@/lib/schemas";
 
@@ -21,17 +21,17 @@ export const clientUsers = pgTable("client_users", {
   /** User nickname / 用户昵称 */
   nickname: varchar({ length: 64 }),
   /** Gender / 性别 */
-  gender: genderEnum().default(Gender.UNKNOWN),
+  gender: varchar({ length: 16 }).$type<GenderType>().default(Gender.UNKNOWN),
   /** User status / 用户状态 */
-  status: userStatusEnum().default(UserStatus.NORMAL),
+  status: varchar({ length: 16 }).$type<UserStatusType>().default(UserStatus.NORMAL),
   /** Mobile number / 手机号码 */
   mobile: varchar({ length: 20 }),
   /** Mobile verification status / 手机号验证状态 */
-  mobileConfirmed: verificationStatusEnum().default(VerificationStatus.UNVERIFIED),
+  mobileConfirmed: varchar({ length: 16 }).$type<VerificationStatusType>().default(VerificationStatus.UNVERIFIED),
   /** Email address / 邮箱地址 */
   email: varchar({ length: 128 }),
   /** Email verification status / 邮箱验证状态 */
-  emailConfirmed: verificationStatusEnum().default(VerificationStatus.UNVERIFIED),
+  emailConfirmed: varchar({ length: 16 }).$type<VerificationStatusType>().default(VerificationStatus.UNVERIFIED),
   /** Avatar URL / 头像地址 */
   avatar: text(),
   /** Department ID list / 部门ID列表 */
@@ -107,12 +107,12 @@ export const selectClientUsersSchema = createSelectSchema(clientUsers, {
   password: schema => schema.meta({ description: "密码" }),
   passwordSecretVersion: schema => schema.meta({ description: "密码密钥版本" }),
   nickname: schema => schema.meta({ description: "用户昵称" }),
-  gender: schema => schema.meta({ description: StatusDescriptions.GENDER }),
-  status: schema => schema.meta({ description: StatusDescriptions.USER }),
+  gender: z.enum([Gender.UNKNOWN, Gender.MALE, Gender.FEMALE]).meta({ description: StatusDescriptions.GENDER }),
+  status: z.enum([UserStatus.NORMAL, UserStatus.DISABLED, UserStatus.PENDING, UserStatus.REJECTED]).meta({ description: StatusDescriptions.USER }),
   mobile: schema => schema.meta({ description: "手机号码" }),
-  mobileConfirmed: schema => schema.meta({ description: StatusDescriptions.VERIFICATION }),
+  mobileConfirmed: z.enum([VerificationStatus.UNVERIFIED, VerificationStatus.VERIFIED]).meta({ description: StatusDescriptions.VERIFICATION }),
   email: schema => schema.meta({ description: "邮箱地址" }),
-  emailConfirmed: schema => schema.meta({ description: StatusDescriptions.VERIFICATION }),
+  emailConfirmed: z.enum([VerificationStatus.UNVERIFIED, VerificationStatus.VERIFIED]).meta({ description: StatusDescriptions.VERIFICATION }),
   avatar: schema => schema.meta({ description: "头像地址" }),
   score: schema => schema.meta({ description: "用户积分" }),
   comment: schema => schema.meta({ description: "备注" }),
@@ -132,8 +132,8 @@ export const insertClientUsersSchema = createInsertSchema(
     nickname: () => nicknameField.optional(),
     mobile: () => mobileField.optional(),
     email: () => emailField.optional(),
-    gender: schema => schema.optional().meta({ description: StatusDescriptions.GENDER }),
-    status: schema => schema.optional().meta({ description: StatusDescriptions.USER }),
+    gender: z.enum([Gender.UNKNOWN, Gender.MALE, Gender.FEMALE]).optional().meta({ description: StatusDescriptions.GENDER }),
+    status: z.enum([UserStatus.NORMAL, UserStatus.DISABLED, UserStatus.PENDING, UserStatus.REJECTED]).optional().meta({ description: StatusDescriptions.USER }),
     score: z.number().min(0).optional().meta({ description: "用户积分" }),
     comment: z.string().max(500, "备注最多500个字符").optional().meta({ description: "备注" }),
     registerIp: () => ipAddressField.optional().meta({ description: "注册时 IP 地址" }),

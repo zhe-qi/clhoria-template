@@ -5,10 +5,24 @@ import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { jsonContent } from "@/lib/core/stoker/openapi/helpers";
 import { respErrSchema } from "@/utils";
 
-import { dictCodeParamsSchema, dictItemsResponseSchema } from "./dicts.schema";
+import { dictCodeParamsSchema, dictItemsResponseSchema, dictListResponseSchema } from "./dicts.schema";
 
 const routePrefix = "/dicts";
 const tags = [`${routePrefix}（业务字典查询）`];
+
+/** List all enabled dicts / 获取所有启用字典 */
+export const list = createRoute({
+  tags,
+  summary: "获取所有启用字典",
+  method: "get",
+  path: routePrefix,
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      RefineResultSchema(dictListResponseSchema),
+      "查询成功",
+    ),
+  },
+});
 
 /** Get dict items by code / 根据编码查询字典项 */
 export const getByCode = createRoute({

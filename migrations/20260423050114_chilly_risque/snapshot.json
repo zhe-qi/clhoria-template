@@ -1,81 +1,11 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "0f1c9b92-a982-4f05-8e34-20e5d84f118b",
+  "id": "486a2e21-2e04-4bc8-9a4d-8d5e0a883592",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
-    {
-      "values": [
-        "UNKNOWN",
-        "MALE",
-        "FEMALE"
-      ],
-      "name": "gender",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "STRING",
-        "NUMBER",
-        "BOOLEAN",
-        "JSON"
-      ],
-      "name": "param_value_type",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "UNAUTHENTICATED",
-        "PENDING",
-        "VERIFIED",
-        "FAILED"
-      ],
-      "name": "real_name_auth_status",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "INDIVIDUAL",
-        "ENTERPRISE"
-      ],
-      "name": "real_name_auth_type",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "ENABLED",
-        "DISABLED"
-      ],
-      "name": "status",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "NORMAL",
-        "DISABLED",
-        "PENDING",
-        "REJECTED"
-      ],
-      "name": "user_status",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "UNVERIFIED",
-        "VERIFIED"
-      ],
-      "name": "verification_status",
-      "entityType": "enums",
-      "schema": "public"
-    },
     {
       "isRlsEnabled": false,
       "name": "casbin_rule",
@@ -327,8 +257,8 @@
       "table": "system_dicts"
     },
     {
-      "type": "status",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": "'ENABLED'",
@@ -431,8 +361,8 @@
       "table": "system_params"
     },
     {
-      "type": "param_value_type",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": "'STRING'",
@@ -470,8 +400,8 @@
       "table": "system_params"
     },
     {
-      "type": "status",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": "'ENABLED'",
@@ -574,8 +504,8 @@
       "table": "system_roles"
     },
     {
-      "type": "status",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": "'ENABLED'",
@@ -743,8 +673,8 @@
       "table": "system_users"
     },
     {
-      "type": "status",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": "'ENABLED'",
@@ -873,8 +803,8 @@
       "table": "client_users"
     },
     {
-      "type": "gender",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
       "default": "'UNKNOWN'",
@@ -886,8 +816,8 @@
       "table": "client_users"
     },
     {
-      "type": "user_status",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
       "default": "'NORMAL'",
@@ -912,8 +842,8 @@
       "table": "client_users"
     },
     {
-      "type": "verification_status",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
       "default": "'UNVERIFIED'",
@@ -938,8 +868,8 @@
       "table": "client_users"
     },
     {
-      "type": "verification_status",
-      "typeSchema": "public",
+      "type": "varchar(16)",
+      "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
       "default": "'UNVERIFIED'",

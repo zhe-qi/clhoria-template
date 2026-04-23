@@ -11,8 +11,46 @@ import { Resp } from "@/utils";
 /** Redis cache key prefix / Redis 缓存 Key 前缀 */
 const DICT_CACHE_PREFIX = "dict:";
 
+/** Redis list cache key / Redis 列表缓存 Key */
+const DICT_LIST_CACHE_KEY = "dicts:all";
+
 /** Cache expiration time (seconds) / 缓存过期时间（秒） */
 const DICT_CACHE_TTL = 300; // 5 minutes / 5 分钟
+
+/** List all enabled dicts / 获取所有启用字典 */
+export const list: DictRouteHandlerType<"list"> = async (c) => {
+  try {
+    const cached = await redisClient.get(DICT_LIST_CACHE_KEY);
+    if (cached) {
+      logger.debug({ cacheKey: DICT_LIST_CACHE_KEY }, "[字典]: 从缓存获取字典列表");
+      return c.json(Resp.ok(JSON.parse(cached)), HttpStatusCodes.OK);
+    }
+  }
+  catch (error) {
+    logger.warn({ error }, "[字典]: Redis 列表缓存读取失败");
+  }
+
+  const dicts = await db.query.systemDicts.findMany({
+    where: { status: Status.ENABLED },
+    columns: {
+      code: true,
+      name: true,
+      items: true,
+    },
+    orderBy: { code: "asc" },
+  });
+
+  const result = dicts.map(dict => ({
+    code: dict.code,
+    name: dict.name,
+    items: (dict.items as DictItem[]).filter(item => !item.disabled),
+  }));
+
+  void redisClient.setex(DICT_LIST_CACHE_KEY, DICT_CACHE_TTL, JSON.stringify(result))
+    .catch(error => logger.warn({ error }, "[字典]: Redis 列表缓存写入失败"));
+
+  return c.json(Resp.ok(result), HttpStatusCodes.OK);
+};
 
 /** Get dict items by code / 根据编码查询字典项 */
 export const getByCode: DictRouteHandlerType<"getByCode"> = async (c) => {

@@ -397,7 +397,11 @@ async function main() {
   const { getQueryClient } = await import("@/db");
   const client = getQueryClient();
   try {
-    await client.unsafe(sql);
+    const stmts = sql
+      .split("\n")
+      .filter(line => line !== "BEGIN;" && line !== "COMMIT;")
+      .join("\n");
+    await client.begin(t => t.unsafe(stmts));
     console.log("[sync-comments] ✓ Comments synced to database");
   }
   finally {

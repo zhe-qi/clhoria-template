@@ -37,9 +37,3 @@ export function isPrivateIp(ip: string, ipVersion: 4 | 6): boolean {
 
   return a === 127 || a === 10 || (a === 192 && b === 168) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31);
 }
-
-// 从请求头中获取 IP 地址
-export function getIPAddressFromHeaders(headers: Headers): string {
-  const ip = headers.get("x-forwarded-for") || headers.get("x-real-ip");
-  return ip ?? "unknown";
-}

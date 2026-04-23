@@ -1,6 +1,7 @@
 import { differenceInMilliseconds, format } from "date-fns";
 
 import { createAdminMiddleware } from "@/lib/core/factory";
+import { getClientIp } from "@/lib/core/rate-limit-factory";
 import { operationLogger } from "@/lib/services/logger";
 
 type OperationLogOptions = {
@@ -13,7 +14,7 @@ export function operationLog(options?: OperationLogOptions) {
     const startTime = new Date();
     const method = c.req.method;
     const urlPath = new URL(c.req.url).pathname;
-    const ip = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    const ip = getClientIp(c);
     const userAgent = c.req.header("user-agent") || "";
 
     let [body, params]: [unknown | null, ParamsType | null] = [null, null];

@@ -15,3 +15,6 @@ export const paramResponseSchema = z.object({
   valueType: z.enum([ParamValueType.STRING, ParamValueType.NUMBER, ParamValueType.BOOLEAN, ParamValueType.JSON]).meta({ description: "参数值类型" }),
   name: z.string().meta({ description: "参数名称" }),
 });
+
+/** Param list response schema / 参数列表响应 Schema */
+export const paramListResponseSchema = z.array(paramResponseSchema);

@@ -1,9 +1,11 @@
+import type { StatusType } from "@/lib/enums";
+
 import { index, jsonb, pgTable, text, varchar } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
+import { z } from "zod";
 import { baseColumns } from "@/db/schema/_shard/base-columns";
-import { statusEnum } from "@/db/schema/_shard/enums";
 import { Status } from "@/lib/enums";
 import { StatusDescriptions } from "@/lib/schemas";
 
@@ -43,7 +45,7 @@ export const systemDicts = pgTable("system_dicts", {
   /** Dictionary items array (stored as JSONB) / 字典项数组（使用 JSONB 存储） */
   items: jsonb().$type<DictItem[]>().default([]).notNull(),
   /** Enabled/disabled status / 启用/禁用状态 */
-  status: statusEnum().default(Status.ENABLED).notNull(),
+  status: varchar({ length: 16 }).$type<StatusType>().default(Status.ENABLED).notNull(),
 }, table => [
   // Unique constraint on code field already includes an index / code 字段的唯一约束已经包含了索引
   // Add index on status field for querying enabled dictionaries / 为 status 字段添加索引，用于查询启用的字典
@@ -60,7 +62,7 @@ export const selectSystemDictsSchema = createSelectSchema(systemDicts, {
   name: schema => schema.meta({ description: "字典名称" }),
   description: schema => schema.meta({ description: "字典描述" }),
   items: schema => schema.meta({ description: "字典项列表" }),
-  status: schema => schema.meta({ description: StatusDescriptions.SYSTEM }),
+  status: z.enum([Status.ENABLED, Status.DISABLED]).meta({ description: StatusDescriptions.SYSTEM }),
   createdAt: schema => schema.meta({ description: "创建时间" }),
   createdBy: schema => schema.meta({ description: "创建人" }),
   updatedAt: schema => schema.meta({ description: "更新时间" }),
@@ -71,7 +73,9 @@ export const selectSystemDictsSchema = createSelectSchema(systemDicts, {
  * Insert Schema (used for insertions)
  * Insert Schema（插入时使用）
  */
-export const insertSystemDictsSchema = createInsertSchema(systemDicts).omit({
+export const insertSystemDictsSchema = createInsertSchema(systemDicts, {
+  status: z.enum([Status.ENABLED, Status.DISABLED]),
+}).omit({
   id: true,
   createdAt: true,
   createdBy: true,

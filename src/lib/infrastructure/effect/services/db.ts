@@ -5,6 +5,6 @@ import dbInstance from "@/db";
 
 type DrizzleDb = typeof db;
 
-export class DbService extends Context.Tag("DbService")<DbService, DrizzleDb>() {}
+export class DbService extends Context.Service<DbService, DrizzleDb>()("DbService") {}
 
 export const DbServiceLive = Layer.succeed(DbService, dbInstance);

@@ -49,6 +49,9 @@ class QueueManager {
     if (!this.queues.has(name)) {
       const queue = new BullQueue<T>(name, {
         connection: this.connection,
+        prefix: `{bull}`,
+        // 托管 Redis（如阿里云）无法改 maxmemory-policy，跳过 INFO 检查以静默 eviction 警告
+        skipVersionCheck: true,
         ...options,
       });
       this.queues.set(name, queue);
@@ -71,13 +74,7 @@ class QueueManager {
         const schema = JobSchemaRegistry[jobName];
         const validatedData = schema.parse(data);
 
-        const queue = new BullQueue<JobDataByName<N>>(queueName, {
-          connection: this.connection,
-        });
-        if (!this.queues.has(queueName)) {
-          this.queues.set(queueName, queue);
-        }
-
+        const queue = this.getQueue<JobDataByName<N>>(queueName);
         return addToQueue(queue, jobName as string, validatedData as JobDataByName<N>, opts);
       },
       catch: (error) => {
@@ -107,6 +104,8 @@ class QueueManager {
         },
         {
           connection: this.connection,
+          prefix: `{bull}`,
+          skipVersionCheck: true,
           ...options,
         },
       );
@@ -116,7 +115,15 @@ class QueueManager {
       });
 
       worker.on("failed", (job, error) => {
-        logger.error({ queueName, jobId: job?.id, error }, "[BullMQ]: 任务失败");
+        logger.error(
+          { queueName, jobId: job?.id, jobData: job?.data, attemptsMade: job?.attemptsMade, error },
+          "[BullMQ]: 任务失败",
+        );
+      });
+
+      worker.on("stalled", (jobId) => {
+        // 任务被判定卡死（worker 未及时心跳），会被另一 worker 抢占重跑；计分流水线非完全幂等，需 warn 关注
+        logger.warn({ queueName, jobId }, "[BullMQ]: 任务卡死被抢占");
       });
 
       this.workers.set(queueName, worker);
@@ -140,11 +147,7 @@ class QueueManager {
         const schema = JobSchemaRegistry[jobName];
         const validatedData = schema.parse(data);
 
-        const queue = new BullQueue<JobDataByName<N>>(queueName, {
-          connection: this.connection,
-        });
-
-        if (!this.queues.has(queueName)) this.queues.set(queueName, queue);
+        const queue = this.getQueue<JobDataByName<N>>(queueName);
 
         // 使用 Job Schedulers API (schedulerId = queueName:jobName)
         await (queue as any).upsertJobScheduler(`${queueName}:${jobName}`, repeatOptions, {
@@ -188,7 +191,7 @@ class QueueManager {
    * 优雅关闭（Effect 封装，带超时）
    */
   close = (timeoutMs: number = 10000) =>
-    Effect.gen(this, function* () {
+    Effect.gen({ self: this }, function* () {
       const closeEffects: Effect.Effect<void, Error>[] = [];
 
       // 关闭所有 Workers
@@ -210,7 +213,7 @@ class QueueManager {
       // 带超时的并行关闭
       yield* Effect.all(closeEffects, { concurrency: "unbounded" }).pipe(
         Effect.timeout(`${timeoutMs} millis`),
-        Effect.catchAll(() => Effect.void),
+        Effect.ignore,
       );
 
       this.workers.clear();
@@ -252,7 +255,8 @@ function createBullMQRedis() {
   const connectionOptions = parseURL(env.REDIS_URL);
   return new RedisClient({
     ...connectionOptions,
-    maxRetriesPerRequest: null, // BullMQ 要求
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
   });
 }
 

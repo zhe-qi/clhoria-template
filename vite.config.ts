@@ -1,18 +1,26 @@
+import type { UserConfig } from "vite";
+import type { Plugin } from "vitest/config";
 import buildPluginNodejs from "@clhoria/vite-plugin/build";
+
 import bullBoardStaticPlugin from "@clhoria/vite-plugin/bull-board-static";
 import hmrNotifyPlugin from "@clhoria/vite-plugin/hmr-notify";
-
 import resourceMonitorPlugin from "@clhoria/vite-plugin/resource-monitor";
 import zodHoistPlugin from "@clhoria/vite-plugin/zod-hoist";
 import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
 import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
     server: {
+      host: "0.0.0.0",
       port: Number.parseInt(env.PORT, 10),
+      allowedHosts: [".trycloudflare.com"],
+      hmr: {
+        protocol: "wss",
+        clientPort: 443,
+      },
     },
     resolve: {
       tsconfigPaths: true,
@@ -37,6 +45,6 @@ export default defineConfig(({ mode }) => {
         // nativeDeps: ["@node-rs/argon2", "excelize-wasm"], // Copy .node/.wasm binaries to dist / 复制原生二进制到 dist
         // targetPlatform: "linux-x64", // Target platform for native dependency installation / 原生依赖安装目标平台
       }),
-    ],
+    ] as unknown as Plugin<any>[],
   };
 });

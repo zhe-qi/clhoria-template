@@ -13,3 +13,6 @@ export const dictItemsResponseSchema = z.object({
   name: z.string().meta({ description: "字典名称" }),
   items: z.array(dictItemSchema).meta({ description: "字典项列表" }),
 });
+
+/** Dict list response schema / 字典列表响应 Schema */
+export const dictListResponseSchema = z.array(dictItemsResponseSchema);

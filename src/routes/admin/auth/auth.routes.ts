@@ -2,6 +2,8 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { jwt } from "hono/jwt";
 
 import env from "@/env";
+import { AUTH_RATE_LIMIT_MAX_REQUESTS, AUTH_RATE_LIMIT_WINDOW_MS } from "@/lib/constants/rate-limit";
+import { createRateLimiter } from "@/lib/core/rate-limit-factory";
 import { RefineResultSchema } from "@/lib/core/refine-query";
 import * as HttpStatusCodes from "@/lib/core/stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "@/lib/core/stoker/openapi/helpers";
@@ -12,10 +14,18 @@ import { systemUsersInfoResponseSchema, systemUsersLoginSchema } from "../system
 const routePrefix = "/auth";
 const tags = [`${routePrefix} (管理端身份认证)`];
 
+// 严格限流：login / refresh / redeem 是密码爆破 & 验证码枚举入口
+const authRateLimit = createRateLimiter({
+  windowMs: AUTH_RATE_LIMIT_WINDOW_MS,
+  limit: AUTH_RATE_LIMIT_MAX_REQUESTS,
+  prefix: "rl:admin-auth:",
+});
+
 /** Admin login / 管理端登录 */
 export const login = createRoute({
   path: `${routePrefix}/login`,
   method: "post",
+  middleware: [authRateLimit] as const,
   request: {
     body: jsonContentRequired(systemUsersLoginSchema, "登录请求"),
   },
@@ -36,6 +46,7 @@ export const login = createRoute({
 export const refreshToken = createRoute({
   path: `${routePrefix}/refresh`,
   method: "post",
+  middleware: [authRateLimit] as const,
   tags,
   summary: "管理端刷新访问令牌",
   responses: {
@@ -108,6 +119,7 @@ export const createChallenge = createRoute({
 export const redeemChallenge = createRoute({
   path: `${routePrefix}/redeem`,
   method: "post",
+  middleware: [authRateLimit] as const,
   request: {
     body: jsonContentRequired(z.object({
       token: z.string().meta({ description: "挑战token" }),

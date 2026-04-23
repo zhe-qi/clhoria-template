@@ -1,10 +1,3 @@
-CREATE TYPE "gender" AS ENUM('UNKNOWN', 'MALE', 'FEMALE');--> statement-breakpoint
-CREATE TYPE "param_value_type" AS ENUM('STRING', 'NUMBER', 'BOOLEAN', 'JSON');--> statement-breakpoint
-CREATE TYPE "real_name_auth_status" AS ENUM('UNAUTHENTICATED', 'PENDING', 'VERIFIED', 'FAILED');--> statement-breakpoint
-CREATE TYPE "real_name_auth_type" AS ENUM('INDIVIDUAL', 'ENTERPRISE');--> statement-breakpoint
-CREATE TYPE "status" AS ENUM('ENABLED', 'DISABLED');--> statement-breakpoint
-CREATE TYPE "user_status" AS ENUM('NORMAL', 'DISABLED', 'PENDING', 'REJECTED');--> statement-breakpoint
-CREATE TYPE "verification_status" AS ENUM('UNVERIFIED', 'VERIFIED');--> statement-breakpoint
 CREATE TABLE "casbin_rule" (
 	"ptype" varchar(8),
 	"v0" varchar(64),
@@ -26,7 +19,7 @@ CREATE TABLE "system_dicts" (
 	"name" varchar(128) NOT NULL,
 	"description" text,
 	"items" jsonb DEFAULT '[]' NOT NULL,
-	"status" "status" DEFAULT 'ENABLED'::"status" NOT NULL
+	"status" varchar(16) DEFAULT 'ENABLED' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "system_params" (
@@ -37,10 +30,10 @@ CREATE TABLE "system_params" (
 	"updated_by" varchar(64),
 	"key" varchar(128) NOT NULL UNIQUE,
 	"value" text NOT NULL,
-	"value_type" "param_value_type" DEFAULT 'STRING'::"param_value_type" NOT NULL,
+	"value_type" varchar(16) DEFAULT 'STRING' NOT NULL,
 	"name" varchar(128) NOT NULL,
 	"description" text,
-	"status" "status" DEFAULT 'ENABLED'::"status" NOT NULL
+	"status" varchar(16) DEFAULT 'ENABLED' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "system_roles" (
@@ -51,7 +44,7 @@ CREATE TABLE "system_roles" (
 	"updated_by" varchar(64),
 	"name" varchar(64) NOT NULL,
 	"description" text,
-	"status" "status" DEFAULT 'ENABLED'::"status" NOT NULL
+	"status" varchar(16) DEFAULT 'ENABLED' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "system_user_roles" (
@@ -71,7 +64,7 @@ CREATE TABLE "system_users" (
 	"built_in" boolean DEFAULT false,
 	"avatar" text,
 	"nick_name" varchar(64) NOT NULL,
-	"status" "status" DEFAULT 'ENABLED'::"status" NOT NULL
+	"status" varchar(16) DEFAULT 'ENABLED' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "client_users" (
@@ -84,12 +77,12 @@ CREATE TABLE "client_users" (
 	"password" varchar(128) NOT NULL,
 	"password_secret_version" integer DEFAULT 1,
 	"nickname" varchar(64),
-	"gender" "gender" DEFAULT 'UNKNOWN'::"gender",
-	"status" "user_status" DEFAULT 'NORMAL'::"user_status",
+	"gender" varchar(16) DEFAULT 'UNKNOWN',
+	"status" varchar(16) DEFAULT 'NORMAL',
 	"mobile" varchar(20) UNIQUE,
-	"mobile_confirmed" "verification_status" DEFAULT 'UNVERIFIED'::"verification_status",
+	"mobile_confirmed" varchar(16) DEFAULT 'UNVERIFIED',
 	"email" varchar(128) UNIQUE,
-	"email_confirmed" "verification_status" DEFAULT 'UNVERIFIED'::"verification_status",
+	"email_confirmed" varchar(16) DEFAULT 'UNVERIFIED',
 	"avatar" text,
 	"department_ids" jsonb DEFAULT '[]',
 	"enterprise_ids" jsonb DEFAULT '[]',

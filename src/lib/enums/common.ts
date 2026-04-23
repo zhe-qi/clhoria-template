@@ -67,36 +67,6 @@ export const VerificationStatus = {
 /** Verification status type / 验证状态类型 */
 export type VerificationStatusType = (typeof VerificationStatus)[keyof typeof VerificationStatus];
 
-/** Real name authentication type enum / 实名认证类型枚举 */
-export const RealNameAuthType = {
-  /** Individual user / 个人用户 */
-  INDIVIDUAL: "INDIVIDUAL",
-
-  /** Enterprise user / 企业用户 */
-  ENTERPRISE: "ENTERPRISE",
-} as const;
-
-/** Real name authentication type / 实名认证类型 */
-export type RealNameAuthTypeType = (typeof RealNameAuthType)[keyof typeof RealNameAuthType];
-
-/** Real name authentication status enum / 实名认证状态枚举 */
-export const RealNameAuthStatus = {
-  /** Unauthenticated / 未认证 */
-  UNAUTHENTICATED: "UNAUTHENTICATED",
-
-  /** Pending authentication / 等待认证 */
-  PENDING: "PENDING",
-
-  /** Verified / 认证通过 */
-  VERIFIED: "VERIFIED",
-
-  /** Failed / 认证失败 */
-  FAILED: "FAILED",
-} as const;
-
-/** Real name authentication status type / 实名认证状态类型 */
-export type RealNameAuthStatusType = (typeof RealNameAuthStatus)[keyof typeof RealNameAuthStatus];
-
 /** Login result enum / 登录结果枚举 */
 export const LoginResult = {
   /** Login success / 登录成功 */

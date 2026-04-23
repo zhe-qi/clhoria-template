@@ -12,8 +12,6 @@ import { z } from "zod";
 import env from "@/env";
 import redisClient from "@/lib/services/redis";
 
-import { createSingleton } from "./singleton";
-
 /**
  * Runtime detection: check if running in Bun environment
  * 运行时检测：判断是否为 Bun 环境
@@ -33,15 +31,15 @@ const getConnInfo = await (async () => {
   return (await import("@hono/node-server/conninfo")).getConnInfo;
 })() as (c: Context) => ConnInfo;
 
-const ioredisStore = createSingleton(
-  "rate-limit-store",
-  () => new RedisStore({
+function buildRedisStore(prefix: string) {
+  return new RedisStore({
+    prefix,
     sendCommand: (...args) => {
       const [command, ...commandArgs] = args;
       return redisClient.call(command, ...commandArgs) as Promise<RedisReply>;
     },
-  }) as unknown as Store<BaseBindings>,
-);
+  }) as unknown as Store<BaseBindings>;
+}
 
 /**
  * IP address validator (Zod v4 - supports IPv4 and IPv6)
@@ -83,15 +81,40 @@ function normalizeIp(ip: string) {
  * 通过 Hono ConnInfo Helper 获取 Socket IP
  * 兼容 Node.js 和 Bun 运行时
  */
-function getSocketIp(c: Context<BaseBindings>) {
-  const info = getConnInfo(c);
-  const ip = info.remote.address;
-  return ip ? normalizeIp(ip) : null;
+function getSocketIp(c: Context<BaseBindings>): string | null {
+  try {
+    const info = getConnInfo(c);
+    const ip = info.remote.address;
+    return ip ? normalizeIp(ip) : null;
+  }
+  catch {
+    // 测试环境无 socket（vitest fetch），返回 null 由上层兜底
+    return null;
+  }
 }
 
 const TRUSTED_PROXY_IPS = env.TRUSTED_PROXY_IPS.split(",")
   .map(s => s.trim())
   .filter(Boolean);
+
+// 特殊模式：
+// - "none"    → 不信任任何代理（直接暴露端口的部署）
+// - "private" → 信任所有私有/回环 IP（1Panel/K8s/Docker 容器网络、Aliyun SLB 等反代场景）
+// - 其他       → 仅信任精确匹配的 IP 白名单
+const TRUST_MODE: "none" | "private" | "list" = (() => {
+  if (TRUSTED_PROXY_IPS.length === 1 && TRUSTED_PROXY_IPS[0] === "none") return "none";
+  if (TRUSTED_PROXY_IPS.length === 1 && TRUSTED_PROXY_IPS[0] === "private") return "private";
+  return "list";
+})();
+
+if (env.NODE_ENV === "production" && TRUSTED_PROXY_IPS.length === 0) {
+  throw new Error(
+    "[Security] 生产环境必须配置 TRUSTED_PROXY_IPS。可选值："
+    + "(1) 逗号分隔的可信反代 IP 列表；"
+    + "(2) \"private\" 信任所有私有 IP（容器/K8s/SLB 反代场景推荐）；"
+    + "(3) \"none\" 直接暴露端口无反代。",
+  );
+}
 
 function isPrivateIpv4(ip: string) {
   const parts = ip.split(".");
@@ -141,13 +164,16 @@ function isTrustedProxy(ip: string | null) {
   if (!ip)
     return false;
 
-  // Explicit configuration takes priority: only trust IPs in the whitelist / 显式配置优先：只有在白名单内才信任
-  if (TRUSTED_PROXY_IPS.length > 0)
+  if (TRUST_MODE === "none")
+    return false;
+
+  if (TRUST_MODE === "private")
+    return isPrivateIp(ip);
+
+  if (TRUST_MODE === "list")
     return TRUSTED_PROXY_IPS.includes(ip);
 
-  // Default behavior (convenient yet secure): / 默认行为（省心但尽量安全）：
-  // When unconfigured, only trust proxy headers from internal/loopback addresses (covers most Nginx/SLB scenarios)
-  // 未配置时，仅在请求来源是内网/本机地址时才信任代理头（覆盖大多数 Nginx/SLB 场景）
+  // dev/test 未配置时：内网/本机地址默认信任，方便本地反代/容器调试
   return isPrivateIp(ip);
 }
 
@@ -198,6 +224,36 @@ function getClientIdentifier(c: Context<BaseBindings>) {
 }
 
 /**
+ * Get the real client IP with trusted proxy validation.
+ * Only reads X-Real-IP / X-Forwarded-For when the socket peer is a trusted proxy.
+ * 获取客户端真实 IP（带可信代理验证）
+ */
+export function getClientIp(c: Context): string {
+  let remote: string | null = null;
+  try {
+    const remoteRaw = getSocketIp(c as Context<BaseBindings>);
+    remote = remoteRaw ? validateIp(remoteRaw) : null;
+  }
+  catch {
+    // getConnInfo unavailable (e.g. test environment) — fall through to header check
+  }
+
+  if (remote && isTrustedProxy(remote)) {
+    const real = c.req.header("X-Real-IP");
+    const realIp = real ? validateIp(normalizeIp(real.trim())) : null;
+    if (realIp) return realIp;
+
+    const xff = c.req.header("X-Forwarded-For");
+    if (xff) {
+      const ip = validateIp(normalizeIp(xff.split(",")[0]?.trim() ?? ""));
+      if (ip) return ip;
+    }
+  }
+
+  return remote ?? "unknown";
+}
+
+/**
  * Rate limit configuration options
  * 速率限制配置选项
  */
@@ -206,6 +262,8 @@ export type RateLimitOptions = {
   windowMs: number;
   /** Maximum requests / 最大请求数 */
   limit: number;
+  /** Redis key prefix — 必须为每个独立桶传不同值，否则多层限流会共用 key 互相计数 */
+  prefix: string;
   /** Custom key generator (optional, defaults to IP) / 自定义key生成器 (可选,默认使用IP) */
   keyGenerator?: (c: Context<BaseBindings>) => string;
   /** Whether to skip counting successful requests (default false) / 是否跳过成功的请求计数 (默认false) */
@@ -222,12 +280,19 @@ export type RateLimitOptions = {
  * 创建速率限制中间件
  */
 export function createRateLimiter(options: RateLimitOptions) {
+  // 非生产环境跳过限流：
+  // - test：用例需要快速连发请求，且共享 socket 会导致 IP key 相同迅速触发 429
+  // - development：本地联调频繁，避免被限流打断
+  if (env.NODE_ENV !== "production") {
+    return async (_c: Context<BaseBindings>, next: () => Promise<void>) => next();
+  }
+
   return rateLimiter({
     windowMs: options.windowMs,
     limit: options.limit,
     standardHeaders: "draft-6", // Return RateLimit-* response headers / 返回 RateLimit-* 响应头
     keyGenerator: options.keyGenerator ?? getClientIdentifier,
-    store: ioredisStore,
+    store: buildRedisStore(options.prefix),
     skipSuccessfulRequests: options.skipSuccessfulRequests ?? false,
     skipFailedRequests: options.skipFailedRequests ?? false,
   });

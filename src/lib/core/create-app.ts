@@ -49,7 +49,17 @@ export default function createApp() {
   app.use(requestId());
 
   /** 2. Logging - record early, including intercepted requests / 日志记录 - 尽早记录，包括被拦截的请求 */
-  app.use(pinoLogger({ pino: logger }));
+  // 客户端 tier 的请求日志对观测无价值（高频、用户自助、含 SSE 心跳），跳过以降低 SLS 成本
+  // 公共字典/参数接口同样高频且无营养，一并跳过
+  // Hono Context 对 Variables 是 invariant，pinoLogger 要求 `{ logger }`，而这里是其超集 BaseVariables，需双重断言透传
+  const requestLogger = pinoLogger({ pino: logger });
+  // 精确匹配跳过集合：O(1) 查找，新增路径只需往 Set 里加字符串
+  const SKIP_LOG_PATHS = new Set<string>(["/api/public/dicts", "/api/public/params"]);
+  app.use(async (c, next) => {
+    const path = c.req.path;
+    if (path.startsWith("/api/client/") || SKIP_LOG_PATHS.has(path)) return next();
+    return requestLogger(c as unknown as Parameters<typeof requestLogger>[0], next);
+  });
 
   /** 3. Security headers / 安全头部 */
   app.use(secureHeaders());
@@ -61,6 +71,7 @@ export default function createApp() {
   app.use(createRateLimiter({
     windowMs: RATE_LIMIT_WINDOW_MS,
     limit: RATE_LIMIT_MAX_REQUESTS,
+    prefix: "rl:global:",
   }));
 
   /** 6. Basic features / 基础功能 */
@@ -79,7 +90,9 @@ export default function createApp() {
   }));
 
   /** 8. Compression and static resources / 压缩和静态资源 */
-  app.use(compress());
+  if (process.env.NODE_ENV === "production") {
+    app.use(compress());
+  }
   app.use(serveEmojiFavicon("📝"));
 
   /** 9. Error handling / 错误处理 */

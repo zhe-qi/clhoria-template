@@ -1,12 +1,13 @@
+import type { StatusType } from "@/lib/enums";
+
 import { boolean, index, pgTable, text, varchar } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
+import { z } from "zod";
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { Status } from "@/lib/enums";
 import { nicknameField, passwordField, StatusDescriptions, usernameField } from "@/lib/schemas";
-
-import { statusEnum } from "../../_shard/enums";
 
 export const systemUsers = pgTable("system_users", {
   ...baseColumns,
@@ -15,7 +16,7 @@ export const systemUsers = pgTable("system_users", {
   builtIn: boolean().default(false),
   avatar: text(),
   nickName: varchar({ length: 64 }).notNull(),
-  status: statusEnum().default(Status.ENABLED).notNull(),
+  status: varchar({ length: 16 }).$type<StatusType>().default(Status.ENABLED).notNull(),
 }, table => [
   index("system_user_username_idx").on(table.username),
 ]);
@@ -27,13 +28,14 @@ export const selectSystemUsersSchema = createSelectSchema(systemUsers, {
   builtIn: schema => schema.meta({ description: "是否内置用户" }),
   avatar: schema => schema.meta({ description: "头像" }),
   nickName: schema => schema.meta({ description: "昵称" }),
-  status: schema => schema.meta({ description: StatusDescriptions.SYSTEM }),
+  status: z.enum([Status.ENABLED, Status.DISABLED]).meta({ description: StatusDescriptions.SYSTEM }),
 });
 
 export const insertSystemUsersSchema = createInsertSchema(systemUsers, {
   username: () => usernameField,
   password: () => passwordField,
   nickName: () => nicknameField,
+  status: z.enum([Status.ENABLED, Status.DISABLED]),
 }).omit({
   id: true,
   createdAt: true,
