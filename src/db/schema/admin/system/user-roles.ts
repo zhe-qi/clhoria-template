@@ -1,9 +1,9 @@
-import { index, pgTable, primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
+import { index, primaryKey, snakeCase, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { systemRoles } from "./roles";
 import { systemUsers } from "./users";
 
-export const systemUserRoles = pgTable("system_user_roles", {
+export const systemUserRoles = snakeCase.table("system_user_roles", {
   userId: uuid().notNull().references(() => systemUsers.id, { onDelete: "cascade" }),
   roleId: varchar({ length: 64 }).notNull().references(() => systemRoles.id, { onDelete: "cascade" }),
 }, table => [

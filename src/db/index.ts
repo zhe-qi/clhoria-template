@@ -27,7 +27,7 @@ export const getQueryClient = createLazySingleton(
 const db = drizzle({
   client: getQueryClient(),
   relations,
-  casing: "snake_case", // 自动在数据库使用 snake_case 命名风格
+  // casing 已迁移到 schema 声明级别（drizzle-orm v1 RC1）：使用 snakeCase.table(...)
   logger: false, // 或者 env.NODE_ENV !== "production"
 });
 

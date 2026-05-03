@@ -1,6 +1,6 @@
 import type { StatusType } from "@/lib/enums";
 
-import { index, jsonb, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { index, jsonb, snakeCase, text, varchar } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
@@ -34,7 +34,7 @@ export type DictItem = {
  * 用于动态配置各种字典数据（如用户状态、订单类型等）
  * 字典项使用 JSONB 数组存储，无需额外的字典项表
  */
-export const systemDicts = pgTable("system_dicts", {
+export const systemDicts = snakeCase.table("system_dicts", {
   ...baseColumns,
   /** Dictionary code (unique identifier, e.g., "user_status") / 字典编码（唯一标识，如 "user_status"） */
   code: varchar({ length: 64 }).notNull().unique(),

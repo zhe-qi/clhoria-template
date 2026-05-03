@@ -1,7 +1,7 @@
 import type { Identity, QqOpenId, RealNameAuth, RegisterEnv, ThirdPartyInfo, WxOpenId } from "@/db/schema/_shard/types/app-user";
 import type { GenderType, UserStatusType, VerificationStatusType } from "@/lib/enums";
 
-import { index, integer, jsonb, pgTable, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
+import { index, integer, jsonb, snakeCase, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
@@ -10,7 +10,7 @@ import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { Gender, UserStatus, VerificationStatus } from "@/lib/enums";
 import { emailField, ipAddressField, mobileField, nicknameField, passwordField, StatusDescriptions, usernameField } from "@/lib/schemas";
 
-export const clientUsers = pgTable("client_users", {
+export const clientUsers = snakeCase.table("client_users", {
   ...baseColumns,
   /** Username / 用户名 */
   username: varchar({ length: 64 }).notNull(),

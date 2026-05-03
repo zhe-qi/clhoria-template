@@ -1,9 +1,9 @@
 import { z } from "@hono/zod-openapi";
-import { index, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { index, primaryKey, snakeCase, varchar } from "drizzle-orm/pg-core";
 
 import { createSelectSchema } from "drizzle-orm/zod";
 
-export const casbinRule = pgTable("casbin_rule", {
+export const casbinRule = snakeCase.table("casbin_rule", {
   /** Policy type: p (permission policy) / g (role inheritance) / 策略类型：p（权限策略）/g（角色继承） */
   ptype: varchar({ length: 8 }).notNull(), // Not null: all rules must contain ptype / 非空：所有规则必含 ptype
   /** Subject: role or user (p=sub, g=parent role/user) / 主体：角色或用户（p策略=sub，g策略=上级角色/用户） */

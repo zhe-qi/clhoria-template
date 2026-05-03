@@ -1,6 +1,6 @@
 import type { ParamValueTypeType, StatusType } from "@/lib/enums";
 
-import { index, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { index, snakeCase, text, varchar } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
@@ -15,7 +15,7 @@ import { StatusDescriptions } from "@/lib/schemas";
  * 系统参数表
  * 用于动态配置各种系统参数（如短信签名、支付配置、系统开关等）
  */
-export const systemParams = pgTable("system_params", {
+export const systemParams = snakeCase.table("system_params", {
   ...baseColumns,
   /** Parameter key (unique identifier, e.g., "sms_sign") / 参数键（唯一标识，如 "sms_sign"） */
   key: varchar({ length: 128 }).notNull().unique(),

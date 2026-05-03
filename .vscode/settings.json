@@ -68,5 +68,6 @@
     "tsgo",
     "uuidv",
     "varchar"
-  ]
+  ],
+  "typescript.native-preview.tsdk": "/Users/zheqi/Documents/project/clhoria-template/node_modules/@typescript/native-preview"
 }

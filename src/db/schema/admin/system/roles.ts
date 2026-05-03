@@ -1,6 +1,6 @@
 import type { StatusType } from "@/lib/enums";
 
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { snakeCase, text, varchar } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-orm/zod";
 
@@ -8,7 +8,7 @@ import { z } from "zod";
 import { baseColumns } from "@/db/schema/_shard/base-columns";
 import { Status } from "@/lib/enums";
 
-export const systemRoles = pgTable("system_roles", {
+export const systemRoles = snakeCase.table("system_roles", {
   ...baseColumns,
   id: varchar({ length: 64 }).notNull().primaryKey(),
   name: varchar({ length: 64 }).notNull(),
