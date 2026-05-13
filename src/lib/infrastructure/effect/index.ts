@@ -1,3 +1,4 @@
+export { toDatabaseError } from "./db-error";
 export * from "./errors";
 export { InfraLayer } from "./layers/live";
 export { BullMQService, BullMQServiceLive } from "./services/bullmq";

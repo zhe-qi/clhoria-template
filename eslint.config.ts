@@ -28,5 +28,6 @@ export default antfu({
     "ts/consistent-type-definitions": ["error", "type"],
     "test/padding-around-all": "error",
     "test/prefer-lowercase-title": "off",
+    "pnpm/json-enforce-catalog": "off",
   },
 });
