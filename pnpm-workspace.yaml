@@ -12,9 +12,9 @@ packages:
   - plugins
 
 catalog:
-  "@oxc-project/types": ^0.130.0
-  oxc-parser: ^0.130.0
-  vite: ^8.0.12
+  "@oxc-project/types": ^0.132.0
+  oxc-parser: ^0.132.0
+  vite: ^8.0.13
 
 onlyBuiltDependencies:
   - "@fission-ai/openspec"
@@ -28,3 +28,54 @@ allowBuilds:
   esbuild: true
   msgpackr-extract: true
   simple-git-hooks: true
+
+minimumReleaseAgeExclude:
+  - '@aws-sdk/client-s3@3.1049.0'
+  - '@aws-sdk/core@3.974.12'
+  - '@aws-sdk/credential-provider-env@3.972.38'
+  - '@aws-sdk/credential-provider-http@3.972.40'
+  - '@aws-sdk/credential-provider-ini@3.972.42'
+  - '@aws-sdk/credential-provider-login@3.972.42'
+  - '@aws-sdk/credential-provider-node@3.972.43'
+  - '@aws-sdk/credential-provider-process@3.972.38'
+  - '@aws-sdk/credential-provider-sso@3.972.42'
+  - '@aws-sdk/credential-provider-web-identity@3.972.42'
+  - '@aws-sdk/middleware-bucket-endpoint@3.972.14'
+  - '@aws-sdk/middleware-flexible-checksums@3.974.20'
+  - '@aws-sdk/middleware-sdk-s3@3.972.41'
+  - '@aws-sdk/nested-clients@3.997.10'
+  - '@aws-sdk/s3-request-presigner@3.1049.0'
+  - '@aws-sdk/token-providers@3.1049.0'
+  - '@hono/node-server@2.0.3'
+  - '@oxc-parser/binding-android-arm-eabi@0.132.0'
+  - '@oxc-parser/binding-android-arm64@0.132.0'
+  - '@oxc-parser/binding-darwin-arm64@0.132.0'
+  - '@oxc-parser/binding-darwin-x64@0.132.0'
+  - '@oxc-parser/binding-freebsd-x64@0.132.0'
+  - '@oxc-parser/binding-linux-arm-gnueabihf@0.132.0'
+  - '@oxc-parser/binding-linux-arm-musleabihf@0.132.0'
+  - '@oxc-parser/binding-linux-arm64-gnu@0.132.0'
+  - '@oxc-parser/binding-linux-arm64-musl@0.132.0'
+  - '@oxc-parser/binding-linux-ppc64-gnu@0.132.0'
+  - '@oxc-parser/binding-linux-riscv64-gnu@0.132.0'
+  - '@oxc-parser/binding-linux-riscv64-musl@0.132.0'
+  - '@oxc-parser/binding-linux-s390x-gnu@0.132.0'
+  - '@oxc-parser/binding-linux-x64-gnu@0.132.0'
+  - '@oxc-parser/binding-linux-x64-musl@0.132.0'
+  - '@oxc-parser/binding-openharmony-arm64@0.132.0'
+  - '@oxc-parser/binding-wasm32-wasi@0.132.0'
+  - '@oxc-parser/binding-win32-arm64-msvc@0.132.0'
+  - '@oxc-parser/binding-win32-ia32-msvc@0.132.0'
+  - '@oxc-parser/binding-win32-x64-msvc@0.132.0'
+  - '@oxc-project/types@0.132.0'
+  - '@types/node@25.9.0'
+  - '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260518.1'
+  - '@typescript/native-preview-darwin-x64@7.0.0-dev.20260518.1'
+  - '@typescript/native-preview-linux-arm64@7.0.0-dev.20260518.1'
+  - '@typescript/native-preview-linux-arm@7.0.0-dev.20260518.1'
+  - '@typescript/native-preview-linux-x64@7.0.0-dev.20260518.1'
+  - '@typescript/native-preview-win32-arm64@7.0.0-dev.20260518.1'
+  - '@typescript/native-preview-win32-x64@7.0.0-dev.20260518.1'
+  - '@typescript/native-preview@7.0.0-dev.20260518.1'
+  - date-fns@4.2.1
+  - oxc-parser@0.132.0
