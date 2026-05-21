@@ -69,5 +69,5 @@
     "uuidv",
     "varchar"
   ],
-  "typescript.native-preview.tsdk": "/Users/zheqi/Documents/project/clhoria-template/node_modules/@typescript/native-preview"
+  "typescript.native-preview.tsdk": "node_modules/@typescript/native-preview"
 }
