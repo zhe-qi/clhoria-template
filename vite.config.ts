@@ -9,6 +9,9 @@ import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
 import { defineConfig, loadEnv } from "vite";
 
+const SHUTDOWN_BARRIER_KEY = Symbol.for("__bootstrap_shutdown_barrier__");
+type GlobalWithBarrier = typeof globalThis & { [SHUTDOWN_BARRIER_KEY]?: Promise<void> };
+
 function bootstrapDevPlugin(): Plugin {
   return {
     name: "bootstrap-dev",
@@ -18,6 +21,17 @@ function bootstrapDevPlugin(): Plugin {
       // @hono/vite-dev-server 只在首个请求才 ssrLoad src/index.ts，
       // 在那之前 bootstrap() 不会跑：WS、BullMQ workers、cron 都不启动。
       // 这里提前手动跑一次；内部所有资源都走 singleton 缓存，后续 lazy import 进来不会重复。
+      //
+      // Vite restart（改 .env 等）会异步 fire 旧 httpServer.close → shutdown，
+      // 但新 configureServer 已经先跑了，此时 hasSingleton 还是 true 会 skip bootstrap，
+      // 之后旧 shutdown 把 singleton 清空 → 新 server 没有任何资源在跑。
+      // 用 globalThis 上的 barrier 让新 bootstrap 等旧 shutdown 跑完。
+      const g = globalThis as GlobalWithBarrier;
+      if (g[SHUTDOWN_BARRIER_KEY]) {
+        await g[SHUTDOWN_BARRIER_KEY];
+        g[SHUTDOWN_BARRIER_KEY] = undefined;
+      }
+
       const { bootstrap, shutdown } = await server.ssrLoadModule(
         "/src/lib/infrastructure/bootstrap.ts",
       ) as typeof import("./src/lib/infrastructure/bootstrap");
@@ -25,7 +39,7 @@ function bootstrapDevPlugin(): Plugin {
       await bootstrap();
 
       server.httpServer?.once("close", () => {
-        void shutdown();
+        g[SHUTDOWN_BARRIER_KEY] = shutdown();
       });
     },
   };
