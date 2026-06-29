@@ -21,7 +21,7 @@ export default antfu({
     "node/prefer-global/process": ["off"],
     "unicorn/filename-case": ["error", {
       case: "kebabCase",
-      ignore: ["AGENTS.md", "README.md", "README.zh-CN.md"],
+      ignore: ["AGENTS.md", "README.md", "README.zh-CN.md", "__test"],
     }],
     "antfu/if-newline": "off",
     "antfu/top-level-function": "off",

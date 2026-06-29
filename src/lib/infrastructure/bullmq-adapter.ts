@@ -1,4 +1,4 @@
-import type { Job, JobsOptions, Queue, QueueOptions, RepeatOptions, Worker, WorkerOptions } from "bullmq";
+import type { ConnectionOptions, Job, JobsOptions, Queue, QueueOptions, RepeatOptions, Worker, WorkerOptions } from "bullmq";
 import type Redis from "ioredis";
 import type { JobDefinitionRegistry, QueueJobsMapping } from "./bullmq/job-registry";
 import type { JobNameType, QueueNameType } from "@/lib/enums/bullmq";
@@ -43,12 +43,21 @@ class QueueManager {
   }
 
   /**
+   * bullmq 内置 ioredis@5.10.1，本项目直接依赖 5.11.0；两份 ioredis 的 Redis 类型
+   * 因 protected 成员签名不同而不互通，但运行时是同一实例、完全兼容。这里按 bullmq
+   * 期望的连接类型断言一次，避免在每个 new BullQueue/BullWorker 调用点重复 as。
+   */
+  private get bullConnection(): ConnectionOptions {
+    return this.connection as unknown as ConnectionOptions;
+  }
+
+  /**
    * 获取或创建队列（原始方法，用于内部和 Bull Board）
    */
   getQueue<T extends ParamsType = ParamsType>(name: string, options?: Partial<QueueOptions>): Queue<T> {
     if (!this.queues.has(name)) {
       const queue = new BullQueue<T>(name, {
-        connection: this.connection,
+        connection: this.bullConnection,
         prefix: `{bull}`,
         // 托管 Redis（如阿里云）无法改 maxmemory-policy，跳过 INFO 检查以静默 eviction 警告
         skipVersionCheck: true,
@@ -103,7 +112,7 @@ class QueueManager {
           return processor(job);
         },
         {
-          connection: this.connection,
+          connection: this.bullConnection,
           prefix: `{bull}`,
           skipVersionCheck: true,
           ...options,
